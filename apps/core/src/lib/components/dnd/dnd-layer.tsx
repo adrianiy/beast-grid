@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { DragHandle, VisibilityOff } from '@mui/icons-material';
 import { useDndStore } from './../../stores/dnd-store/store';
 
-import styles from './dnd-layer.module.scss';
+import './dnd-layer.scss';
 
 export default function DndLayer() {
   const [dragItem, coords] = useDndStore((state) => [state.dragItem, state.coords]);
@@ -30,7 +30,7 @@ export default function DndLayer() {
   }
   
   return (
-    <div className={styles.dndLayer}>
+    <div className="dnd-layer">
       {renderItem()}
     </div>
   );
@@ -46,17 +46,10 @@ interface BoxDragPreviewProps {
 const BoxDragPreview = ({ text, isInside, top, left }: BoxDragPreviewProps) => {
   return (
     <div
+      className="dnd-drag-preview"
       style={{
-        position: 'absolute',
         top,
         left,
-        background: 'var(--bg-color--0)',
-        border: 'var(--bg-border--1)',
-        padding: 12,
-        width: 'fit-content',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
       }}
     >
       {isInside ? <DragHandle style={{ fontSize: 12 }} /> : <VisibilityOff style={{ fontSize: 12 }} />}
