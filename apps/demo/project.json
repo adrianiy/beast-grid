@@ -3,6 +3,30 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/demo",
   "projectType": "application",
-  "targets": {},
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "root": "apps/demo",
+        "outputPath": "dist/apps/demo"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/demo"
+        },
+        "production": {}
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "app:build:production"
+      }
+    }
+  },
   "tags": []
 }

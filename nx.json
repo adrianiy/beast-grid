@@ -42,7 +42,19 @@
         "style": "scss",
         "linter": "eslint"
       }
+    },
+    "@nx/react": {
+      "library": {
+        "unitTestRunner": "none"
+      }
     }
   },
-  "nxCloudAccessToken": "YTc3ZjQ0ZWYtODJlYi00YjM1LThkMjUtZTc4MjBjMWEyNzkwfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "YTc3ZjQ0ZWYtODJlYi00YjM1LThkMjUtZTc4MjBjMWEyNzkwfHJlYWQtd3JpdGU=",
+  "targetDefaults": {
+    "@nx/rollup:rollup": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    }
+  }
 }
