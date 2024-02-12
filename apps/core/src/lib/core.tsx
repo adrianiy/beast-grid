@@ -14,7 +14,7 @@ import { getColumnArrayFromDefs, getColumnsFromDefs, initialize } from './stores
 
 import cn from 'classnames';
 
-import './beast-grid.scss';
+import './core.scss';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,

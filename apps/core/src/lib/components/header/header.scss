@@ -1,4 +1,5 @@
-.grid-header {
+.beast-grid {
+  .grid-header {
     position: sticky;
     width: 100%;
     display: flex;
@@ -6,16 +7,16 @@
     color: var(--bg-text-color--1);
     top: 0;
     z-index: 1;
-}
+  }
 
-.grid-header-row {
+  .grid-header-row {
     width: 100%;
     box-sizing: border-box;
     border-bottom: var(--bg-border--1);
     border-top: var(--bg-border--1);
-}
+  }
 
-.grid-header-cell {
+  .grid-header-cell {
     cursor: pointer;
     user-select: none;
     position: absolute;
@@ -28,36 +29,37 @@
     resize: horizontal;
 
     .grid-header-name {
-        flex: 1;
+      flex: 1;
     }
 
     .grid-header-resize {
-        position: absolute;
-        display: flex;
-        right: -4px;
-        width: 24px;
-        height: 100%;
-        cursor: ew-resize;
-        z-index: 2;
+      position: absolute;
+      display: flex;
+      right: -4px;
+      width: 24px;
+      height: 100%;
+      cursor: ew-resize;
+      z-index: 2;
 
-        &::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 4px;
-            width: 1px;
-            height: 14px;
-            background-color: var(--bg-background-color--2);
-            margin-top: -7px;
-        }
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 4px;
+        width: 1px;
+        height: 14px;
+        background-color: var(--bg-background-color--2);
+        margin-top: -7px;
+      }
     }
 
     .sort-icon {
-        font-size: var(--bg-size--2);
+      font-size: var(--bg-size--3);
 
-        svg {
-            font-size: var(--bg-size--2);
-            margin-left: var(--bg-size--1);
-        }
+      svg {
+        font-size: var(--bg-size--3);
+        margin-left: var(--bg-size--1);
+      }
     }
+  }
 }

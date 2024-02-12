@@ -1,11 +1,13 @@
-.grid-summary {
-  position: sticky;
-  left: 0;
-  background-color: var(--bg-background-color--1);
-  color: var(--bg-text-color--1);
-  padding: 0 var(--bg-size--3);
+.beast-grid {
+  .grid-summary {
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-background-color--1);
+    color: var(--bg-text-color--1);
+    padding: 0 var(--bg-size--3);
 
-  &.bordered {
-    border-top: var(--bg-border--1);
+    &.bordered {
+      border-top: var(--bg-border--1);
+    }
   }
 }
