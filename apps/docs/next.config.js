@@ -3,6 +3,11 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
 
+const withNextra = require('nextra')({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.tsx',
+})
+
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
@@ -16,6 +21,7 @@ const nextConfig = {
 
 const plugins = [
   // Add more Next.js plugins to this list if needed.
+  withNextra,
   withNx,
 ];
 
