@@ -52,8 +52,6 @@
     "@types/prismjs": "^1.26.3",
     "@types/react": "18.2.33",
     "@types/react-dom": "18.2.14",
-    "@types/thin-backend": "https://thin.dev/types/175b4ed4-ff65-4337-b621-6cc534b5b1a0/ziXtlXNzpdqPgWQYJYSBMiPPnebpZTUw",
-    "@types/timsort": "^0.3.3",
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
