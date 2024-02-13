@@ -1,4 +1,8 @@
-'use client'
+# Basic Example
+
+Here is a basic example of how to use the `beast-grid` package:
+
+```tsx
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
@@ -8,8 +12,8 @@ import { User, data } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'ID', field: 'userId' },
-    { headerName: 'NAME', field: 'username' },
+    { headerName: 'ID', field: 'userId', sorting: false },
+    { headerName: 'NAME', field: 'username', sorting: false },
     {
       headerName: 'AMOUNT',
       field: 'money',
@@ -36,3 +40,10 @@ export default function Grid() {
     </div>
   );
 }
+```
+---
+
+import BasicExample from '../../components/examples/basic'
+
+<BasicExample />
+

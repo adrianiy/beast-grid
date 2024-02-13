@@ -16,7 +16,7 @@ export interface BaseColumnDef {
   field: string;
   sortable?: boolean;
   children?: ColumnDef[];
-  formatter?: (value: unknown) => string;
+  formatter?: (value: string & number) => string;
 }
 
 export type ColumnDef = Partial<StyleProps> & BaseColumnDef;

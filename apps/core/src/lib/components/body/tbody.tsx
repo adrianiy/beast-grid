@@ -90,12 +90,12 @@ export default function TBody<TData>({
       setTimeout(() => {
         sortedData.sort(sortData);
 
+        setSortedData(sortedData);
         if (data.length > PERFORMANCE_LIMIT) {
           setSorting(false);
         }
       }, 0);
 
-      setSortedData(sortedData);
     }
   }, [sort, sortedData]);
 

@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
+import generatePackageJson from 'rollup-plugin-generate-package-json'
 import * as path from 'path';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
@@ -44,6 +45,17 @@ export default defineConfig({
     rollupOptions: {
       // External packages that should not be bundled into your library.
       external: ['react', 'react-dom', 'react/jsx-runtime'],
+      plugins: [
+        generatePackageJson({
+          baseContents: (pkg) => ({
+            ...pkg,
+            main: 'index.cjs.js',
+            module: 'index.es.js',
+            types: 'index.d.ts',
+            files: ['index.cjs.js', 'index.es.js', 'index.d.ts'],
+          }),
+        }),
+      ],
     },
   },
 });

@@ -14,7 +14,6 @@ export interface BeastGridConfig extends Partial<TableStyles> {
   defaultColumnDef?: ColumnDef;
   data: TData[];
   theme?: string;
-  sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;
 }
@@ -29,7 +28,6 @@ export interface BeastGridConfig extends Partial<TableStyles> {
 | `defaultColumnDef` | `ColumnDef` | `undefined` | Default column definition. Applied to all columns |
 | `data` | `TData[]` | `[]` | Array of data |
 | `theme` | `string` | `default` | Theme name |
-| `sortable` | `boolean` | `true` | Enable sorting |
 | `mulitSort` | `boolean` | `false` | Enable multi column sorting |
 | `summarize` | `boolean` | `false` | Enable summarization |
 | `rowHeight` | `number` | `48` | Row height |

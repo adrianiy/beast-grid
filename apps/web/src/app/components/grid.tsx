@@ -1,7 +1,7 @@
 'use client';
 
 import numeral from 'numeral';
-import { User, getData } from '../api/data';
+import { User, getData, months } from '../api/data';
 
 import {
   BeastGrid,
@@ -19,81 +19,15 @@ type Props = {
   config?: Partial<BeastGridConfig<User>>;
 };
 const columnDefs: ColumnDef[] = [
-  { headerName: 'ID', field: 'id' },
+  { headerName: 'ID', field: 'id', sortable: false },
   { headerName: 'NAME', field: 'name', width: 200 },
   { headerName: 'COUNTRY', field: 'country', width: 200 },
-  {
-    headerName: 'JANUARY',
-    field: 'january',
+  ...months.map((month) => ({
+    headerName: month.toUpperCase(),
+    field: month,
     flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'FEBRUARY',
-    field: 'february',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'MARCH',
-    field: 'march',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'APRIL',
-    field: 'april',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'MAY',
-    field: 'may',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'JUNE',
-    field: 'june',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'JULY',
-    field: 'july',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'AUGUST',
-    field: 'august',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'SEPTEMBER',
-    field: 'september',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'OCTOBER',
-    field: 'october',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'NOVEMBER',
-    field: 'november',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
-  {
-    headerName: 'DECEMBER',
-    field: 'december',
-    flex: 1,
-    formatter: (value) => numeral(value).format('0,0 $'),
-  },
+    formatter: (value: number) => numeral(value).format('0,0 $')
+  })),
 ];
 
 function SlideTransition(props: SlideProps) {
@@ -133,6 +67,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         columnDefs,
         border: true,
         mulitSort: true,
+        summarize: true,
         theme,
         ..._customConfig,
       });

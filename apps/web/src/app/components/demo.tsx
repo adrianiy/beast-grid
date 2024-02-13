@@ -11,22 +11,41 @@ export const features = [
     icon: <DataObject style={{ color: 'var(--bg-demo-color--gradient--1)' }} />,
     id: '#easy-to-use',
     title: 'Easy to use',
-    description:
-      'Create your grid with a simple and intuitive API. No more headaches with complex configurations and slow rendering.',
+    description: () => (
+      <>
+        <p>Create your grid with a simple and intuitive API.</p>
+        <p>
+          No more headaches with complex configurations!
+        </p>
+      </>
+    )
   },
   {
     icon: <Bolt style={{ color: 'var(--bg-demo-color--gradient--2)' }} />,
     id: '#fast',
     title: 'Blazing fast!',
-    description:
-      "Beast Grid is built with performance in mind. It's fast, efficient, and easy to use. It supports multi-sort, column resizing, and drag and drop.",
+    description: () => (
+      <>
+        <p>
+          Beast Grid is built with performance in mind.
+        </p>
+        <p>
+          Done with list virtualization and optimized rendering.
+        </p>
+
+      </>
+    ),
   },
   {
     icon: <Settings style={{ color: 'var(--bg-demo-color--gradient--3)' }} />,
     title: 'Fully customizable',
     id: '#customizable',
-    description:
-      'Customize your grid to your needs. Add formatters, filters, and custom cell renderers. Everyting with a simple configuration JSON object.',
+    description: () => (
+      <>
+        <p>Customize your grid to your needs.</p>
+        <p>It supports multi-sort, resizing,  DnD, theming, etc.</p>
+      </>
+    )
   },
 ];
 

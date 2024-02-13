@@ -132,7 +132,7 @@ pre[class*='language-'] {
   .feature {
     overflow: hidden;
     width: 27%;
-    min-height: 230px;
+    min-height: 280px;
     white-space: wrap;
     background: var(--bg-demo-color--6);
     padding: var(--bg-demo-size--3);
@@ -191,13 +191,41 @@ section {
 
   .button-row {
     gap: var(--bg-demo-size--2);
+    margin-bottom: var(--bg-demo-size--3);
+    
+    button {
+      padding: var(--bg-demo-size--1) var(--bg-demo-size--2);
+    }
+    .button {
+      padding: 0 var(--bg-demo-size--2);
+      gap: var(--bg-demo-size--2);
+      color: var(--bg-demo-color--3);
+      cursor: pointer;
+      font-size: var(--bg-demo-size--2);
+
+      svg {
+        font-size: var(--bg-demo-size--2);
+      }
+
+      &.active {
+        color: var(--bg-demo-color--1);
+      }
+    }
+    
+    hr {
+      margin: 0 var(--bg-demo-size--2);
+    }
+    .view-toggle {
+      gap: var(--bg-demo-size--2);
+    }
   }
 
   .demo-container {
     box-sizing: border-box;
-    height: 500px;
+    height: 700px;
     overflow: hidden;
     border-radius: var(--bg-demo-size--2);
+
 
     &.default {
       border-radius: 0;
@@ -211,5 +239,47 @@ section {
   h1 {
     margin-left: 0;
     background-color: var(--bg-demo-linear--gradient--3);
+  }
+}
+.sections-container {
+  gap: var(--bg-demo-size--1);
+  margin-bottom: var(--bg-demo-size--6);
+
+  .left-bar, .right-bar {
+    background-color: var(--bg-demo-color--6);
+    width: 60px;
+    height: 100%;
+  }
+  .left-bar {
+    border-top-left-radius: var(--bg-demo-size--2);
+    border-bottom-left-radius: var(--bg-demo-size--2);
+  }
+  .right-bar {
+    border-top-right-radius: var(--bg-demo-size--2);
+    border-bottom-right-radius: var(--bg-demo-size--2);
+  }
+  .section {
+    gap: var(--bg-demo-size--3);
+    padding: var(--bg-demo-size--4) var(--bg-demo-size--3);
+    background-color: var(--bg-demo-color--6);
+    transition: all 0.5s ease-in-out;
+
+    &:hover {
+      background-color: var(--bg-demo-color--7);
+
+      h3 {
+        color: var(--bg-demo-color--gradient--2);
+      }
+    }
+    
+
+    .section-title {
+      gap: var(--bg-demo-size--2);
+    }
+    h3 {
+      margin: 0;
+      padding: 0;
+    }
+    
   }
 }

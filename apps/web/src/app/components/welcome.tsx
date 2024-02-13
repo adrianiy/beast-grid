@@ -23,7 +23,7 @@ export default function Welcome() {
           <div className="row middle misc">
             <Code
               code="npm i beast-grid"
-              language={'bash'}
+              language={'sh'}
               canCopy
               style={{ width: 190 }}
             />
@@ -57,11 +57,11 @@ export default function Welcome() {
       </div>
       <div className="row middle between features">
         {features.map((feature, idx) => (
-          <a href={feature.id} key={idx} className="column left feature">
+          <div key={idx} className="column left feature">
             {feature.icon}
             <h3>{feature.title}</h3>
-            <p>{feature.description}</p>
-          </a>
+            {feature.description()}
+          </div>
         ))}
       </div>
     </section>

@@ -1,4 +1,5 @@
 'use client'
+
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
@@ -8,8 +9,8 @@ import { User, data } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'ID', field: 'userId' },
-    { headerName: 'NAME', field: 'username' },
+    { headerName: 'ID', field: 'userId', sorting: false },
+    { headerName: 'NAME', field: 'username', sorting: false },
     {
       headerName: 'AMOUNT',
       field: 'money',

@@ -5,7 +5,8 @@
   "scripts": {
     "docs:install": "cd apps/docs && npm install",
     "docs:dev": "cd apps/docs && npm run dev",
-    "docs:build": "cd apps/docs && npm run build"
+    "docs:build": "cd apps/docs && npm run build",
+    "core:publish": "nx build core && cd dist/apps/core && npm publish"
   },
   "private": true,
   "dependencies": {
@@ -70,6 +71,7 @@
     "jsdom": "~22.1.0",
     "nx": "18.0.4",
     "prettier": "^2.6.2",
+    "rollup-plugin-generate-package-json": "^3.2.0",
     "sass": "1.62.1",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",

@@ -22,3 +22,51 @@ export const getData = async (count: number): Promise<User[]> => {
   const data = await response.json();
   return data;
 };
+
+export const months = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+];
+
+export const codeBlock = `
+import numeral from 'numeral';
+
+import { User, data, months } from '../api/data';
+
+const columnDefs: ColumnDef[] = [
+  { headerName: 'ID', field: 'id', sortable: false },
+  { headerName: 'NAME', field: 'name', width: 200 },
+  { headerName: 'COUNTRY', field: 'country', width: 200 },
+  ...months.map((month) => ({
+    headerName: month.toUpperCase(),
+    field: month,
+    flex: 1,
+    formatter: (value: number) => numeral(value).format('0,0 $')
+  })),
+];
+
+export default function Grid() {
+  const beastApi = useRef<BeastGridApi | undefined>();
+
+  const config: BeastGridConfig<User> = {
+    columnDefs,
+    data,
+    sortable: true,
+    mulitSort: true,
+    summarize: true,
+  };
+
+  return (
+    <BeastGrid config={config} api={beastApi} />
+  );
+`;

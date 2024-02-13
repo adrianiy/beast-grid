@@ -1,4 +1,10 @@
-'use client'
+# Sorting Example
+
+Here is a sorting example configuration for the BeastGrid component.
+
+In this example, we have a list of users with their ID, name, amount, and orders. We want to sort the data based on the amount and orders.
+
+```tsx
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
@@ -8,8 +14,8 @@ import { User, data } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'ID', field: 'userId' },
-    { headerName: 'NAME', field: 'username' },
+    { headerName: 'ID', field: 'userId', sorting: false },
+    { headerName: 'NAME', field: 'username', sorting: false },
     {
       headerName: 'AMOUNT',
       field: 'money',
@@ -36,3 +42,10 @@ export default function Grid() {
     </div>
   );
 }
+```
+---
+
+import SortingExample from '../../components/examples/sorting.tsx'
+
+<SortingExample />
+

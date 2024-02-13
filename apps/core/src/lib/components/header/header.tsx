@@ -26,6 +26,8 @@ export default function Header({
   }, [] as Column[][]);
 
   const handleChangeSort = (column: Column) => () => {
+    if (column.sortable === false) return;
+    
     changeSort(column.id, !!multiSort);
   };
 
