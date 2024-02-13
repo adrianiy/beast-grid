@@ -34,6 +34,16 @@
       "options": {
         "targetName": "lint"
       }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "previewTargetName": "preview",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "serveStaticTargetName": "serve-static"
+      }
     }
   ],
   "generators": {
@@ -49,12 +59,5 @@
       }
     }
   },
-  "nxCloudAccessToken": "YTc3ZjQ0ZWYtODJlYi00YjM1LThkMjUtZTc4MjBjMWEyNzkwfHJlYWQtd3JpdGU=",
-  "targetDefaults": {
-    "@nx/rollup:rollup": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
-    }
-  }
+  "nxCloudAccessToken": "NDIyZGVmNjQtMzY5MC00NmU3LTg5ODItMTJlM2UyOTE1Y2ZifHJlYWQtd3JpdGU="
 }

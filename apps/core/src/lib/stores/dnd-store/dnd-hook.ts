@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { DragItem, useDndStore } from './store';
+import { DragItem } from './store';
+import { useDndStore } from '../dnd-store';
 
 let emptyImage: HTMLImageElement;
 export function getEmptyImage() {
   if (!emptyImage) {
     emptyImage = new Image();
-    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    emptyImage.src =
+      'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   }
   return emptyImage;
 }
@@ -19,12 +21,15 @@ export const useDndHook = <T>(
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const emptyImage = getEmptyImage();
-  const [setDragItem, setCoords] = useDndStore((state) => [state.setDragItem, state.setCoords]);
+  const [setDragItem, setCoords] = useDndStore((state) => [
+    state.setDragItem,
+    state.setCoords,
+  ]);
 
   useEffect(() => {
     const onDragStart = (e: DragEvent) => {
       setDragItem(item);
-      
+
       if (e.dataTransfer) {
         e.dataTransfer.setData('id', item.id);
         e.dataTransfer.setDragImage(emptyImage, -10, -10);
@@ -34,7 +39,7 @@ export const useDndHook = <T>(
 
     const onDrag = (e: DragEvent) => {
       setCoords({ x: e.clientX, y: e.clientY });
-      
+
       if (options.onDrag) {
         options.onDrag()(e);
       }
@@ -51,9 +56,9 @@ export const useDndHook = <T>(
     };
     if (ref.current) {
       const dragRef = ref.current;
-      
+
       dragRef.setAttribute('draggable', 'true');
-      
+
       dragRef.addEventListener('dragstart', onDragStart);
 
       dragRef.addEventListener('drag', onDrag);

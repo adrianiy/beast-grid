@@ -1,0 +1,93 @@
+# Quick Start
+
+## Installation
+
+```bash
+npm i beast-grid
+```
+
+
+## Fist steps
+
+### Prepare your DOM
+
+Beast grid needs a container with a `width` and `height` to be rendered.
+
+```css
+#container {
+  width: 100%;
+  height: 400px
+}
+```
+```html
+<div id="container">
+...
+</div>
+```
+
+### Prepare your styles
+
+You can use the default theme or create your own.
+
+```tsx
+import 'beast-grid/dist/styles.css';
+```
+
+```css
+/* Custom theme */`
+
+--bg-color--1: #f5f5f5;
+--bg-color--2: #ffffff;
+--bg-color--3: #f5f5f5;
+...
+```
+
+
+### Configure the Beast!
+
+To start let's configure the basic options!
+
+You can dig into the [API](#api)[NOT AVAILABLE YET] to see all the options available.
+
+```tsx
+// Import the Beast!
+import BeastGrid, { BeastGridConfig } from 'beast-grid';
+
+export default function Grid({ count, theme, config: _customConfig }: Props) {
+  // Get the data
+  const data = TableData(count);
+
+  // Define the columns
+  const columnDefs: ColumnDef[] = [
+    { headerName: 'ID', field: 'userId' },
+    { headerName: 'NAME', field: 'username' },
+    { headerName: 'MAIL', field: 'email', width: 300 },
+    {
+      headerName: 'AMOUNT',
+      field: 'money',
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'ORDERS',
+      field: 'orders',
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0'),
+    },
+  ];
+
+  // Customize your grid
+  const config: BeastGridConfig<User> = {
+    data,
+    columnDefs,
+    border: true,
+    mulitSort: true,
+    theme,
+    ..._customConfig,
+  };
+
+  return (
+      <BeastGrid config={config} />
+  );
+}
+```
