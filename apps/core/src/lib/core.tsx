@@ -34,7 +34,7 @@ export function BeastGrid<TData>({
   api,
 }: {
   config: BeastGridConfig<TData>;
-  api?: MutableRefObject<BeastGridApi>;
+  api?: MutableRefObject<BeastGridApi | undefined>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const config: BeastGridConfig<TData> & TableStyles = {
