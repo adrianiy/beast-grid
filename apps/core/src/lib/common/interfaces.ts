@@ -63,3 +63,8 @@ export interface HeaderDrag extends DragItem {
   isInside: boolean;
 }
 
+export interface BeastGridApi {
+  columns: ColumnStore;
+  setColumns: (columns: ColumnStore) => void;
+  setLoading: (loading: boolean) => void;
+}

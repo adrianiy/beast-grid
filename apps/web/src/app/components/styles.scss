@@ -161,6 +161,7 @@ section {
     .logo-container {
       position: relative;
       transform: translateX(-75%);
+      z-index: -1;
 
       .image-bg {
         --size: 350px;
@@ -186,6 +187,10 @@ section {
       gap: var(--bg-demo-size--2);
       padding-top: var(--bg-demo-size--3);
     }
+  }
+
+  .button-row {
+    gap: var(--bg-demo-size--2);
   }
 
   .demo-container {

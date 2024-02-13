@@ -10,7 +10,7 @@ export default function Example() {
   return(
     <section className="demo" id="demo">
       <div className="demo-container">
-        <Grid key="example" count={25} config={config} theme="minimal-theme" /> 
+        <Grid key="example" qty={25} config={config} theme="minimal-theme" /> 
       </div>
     </section>
   )

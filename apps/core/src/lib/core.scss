@@ -37,6 +37,14 @@
   background-color: var(--bg-background-color--1);
   color: var(--bg-text-color--1);
 
+  &--loading {
+    overflow: hidden;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
   .row {
     display: flex;
 

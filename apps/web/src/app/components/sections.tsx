@@ -7,7 +7,7 @@ import { BeastGridConfig } from 'beast-grid';
 import Grid from './grid';
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Button, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import cn from 'classnames';
 
@@ -36,8 +36,8 @@ export default function Demo() {
 `;
 
 export default function Sections() {
-  const { theme: _sysTheme } = useTheme();
-  const [theme, setTheme] = useState((_sysTheme || 'dark') + '-thme');
+  const [theme, setTheme] = useState("default");
+  const [count, setCount] = useState(10000);
   const config: Partial<BeastGridConfig<User>> = {
     summarize: true,
     headerHeight: 80,
@@ -49,6 +49,10 @@ export default function Sections() {
   ) => {
     setTheme(newTheme);
   };
+
+  const increase = (qty: number) => {
+    setCount(count + qty);
+  }
   
   return (
     <>
@@ -72,10 +76,21 @@ export default function Sections() {
           rendering.
         </p>
 
-        <p>Se how it works with this simple example of 10K rows:</p>
+        <p>Se how it works with this large data example:</p>
 
+        <div className="row middle end button-row">
+          <Button color="primary" variant="outlined" onClick={() => increase(10000)}>
+            +10k
+          </Button>
+          <Button color="primary" variant="outlined" onClick={() => increase(100000)}>
+            +100k
+          </Button>
+          <Button color="primary" variant="outlined" onClick={() => increase(500000)}>
+            +500k
+          </Button>
+        </div>
         <div className="demo-container" style={{ marginTop: 24 }}>
-          <Grid key="big" count={500000} theme="minimal-theme" config={config} />
+          <Grid key="big" qty={count} theme="minimal-theme" config={config} />
         </div>
       </section>
       <section id="customizable" className="column start">
@@ -108,7 +123,7 @@ export default function Sections() {
           className={cn('demo-container', theme === 'light' && 'outlined', theme)}
           style={{ marginTop: 24 }}
         >
-          <Grid key="custom" count={25} theme={theme} config={theme === 'minimal' ? config : undefined} />
+          <Grid key="custom" qty={25} theme={theme} config={theme === 'minimal-theme' ? config : undefined} />
         </div>
       </section>
     </>

@@ -6,8 +6,6 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import { Column, SortType } from '../../common';
 
-import * as Timsort from 'timsort';
-
 import './tbody.scss';
 
 type TBodyProps<TData> = {
@@ -20,10 +18,25 @@ type TBodyProps<TData> = {
 
 let lastIdx = 0;
 
-export default function TBody<TData>({ height, headerHeight, border, data, summary }: TBodyProps<TData>) {
-  const [columns, container, sort] = useBeastStore((state) => [state.columns, state.container, state.sort]);
+const PERFORMANCE_LIMIT = 1000;
+const THRESHOLD = (height: number) => height * 3;
+
+export default function TBody<TData>({
+  height,
+  headerHeight,
+  border,
+  data,
+  summary,
+}: TBodyProps<TData>) {
+  const [columns, container, sort, setSorting] = useBeastStore((state) => [
+    state.columns,
+    state.container,
+    state.sort,
+    state.setSorting,
+  ]);
   const [[max, min], setMaxMin] = useState([500, 0]);
   const [sortedData, setSortedData] = useState<TData[]>([]);
+  const threshold = THRESHOLD(height);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -35,8 +48,9 @@ export default function TBody<TData>({ height, headerHeight, border, data, summa
   useEffect(() => {
     if (container) {
       container.addEventListener('scroll', () => {
-        const threshold = height * 3;
-        const containerHeight = container.getBoundingClientRect().height - headerHeight * levels.length;
+        const containerHeight =
+          container.getBoundingClientRect().height -
+          headerHeight * levels.length;
         const maxValue = containerHeight + threshold;
         const minValue = -threshold;
 
@@ -70,7 +84,16 @@ export default function TBody<TData>({ height, headerHeight, border, data, summa
         return 0;
       };
 
-      Timsort.sort(sortedData, sortData);
+      if (sortedData.length > PERFORMANCE_LIMIT) {
+        setSorting(true);
+      }
+      setTimeout(() => {
+        sortedData.sort(sortData);
+
+        if (data.length > PERFORMANCE_LIMIT) {
+          setSorting(false);
+        }
+      }, 0);
 
       setSortedData(sortedData);
     }
@@ -95,7 +118,11 @@ export default function TBody<TData>({ height, headerHeight, border, data, summa
       const row = sortedData[idx];
 
       renderArray.push(
-        <div key={idx} className={getClass()} style={{ top: height * idx, height }}>
+        <div
+          key={idx}
+          className={getClass()}
+          style={{ top: height * idx, height }}
+        >
           {lastLevel?.map((column, idx) => (
             <RowCell key={idx} height={height} row={row} columnDef={column} />
           ))}
@@ -110,7 +137,10 @@ export default function TBody<TData>({ height, headerHeight, border, data, summa
     <div className="grid-body">
       {sortedData.length > 0 && createDataSlice()}
       {summary && (
-        <div className="grid-row-cell" style={{ height, top: height * data.length }}>
+        <div
+          className="grid-row-cell"
+          style={{ height, top: height * data.length }}
+        >
           ghost summary
         </div>
       )}

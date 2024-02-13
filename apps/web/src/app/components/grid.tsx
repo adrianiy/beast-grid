@@ -1,49 +1,171 @@
 'use client';
 
 import numeral from 'numeral';
-import { TableData, User } from '../api/data';
+import { User, getData } from '../api/data';
 
-import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
-import { useEffect, useState } from 'react';
+import {
+  BeastGrid,
+  BeastGridApi,
+  BeastGridConfig,
+  ColumnDef,
+} from 'beast-grid';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 
 type Props = {
-  count: number;
+  qty: number;
   theme: string;
   config?: Partial<BeastGridConfig<User>>;
 };
 const columnDefs: ColumnDef[] = [
-  { headerName: 'ID', field: 'userId' },
-  { headerName: 'NAME', field: 'username', width: 300 },
+  { headerName: 'ID', field: 'id' },
+  { headerName: 'NAME', field: 'name', width: 200 },
+  { headerName: 'COUNTRY', field: 'country', width: 200 },
   {
-    headerName: 'AMOUNT',
-    field: 'money',
+    headerName: 'JANUARY',
+    field: 'january',
     flex: 1,
     formatter: (value) => numeral(value).format('0,0 $'),
   },
   {
-    headerName: 'ORDERS',
-    field: 'orders',
+    headerName: 'FEBRUARY',
+    field: 'february',
     flex: 1,
-    formatter: (value) => numeral(value).format('0,0'),
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'MARCH',
+    field: 'march',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'APRIL',
+    field: 'april',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'MAY',
+    field: 'may',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'JUNE',
+    field: 'june',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'JULY',
+    field: 'july',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'AUGUST',
+    field: 'august',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'SEPTEMBER',
+    field: 'september',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'OCTOBER',
+    field: 'october',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'NOVEMBER',
+    field: 'november',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
+  },
+  {
+    headerName: 'DECEMBER',
+    field: 'december',
+    flex: 1,
+    formatter: (value) => numeral(value).format('0,0 $'),
   },
 ];
 
-export default function Grid({ count, theme, config: _customConfig }: Props) {
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="up" />;
+}
+
+export default function Grid({ qty, theme, config: _customConfig }: Props) {
+  const beastApi = useRef<BeastGridApi | undefined>();
   const [config, setConfig] = useState<BeastGridConfig<User> | null>();
+  const [data, setData] = useState<User[]>([]);
+  const [error, setError] = useState<boolean>(false);
+
+  let loading = false;
 
   useEffect(() => {
-    const data = [...TableData(count)];
-    console.log(data.length)
-    setConfig({
-      data,
-      columnDefs,
-      border: true,
-      mulitSort: true,
-      theme,
-      ..._customConfig,
-    });
-  }, []);
+    const fetchData = async () => {
+      try {
+        const res = await getData(qty - data.length);
+        setData((state) => [...state, ...res]);
+        beastApi?.current?.setLoading(false);
+      } catch (_) {
+        setError(true);
+        beastApi?.current?.setLoading(false);
+      }
+    };
+    if (!loading) {
+      loading = true;
+      beastApi?.current?.setLoading(true);
+      fetchData();
+    }
+  }, [qty]);
 
+  useEffect(() => {
+    if (data.length) {
+      setConfig({
+        data,
+        columnDefs,
+        border: true,
+        mulitSort: true,
+        theme,
+        ..._customConfig,
+      });
+    }
+  }, [_customConfig, qty, theme, data]);
 
-  return  <BeastGrid config={config} />;
+  const handleClose = () => {
+    setError(false);
+  };
+
+  if (!config) return null;
+
+  return (
+    <>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={error}
+        onClose={handleClose}
+        TransitionComponent={
+          SlideTransition as React.ComponentType<TransitionProps>
+        }
+        key={'copied'}
+        autoHideDuration={1200}
+      >
+        <Alert
+          onClose={handleClose}
+          severity="error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Error fetching data :(
+        </Alert>
+      </Snackbar>
+      <BeastGrid config={config} api={beastApi} />
+    </>
+  );
 }

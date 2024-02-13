@@ -95,6 +95,8 @@ body {
     background-color: var(--bg-demo-color--0);
     color: var(--bg-demo-color--1);
     margin: var(--bg-demo-size-5);
+    display: flex;
+    justify-content: center;
 }
 a {
     color: var(--bg-demo-color--1);

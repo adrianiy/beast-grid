@@ -3,6 +3,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
 
+const API_URL = process.env.API_URL || 'http://localhost:5000';
+
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
@@ -22,7 +24,15 @@ const nextConfig = {
   },
   compiler: {
     styledComponents: true
-  }
+  },
+  async rewrites() {
+		return [
+			{
+				source: '/api/:path*',
+				destination: `${API_URL}/api/:path*`,
+			},
+		]
+	},
 };
 
 const plugins = [
