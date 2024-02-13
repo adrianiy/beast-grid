@@ -1,31 +1,29 @@
-.beast-grid {
-  .grid-body {
-    position: relative;
-  }
-  .grid-row {
-    position: absolute;
-    box-sizing: border-box;
-    display: flex;
-    width: 100%;
+.grid-body {
+  position: relative;
+}
+.grid-row {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
 
-    &.bordered {
+  &.bordered {
+    border-bottom: var(--bg-border--1);
+    .grid-row-cell {
       border-bottom: var(--bg-border--1);
-      .grid-row-cell {
-        border-bottom: var(--bg-border--1);
-      }
     }
   }
-  .grid-row-cell {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    transition: var(--bg-transition--1);
-    box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--bg-text-color--1);
-    background-color: var(--bg-background-color--1);
-  }
+}
+.grid-row-cell {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  transition: var(--bg-transition--1);
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--bg-text-color--1);
+  background-color: var(--bg-background-color--1);
 }

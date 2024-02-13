@@ -1,3 +1,6 @@
+'use client'
+import 'beast-grid/style.css'
+
 import numeral from 'numeral';
 import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
 

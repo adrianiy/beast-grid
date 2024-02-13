@@ -15,10 +15,10 @@ export const BeastGridProvider = ({ createStore, children }: { createStore: () =
   return createElement(StoreContext.Provider, { value: storeRef.current }, children);
 }
 
-export const useBeastStore = <T>(selector: (state: ExtractState<StoreApi<GridStore>>) => T) => {
+export const useBeastStore = <T>(selector: (state: ExtractState<StoreApi<GridStore>>) => T, equalityFn?: (a: T, b: T) => boolean) => {
   const store = useContext(StoreContext)
   if (!store) {
     throw new Error('Missing StoreProvider');
   }
-  return useStore(store, selector)
+  return useStore(store, selector, equalityFn)
 }

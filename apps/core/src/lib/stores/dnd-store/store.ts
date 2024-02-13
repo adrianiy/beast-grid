@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { StoreApi, create } from 'zustand';
 
 export interface DragItem extends Record<string, unknown> {
   id: string;
@@ -14,7 +14,9 @@ export interface DndStore {
   setCoords: (coords?: { x: number; y: number }) => void;
 }
 
-export const useDndStore = create<DndStore>((set) => ({
+export const createDndStore = () => create<DndStore>((set) => ({
   setDragItem: (dragItem?: DragItem) => set({ dragItem }),
   setCoords: (coords?: Coords) => set({ coords }),
 }));
+
+export type TDndStore = () => StoreApi<DndStore>;

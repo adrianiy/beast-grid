@@ -9,8 +9,11 @@ import { BeastGridConfig, TableStyles } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
 
 import { BeastGridProvider } from './stores/beast-store';
-import { createGridStore } from './stores/grid-store/store';
+import { TGridStore, createGridStore } from './stores/grid-store/store';
 import { getColumnArrayFromDefs, getColumnsFromDefs, initialize } from './stores/grid-store/utils';
+
+import { DndStoreProvider } from './stores/dnd-store';
+import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import cn from 'classnames';
 
@@ -23,49 +26,56 @@ export const defaultConfig = {
 
 export function BeastGrid<TData>({ config: userConfig }: { config: BeastGridConfig<TData> }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
   const config: BeastGridConfig<TData> & TableStyles = {
     ...defaultConfig,
     ...userConfig,
   };
-  const columnDefs = getColumnsFromDefs(config.columnDefs, config.defaultColumnDef);
-  const columns = getColumnArrayFromDefs(columnDefs);
+  const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
 
   useEffect(() => {
-    if (ref.current) {
-      setReady(true);
+    if (ref.current && config.columnDefs) {
+      const columns = getColumnsFromDefs(config.columnDefs, config.defaultColumnDef);
+      
+      initialize(columns, ref.current);
+      
+      const gridStore = () => createGridStore({ columns, container: ref.current as HTMLDivElement });
+      const dndStore = () => createDndStore();
+      
+      setStores([gridStore, dndStore]);
     }
-  }, [ref, columnDefs, config.theme]);
+  }, [ref, config.columnDefs, config.defaultColumnDef]);
 
   const renderGrid = () => {
-    if (!ready || !ref.current) {
-      return;
+    if (!beastGridStore || !beastDndStore) {
+      return null;
     }
 
-    initialize(columnDefs, columns, ref.current);
-
-    const store = createGridStore({ columnDefs, container: ref.current, columns });
-
     return (
-      <BeastGridProvider createStore={() => store}>
-        <DndLayer />
-        <Header height={config.headerHeight} multiSort={config.mulitSort} />
-        <TBody
-          height={config.rowHeight}
-          headerHeight={config.headerHeight}
-          data={config.data}
-          border={config.border}
-          summary={!!config.summarize}
-        />
-        <Summary data={config.data} height={config.rowHeight} summary={!!config.summarize} border={config.border} />
-      </BeastGridProvider>
+      <DndStoreProvider createStore={beastDndStore}>
+        <BeastGridProvider createStore={beastGridStore}>
+          <DndLayer />
+          <Header height={config.headerHeight} multiSort={config.mulitSort} />
+          <TBody
+            height={config.rowHeight}
+            headerHeight={config.headerHeight}
+            data={config.data}
+            border={config.border}
+            summary={!!config.summarize}
+          />
+          <Summary
+            data={config.data}
+            height={config.rowHeight}
+            summary={!!config.summarize}
+            border={config.border}
+          />
+        </BeastGridProvider>
+      </DndStoreProvider>
     );
   };
 
   return (
-    <div className={cn("beast-grid", "default", config.theme)} ref={ref}>
-      {renderGrid()}
+    <div className={cn('beast-grid', 'default', config.theme)} ref={ref}>
+      {config && renderGrid()}
     </div>
   );
 }
-

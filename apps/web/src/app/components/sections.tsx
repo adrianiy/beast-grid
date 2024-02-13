@@ -37,7 +37,7 @@ export default function Demo() {
 
 export default function Sections() {
   const { theme: _sysTheme } = useTheme();
-  const [theme, setTheme] = useState(_sysTheme || 'default');
+  const [theme, setTheme] = useState((_sysTheme || 'dark') + '-thme');
   const config: Partial<BeastGridConfig<User>> = {
     summarize: true,
     headerHeight: 80,
@@ -75,7 +75,7 @@ export default function Sections() {
         <p>Se how it works with this simple example of 10K rows:</p>
 
         <div className="demo-container" style={{ marginTop: 24 }}>
-          <Grid count={10000} theme="minimal" config={config} />
+          <Grid key="big" count={500000} theme="minimal-theme" config={config} />
         </div>
       </section>
       <section id="customizable" className="column start">
@@ -96,19 +96,19 @@ export default function Sections() {
             value={theme}
             exclusive
             onChange={handleThemeChange}
-            aria-label="Platform"
+            aria-label="theme"
           >
-            <ToggleButton value="default">Default</ToggleButton>
-            <ToggleButton value="minimal">Minimal</ToggleButton>
-            <ToggleButton value="dark">Dark</ToggleButton>
-            <ToggleButton value="light">Light</ToggleButton>
+            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="default">Default</ToggleButton>
+            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="minimal-theme">Minimal</ToggleButton>
+            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="dark-theme">Dark</ToggleButton>
+            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="light-theme">Light</ToggleButton>
           </ToggleButtonGroup>
         </div>
         <div
           className={cn('demo-container', theme === 'light' && 'outlined', theme)}
           style={{ marginTop: 24 }}
         >
-          <Grid count={25} theme={theme} config={theme === 'minimal' ? config : undefined} />
+          <Grid key="custom" count={25} theme={theme} config={theme === 'minimal' ? config : undefined} />
         </div>
       </section>
     </>

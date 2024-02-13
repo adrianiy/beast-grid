@@ -1,7 +1,7 @@
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { Column, ColumnStore, HeaderDrag, SortConfig } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
-import { useDndStore } from './../../stores/dnd-store/store';
+import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from './../../stores/dnd-store/dnd-hook';
 
 type Props = {

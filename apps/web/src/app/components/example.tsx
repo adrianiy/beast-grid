@@ -1,6 +1,6 @@
 import { BeastGridConfig } from 'beast-grid';
-import Grid from './grid';
 import { User } from '../api/data';
+import Grid from './grid';
 
 export default function Example() {
   const config: Partial<BeastGridConfig<User>> = {
@@ -10,7 +10,7 @@ export default function Example() {
   return(
     <section className="demo" id="demo">
       <div className="demo-container">
-        <Grid count={25} config={config} theme="minimal" /> 
+        <Grid key="example" count={25} config={config} theme="minimal-theme" /> 
       </div>
     </section>
   )

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { DragItem, useDndStore } from './store';
+import { DragItem } from './store';
+import { useDndStore } from '../dnd-store';
 
 let emptyImage: HTMLImageElement;
 export function getEmptyImage() {

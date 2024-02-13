@@ -1,7 +1,9 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
 import { v4 as uuidv4 } from 'uuid';
 import { Column, ColumnArray, ColumnDef, ColumnStore } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
+import { SortType } from '../../common';
 
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
@@ -59,9 +61,9 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
   return columns
 }
 
-export const initialize = (columnDefs: ColumnStore, columns: ColumnArray, container: HTMLDivElement) => {
-  setColumnsStyleProps(columnDefs, container.offsetWidth);
-  moveColumns(columnDefs, columns);
+export const initialize = (columns: ColumnStore, container: HTMLDivElement) => {
+  setColumnsStyleProps(columns, container.offsetWidth);
+  moveColumns(columns);
 }
 
 export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
@@ -88,25 +90,59 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 };
 
 
-export const moveColumns = (columnStore: ColumnStore, columns: ColumnArray, statingPosition = 0) => {
+export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
   let left = 0;
+
+  const levels = Object.values(columns).reduce((acc, column) => {
+    const level = column.level || 0;
+    acc[level] = acc[level] || [];
+    acc[level].push(column);
+    return acc;
+  }, [] as Column[][]);
     
-  columns.forEach((level) => {
+  levels.forEach((level) => {
     const sortedColumns = [...level].sort((a, b) => a.position - b.position);
 
     sortedColumns.forEach((column) => {
-      if (columnStore[column.id].hidden) {
+      if (columns[column.id].hidden) {
         return;
       }
-      if (columnStore[column.id].position <= statingPosition) {
-        left += columnStore[column.id].width || 150;
+      if (columns[column.id].position <= statingPosition) {
+        left += columns[column.id].width || 150;
         return;
       }
-      columnStore[column.id].left = left;
-      left += columnStore[column.id].width || 150;
+      columns[column.id].left = left;
+      left += columns[column.id].width || 150;
     });
   });
 };
+
+export const addSort = (column: Column, columnsWithSort: Column[], multipleColumnSort: boolean) => {
+  if (multipleColumnSort) {
+    const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort!.priority), 0);
+    
+    column.sort = {
+      order: SortType.ASC,
+      priority: lastPriority + 1,
+    };
+  } else {
+    column.sort = {
+      order: SortType.ASC,
+      priority: 1,
+    };
+
+    delete columnsWithSort[0].sort;
+  }
+}
+
+export const removeSort = (column: Column, columnsWithSort: Column[]) => {
+  columnsWithSort.forEach((col) => {
+    if (col.sort!.priority > column.sort!.priority) {
+      col.sort!.priority -= 1;
+    }
+  });
+  delete column.sort;
+}
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   let timeout: NodeJS.Timeout;

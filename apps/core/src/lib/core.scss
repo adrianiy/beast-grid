@@ -1,109 +1,104 @@
-// Theming
+:root {
+  display: block;
+  height: 100%;
 
-.default {
-    --bg-size--1: 4px;
-    --bg-size--2: 8px;
-    --bg-size--3: 12px;
-    --bg-size--4: 16px;
+  --bg-size--1: 4px;
+  --bg-size--2: 8px;
+  --bg-size--3: 12px;
+  --bg-size--4: 16px;
 
-    --bg-color--0: #fff;
-    --bg-color--1: #000;
-    --bg-color--2: #333;
-    --bg-color--3: #b8b8b8;
-    --bg-color--4: #e0e0e0;
-    --bg-color--5: #a9a9a9;
-    --bg-border--1: 1px solid var(--bg-color--3);
-    --bg-border--2: 1px solid var(--bg-color--4);
-    --bg-transition--1: 0.2s;
+  --bg-color--0: #fff;
+  --bg-color--1: #000;
+  --bg-color--2: #333;
+  --bg-color--3: #b8b8b8;
+  --bg-color--4: #e0e0e0;
+  --bg-color--5: #a9a9a9;
+  --bg-border--1: 1px solid var(--bg-color--3);
+  --bg-border--2: 1px solid var(--bg-color--4);
+  --bg-transition--1: 0.2s;
 
-    --bg-background-color--1: var(--bg-color--0);
-    --bg-background-color--2: var(--bg-color--3);
-    --bg-background-color--3: var(--bg-color--0);
-    --bg-text-color--1: var(--bg-color--1);
+  --bg-background-color--1: var(--bg-color--0);
+  --bg-background-color--2: var(--bg-color--3);
+  --bg-background-color--3: var(--bg-color--0);
+  --bg-text-color--1: var(--bg-color--1);
 }
-
 .beast-grid {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: scroll;
-    border-collapse: collapse;
-    border-spacing: 0;
-    box-sizing: border-box;
-    margin: 0;
-    margin-top: -1px;
-    padding: 0;
-    table-layout: fixed;
-    background-color: var(--bg-background-color--1);
-    color: var(--bg-text-color--1);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+  border-collapse: collapse;
+  border-spacing: 0;
+  box-sizing: border-box;
+  margin: 0;
+  margin-top: -1px;
+  padding: 0;
+  table-layout: fixed;
+  background-color: var(--bg-background-color--1);
+  color: var(--bg-text-color--1);
 
-    &:host {
-        display: block;
-        height: 100%;
+  .row {
+    display: flex;
+
+    &.center {
+      justify-content: center;
     }
-
-    .row {
-        display: flex;
-
-        &.center {
-            justify-content: center;
-        }
-        &.end {
-            justify-content: flex-end;
-        }
-        &.start {
-            justify-content: flex-start;
-        }
-        &.between {
-            justify-content: space-between;
-        }
-        &.around {
-            justify-content: space-around;
-        }
-        &.evenly {
-            justify-content: space-evenly;
-        }
-        &.top {
-            align-items: flex-start;
-        }
-        &.middle {
-            align-items: center;
-        }
-        &.bottom {
-            align-items: flex-end;
-        }
+    &.end {
+      justify-content: flex-end;
     }
-
-    .column {
-        display: flex;
-        flex-direction: column;
-
-        &.center {
-            justify-content: center;
-        }
-        &.end {
-            justify-content: flex-end;
-        }
-        &.start {
-            justify-content: flex-start;
-        }
-        &.between {
-            justify-content: space-between;
-        }
-        &.around {
-            justify-content: space-around;
-        }
-        &.evenly {
-            justify-content: space-evenly;
-        }
-        &.top {
-            align-items: flex-start;
-        }
-        &.middle {
-            align-items: center;
-        }
-        &.bottom {
-            align-items: flex-end;
-        }
+    &.start {
+      justify-content: flex-start;
     }
+    &.between {
+      justify-content: space-between;
+    }
+    &.around {
+      justify-content: space-around;
+    }
+    &.evenly {
+      justify-content: space-evenly;
+    }
+    &.top {
+      align-items: flex-start;
+    }
+    &.middle {
+      align-items: center;
+    }
+    &.bottom {
+      align-items: flex-end;
+    }
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+
+    &.center {
+      justify-content: center;
+    }
+    &.end {
+      justify-content: flex-end;
+    }
+    &.start {
+      justify-content: flex-start;
+    }
+    &.between {
+      justify-content: space-between;
+    }
+    &.around {
+      justify-content: space-around;
+    }
+    &.evenly {
+      justify-content: space-evenly;
+    }
+    &.top {
+      align-items: flex-start;
+    }
+    &.middle {
+      align-items: center;
+    }
+    &.bottom {
+      align-items: flex-end;
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { DragHandle, VisibilityOff } from '@mui/icons-material';
-import { useDndStore } from './../../stores/dnd-store/store';
+import { useDndStore } from './../../stores/dnd-store';
 
 import './dnd-layer.scss';
 
