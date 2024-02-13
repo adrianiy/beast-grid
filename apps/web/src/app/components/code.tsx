@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { CSSProperties, useEffect, useState } from 'react';
 
@@ -19,7 +19,13 @@ function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="up" />;
 }
 
-export default function Code({ code, language, showLineNumbers, canCopy, style }: Props) {
+export default function Code({
+  code,
+  language,
+  showLineNumbers,
+  canCopy,
+  style,
+}: Props) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -44,11 +50,18 @@ export default function Code({ code, language, showLineNumbers, canCopy, style }
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={copied}
         onClose={handleClose}
-        TransitionComponent={SlideTransition as React.ComponentType<TransitionProps>}
+        TransitionComponent={
+          SlideTransition as React.ComponentType<TransitionProps>
+        }
         key={'copied'}
         autoHideDuration={1200}
       >
-        <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleClose}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           Copied to clipboard!
         </Alert>
       </Snackbar>

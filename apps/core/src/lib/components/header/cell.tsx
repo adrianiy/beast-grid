@@ -1,5 +1,10 @@
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import { Column, ColumnStore, HeaderDrag, SortConfig } from './../../common/interfaces';
+import {
+  Column,
+  ColumnStore,
+  HeaderDrag,
+  SortConfig,
+} from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from './../../stores/dnd-store/dnd-hook';
@@ -15,14 +20,26 @@ type Props = {
 
 let lastX = 0;
 
-export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, changeSort }: Props) {
-  const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore((state) => [
-    state.hideColumn,
-    state.swapColumns,
-    state.resizeColumn,
-    state.container,
+export default function HeaderCell({
+  levelIdx,
+  idx,
+  height,
+  column,
+  columnDefs,
+  changeSort,
+}: Props) {
+  const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore(
+    (state) => [
+      state.hideColumn,
+      state.swapColumns,
+      state.resizeColumn,
+      state.container,
+    ]
+  );
+  const [dragItem, setDragItem] = useDndStore((state) => [
+    state.dragItem,
+    state.setDragItem,
   ]);
-  const [dragItem, setDragItem] = useDndStore((state) => [state.dragItem, state.setDragItem]);
   const [drag] = useDndHook<HeaderDrag>(
     { id: column.id, text: column.headerName, isInside: true },
     {
@@ -72,11 +89,17 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
 
       if (movingRight) {
         swappableColumn = Object.values(columnDefs).find(
-          (c) => c.left > columnDefs[column.id].left && xInGrid < c.left + c.width && xInGrid > c.left
+          (c) =>
+            c.left > columnDefs[column.id].left &&
+            xInGrid < c.left + c.width &&
+            xInGrid > c.left
         );
       } else {
         swappableColumn = Object.values(columnDefs).findLast(
-          (c) => c.left < columnDefs[column.id].left && xInGrid >= c.left && xInGrid <= c.left + c.width
+          (c) =>
+            c.left < columnDefs[column.id].left &&
+            xInGrid >= c.left &&
+            xInGrid <= c.left + c.width
         );
       }
 
@@ -92,12 +115,12 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
     if (lastX === 0) {
       lastX = e.clientX;
     }
-    
+
     const delta = e.clientX - lastX;
-    
+
     if (Math.abs(delta) > 20) {
       const newWidth = columnDefs[column.id].width + delta;
-      
+
       lastX = e.clientX;
 
       resizeColumn(column.id, newWidth);
@@ -106,13 +129,15 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
 
   const handleResizeEnd = () => {
     lastX = 0;
-  }
+  };
 
   const renderSortIcon = (sort: SortConfig) => {
     return (
       <div className="sort-icon row middle">
         {sort.order === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-        {sort.priority > 0 && <span className="sort-priority">{sort.priority}</span>}
+        {sort.priority > 0 && (
+          <span className="sort-priority">{sort.priority}</span>
+        )}
       </div>
     );
   };

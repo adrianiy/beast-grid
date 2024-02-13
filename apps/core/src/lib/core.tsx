@@ -5,7 +5,11 @@ import Header from './components/header/header';
 import TBody from './components/body/tbody';
 import Summary from './components/summary/summary';
 
-import { BeastGridApi, BeastGridConfig, TableStyles } from './common/interfaces';
+import {
+  BeastGridApi,
+  BeastGridConfig,
+  TableStyles,
+} from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
 
 import { BeastGridProvider, BeastApi } from './stores/beast-store';
@@ -25,27 +29,42 @@ export const defaultConfig = {
   headerHeight: HEADER_HEIGHT,
 };
 
-export function BeastGrid<TData>({ config: userConfig, api }: { config: BeastGridConfig<TData>, api?: MutableRefObject<BeastGridApi> }) {
+export function BeastGrid<TData>({
+  config: userConfig,
+  api,
+}: {
+  config: BeastGridConfig<TData>;
+  api?: MutableRefObject<BeastGridApi>;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const config: BeastGridConfig<TData> & TableStyles = {
     ...defaultConfig,
     ...userConfig,
   };
-  const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
+  const [[beastGridStore, beastDndStore], setStores] = useState<
+    [TGridStore | null, TDndStore | null]
+  >([null, null]);
 
   useEffect(() => {
     if (ref.current && config.columnDefs) {
-      const columns = getColumnsFromDefs(config.columnDefs, config.defaultColumnDef);
+      const columns = getColumnsFromDefs(
+        config.columnDefs,
+        config.defaultColumnDef
+      );
 
       initialize(columns, ref.current);
 
-      const gridStore = () => createGridStore({ columns, container: ref.current as HTMLDivElement, sort: [] });
+      const gridStore = () =>
+        createGridStore({
+          columns,
+          container: ref.current as HTMLDivElement,
+          sort: [],
+        });
       const dndStore = () => createDndStore();
 
       setStores([gridStore, dndStore]);
     }
   }, [ref, config.columnDefs, config.defaultColumnDef]);
-
 
   const renderGrid = () => {
     if (!beastGridStore || !beastDndStore) {

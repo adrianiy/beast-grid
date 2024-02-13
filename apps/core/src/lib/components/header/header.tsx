@@ -6,8 +6,17 @@ import { Column } from '../../common/interfaces';
 
 import './header.scss';
 
-export default function Header({ height, multiSort }: { height: number; multiSort?: boolean }) {
-  const [columns, changeSort] = useBeastStore((state) => [state.columns, state.changeSort]);
+export default function Header({
+  height,
+  multiSort,
+}: {
+  height: number;
+  multiSort?: boolean;
+}) {
+  const [columns, changeSort] = useBeastStore((state) => [
+    state.columns,
+    state.changeSort,
+  ]);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -21,7 +30,10 @@ export default function Header({ height, multiSort }: { height: number; multiSor
   };
 
   return (
-    <div className="grid-header row between" style={{ height: height * levels.length }}>
+    <div
+      className="grid-header row between"
+      style={{ height: height * levels.length }}
+    >
       {levels.map((level, levelIdx) => (
         <div className="grid-header-row row" style={{ height }} key={levelIdx}>
           {level.map((column, idx) => (

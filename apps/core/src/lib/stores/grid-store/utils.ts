@@ -1,7 +1,12 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Column, ColumnArray, ColumnDef, ColumnStore } from './../../common/interfaces';
+import {
+  Column,
+  ColumnArray,
+  ColumnDef,
+  ColumnStore,
+} from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { SortType } from '../../common';
 
@@ -39,7 +44,12 @@ export const getColumnsFromDefs = (
     columns[id] = column;
 
     if (columnDef.children) {
-      const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, id);
+      const childrenColumns = getColumnsFromDefs(
+        columnDef.children,
+        defaultColumnDef,
+        level + 1,
+        id
+      );
 
       Object.assign(columns, childrenColumns);
     }
@@ -49,7 +59,9 @@ export const getColumnsFromDefs = (
   return columns;
 };
 
-export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => {
+export const getColumnArrayFromDefs = (
+  columnStore: ColumnStore
+): Column[][] => {
   const columns = Object.values(columnStore).reduce((acc, column) => {
     if (!acc[column.level]) {
       acc[column.level] = [];
@@ -58,18 +70,28 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
     return acc;
   }, [] as Column[][]);
 
-  return columns
-}
+  return columns;
+};
 
 export const initialize = (columns: ColumnStore, container: HTMLDivElement) => {
   setColumnsStyleProps(columns, container.offsetWidth);
   moveColumns(columns);
-}
+};
 
-export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
-  const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
-  const dynamicColumns = finalColumns.filter((column) => !column.width || column.flex);
-  const totalFlex = dynamicColumns.reduce((acc, column) => acc + (column.flex ?? 0), 0);
+export const setColumnsStyleProps = (
+  columnStore: ColumnStore,
+  containeWidth: number
+): ColumnStore => {
+  const finalColumns = Object.values(columnStore).filter(
+    (column) => column.final && !column.hidden
+  );
+  const dynamicColumns = finalColumns.filter(
+    (column) => !column.width || column.flex
+  );
+  const totalFlex = dynamicColumns.reduce(
+    (acc, column) => acc + (column.flex ?? 0),
+    0
+  );
 
   // Calculate width for user defined columns
   const fixedWidth = finalColumns.reduce(
@@ -83,12 +105,14 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
   // Set width for flex columns
   dynamicColumns.forEach((column) => {
     const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
-    columnStore[column.id].width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
+    columnStore[column.id].width = Math.max(
+      flexWidth,
+      column.minWidth || MIN_COL_WIDTH
+    );
   });
 
   return columnStore;
 };
-
 
 export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
   let left = 0;
@@ -99,7 +123,7 @@ export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
     acc[level].push(column);
     return acc;
   }, [] as Column[][]);
-    
+
   levels.forEach((level) => {
     const sortedColumns = [...level].sort((a, b) => a.position - b.position);
 
@@ -117,10 +141,17 @@ export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
   });
 };
 
-export const addSort = (column: Column, columnsWithSort: Column[], multipleColumnSort: boolean) => {
+export const addSort = (
+  column: Column,
+  columnsWithSort: Column[],
+  multipleColumnSort: boolean
+) => {
   if (multipleColumnSort) {
-    const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort!.priority), 0);
-    
+    const lastPriority = columnsWithSort.reduce(
+      (acc, col) => Math.max(acc, col.sort!.priority),
+      0
+    );
+
     column.sort = {
       order: SortType.ASC,
       priority: lastPriority + 1,
@@ -133,7 +164,7 @@ export const addSort = (column: Column, columnsWithSort: Column[], multipleColum
 
     delete columnsWithSort[0].sort;
   }
-}
+};
 
 export const removeSort = (column: Column, columnsWithSort: Column[]) => {
   columnsWithSort.forEach((col) => {
@@ -142,11 +173,11 @@ export const removeSort = (column: Column, columnsWithSort: Column[]) => {
     }
   });
   delete column.sort;
-}
+};
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   let timeout: NodeJS.Timeout;
-  return function(this: unknown, ...args: unknown[]) {
+  return function (this: unknown, ...args: unknown[]) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), wait);
   };

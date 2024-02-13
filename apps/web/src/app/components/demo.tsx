@@ -1,8 +1,8 @@
-import { Bolt, DataObject, Settings } from "@mui/icons-material";
-import Header from "./header";
-import Welcome from "./welcome";
-import Example from "./example";
-import Sections from "./sections";
+import { Bolt, DataObject, Settings } from '@mui/icons-material';
+import Header from './header';
+import Welcome from './welcome';
+import Example from './example';
+import Sections from './sections';
 
 import './styles.scss';
 
@@ -31,7 +31,6 @@ export const features = [
 ];
 
 export default function Demo() {
-  
   return (
     <div className="container column center middle" id="home">
       <Header />
@@ -39,5 +38,5 @@ export default function Demo() {
       <Example />
       <Sections />
     </div>
-  )
+  );
 }

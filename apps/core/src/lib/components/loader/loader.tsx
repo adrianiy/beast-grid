@@ -7,13 +7,21 @@ export function Loader({ sorting }: { sorting?: boolean }) {
   return (
     <div className="beast-grid__loader row middle center">
       <div className="beast-grid__loader__overlay" />
-      {sorting ? <span>Sorting...</span> : <InfinitySpin width="200" color="var(--bg-color--3)" />}
+      {sorting ? (
+        <span>Sorting...</span>
+      ) : (
+        <InfinitySpin width="200" color="var(--bg-color--3)" />
+      )}
     </div>
   );
 }
 
 export default function LoaderLayer() {
-  const [loading, sorting, container] = useBeastStore((state) => [state.loading, state.sorting, state.container]);
+  const [loading, sorting, container] = useBeastStore((state) => [
+    state.loading,
+    state.sorting,
+    state.container,
+  ]);
 
   if (!loading && !sorting) {
     container.classList.remove('beast-grid--loading');
@@ -22,5 +30,5 @@ export default function LoaderLayer() {
 
   container.classList.add('beast-grid--loading');
 
-  return <Loader sorting={sorting}/>;
+  return <Loader sorting={sorting} />;
 }

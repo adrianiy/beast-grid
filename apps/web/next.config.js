@@ -18,21 +18,21 @@ const nextConfig = {
     remotePatterns: [
       {
         hostname: 'avatars.githubusercontent.com',
-        protocol: 'https'
-      }
-    ]
+        protocol: 'https',
+      },
+    ],
   },
   compiler: {
-    styledComponents: true
+    styledComponents: true,
   },
   async rewrites() {
-		return [
-			{
-				source: '/api/:path*',
-				destination: `${API_URL}/api/:path*`,
-			},
-		]
-	},
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${API_URL}/api/:path*`,
+      },
+    ];
+  },
 };
 
 const plugins = [

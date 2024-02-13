@@ -5,13 +5,13 @@ import Grid from './grid';
 export default function Example() {
   const config: Partial<BeastGridConfig<User>> = {
     headerHeight: 80,
-    rowHeight: 60
+    rowHeight: 60,
   };
-  return(
+  return (
     <section className="demo" id="demo">
       <div className="demo-container">
-        <Grid key="example" qty={25} config={config} theme="minimal-theme" /> 
+        <Grid key="example" qty={25} config={config} theme="minimal-theme" />
       </div>
     </section>
-  )
+  );
 }

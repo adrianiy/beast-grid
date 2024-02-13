@@ -36,7 +36,7 @@ export default function Demo() {
 `;
 
 export default function Sections() {
-  const [theme, setTheme] = useState("default");
+  const [theme, setTheme] = useState('default');
   const [count, setCount] = useState(10000);
   const config: Partial<BeastGridConfig<User>> = {
     summarize: true,
@@ -52,16 +52,16 @@ export default function Sections() {
 
   const increase = (qty: number) => {
     setCount(count + qty);
-  }
-  
+  };
+
   return (
     <>
       <section id="easy-to-use" className="column start">
         <h1>Easy to use</h1>
         <p>Create your grid with a simple and intuitive API.</p>
         <p>
-          Just pass your data, column definitions and configuration
-          and you are ready to go.
+          Just pass your data, column definitions and configuration and you are
+          ready to go.
         </p>
         <Code code={easyBlock} language="ts" showLineNumbers canCopy />
       </section>
@@ -72,20 +72,31 @@ export default function Sections() {
         </p>
         <p>It&apos;s fast, efficient, and easy to use.</p>
         <p>
-          Done with <b>list virtualization</b> and optimized
-          rendering.
+          Done with <b>list virtualization</b> and optimized rendering.
         </p>
 
         <p>Se how it works with this large data example:</p>
 
         <div className="row middle end button-row">
-          <Button color="primary" variant="outlined" onClick={() => increase(10000)}>
+          <Button
+            color="primary"
+            variant="outlined"
+            onClick={() => increase(10000)}
+          >
             +10k
           </Button>
-          <Button color="primary" variant="outlined" onClick={() => increase(100000)}>
+          <Button
+            color="primary"
+            variant="outlined"
+            onClick={() => increase(100000)}
+          >
             +100k
           </Button>
-          <Button color="primary" variant="outlined" onClick={() => increase(500000)}>
+          <Button
+            color="primary"
+            variant="outlined"
+            onClick={() => increase(500000)}
+          >
             +500k
           </Button>
         </div>
@@ -96,13 +107,11 @@ export default function Sections() {
       <section id="customizable" className="column start">
         <h1>Fully customizable</h1>
         <p>Customize your grid to your needs.</p>
-        <p>
-          It supports multi-sort, column resizing, and drag and drop.
-        </p>
+        <p>It supports multi-sort, column resizing, and drag and drop.</p>
         <p>Add formatters, filters, and custom cell renderers.</p>
         <p>
-          Create your own themes to make the grid match your
-          application deisgn system.
+          Create your own themes to make the grid match your application deisgn
+          system.
         </p>
         <p>Everything with a simple configuration JSON object.</p>
         <div className="row middle end">
@@ -113,17 +122,46 @@ export default function Sections() {
             onChange={handleThemeChange}
             aria-label="theme"
           >
-            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="default">Default</ToggleButton>
-            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="minimal-theme">Minimal</ToggleButton>
-            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="dark-theme">Dark</ToggleButton>
-            <ToggleButton style={{ color: 'var(--bg-demo--color--1)' }} value="light-theme">Light</ToggleButton>
+            <ToggleButton
+              style={{ color: 'var(--bg-demo--color--1)' }}
+              value="default"
+            >
+              Default
+            </ToggleButton>
+            <ToggleButton
+              style={{ color: 'var(--bg-demo--color--1)' }}
+              value="minimal-theme"
+            >
+              Minimal
+            </ToggleButton>
+            <ToggleButton
+              style={{ color: 'var(--bg-demo--color--1)' }}
+              value="dark-theme"
+            >
+              Dark
+            </ToggleButton>
+            <ToggleButton
+              style={{ color: 'var(--bg-demo--color--1)' }}
+              value="light-theme"
+            >
+              Light
+            </ToggleButton>
           </ToggleButtonGroup>
         </div>
         <div
-          className={cn('demo-container', theme === 'light' && 'outlined', theme)}
+          className={cn(
+            'demo-container',
+            theme === 'light' && 'outlined',
+            theme
+          )}
           style={{ marginTop: 24 }}
         >
-          <Grid key="custom" qty={25} theme={theme} config={theme === 'minimal-theme' ? config : undefined} />
+          <Grid
+            key="custom"
+            qty={25}
+            theme={theme}
+            config={theme === 'minimal-theme' ? config : undefined}
+          />
         </div>
       </section>
     </>

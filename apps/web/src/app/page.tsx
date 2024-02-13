@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import './numeral.config'
+import './numeral.config';
 
 import 'prismjs';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-bash';
 import 'prismjs/plugins/line-numbers/prism-line-numbers';
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
-import "dracula-prism/dist/css/dracula-prism.css";
+import 'dracula-prism/dist/css/dracula-prism.css';
 
 import Demo from './components/demo';
 import { ThemeProvider } from 'next-themes';
