@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { GitHub } from '@mui/icons-material';
+import { Book, GitHub } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { features } from './demo';
 import Code from './code';
@@ -34,6 +34,14 @@ export default function Welcome() {
               startIcon={<GitHub />}
             >
               View Code
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Book />}
+              href="https://beast-grid-docs.vercel.app"
+              target="_blank"
+            >
+              View Docs
             </Button>
           </div>
         </div>
