@@ -25,7 +25,7 @@ export const defaultConfig = {
   headerHeight: HEADER_HEIGHT,
 };
 
-export function BeastGrid<TData>({ config: userConfig, api }: { config: BeastGridConfig<TData>, store?: MutableRefObject<BeastGridApi> }) {
+export function BeastGrid<TData>({ config: userConfig, api }: { config: BeastGridConfig<TData>, api?: MutableRefObject<BeastGridApi> }) {
   const ref = useRef<HTMLDivElement>(null);
   const config: BeastGridConfig<TData> & TableStyles = {
     ...defaultConfig,
