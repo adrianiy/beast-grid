@@ -1,0 +1,49 @@
+# Beast Grid API
+
+We know you'll need to play with your data on your own, or know how the user has interacted with your app. 
+
+That's why we've created the Beast Grid API. 
+
+Using the `useRef` hook, you can access the `grid` object and use the following methods:
+
+```tsx
+const beastApi = useRef<BeastGridApi | undefined>();
+
+const config: BeastGridConfig = {
+  ...
+}
+
+return (
+  <BeastGrid
+    config={config}
+    api={beastApi}
+  />
+)
+```
+
+## API
+
+```tsx
+export interface BeastGridApi {
+  columns: ColumnStore;
+  setColumns: (columns: ColumnStore) => void;
+  setLoading: (loading: boolean) => void;
+}
+````
+
+---
+
+### columns
+#### `ColumnStore`
+
+The `columns` property is a `ColumnStore` object that contains all the columns that are currently being displayed in the grid.
+
+### setColumns
+#### `(columns: ColumnStore) => void`
+
+The `setColumns` method allows you to update the columns that are being displayed in the grid.
+
+### `setLoading`
+#### `(loading: boolean) => void`
+
+The `setLoading` method allows you to set the loading state of the grid. This is useful when you're fetching data from an API and want to show a loading spinner to the user.

@@ -2,6 +2,12 @@
   "index": "Introduction",
   "start": "Quik Start",
   "example": "Basic Example",
+  "configuration": "Configuration",
+  "apidef": "Beast API",
+  "---": {
+    "type": "separator"
+  },
+  "columns": "Column configuration",
   "about": {
     "title": "About",
     "type": "page"

@@ -1,0 +1,37 @@
+# Beast Configuration
+
+Configure your grid with a simple `BeastGridConfig` object. check the [example](example) for a complete example.
+
+
+```tsx
+export interface TableStyles {
+  rowHeight: number;
+  headerHeight: number;
+  border?: boolean;
+}
+export interface BeastGridConfig extends Partial<TableStyles> {
+  columnDefs: ColumnDef[];
+  defaultColumnDef?: ColumnDef;
+  data: TData[];
+  theme?: string;
+  sortable?: boolean;
+  mulitSort?: boolean;
+  summarize?: boolean;
+}
+```
+
+## Properties
+
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [`columnDefs`](columns/definitions) | `ColumnDef[]` | `[]` | Array of column definitions |
+| `defaultColumnDef` | `ColumnDef` | `undefined` | Default column definition. Applied to all columns |
+| `data` | `TData[]` | `[]` | Array of data |
+| `theme` | `string` | `default` | Theme name |
+| `sortable` | `boolean` | `true` | Enable sorting |
+| `mulitSort` | `boolean` | `false` | Enable multi column sorting |
+| `summarize` | `boolean` | `false` | Enable summarization |
+| `rowHeight` | `number` | `48` | Row height |
+| `headerHeight` | `number` | `48` | Header height |
+| `border` | `boolean` | `false` | Enable border |

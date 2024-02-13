@@ -14,6 +14,7 @@ export type ColumnId = string;
 export interface BaseColumnDef {
   headerName: string;
   field: string;
+  sortable?: boolean;
   children?: ColumnDef[];
   formatter?: (value: unknown) => string;
 }
@@ -25,6 +26,7 @@ export interface BeastGridConfig<TData> extends Partial<TableStyles> {
   defaultColumnDef?: ColumnDef;
   data: TData[];
   theme?: string;
+  sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;
 }

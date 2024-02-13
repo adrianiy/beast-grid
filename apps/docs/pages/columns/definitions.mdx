@@ -1,0 +1,111 @@
+# Column definitions
+
+```tsx
+interface StyleProps {
+  width: number;
+  minWidth: number;
+  maxWidth: number;
+  hidden: boolean;
+  flex: number;
+}
+interface ColumnDef extends Partial<StyleProps> {
+  headerName: string;
+  field: string;
+  children?: ColumnDef[];
+  formatter?: (value: unknown) => string;
+
+}
+```
+
+# Column definition example
+
+```tsx
+const columns: ColumnDef[] = [
+  {
+    headerName: 'Name',
+    field: 'name',
+    minWidth: 100,
+    maxWidth: 200,
+    formatter: (value) => value.toUpperCase(),
+  },
+  {
+    headerName: 'Age',
+    field: 'age',
+    width: 100,
+  },
+  {
+    headerName: 'Address',
+    field: 'address',
+  },
+  {
+    headerName: 'Children',
+    field: 'children',
+    children: [
+      {
+        headerName: 'Name',
+        field: 'name',
+      },
+      {
+        headerName: 'Age',
+        field: 'age',
+      },
+    ],
+  },
+];
+```
+
+# Properties
+
+## `headerName`
+### Type: `string`
+### Required: `true`
+
+The name of the column.
+
+## `field`
+### Type: `string`
+### Required: `true`
+
+The field to be displayed in the column. Must match the field name in the data.
+
+## `children`
+### Type: `ColumnDef[]`
+### Required: `false`
+ 
+The children columns of the column.
+
+## `formatter`
+### Type: `(value: unknown) => string`
+### Required: `false`
+
+A function to format the value of the column.
+
+## `width`
+### Type: `number`
+### Required: `false`
+
+The width of the column.
+
+## `minWidth`
+### Type: `number`
+### Required: `false`
+
+The minimum width of the column.
+
+## `maxWidth`
+### Type: `number`
+### Required: `false`
+
+The maximum width of the column.
+
+## `hidden`
+### Type: `boolean`
+### Required: `false`
+
+Whether the column is hidden.
+
+## `flex`
+### Type: `number`
+### Required: `false`
+
+The flex value of the column. Follows the same rules as the flex property in CSS.

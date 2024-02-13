@@ -37,19 +37,22 @@ export default function Grid() {
     {
       headerName: 'AMOUNT',
       field: 'money',
-      flex: 1,
+      width: 100,
       formatter: (value) => numeral(value).format('0,0 $'),
     },
     {
       headerName: 'ORDERS',
       field: 'orders',
-      flex: 1,
       formatter: (value) => numeral(value).format('0,0'),
     },
   ];
+  const defaultColumnDef: ColumnDef = {
+    flex: 1,
+  };
   const config: BeastGridConfig<User> = {
     data,
     columnDefs,
+    defaultColumnDef,
     border: true,
     mulitSort: true,
   };

@@ -1,0 +1,42 @@
+# Sorting Configuration
+
+Enable sorting for the specified column.
+This configuration will override the default sorting configuration.
+
+```tsx
+  const config: BeastGridConfig<User> = {
+    data,
+    columnDefs,
+    defaultColumnDef,
+    border: true,
+  };
+  const columnDefs: ColumnDef[] = [
+    { headerName: 'ID', field: 'userId', sort: false },
+    { headerName: 'NAME', field: 'username', sort: false },
+    {
+      headerName: 'AMOUNT',
+      field: 'money',
+      width: 100,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'ORDERS',
+      field: 'orders',
+      formatter: (value) => numeral(value).format('0,0'),
+    },
+  ];
+```
+
+In the above example, the first two columns are not sortable, while the last two columns are sortable.
+
+
+You can acces the sorting state using our [API](apidef)
+
+---
+
+### A Note on Sorting
+#### Server Side Sorting for Large Datasets
+
+We strongly recommd to do async sorting on the server side to avoid performance issues.
+
+
