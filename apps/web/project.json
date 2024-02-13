@@ -11,12 +11,12 @@
       ],
       "defaultConfiguration": "production",
       "options": {
-        "root": "apps/demo",
-        "outputPath": "dist/apps/demo"
+        "root": "apps/web",
+        "outputPath": "dist/apps/web"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/demo"
+          "outputPath": "apps/web"
         },
         "production": {}
       }
