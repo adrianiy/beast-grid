@@ -37,7 +37,7 @@ function SlideTransition(props: SlideProps) {
 export default function Grid({ qty, theme, config: _customConfig }: Props) {
   const loading = useRef(false);
   const beastApi = useRef<BeastGridApi | undefined>();
-  const [config, setConfig] = useState<BeastGridConfig<User> | null>();
+  const [config, setConfig] = useState<BeastGridConfig<User> | undefined>();
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<boolean>(false);
 
@@ -68,7 +68,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         border: true,
         mulitSort: true,
         summarize: true,
-        theme,
         ..._customConfig,
       });
     }
@@ -77,8 +76,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
   const handleClose = () => {
     setError(false);
   };
-
-  if (!config) return null;
 
   return (
     <>
@@ -101,7 +98,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           Error fetching data :(
         </Alert>
       </Snackbar>
-      <BeastGrid config={config} api={beastApi} />
+      <BeastGrid config={config} api={beastApi} theme={theme} />
     </>
   );
 }

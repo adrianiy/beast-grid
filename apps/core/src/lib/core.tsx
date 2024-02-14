@@ -31,22 +31,34 @@ export const defaultConfig = {
 
 export function BeastGrid<TData>({
   config: userConfig,
+  theme = 'default',
   api,
 }: {
-  config: BeastGridConfig<TData>;
+  config?: BeastGridConfig<TData>;
+  theme?: string;
   api?: MutableRefObject<BeastGridApi | undefined>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const config: BeastGridConfig<TData> & TableStyles = {
-    ...defaultConfig,
-    ...userConfig,
-  };
+  const [config, setConfig] = useState<
+    (BeastGridConfig<TData> & TableStyles) | undefined
+  >();
   const [[beastGridStore, beastDndStore], setStores] = useState<
     [TGridStore | null, TDndStore | null]
   >([null, null]);
 
   useEffect(() => {
-    if (ref.current && config.columnDefs) {
+    if (userConfig) {
+      const config: BeastGridConfig<TData> & TableStyles = {
+        ...defaultConfig,
+        ...userConfig,
+      };
+
+      setConfig(config);
+    }
+  }, [userConfig]);
+
+  useEffect(() => {
+    if (ref.current && config?.columnDefs) {
       const columns = getColumnsFromDefs(
         config.columnDefs,
         config.defaultColumnDef
@@ -64,10 +76,10 @@ export function BeastGrid<TData>({
 
       setStores([gridStore, dndStore]);
     }
-  }, [ref, config.columnDefs, config.defaultColumnDef]);
+  }, [ref, config?.columnDefs, config?.defaultColumnDef]);
 
   const renderGrid = () => {
-    if (!beastGridStore || !beastDndStore) {
+    if (!config || !beastGridStore || !beastDndStore) {
       return <Loader />;
     }
 
@@ -97,7 +109,7 @@ export function BeastGrid<TData>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', config.theme)} ref={ref}>
+    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
       {renderGrid()}
     </div>
   );

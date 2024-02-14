@@ -124,7 +124,7 @@ export default function Example() {
             key="example"
             qty={count}
             config={{ ...(theme === 'minimal-theme' ? config : {}), theme }}
-            theme="minimal-theme"
+            theme={theme}
           />
         </div>
       )}
