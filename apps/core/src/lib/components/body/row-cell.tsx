@@ -4,7 +4,7 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
   const value = obj[columnDef.field as Key];
 
   if (columnDef.formatter) {
-    return columnDef.formatter(value);
+    return columnDef.formatter(value as number & string);
   }
 
   return value as string;
