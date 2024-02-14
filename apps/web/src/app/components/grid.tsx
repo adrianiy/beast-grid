@@ -7,6 +7,7 @@ import {
   BeastGrid,
   BeastGridApi,
   BeastGridConfig,
+  Column,
   ColumnDef,
 } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
