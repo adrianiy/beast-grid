@@ -123,7 +123,7 @@ export default function Example() {
           <Grid
             key="example"
             qty={count}
-            config={{ ...(theme === 'minimal-theme' ? config : {}), theme }}
+            config={{ ...(theme === 'minimal-theme' ? config : {}) }}
             theme={theme}
           />
         </div>
