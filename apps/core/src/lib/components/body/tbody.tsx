@@ -4,7 +4,7 @@ import { RowCell } from './row-cell';
 
 import { useBeastStore } from './../../stores/beast-store';
 
-import { BeastGridConfig, Column, SortType } from '../../common';
+import { Column, SortType } from '../../common';
 
 import './tbody.scss';
 
@@ -17,10 +17,9 @@ type TBodyProps<TData> = {
   onSortChange?: (data: TData[], sortColumns: Column[]) => Promise<TData[]>;
 };
 
-let lastIdx = 0;
 
 const PERFORMANCE_LIMIT = 1000000;
-const THRESHOLD = (height: number) => height * 3;
+const THRESHOLD = 4
 
 export default function TBody<TData>({
   height,
@@ -36,9 +35,8 @@ export default function TBody<TData>({
     state.sort,
     state.setSorting,
   ]);
-  const [[max, min], setMaxMin] = useState([500, 0]);
+  const [[max, min], setMaxMin] = useState([0, 0]);
   const [sortedData, setSortedData] = useState<TData[]>([]);
-  const threshold = THRESHOLD(height);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -49,17 +47,24 @@ export default function TBody<TData>({
 
   useEffect(() => {
     if (container) {
-      container.addEventListener('scroll', () => {
+      const setMaxMinValues = () => {
         const containerHeight =
           container.getBoundingClientRect().height -
           headerHeight * levels.length;
-        const maxValue = containerHeight + threshold;
-        const minValue = -threshold;
+        const visibleRows = Math.ceil(containerHeight / height);
+        const topRow = Math.floor(container.scrollTop / height);
+        const bottomRow = topRow + visibleRows;
+        const maxValue = Math.min(data.length, bottomRow + THRESHOLD);
+        const minValue = Math.max(0, topRow - THRESHOLD);
 
         setMaxMin([maxValue, minValue]);
+      }
+      container.addEventListener('scroll', () => {
+        setMaxMinValues();
       });
+      setMaxMinValues();
     }
-  }, [container, headerHeight, height, levels.length]);
+  }, [container, headerHeight, height, levels.length, data.length]);
 
   useEffect(() => {
     setSortedData(data);
@@ -124,14 +129,7 @@ export default function TBody<TData>({
 
   const createDataSlice = () => {
     const renderArray = [];
-    for (let idx = lastIdx; idx < sortedData.length; idx++) {
-      const position = height * idx - (container?.scrollTop || 0);
-
-      if (position > max || position < min) {
-        lastIdx = Math.floor(container?.scrollTop / height);
-        break;
-      }
-
+    for (let idx = min; idx < max; idx++) {
       const row = sortedData[idx];
 
       renderArray.push(
