@@ -1,3 +1,5 @@
+import { Column } from "beast-grid";
+
 export interface User {
   userId: number;
   username: string;
@@ -22,6 +24,18 @@ export const getData = async (count: number): Promise<User[]> => {
   const data = await response.json();
   return data;
 };
+
+export const sortData = async (data: User[], columns: Column[]) => {
+  const response = await fetch('/api/sort', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ data, columns }),
+  });
+  const sortedData = await response.json();
+  return sortedData;
+}
 
 export const months = [
   'january',

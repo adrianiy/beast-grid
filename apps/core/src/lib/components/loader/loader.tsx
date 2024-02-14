@@ -3,9 +3,9 @@ import { useBeastStore } from '../../stores/beast-store';
 
 import './loader.scss';
 
-export function Loader({ sorting }: { sorting?: boolean }) {
+export function Loader({ sorting, top }: { sorting?: boolean, top?: number }) {
   return (
-    <div className="beast-grid__loader row middle center">
+    <div className="beast-grid__loader row middle center" style={{ top }}>
       <div className="beast-grid__loader__overlay" />
       {sorting ? (
         <span>Sorting...</span>
@@ -30,5 +30,5 @@ export default function LoaderLayer() {
 
   container.classList.add('beast-grid--loading');
 
-  return <Loader sorting={sorting} />;
+  return <Loader sorting={sorting} top={container?.scrollTop} />;
 }
