@@ -65,6 +65,7 @@ export default function HeaderCell({
 
   const handleDrag = (e: DragEvent) => {
     const { left, right, top, bottom } = container.getBoundingClientRect();
+    const horizontalScroll = container.scrollLeft;
 
     const checkInside = () => {
       const threshold = 50;
@@ -82,7 +83,7 @@ export default function HeaderCell({
 
     if (e.clientX && e.clientX !== lastX) {
       const movingRight = lastX < e.clientX;
-      const xInGrid = e.clientX - container.getBoundingClientRect().left;
+      const xInGrid = e.clientX + horizontalScroll;
       let swappableColumn: Column | undefined = undefined;
 
       lastX = e.clientX;
