@@ -24,7 +24,7 @@ export default function Sections() {
           <p>Explore the API to learn how to use Beast Grid.</p>
         </div>
       </a>
-      <a href="https://beast-grid-docs.vercel.app/examples/basic" target="_blank" className="section row middle center">
+      <a href="https://beast-grid-docs.vercel.app/example/basic" target="_blank" className="section row middle center">
         <div>
           <div className="row middle section-title">
             <Code />
