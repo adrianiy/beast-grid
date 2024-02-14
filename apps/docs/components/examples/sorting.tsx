@@ -9,8 +9,8 @@ import { User, data } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'ID', field: 'userId', sorting: false },
-    { headerName: 'NAME', field: 'username', sorting: false },
+    { headerName: 'ID', field: 'userId', sortable: false },
+    { headerName: 'NAME', field: 'username', sortable: false },
     {
       headerName: 'AMOUNT',
       field: 'money',
