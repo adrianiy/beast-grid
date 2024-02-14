@@ -1,7 +1,7 @@
 'use client';
 
 import numeral from 'numeral';
-import { User, getData, months } from '../api/data';
+import { User, getData, months, sortData } from '../api/data';
 
 import {
   BeastGrid,
@@ -77,6 +77,14 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     setError(false);
   };
 
+  const handleSortChange = (data: User[], columns: Column[]) => {
+    beastApi?.current?.setLoading(true);
+    sortData(data, columns).then((res) => {
+      setData(res);
+      beastApi?.current?.setLoading(false);
+    });
+  }
+
   return (
     <>
       <Snackbar
@@ -98,7 +106,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           Error fetching data :(
         </Alert>
       </Snackbar>
-      <BeastGrid config={config} api={beastApi} theme={theme} />
+      <BeastGrid config={config} api={beastApi} theme={theme}/>
     </>
   );
 }

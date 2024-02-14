@@ -25,7 +25,6 @@ export interface BeastGridConfig<TData> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: ColumnDef;
   data: TData[];
-  theme?: string;
   sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;

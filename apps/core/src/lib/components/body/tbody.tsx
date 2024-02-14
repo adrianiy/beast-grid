@@ -4,7 +4,7 @@ import { RowCell } from './row-cell';
 
 import { useBeastStore } from './../../stores/beast-store';
 
-import { Column, SortType } from '../../common';
+import { BeastGridConfig, Column, SortType } from '../../common';
 
 import './tbody.scss';
 
@@ -14,11 +14,12 @@ type TBodyProps<TData> = {
   border?: boolean;
   summary?: boolean;
   data: TData[];
+  onSortChange?: (data: TData[], sortColumns: Column[]) => Promise<TData[]>;
 };
 
 let lastIdx = 0;
 
-const PERFORMANCE_LIMIT = 1000;
+const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = (height: number) => height * 3;
 
 export default function TBody<TData>({
@@ -27,6 +28,7 @@ export default function TBody<TData>({
   border,
   data,
   summary,
+  onSortChange,
 }: TBodyProps<TData>) {
   const [columns, container, sort, setSorting] = useBeastStore((state) => [
     state.columns,
@@ -65,11 +67,15 @@ export default function TBody<TData>({
 
   useEffect(() => {
     if (sortedData.length > 0) {
-      const sortData = (a: TData, b: TData) => {
-        const sortColumns = Object.values(columns)
-          .filter((c) => c.sort)
-          .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
+      const sortColumns = Object.values(columns)
+        .filter((c) => c.sort)
+        .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
 
+      if (sortColumns.length === 0) {
+        return;
+      }
+
+      const sortData = (a: TData, b: TData) => {
         for (const column of sortColumns) {
           const valueA = a[column.field as keyof TData];
           const valueB = b[column.field as keyof TData];
@@ -84,20 +90,31 @@ export default function TBody<TData>({
         return 0;
       };
 
-      if (sortedData.length > PERFORMANCE_LIMIT) {
-        setSorting(true);
-      }
-      setTimeout(() => {
-        sortedData.sort(sortData);
+      const asyncSort = async () => {
+        if (onSortChange) {
+          const result = await onSortChange(sortedData, sortColumns);
 
-        setSortedData(sortedData);
-        if (data.length > PERFORMANCE_LIMIT) {
-          setSorting(false);
+          if (result) {
+            setSortedData(result);
+          }
+        } else {
+          if (sortedData.length > PERFORMANCE_LIMIT) {
+            setSorting(true);
+          }
+          setTimeout(() => {
+            sortedData.sort(sortData);
+
+            setSortedData(sortedData);
+            if (data.length > PERFORMANCE_LIMIT) {
+              setTimeout(() => setSorting(false), 100);
+            }
+          }, 0);
         }
-      }, 0);
+      };
 
+      asyncSort();
     }
-  }, [sort, sortedData]);
+  }, [sort]);
 
   const lastLevel = levels[levels.length - 1];
 

@@ -8,6 +8,7 @@ import Summary from './components/summary/summary';
 import {
   BeastGridApi,
   BeastGridConfig,
+  Column,
   TableStyles,
 } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
@@ -33,10 +34,12 @@ export function BeastGrid<TData>({
   config: userConfig,
   theme = 'default',
   api,
+  onSortChange
 }: {
   config?: BeastGridConfig<TData>;
   theme?: string;
   api?: MutableRefObject<BeastGridApi | undefined>;
+  onSortChange?: (data: TData[], sortColumns: Column[]) => Promise<TData[]>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState<
@@ -96,6 +99,7 @@ export function BeastGrid<TData>({
             data={config.data}
             border={config.border}
             summary={!!config.summarize}
+            onSortChange={onSortChange}
           />
           <Summary
             data={config.data}
