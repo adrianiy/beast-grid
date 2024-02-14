@@ -4,11 +4,11 @@ import { DocsThemeConfig } from 'nextra-theme-docs'
 const config: DocsThemeConfig = {
   logo: <span>Beast Grid</span>,
   project: {
-    link: 'https://github.com/shuding/nextra-docs-template',
+    link: 'https://github.com/adrianiy/beast-grid',
   },
-  docsRepositoryBase: 'https://github.com/shuding/nextra-docs-template',
+  docsRepositoryBase: 'https://github.com/adrianiy/beast-grid',
   footer: {
-    text: 'Nextra Docs Template',
+    text: 'Beast Grid. Unleash your data\'s inner beast!',
   },
   head: (
     <>
