@@ -2,12 +2,19 @@
   "index": "Introduction",
   "start": "Quik Start",
   "example": "Examples",
-  "configuration": "Configuration",
-  "apidef": "Beast API",
+  "----": {
+    "type": "separator"
+  },
+  "theming": "Theming",
   "---": {
     "type": "separator"
   },
+  "configuration": "Configuration",
   "columns": "Column configuration",
+  "--": {
+    "type": "separator"
+  },
+  "apidef": "Beast API",
   "contact": {
     "title": "Contact ↗",
     "type": "page",

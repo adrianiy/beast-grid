@@ -1,0 +1,61 @@
+# Theming
+
+Beast Grid is designed to be themable. You can create your own theme by overwriting the global css variables.
+
+By default, Beast Grid uses the following css variables:
+
+```css
+:root {
+  --bg-size--1: 4px;
+  --bg-size--2: 8px;
+  --bg-size--3: 12px;
+  --bg-size--4: 16px;
+
+  --bg-color--0: #fff;
+  --bg-color--1: #000;
+  --bg-color--2: #333;
+  --bg-color--3: #b8b8b8;
+  --bg-color--4: #e0e0e0;
+  --bg-color--5: #a9a9a9;
+  --bg-border--1: 1px solid var(--bg-color--3);
+  --bg-border--2: 1px solid var(--bg-color--4);
+  --bg-transition--1: 0.2s;
+
+  --bg-background-color--1: var(--bg-color--0);
+  --bg-background-color--2: var(--bg-color--3);
+  --bg-background-color--3: var(--bg-color--0);
+  --bg-text-color--1: var(--bg-color--1);
+}
+```
+
+You can overwrite these variables in your own css file to create your own theme.
+
+```css
+.custom-theme {
+  --bg-size--1: 8px;
+  --bg-size--2: 16px;
+  --bg-size--3: 24px;
+  --bg-size--4: 32px;
+
+  --bg-color--0: #f0f0f0;
+  --bg-color--1: #000;
+  --bg-color--2: #333;
+  --bg-color--3: #b8b8b8;
+  --bg-color--4: #e0e0e0;
+  --bg-color--5: #a9a9a9;
+  --bg-border--1: 1px solid var(--bg-color--3);
+  --bg-border--2: 1px solid var(--bg-color--4);
+  --bg-transition--1: 0.2s;
+
+  --bg-background-color--1: var(--bg-color--0);
+  --bg-background-color--2: var(--bg-color--3);
+  --bg-background-color--3: var(--bg-color--0);
+  --bg-text-color--1: var(--bg-color--1);
+}
+```
+
+Then you can pass the class to the `BeastGrid` component.
+
+```tsx
+<BeastGrid theme="custom-theme" />
+```
