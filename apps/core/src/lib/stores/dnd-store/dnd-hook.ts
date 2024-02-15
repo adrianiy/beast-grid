@@ -76,7 +76,7 @@ export const useDndHook = <T>(
 
     const _getHitStatus = () => {
       if (hitElements.current.length && parent && direction.current) {
-        const elementData = hitElements.current.map((el) => {
+        const elementData = hitElements.current.filter(Boolean).map((el) => {
           const rect = el.getBoundingClientRect();
           return {
             left: rect.left,
