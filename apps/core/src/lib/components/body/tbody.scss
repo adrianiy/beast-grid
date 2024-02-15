@@ -8,9 +8,9 @@
   width: 100%;
 
   &.bordered {
-    border-bottom: var(--bg-border--1);
+    border-bottom: var(--bg-border--2);
     .grid-row-cell {
-      border-bottom: var(--bg-border--1);
+      border-bottom: var(--bg-border--2);
     }
   }
 }

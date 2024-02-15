@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import HeaderCell from './cell';
 
 import { useBeastStore } from './../../stores/beast-store';
@@ -13,10 +15,12 @@ export default function Header({
   height: number;
   multiSort?: boolean;
 }) {
+  const dragBounds = useRef(null);
+  
   const [columns, changeSort] = useBeastStore((state) => [
     state.columns,
     state.changeSort,
-  ]);
+  ]);  
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -33,6 +37,7 @@ export default function Header({
 
   return (
     <div
+      ref={dragBounds}
       className="grid-header row between"
       style={{ height: height * levels.length }}
     >

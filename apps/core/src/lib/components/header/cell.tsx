@@ -8,6 +8,7 @@ import {
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from './../../stores/dnd-store/dnd-hook';
+import { useRef } from 'react';
 
 type Props = {
   levelIdx: number;
@@ -18,8 +19,6 @@ type Props = {
   changeSort: (column: Column) => () => void;
 };
 
-let lastX = 0;
-
 export default function HeaderCell({
   levelIdx,
   idx,
@@ -28,6 +27,7 @@ export default function HeaderCell({
   columnDefs,
   changeSort,
 }: Props) {
+  const lastX = useRef<number>(0);
   const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore(
     (state) => [
       state.hideColumn,
@@ -36,101 +36,77 @@ export default function HeaderCell({
       state.container,
     ]
   );
-  const [dragItem, setDragItem] = useDndStore((state) => [
-    state.dragItem,
-    state.setDragItem,
+  const [pointer, direction] = useDndStore((state) => [
+    state.pointer,
+    state.direction,
   ]);
   const [drag] = useDndHook<HeaderDrag>(
     { id: column.id, text: column.headerName, isInside: true },
     {
-      onDrag: () => handleDrag,
-      onDrop: () => handleDrop,
-    }
+      onDrag,
+      onDragEnd,
+    },
+    container
   );
   const [resize] = useDndHook(
     { id: column.id, hidePreview: true },
     {
-      onDrag: () => handleResize,
-      onDrop: () => handleResizeEnd,
+      onDrag: handleResize,
+      onDragEnd: () => (lastX.current = 0), 
     }
   );
 
-  const handleDrop = () => {
-    lastX = 0;
+  function handleResize(e: DragEvent) {
+    if (lastX.current === 0) {
+      lastX.current = e.clientX;
+    }
 
-    if (!dragItem?.isInside) {
+    const delta = e.clientX - lastX.current;
+
+    if (delta && Math.abs(delta) > 20) {
+      const newWidth = columnDefs[column.id].width + delta;
+
+      lastX.current = e.clientX;
+
+      resizeColumn(column.id, newWidth);
+    }
+  }
+
+  function onDragEnd() {
+    if (pointer.x < 0 || pointer.y < 0) {
       hideColumn(column.id);
     }
-  };
+  }
 
-  const handleDrag = (e: DragEvent) => {
-    const { left, right, top, bottom } = container.getBoundingClientRect();
-    const horizontalScroll = container.scrollLeft;
-
-    const checkInside = () => {
-      const threshold = 50;
-
-      const isInside =
-        e.clientX > left - threshold &&
-        e.clientX < right + threshold &&
-        e.clientY > top - threshold &&
-        e.clientY < bottom + threshold;
-
-      if (dragItem) {
-        setDragItem({ ...dragItem, isInside });
-      }
-    };
-
-    if (e.clientX && e.clientX !== lastX) {
-      const movingRight = lastX < e.clientX;
-      const xInGrid = e.clientX + horizontalScroll;
+  function onDrag() {
+    if (pointer.x  && pointer.y) {
+      const x = pointer.x + container.scrollLeft;
+      
       let swappableColumn: Column | undefined = undefined;
 
-      lastX = e.clientX;
-
-      if (movingRight) {
+      if (direction === 'right') {
         swappableColumn = Object.values(columnDefs).find(
           (c) =>
             c.left > columnDefs[column.id].left &&
-            xInGrid < c.left + c.width &&
-            xInGrid > c.left
-        );
-      } else {
+            !c.hidden &&
+            x < c.left + c.width &&
+            x > c.left
+        )
+      } else if (direction === 'left') {
         swappableColumn = Object.values(columnDefs).findLast(
           (c) =>
             c.left < columnDefs[column.id].left &&
-            xInGrid >= c.left &&
-            xInGrid <= c.left + c.width
+            !c.hidden &&
+            x >= c.left &&
+            x <= c.left + c.width
         );
       }
 
       if (swappableColumn) {
         swapColumns(column.id, swappableColumn.id);
-      } else {
-        checkInside();
       }
     }
-  };
-
-  const handleResize = (e: DragEvent) => {
-    if (lastX === 0) {
-      lastX = e.clientX;
-    }
-
-    const delta = e.clientX - lastX;
-
-    if (Math.abs(delta) > 20) {
-      const newWidth = columnDefs[column.id].width + delta;
-
-      lastX = e.clientX;
-
-      resizeColumn(column.id, newWidth);
-    }
-  };
-
-  const handleResizeEnd = () => {
-    lastX = 0;
-  };
+  }
 
   const renderSortIcon = (sort: SortConfig) => {
     return (

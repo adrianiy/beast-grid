@@ -15,7 +15,7 @@ export function RowCell<TData>({ height, row, columnDef }: { height: number, row
     return null;
   }
   return (
-    <div className="grid-row-cell" style={{ height, left: columnDef.left, width: columnDef.width }}>
+    <div data-hidden={columnDef.hidden} className="grid-row-cell" style={{ height, left: columnDef.left, width: columnDef.width }}>
       { getProperty(row, columnDef) }
     </div>
   )

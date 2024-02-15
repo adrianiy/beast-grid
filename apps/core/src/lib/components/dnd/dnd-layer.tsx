@@ -6,9 +6,10 @@ import { useDndStore } from './../../stores/dnd-store';
 import './dnd-layer.scss';
 
 export default function DndLayer() {
-  const [dragItem, coords] = useDndStore((state) => [
+  const [dragItem, coords, pointer] = useDndStore((state) => [
     state.dragItem,
     state.coords,
+    state.pointer,
   ]);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function DndLayer() {
     return (
       <BoxDragPreview
         text={dragItem.text as string}
-        isInside={!!dragItem['isInside']}
+        isInside={pointer.x > 0 && pointer.y > 0}
         top={coords?.y}
         left={coords?.x}
       />

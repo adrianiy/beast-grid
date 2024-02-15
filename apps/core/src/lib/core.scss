@@ -31,10 +31,10 @@
   border-spacing: 0;
   box-sizing: border-box;
   margin: 0;
-  margin-top: -1px;
   padding: 0;
   table-layout: fixed;
   background-color: var(--bg-background-color--1);
+  transition: scroll-behavior var(--bg-transition--1);
   color: var(--bg-text-color--1);
 
   &--loading {

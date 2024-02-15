@@ -57,6 +57,7 @@ html {
     --bg-demo-color--6: #202127;
     --bg-demo-border: 1px solid var(--bg-demo-color--3);
     --bg-demo-border--1: 1px solid var(--bg-demo-color--4);
+    --bg-demo-border--2: 1px solid var(--bg-demo-color--4);
 
     .header .left img {
       filter: invert(1);
@@ -74,12 +75,14 @@ html {
     --bg-background-color--2: var(--bg-demo-color--3);
     --bg-text-color--1: var(--bg-demo-color--1);
     --bg-border--1: 5px solid var(--bg-demo-color--0);
+    --bg-border--2: 5px solid var(--bg-demo-color--0);
   }
   .dark-theme {
     --bg-background-color--1: #202127;
     --bg-background-color--2: #777;
     --bg-text-color--1: #e0e0e0;
-    --bg-border--1: 1px solid #333;
+    --bg-border--1: 1px solid #999;
+    --bg-border--2: 1px solid #333;
   }
 }
 

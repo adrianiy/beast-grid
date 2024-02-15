@@ -14,6 +14,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "noImplicitThis": false,  
     "paths": {
       "beast-grid": ["apps/core/src/index.ts"]
     }
