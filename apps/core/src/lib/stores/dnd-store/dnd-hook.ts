@@ -1,47 +1,54 @@
 import { useEffect, useRef } from 'react';
-import { DragItem } from './store';
+import { Coords, DragItem } from './store';
 import { useDndStore } from '../dnd-store';
+import { Direction } from '../../common';
 
 let emptyImage: HTMLImageElement;
 export function getEmptyImage() {
   if (!emptyImage) {
     emptyImage = new Image();
-    emptyImage.src =
-      'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   }
   return emptyImage;
 }
+
+export type OnAnimationFrame = (direction: Direction, pointerCoords: Coords) => void;
+export type OnDirectionChange = (direction: Direction) => void;
+export type OnDragStart = (e: DragEvent) => void;
+export type OnDrag = (e: DragEvent) => void;
+export type OnDragEnd = (e: DragEvent) => void;
 
 export const useDndHook = <T>(
   item: DragItem & T,
   options: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
-    hitTestElements: string[];
+    isDropTarget: boolean;
+    onDirectionChange: (direction: Direction) => void;
+    onDragStart: (e: DragEvent) => void;
     onDrag: (e: DragEvent) => void;
     onDragEnd: (e: DragEvent) => void;
-    onHitElement: (e: HTMLElement) => void;
+    onAnimationFrame: (pointerCoords: Coords) => void;
   }>,
   parent?: HTMLDivElement
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const reqAnimFrameNo = useRef<number>(0);
-  const startCoords = useRef({ x: 0, y: 0 });
   const coords = useRef({ x: 0, y: 0 });
-  const direction = useRef<'right' | 'left'>();
-  const hitElements = useRef<HTMLElement[]>([]);
-  const lastHitElement = useRef<HTMLElement>();
+  const direction = useRef<Direction>();
   const emptyImage = getEmptyImage();
-  const [setDragItem, setCoords, setPointer, setDirection] = useDndStore(
-    (state) => [
-      state.setDragItem,
-      state.setCoords,
-      state.setPointer,
-      state.setDirection,
-    ]
-  );
+  const [setDragItem, setCoords, setPointer, setDirection, addDropTarget] = useDndStore((state) => [
+    state.setDragItem,
+    state.setCoords,
+    state.setPointer,
+    state.setDirection,
+    state.addDropTarget
+  ]);
 
-  useEffect(() => {
+  useEffect(() => { 
+    if (options?.isDropTarget && ref.current) {
+      addDropTarget(ref.current);
+    }
     const _getMaxScroll = (element: HTMLDivElement) => {
       return element.scrollWidth - element.clientWidth;
     };
@@ -74,50 +81,11 @@ export const useDndHook = <T>(
       };
     };
 
-    const _getHitStatus = () => {
-      if (hitElements.current.length && parent && direction.current) {
-        const elementData = hitElements.current.filter(Boolean).map((el) => {
-          const rect = el.getBoundingClientRect();
-          return {
-            left: rect.left,
-            right: rect.right,
-            el,
-          };
-        });
-        const directionElements = elementData.filter((el) => {
-          const { left, right } = el;
-          const x = coords.current.x;
-
-          return direction.current === 'right' ? right > x : left < x;
-        }).sort((a, b) => {
-          return direction.current === 'right' ? a.left - b.left : b.right - a.right;
-        });
-
-        if (directionElements.length) {
-          const possibleHit = directionElements[0];
-
-          const x = coords.current.x;
-          
-          const { left, right } = possibleHit;
-          const inBox = direction.current === 'right'
-            ? left < x
-            : right > x;
-
-          if (inBox && possibleHit.el !== lastHitElement.current) {
-            lastHitElement.current = possibleHit.el;
-            options.onHitElement?.(possibleHit.el);
-          }
-        }
-      }
-    };
-
-    const handleAnimations = () => {
-      if (!parent || !coords) {
+    const _handleAutoScroll = () => {
+      if (!parent) {
         reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
         return;
       }
-      _getHitStatus();
-
       const { left, right } = parent.getBoundingClientRect();
       const pointerX = coords.current.x;
       const autoScrollMargin = options.autoScrollSpeed || 100;
@@ -130,38 +98,39 @@ export const useDndHook = <T>(
       } else if (pointerX > right - autoScrollMargin && gap) {
         changeX = Math.min(
           autoScrollSpeed,
-          (autoScrollSpeed *
-            (1 - Math.max(0, right - pointerX) / autoScrollMargin)) |
-          0
+          (autoScrollSpeed * (1 - Math.max(0, right - pointerX) / autoScrollMargin)) | 0
         );
       } else if (pointerX < left + autoScrollMargin && parent.scrollLeft) {
         changeX = Math.max(
           -parent.scrollLeft,
-          (-autoScrollSpeed *
-            (1 - Math.max(0, pointerX - left) / autoScrollMargin)) |
-          0
+          (-autoScrollSpeed * (1 - Math.max(0, pointerX - left) / autoScrollMargin)) | 0
         );
       }
 
       if (changeX) {
         parent.scrollLeft += changeX;
       }
+    };
+
+    const handleAnimations = () => {
+      if (!parent || !coords) {
+        reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
+        return;
+      }
+
+      _handleAutoScroll();
+
+      options?.onAnimationFrame?.(coords.current);
 
       reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
     };
+    
     const onDragStart = (e: DragEvent) => {
       setDragItem(item);
       setPointer(_getPointerPositionInParent());
 
-      if (options?.hitTestElements) {
-        hitElements.current = options.hitTestElements.map((el) => {
-          return document.getElementById(el) as HTMLElement;
-        });
-      }
-
       coords.current = { x: e.clientX, y: e.clientY };
-      startCoords.current = { x: e.clientX, y: e.clientY };
-      
+
       setCoords(coords.current);
 
       if (parent) {
@@ -174,17 +143,21 @@ export const useDndHook = <T>(
         e.dataTransfer.setDragImage(emptyImage, -10, -10);
         e.dataTransfer.effectAllowed = 'move';
       }
+
+      if (options?.onDragStart) {
+        options.onDragStart(e);
+      }
     };
 
     const onDrag = (e: DragEvent) => {
       if (e.clientX !== coords.current.x) {
-        const newDirection = e.clientX >= coords.current.x ? 'right' : 'left';
-        
+        const newDirection = e.clientX >= coords.current.x ? Direction.RIGHT : Direction.LEFT;
+
         if (newDirection !== direction.current) {
-          lastHitElement.current = undefined;
           direction.current = newDirection;
-          setDirection(newDirection);
+          options?.onDirectionChange?.(newDirection);
         }
+        setDirection(newDirection);
       }
 
       coords.current = { x: e.clientX, y: e.clientY };
@@ -200,10 +173,8 @@ export const useDndHook = <T>(
     const onDragEnd = (e: DragEvent) => {
       e.preventDefault();
 
-      lastHitElement.current = undefined;
-      direction.current = undefined;
       coords.current = { x: 0, y: 0 };
-      
+
       cancelAnimationFrame(reqAnimFrameNo.current);
 
       if (parent) {
@@ -212,7 +183,7 @@ export const useDndHook = <T>(
       if (options?.onDragEnd) {
         options.onDragEnd(e);
       }
-      setCoords({ x: 0, y: 0});
+      setCoords({ x: 0, y: 0 });
       setDragItem(undefined);
       return false;
     };
@@ -233,7 +204,7 @@ export const useDndHook = <T>(
         dragRef.removeEventListener('dragend', onDragEnd);
       };
     }
-  }, [ref, item, options]);
+  }, [ref]);
 
   return [ref];
 };

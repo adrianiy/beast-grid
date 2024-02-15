@@ -1,15 +1,10 @@
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import {
-    BeastGridConfig,
-  Column,
-  ColumnStore,
-  HeaderDrag,
-  SortConfig,
-} from './../../common/interfaces';
+import { BeastGridConfig, Column, ColumnStore, HeaderDrag, SortConfig } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from './../../stores/dnd-store/dnd-hook';
 import { useRef } from 'react';
+import { Coords } from '../../stores/dnd-store/store';
 
 type Props = {
   levelIdx: number;
@@ -21,34 +16,24 @@ type Props = {
   dragOptions?: BeastGridConfig<unknown>['dragOptions'];
 };
 
-export default function HeaderCell({
-  levelIdx,
-  idx,
-  height,
-  column,
-  columnDefs,
-  changeSort,
-  dragOptions,
-}: Props) {
+export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, changeSort, dragOptions }: Props) {
   const lastX = useRef<number>(0);
-  const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore(
-    (state) => [
-      state.hideColumn,
-      state.swapColumns,
-      state.resizeColumn,
-      state.container,
-    ]
-  );
-  const [pointer] = useDndStore((state) => [
-    state.pointer,
-    state.direction,
+  const lastHitElement = useRef<HTMLElement | null>(null);
+  const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore((state) => [
+    state.hideColumn,
+    state.swapColumns,
+    state.resizeColumn,
+    state.container,
   ]);
+  const [pointer, dropTargets] = useDndStore((state) => [state.pointer, state.dropTargets]);
   const [drag] = useDndHook<HeaderDrag>(
     { id: column.id, text: column.headerName, isInside: true },
     {
       ...dragOptions,
-      hitTestElements: Object.values(columnDefs).filter((c) => c.id !== column.id).map((c) => c.id),
-      onHitElement,
+      isDropTarget: true,
+      onDragStart: () => (lastHitElement.current = null),
+      onDirectionChange: () => (lastHitElement.current = null),
+      onAnimationFrame: hitTest,
       onDragEnd,
     },
     container
@@ -57,22 +42,40 @@ export default function HeaderCell({
     { id: column.id, hidePreview: true },
     {
       ...dragOptions,
-      onDrag: handleResize,
+      onAnimationFrame: handleResize,
       onDragEnd: () => (lastX.current = 0),
     }
   );
 
-  function handleResize(e: DragEvent) {
+  function hitTest(pointer: Coords) {
+    for (const element of dropTargets) {
+      if (!element || element.id === column.id) continue;
+
+      const { left, right } = element.getBoundingClientRect();
+      const { x } = pointer;
+      const hit = x > left && x < right;
+
+      if (hit && element !== lastHitElement.current) {
+        lastHitElement.current = element;
+        swapColumns(column.id, element.id);
+        break;
+      }
+    }
+  }
+
+  function handleResize(pointer?: Coords) {
+    if (!pointer) return;
+
     if (lastX.current === 0) {
-      lastX.current = e.clientX;
+      lastX.current = pointer.x;
     }
 
-    const delta = e.clientX - lastX.current;
+    const delta = pointer.x - lastX.current;
 
-    if (delta && Math.abs(delta) > 20) {
+    if (delta) {
       const newWidth = columnDefs[column.id].width + delta;
 
-      lastX.current = e.clientX;
+      lastX.current = pointer.x;
 
       resizeColumn(column.id, newWidth);
     }
@@ -80,21 +83,16 @@ export default function HeaderCell({
 
   function onDragEnd() {
     if (pointer.x < 0 || pointer.y < 0) {
+      lastHitElement.current = null;
       hideColumn(column.id);
     }
-  }
-
-  function onHitElement(e: HTMLElement) {
-    swapColumns(column.id, e.id)
   }
 
   const renderSortIcon = (sort: SortConfig) => {
     return (
       <div className="sort-icon row middle">
         {sort.order === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-        {sort.priority > 0 && (
-          <span className="sort-priority">{sort.priority}</span>
-        )}
+        {sort.priority > 0 && <span className="sort-priority">{sort.priority}</span>}
       </div>
     );
   };
