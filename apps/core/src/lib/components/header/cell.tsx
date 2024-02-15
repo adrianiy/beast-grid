@@ -17,6 +17,7 @@ type Props = {
   column: Column;
   columnDefs: ColumnStore;
   changeSort: (column: Column) => () => void;
+  dragOptions?: BeastGridConfig<unknown>['dragOptions'];
 };
 
 export default function HeaderCell({
@@ -26,6 +27,7 @@ export default function HeaderCell({
   column,
   columnDefs,
   changeSort,
+  dragOptions
 }: Props) {
   const lastX = useRef<number>(0);
   const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore(
@@ -43,6 +45,7 @@ export default function HeaderCell({
   const [drag] = useDndHook<HeaderDrag>(
     { id: column.id, text: column.headerName, isInside: true },
     {
+      ...dragOptions,
       onDrag,
       onDragEnd,
     },
@@ -51,6 +54,7 @@ export default function HeaderCell({
   const [resize] = useDndHook(
     { id: column.id, hidePreview: true },
     {
+      ...dragOptions,
       onDrag: handleResize,
       onDragEnd: () => (lastX.current = 0),
     }

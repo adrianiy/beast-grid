@@ -14,11 +14,13 @@ export function getEmptyImage() {
 
 export const useDndHook = <T>(
   item: DragItem & T,
-  options?: Partial<{
+  options: Partial<{
+    autoScrollSpeed: number
+    autoScrollMargin: number,
     onDrag: (e: DragEvent) => void;
     onDragEnd: (e: DragEvent) => void;
-  }>,
-  parent?: HTMLDivElement
+  }> = { autoScrollSpeed: 40, autoScrollMargin: 100 },
+  parent?: HTMLDivElement,
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const reqAnimFrameNo = useRef<number>(0);
@@ -73,17 +75,10 @@ export const useDndHook = <T>(
         return;
       }
 
-      const pointerPosition = _getPointerPositionInParent();
-
-      if (pointerPosition.x < 0 || pointerPosition.y < 0) {
-        reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
-        return;
-      }
-
       const { left, right } = parent.getBoundingClientRect();
       const pointerX = coords.current.x;
-      const autoScrollMargin = 100;
-      const autoScrollSpeed = 10;
+      const autoScrollMargin = options.autoScrollSpeed;
+      const autoScrollSpeed = options.autoScrollMargin;
       let changeX = 0;
 
       const gap = _getMaxScroll(parent) - parent.scrollLeft;

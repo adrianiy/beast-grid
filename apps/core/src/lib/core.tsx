@@ -34,7 +34,7 @@ export function BeastGrid<TData>({
   config: userConfig,
   theme = 'default',
   api,
-  onSortChange
+  onSortChange,
 }: {
   config?: BeastGridConfig<TData>;
   theme?: string;
@@ -92,7 +92,7 @@ export function BeastGrid<TData>({
           <BeastApi store={api} />
           <DndLayer />
           <LoaderLayer />
-          <Header height={config.headerHeight} multiSort={config.mulitSort} />
+          <Header height={config.headerHeight} multiSort={config.mulitSort} dragOptions={config.dragOptions} />
           <TBody
             height={config.rowHeight}
             headerHeight={config.headerHeight}

@@ -4,16 +4,18 @@ import HeaderCell from './cell';
 
 import { useBeastStore } from './../../stores/beast-store';
 
-import { Column } from '../../common/interfaces';
+import { BeastGridConfig, Column } from '../../common/interfaces';
 
 import './header.scss';
 
 export default function Header({
   height,
   multiSort,
+  dragOptions,
 }: {
   height: number;
   multiSort?: boolean;
+  dragOptions?: BeastGridConfig<unknown>['dragOptions'];
 }) {
   const dragBounds = useRef(null);
 
@@ -52,6 +54,7 @@ export default function Header({
               column={column}
               columnDefs={columns}
               changeSort={handleChangeSort}
+              dragOptions={dragOptions}
             />
           ))}
         </div>

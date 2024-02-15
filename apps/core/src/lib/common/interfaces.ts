@@ -28,6 +28,10 @@ export interface BeastGridConfig<TData> extends Partial<TableStyles> {
   sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;
+  dragOptions?: Partial<{
+    autoScrollSpeed: number;
+    autoScrollMargin: number;
+  }>
 }
 
 export interface TableStyles {
