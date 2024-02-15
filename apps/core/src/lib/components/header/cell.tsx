@@ -27,7 +27,7 @@ export default function HeaderCell({
   column,
   columnDefs,
   changeSort,
-  dragOptions
+  dragOptions,
 }: Props) {
   const lastX = useRef<number>(0);
   const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore(
@@ -46,7 +46,8 @@ export default function HeaderCell({
     { id: column.id, text: column.headerName, isInside: true },
     {
       ...dragOptions,
-      onDrag,
+      hitTestElements: Object.values(columnDefs).filter((c) => c.id !== column.id).map((c) => c.id),
+      onHitElement,
       onDragEnd,
     },
     container
@@ -82,34 +83,8 @@ export default function HeaderCell({
     }
   }
 
-  function onDrag() {
-    if (pointer.x && pointer.y) {
-      const x = pointer.x + container.scrollLeft;
-
-      let swappableColumn: Column | undefined = undefined;
-
-      if (direction === 'right') {
-        swappableColumn = Object.values(columnDefs).find(
-          (c) =>
-            c.left > columnDefs[column.id].left &&
-            !c.hidden &&
-            x < c.left + c.width &&
-            x > c.left
-        );
-      } else if (direction === 'left') {
-        swappableColumn = Object.values(columnDefs).findLast(
-          (c) =>
-            c.left < columnDefs[column.id].left &&
-            !c.hidden &&
-            x >= c.left &&
-            x <= c.left + c.width
-        );
-      }
-
-      if (swappableColumn) {
-        swapColumns(column.id, swappableColumn.id);
-      }
-    }
+  function onHitElement(e: HTMLElement) {
+    swapColumns(column.id, e.id)
   }
 
   const renderSortIcon = (sort: SortConfig) => {
@@ -137,7 +112,7 @@ export default function HeaderCell({
       }}
       onClick={changeSort(column)}
     >
-      <div className="grid-header-name row middle" ref={drag}>
+      <div className="grid-header-name row middle" data-name={column.headerName} id={column.id} ref={drag}>
         <span className="grid-header-drop">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>

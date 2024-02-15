@@ -15,17 +15,22 @@ export function getEmptyImage() {
 export const useDndHook = <T>(
   item: DragItem & T,
   options: Partial<{
-    autoScrollSpeed: number
-    autoScrollMargin: number,
+    autoScrollSpeed: number;
+    autoScrollMargin: number;
+    hitTestElements: string[];
     onDrag: (e: DragEvent) => void;
     onDragEnd: (e: DragEvent) => void;
-  }> = { autoScrollSpeed: 40, autoScrollMargin: 100 },
-  parent?: HTMLDivElement,
+    onHitElement: (e: HTMLElement) => void;
+  }>,
+  parent?: HTMLDivElement
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const reqAnimFrameNo = useRef<number>(0);
   const startCoords = useRef({ x: 0, y: 0 });
   const coords = useRef({ x: 0, y: 0 });
+  const direction = useRef<'right' | 'left'>();
+  const hitElements = useRef<HTMLElement[]>([]);
+  const lastHitElement = useRef<HTMLElement>();
   const emptyImage = getEmptyImage();
   const [setDragItem, setCoords, setPointer, setDirection] = useDndStore(
     (state) => [
@@ -69,16 +74,46 @@ export const useDndHook = <T>(
       };
     };
 
-    const handleVirtualScroll = () => {
+    const _getHitStatus = () => {
+      if (hitElements.current.length && parent && direction.current) {
+        const directionElements = hitElements.current.filter((el) => {
+          const rect = el.getBoundingClientRect();
+          const { left, right } = rect;
+          const x = coords.current.x;
+
+          return direction.current === 'right' ? right > x : left < x;
+        });
+
+        if (directionElements.length) {
+          const possibleHit = directionElements[direction.current === 'right' ? 0 : directionElements.length - 1];
+
+          const rect = possibleHit.getBoundingClientRect();
+          const x = coords.current.x;
+          
+          const { left, right } = rect;
+          const inBox = direction.current === 'right'
+            ? left < x
+            : right > x;
+
+          if (inBox && possibleHit !== lastHitElement.current) {
+            lastHitElement.current = possibleHit;
+            options.onHitElement?.(possibleHit);
+          }
+        }
+      }
+    };
+
+    const handleAnimations = () => {
       if (!parent || !coords) {
-        reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+        reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
         return;
       }
+      _getHitStatus();
 
       const { left, right } = parent.getBoundingClientRect();
       const pointerX = coords.current.x;
-      const autoScrollMargin = options.autoScrollSpeed;
-      const autoScrollSpeed = options.autoScrollMargin;
+      const autoScrollMargin = options.autoScrollSpeed || 100;
+      const autoScrollSpeed = options.autoScrollMargin || 40;
       let changeX = 0;
 
       const gap = _getMaxScroll(parent) - parent.scrollLeft;
@@ -89,14 +124,14 @@ export const useDndHook = <T>(
           autoScrollSpeed,
           (autoScrollSpeed *
             (1 - Math.max(0, right - pointerX) / autoScrollMargin)) |
-            0
+          0
         );
       } else if (pointerX < left + autoScrollMargin && parent.scrollLeft) {
         changeX = Math.max(
           -parent.scrollLeft,
           (-autoScrollSpeed *
             (1 - Math.max(0, pointerX - left) / autoScrollMargin)) |
-            0
+          0
         );
       }
 
@@ -104,19 +139,27 @@ export const useDndHook = <T>(
         parent.scrollLeft += changeX;
       }
 
-      reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+      reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
     };
     const onDragStart = (e: DragEvent) => {
       setDragItem(item);
       setPointer(_getPointerPositionInParent());
 
+      if (options?.hitTestElements) {
+        hitElements.current = options.hitTestElements.map((el) => {
+          return document.getElementById(el) as HTMLElement;
+        });
+      }
+
       coords.current = { x: e.clientX, y: e.clientY };
       startCoords.current = { x: e.clientX, y: e.clientY };
+      
+      setCoords(coords.current);
 
       if (parent) {
         parent.style.overflow = 'hidden';
       }
-      reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+      reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
 
       if (e.dataTransfer) {
         e.dataTransfer.setData('id', item.id);
@@ -127,7 +170,13 @@ export const useDndHook = <T>(
 
     const onDrag = (e: DragEvent) => {
       if (e.clientX !== coords.current.x) {
-        setDirection(e.clientX >= coords.current.x ? 'right' : 'left');
+        const newDirection = e.clientX >= coords.current.x ? 'right' : 'left';
+        
+        if (newDirection !== direction.current) {
+          lastHitElement.current = undefined;
+          direction.current = newDirection;
+          setDirection(newDirection);
+        }
       }
 
       coords.current = { x: e.clientX, y: e.clientY };
@@ -151,7 +200,7 @@ export const useDndHook = <T>(
       if (options?.onDragEnd) {
         options.onDragEnd(e);
       }
-      // setCoords({ x: 0, y: 0});
+      setCoords({ x: 0, y: 0});
       setDragItem(undefined);
       return false;
     };
