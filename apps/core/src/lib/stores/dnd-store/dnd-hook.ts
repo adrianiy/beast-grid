@@ -76,28 +76,36 @@ export const useDndHook = <T>(
 
     const _getHitStatus = () => {
       if (hitElements.current.length && parent && direction.current) {
-        const directionElements = hitElements.current.filter((el) => {
+        const elementData = hitElements.current.map((el) => {
           const rect = el.getBoundingClientRect();
-          const { left, right } = rect;
+          return {
+            left: rect.left,
+            right: rect.right,
+            el,
+          };
+        });
+        const directionElements = elementData.filter((el) => {
+          const { left, right } = el;
           const x = coords.current.x;
 
           return direction.current === 'right' ? right > x : left < x;
+        }).sort((a, b) => {
+          return direction.current === 'right' ? a.left - b.left : b.right - a.right;
         });
 
         if (directionElements.length) {
-          const possibleHit = directionElements[direction.current === 'right' ? 0 : directionElements.length - 1];
+          const possibleHit = directionElements[0];
 
-          const rect = possibleHit.getBoundingClientRect();
           const x = coords.current.x;
           
-          const { left, right } = rect;
+          const { left, right } = possibleHit;
           const inBox = direction.current === 'right'
             ? left < x
             : right > x;
 
-          if (inBox && possibleHit !== lastHitElement.current) {
-            lastHitElement.current = possibleHit;
-            options.onHitElement?.(possibleHit);
+          if (inBox && possibleHit.el !== lastHitElement.current) {
+            lastHitElement.current = possibleHit.el;
+            options.onHitElement?.(possibleHit.el);
           }
         }
       }
@@ -192,6 +200,10 @@ export const useDndHook = <T>(
     const onDragEnd = (e: DragEvent) => {
       e.preventDefault();
 
+      lastHitElement.current = undefined;
+      direction.current = undefined;
+      coords.current = { x: 0, y: 0 };
+      
       cancelAnimationFrame(reqAnimFrameNo.current);
 
       if (parent) {
