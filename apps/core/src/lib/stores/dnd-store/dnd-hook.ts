@@ -14,21 +14,114 @@ export function getEmptyImage() {
 
 export const useDndHook = <T>(
   item: DragItem & T,
-  options: {
-    onDrag?: () => (e: DragEvent) => void;
-    onDrop?: () => (e: DragEvent) => void;
-  }
+  options?: Partial<{
+    onDrag: (e: DragEvent) => void;
+    onDragEnd: (e: DragEvent) => void;
+  }>,
+  parent?: HTMLDivElement
 ) => {
   const ref = useRef<HTMLDivElement>(null);
+  const reqAnimFrameNo = useRef<number>(0);
+  const startCoords = useRef({ x: 0, y: 0 });
+  const coords = useRef({ x: 0, y: 0 });
   const emptyImage = getEmptyImage();
-  const [setDragItem, setCoords] = useDndStore((state) => [
-    state.setDragItem,
-    state.setCoords,
-  ]);
+  const [setDragItem, setCoords, setPointer, setDirection] = useDndStore(
+    (state) => [
+      state.setDragItem,
+      state.setCoords,
+      state.setPointer,
+      state.setDirection,
+    ]
+  );
 
   useEffect(() => {
+    const _getMaxScroll = (element: HTMLDivElement) => {
+      return element.scrollWidth - element.clientWidth;
+    };
+    const _getPointerPositionInParent = () => {
+      if (!parent) {
+        return { x: 0, y: 0 };
+      }
+      let { x, y } = coords.current;
+      const rect = parent.getBoundingClientRect();
+      const maxX = rect.right;
+      const minX = rect.left;
+      const maxY = rect.bottom;
+      const minY = rect.top;
+
+      if (x > maxX) {
+        x = maxX - x;
+      } else if (x < minX) {
+        x = x - minX;
+      }
+
+      if (y > maxY) {
+        y = maxY - y;
+      } else if (y < minY) {
+        y = y - minY;
+      }
+
+      return {
+        x,
+        y,
+      };
+    };
+
+    const handleVirtualScroll = () => {
+      if (!parent || !coords) {
+        reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+        return;
+      }
+
+      const pointerPosition = _getPointerPositionInParent();
+
+      if (pointerPosition.x < 0 || pointerPosition.y < 0) {
+        reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+        return;
+      }
+
+      const { left, right } = parent.getBoundingClientRect();
+      const pointerX = coords.current.x;
+      const autoScrollMargin = 100;
+      const autoScrollSpeed = 10;
+      let changeX = 0;
+
+      const gap = _getMaxScroll(parent) - parent.scrollLeft;
+      if (gap < 0) {
+        changeX = gap;
+      } else if (pointerX > right - autoScrollMargin && gap) {
+        changeX = Math.min(
+          autoScrollSpeed,
+          (autoScrollSpeed *
+            (1 - Math.max(0, right - pointerX) / autoScrollMargin)) |
+            0
+        );
+      } else if (pointerX < left + autoScrollMargin && parent.scrollLeft) {
+        changeX = Math.max(
+          -parent.scrollLeft,
+          (-autoScrollSpeed *
+            (1 - Math.max(0, pointerX - left) / autoScrollMargin)) |
+            0
+        );
+      }
+
+      if (changeX) {
+        parent.scrollLeft += changeX;
+      }
+
+      reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
+    };
     const onDragStart = (e: DragEvent) => {
       setDragItem(item);
+      setPointer(_getPointerPositionInParent());
+
+      coords.current = { x: e.clientX, y: e.clientY };
+      startCoords.current = { x: e.clientX, y: e.clientY };
+
+      if (parent) {
+        parent.style.overflow = 'hidden';
+      }
+      reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
 
       if (e.dataTransfer) {
         e.dataTransfer.setData('id', item.id);
@@ -38,19 +131,32 @@ export const useDndHook = <T>(
     };
 
     const onDrag = (e: DragEvent) => {
-      setCoords({ x: e.clientX, y: e.clientY });
+      if (e.clientX !== coords.current.x) {
+        setDirection(e.clientX >= coords.current.x ? 'right' : 'left');
+      }
 
-      if (options.onDrag) {
-        options.onDrag()(e);
+      coords.current = { x: e.clientX, y: e.clientY };
+
+      setCoords(coords.current);
+      setPointer(_getPointerPositionInParent());
+
+      if (options?.onDrag) {
+        options.onDrag(e);
       }
     };
 
-    const onDrop = (e: DragEvent) => {
+    const onDragEnd = (e: DragEvent) => {
       e.preventDefault();
-      if (options.onDrop) {
-        options.onDrop()(e);
+
+      cancelAnimationFrame(reqAnimFrameNo.current);
+
+      if (parent) {
+        parent.style.overflow = 'scroll';
       }
-      setCoords(undefined);
+      if (options?.onDragEnd) {
+        options.onDragEnd(e);
+      }
+      // setCoords({ x: 0, y: 0});
       setDragItem(undefined);
       return false;
     };
@@ -63,12 +169,12 @@ export const useDndHook = <T>(
 
       dragRef.addEventListener('drag', onDrag);
 
-      dragRef.addEventListener('dragend', onDrop);
+      dragRef.addEventListener('dragend', onDragEnd);
 
       return () => {
         dragRef.removeEventListener('dragstart', onDragStart);
         dragRef.removeEventListener('drag', onDrag);
-        dragRef.removeEventListener('dragend', onDrop);
+        dragRef.removeEventListener('dragend', onDragEnd);
       };
     }
   }, [ref, item, options]);

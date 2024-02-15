@@ -53,7 +53,9 @@ export const swapColumns =
       column2.left = column2.left + column1.width;
     }
 
-    return { columns };
+    moveColumns(columns);
+
+    return { ...columns };
   };
 
 export const resizeColumn =
@@ -72,7 +74,7 @@ export const resizeColumn =
 // Changes the sort tye of a column
 export const changeSort =
   (id: ColumnId, multipleColumnSort: boolean) => (state: GridStore) => {
-    const { columns, sort } = state;
+    const { columns } = state;
 
     let columnsWithSort = Object.values(columns).filter(
       (col) => col.sort?.priority

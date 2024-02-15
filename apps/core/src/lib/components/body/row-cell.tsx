@@ -1,6 +1,9 @@
-import { Column } from "./../../common/interfaces";
+import { Column } from './../../common/interfaces';
 
-function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column): string {
+function getProperty<Type, Key extends keyof Type>(
+  obj: Type,
+  columnDef: Column
+): string {
   const value = obj[columnDef.field as Key];
 
   if (columnDef.formatter) {
@@ -10,13 +13,25 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
   return value as string;
 }
 
-export function RowCell<TData>({ height, row, columnDef }: { height: number, row: TData, columnDef: Column }) {
+export function RowCell<TData>({
+  height,
+  row,
+  columnDef,
+}: {
+  height: number;
+  row: TData;
+  columnDef: Column;
+}) {
   if (columnDef.hidden) {
     return null;
   }
   return (
-    <div className="grid-row-cell" style={{ height, left: columnDef.left, width: columnDef.width }}>
-      { getProperty(row, columnDef) }
+    <div
+      data-hidden={columnDef.hidden}
+      className="grid-row-cell"
+      style={{ height, left: columnDef.left, width: columnDef.width }}
+    >
+      {getProperty(row, columnDef)}
     </div>
-  )
+  );
 }
