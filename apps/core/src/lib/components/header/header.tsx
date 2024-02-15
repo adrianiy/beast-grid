@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
 import HeaderCell from './cell';
 
@@ -16,11 +16,11 @@ export default function Header({
   multiSort?: boolean;
 }) {
   const dragBounds = useRef(null);
-  
+
   const [columns, changeSort] = useBeastStore((state) => [
     state.columns,
     state.changeSort,
-  ]);  
+  ]);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -31,7 +31,7 @@ export default function Header({
 
   const handleChangeSort = (column: Column) => () => {
     if (column.sortable === false) return;
-    
+
     changeSort(column.id, !!multiSort);
   };
 

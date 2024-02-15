@@ -19,14 +19,12 @@ export interface DndStore {
 }
 
 export const createDndStore = () =>
-  create<DndStore>(
-    (set) => ({
-      pointer: { x: 0, y: 0 },
-      setDragItem: (dragItem?: DragItem) => set({ dragItem }),
-      setCoords: (coords?: Coords) => set({ coords }),
-      setPointer: (pointer?: Coords) => set({ pointer }),
-      setDirection: (direction?: 'right' | 'left') => set({ direction }),
-    })
-  );
+  create<DndStore>((set) => ({
+    pointer: { x: 0, y: 0 },
+    setDragItem: (dragItem?: DragItem) => set({ dragItem }),
+    setCoords: (coords?: Coords) => set({ coords }),
+    setPointer: (pointer?: Coords) => set({ pointer }),
+    setDirection: (direction?: 'right' | 'left') => set({ direction }),
+  }));
 
 export type TDndStore = () => StoreApi<DndStore>;

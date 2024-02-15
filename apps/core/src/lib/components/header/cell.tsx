@@ -52,7 +52,7 @@ export default function HeaderCell({
     { id: column.id, hidePreview: true },
     {
       onDrag: handleResize,
-      onDragEnd: () => (lastX.current = 0), 
+      onDragEnd: () => (lastX.current = 0),
     }
   );
 
@@ -79,9 +79,9 @@ export default function HeaderCell({
   }
 
   function onDrag() {
-    if (pointer.x  && pointer.y) {
+    if (pointer.x && pointer.y) {
       const x = pointer.x + container.scrollLeft;
-      
+
       let swappableColumn: Column | undefined = undefined;
 
       if (direction === 'right') {
@@ -91,7 +91,7 @@ export default function HeaderCell({
             !c.hidden &&
             x < c.left + c.width &&
             x > c.left
-        )
+        );
       } else if (direction === 'left') {
         swappableColumn = Object.values(columnDefs).findLast(
           (c) =>

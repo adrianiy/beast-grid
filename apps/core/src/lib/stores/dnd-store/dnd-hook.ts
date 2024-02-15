@@ -12,7 +12,6 @@ export function getEmptyImage() {
   return emptyImage;
 }
 
-
 export const useDndHook = <T>(
   item: DragItem & T,
   options?: Partial<{
@@ -26,13 +25,14 @@ export const useDndHook = <T>(
   const startCoords = useRef({ x: 0, y: 0 });
   const coords = useRef({ x: 0, y: 0 });
   const emptyImage = getEmptyImage();
-  const [setDragItem, setCoords, setPointer, setDirection] =
-    useDndStore((state) => [
+  const [setDragItem, setCoords, setPointer, setDirection] = useDndStore(
+    (state) => [
       state.setDragItem,
       state.setCoords,
       state.setPointer,
       state.setDirection,
-    ]);
+    ]
+  );
 
   useEffect(() => {
     const _getMaxScroll = (element: HTMLDivElement) => {
@@ -66,7 +66,7 @@ export const useDndHook = <T>(
         y,
       };
     };
-    
+
     const handleVirtualScroll = () => {
       if (!parent || !coords) {
         reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
@@ -94,14 +94,14 @@ export const useDndHook = <T>(
           autoScrollSpeed,
           (autoScrollSpeed *
             (1 - Math.max(0, right - pointerX) / autoScrollMargin)) |
-          0
+            0
         );
       } else if (pointerX < left + autoScrollMargin && parent.scrollLeft) {
         changeX = Math.max(
           -parent.scrollLeft,
           (-autoScrollSpeed *
             (1 - Math.max(0, pointerX - left) / autoScrollMargin)) |
-          0
+            0
         );
       }
 
@@ -110,7 +110,7 @@ export const useDndHook = <T>(
       }
 
       reqAnimFrameNo.current = requestAnimationFrame(handleVirtualScroll);
-    }
+    };
     const onDragStart = (e: DragEvent) => {
       setDragItem(item);
       setPointer(_getPointerPositionInParent());

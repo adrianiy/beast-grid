@@ -52,7 +52,7 @@ export const swapColumns =
       column1.left = column2.left;
       column2.left = column2.left + column1.width;
     }
-  
+
     moveColumns(columns);
 
     return { ...columns };
