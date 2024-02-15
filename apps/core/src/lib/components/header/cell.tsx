@@ -1,5 +1,6 @@
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import {
+    BeastGridConfig,
   Column,
   ColumnStore,
   HeaderDrag,
@@ -38,7 +39,7 @@ export default function HeaderCell({
       state.container,
     ]
   );
-  const [pointer, direction] = useDndStore((state) => [
+  const [pointer] = useDndStore((state) => [
     state.pointer,
     state.direction,
   ]);
