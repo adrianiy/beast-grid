@@ -6,7 +6,7 @@
     "docs:install": "cd apps/docs && npm install",
     "docs:dev": "cd apps/docs && npm run dev",
     "docs:build": "cd apps/docs && npm run build",
-    "core:publish": "nx build core && cd dist/apps/core && npm publish"
+    "core:publish": "cd dist/apps/core && npm publish"
   },
   "private": true,
   "dependencies": {
