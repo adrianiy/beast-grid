@@ -1,13 +1,12 @@
 'use client';
 
 import numeral from 'numeral';
-import { User, getData, months, sortData } from '../api/data';
+import { User, getData, months } from '../api/data';
 
 import {
   BeastGrid,
   BeastGridApi,
   BeastGridConfig,
-  Column,
   ColumnDef,
 } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
@@ -77,14 +76,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
   const handleClose = () => {
     setError(false);
   };
-
-  const handleSortChange = (data: User[], columns: Column[]) => {
-    beastApi?.current?.setLoading(true);
-    sortData(data, columns).then((res) => {
-      setData(res);
-      beastApi?.current?.setLoading(false);
-    });
-  }
 
   return (
     <>

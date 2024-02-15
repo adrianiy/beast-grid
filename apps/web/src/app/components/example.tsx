@@ -119,7 +119,7 @@ export default function Example() {
         />
       )}
       {view === 'grid' && (
-        <div className="demo-container">
+        <div className={cn("demo-container", theme)}>
           <Grid
             key="example"
             qty={count}
