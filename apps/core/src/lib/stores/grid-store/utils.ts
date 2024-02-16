@@ -3,9 +3,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
-  ColumnArray,
   ColumnDef,
   ColumnStore,
+  Data,
+  IFilter,
 } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { SortType } from '../../common';
@@ -73,8 +74,9 @@ export const getColumnArrayFromDefs = (
   return columns;
 };
 
-export const initialize = (columns: ColumnStore, container: HTMLDivElement) => {
+export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data) => {
   setColumnsStyleProps(columns, container.offsetWidth);
+  setColumnFilters(columns, data);
   moveColumns(columns);
 };
 
@@ -114,6 +116,18 @@ export const setColumnsStyleProps = (
   return columnStore;
 };
 
+export const setColumnFilters = (columns: ColumnStore, data: Data) => {
+  Object.values(columns).forEach((column) => {
+    if (column.filterType) {
+      const values = Array.from(
+        new Set(data.map((row) => row[column.field]))
+      ).sort() as IFilter[];
+      
+      column.filterOptions = values;
+    }
+  });
+}
+
 export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
   let left = 0;
 
@@ -144,7 +158,8 @@ export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
 export const addSort = (
   column: Column,
   columnsWithSort: Column[],
-  multipleColumnSort: boolean
+  multipleColumnSort: boolean,
+  order: SortType = SortType.ASC
 ) => {
   if (multipleColumnSort) {
     const lastPriority = columnsWithSort.reduce(
@@ -153,16 +168,18 @@ export const addSort = (
     );
 
     column.sort = {
-      order: SortType.ASC,
+      order,
       priority: lastPriority + 1,
     };
   } else {
     column.sort = {
-      order: SortType.ASC,
+      order,
       priority: 1,
     };
 
-    delete columnsWithSort[0].sort;
+    if (columnsWithSort.length > 0) {
+      delete columnsWithSort[0].sort;
+    }
   }
 };
 

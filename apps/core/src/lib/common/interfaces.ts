@@ -1,5 +1,9 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { SortType } from './enums';
+import { FilterType, SortType } from './enums';
+
+export type Row = Record<string, string | number | unknown>;
+
+export type Data = Row[];
 
 export interface StyleProps {
   width: number;
@@ -11,20 +15,24 @@ export interface StyleProps {
 
 export type ColumnId = string;
 
+export type IFilter = string | number | boolean;
+
 export interface BaseColumnDef {
   headerName: string;
   field: string;
   sortable?: boolean;
+  filterType?: FilterType;
+  filterOptions?: IFilter[];
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
 }
 
 export type ColumnDef = Partial<StyleProps> & BaseColumnDef;
 
-export interface BeastGridConfig<TData> extends Partial<TableStyles> {
+export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: ColumnDef;
-  data: TData[];
+  data: T;
   sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;

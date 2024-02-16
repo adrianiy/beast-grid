@@ -8,6 +8,7 @@ import {
   BeastGridApi,
   BeastGridConfig,
   ColumnDef,
+  FilterType,
 } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
@@ -16,12 +17,12 @@ import { TransitionProps } from '@mui/material/transitions';
 type Props = {
   qty: number;
   theme: string;
-  config?: Partial<BeastGridConfig<User>>;
+  config?: Partial<BeastGridConfig>;
 };
 const columnDefs: ColumnDef[] = [
   { headerName: 'ID', field: 'id', sortable: false },
   { headerName: 'NAME', field: 'name', width: 200 },
-  { headerName: 'COUNTRY', field: 'country', width: 200 },
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING },
   ...months.map((month) => ({
     headerName: month.toUpperCase(),
     field: month,

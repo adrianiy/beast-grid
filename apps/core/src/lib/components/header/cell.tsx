@@ -1,29 +1,34 @@
-import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { ArrowUpward, ArrowDownward, Menu } from '@mui/icons-material';
 import { BeastGridConfig, Column, ColumnStore, HeaderDrag, SortConfig } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from './../../stores/dnd-store/dnd-hook';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Coords } from '../../stores/dnd-store/store';
+import HeaderMenu from './menu';
+
+import cn from 'classnames';
 
 type Props = {
   levelIdx: number;
   idx: number;
   height: number;
   column: Column;
+  multiSort: boolean;
   columnDefs: ColumnStore;
-  changeSort: (column: Column) => () => void;
-  dragOptions?: BeastGridConfig<unknown>['dragOptions'];
+  dragOptions?: BeastGridConfig['dragOptions'];
 };
 
-export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, changeSort, dragOptions }: Props) {
+export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, dragOptions, multiSort }: Props) {
   const lastX = useRef<number>(0);
   const lastHitElement = useRef<HTMLElement | null>(null);
-  const [hideColumn, swapColumns, resizeColumn, container] = useBeastStore((state) => [
+  const [menu, toggleMenu] = useState(false);
+  const [hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.hideColumn,
     state.swapColumns,
     state.resizeColumn,
     state.container,
+    state.changeSort
   ]);
   const [pointer, dropTargets] = useDndStore((state) => [state.pointer, state.dropTargets]);
   const [drag] = useDndHook<HeaderDrag>(
@@ -88,20 +93,37 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
     }
   }
 
+  const handleChangeSort = () => {
+    if (column.sortable === false) return;
+
+    changeSort(column.id, !!multiSort);
+  };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleMenu(!menu);
+  }
+
   const renderSortIcon = (sort: SortConfig) => {
     return (
-      <div className="sort-icon row middle">
+      <div className="bg-sort-icon row middle">
         {sort.order === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-        {sort.priority > 0 && <span className="sort-priority">{sort.priority}</span>}
+        {sort.priority > 0 && <span className="bg-sort-priority">{sort.priority}</span>}
       </div>
     );
+  };
+
+  const renderMenu = () => {
+    if (!menu) return null;
+
+    return <HeaderMenu column={column} multiSort={multiSort} />;
   };
 
   if (column.hidden) return null;
 
   return (
     <div
-      className="grid-header-cell row middle between"
+      className="bg-grid-header__cell row middle between"
       key={`${levelIdx}-${idx}-${column.id}`}
       style={{
         top: height * levelIdx,
@@ -109,13 +131,19 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
         width: columnDefs[column.id].width,
         left: columnDefs[column.id].left,
       }}
-      onClick={changeSort(column)}
+      onClick={handleChangeSort}
     >
-      <div className="grid-header-name row middle" data-name={column.headerName} id={column.id} ref={drag}>
-        <span className="grid-header-drop">{column.headerName}</span>
+      <div className="bg-grid-header__cell__name row middle" data-name={column.headerName} id={column.id} ref={drag}>
+        <span className="bg-grid-header-drop">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
-      <div ref={resize} className="grid-header-resize" />
+
+      <div className="bg-grid-header__cell__menu row middle">
+        {column.filterType && <Menu className={cn("bg-grid-header__menu", menu && 'active')} onClick={handleMenuClick} />}
+        {renderMenu()}
+      </div>
+
+      <div ref={resize} className="bg-grid-header__resize" />
     </div>
   );
 }

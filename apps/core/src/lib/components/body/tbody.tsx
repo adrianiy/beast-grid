@@ -4,39 +4,32 @@ import { RowCell } from './row-cell';
 
 import { useBeastStore } from './../../stores/beast-store';
 
-import { Column, SortType } from '../../common';
+import { Column, Data, Row, SortType } from '../../common';
 
 import './tbody.scss';
 
-type TBodyProps<TData> = {
+type TBodyProps = {
   height: number;
   headerHeight: number;
   border?: boolean;
   summary?: boolean;
-  data: TData[];
-  onSortChange?: (data: TData[], sortColumns: Column[]) => Promise<TData[]>;
+  onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
-
 const PERFORMANCE_LIMIT = 1000000;
-const THRESHOLD = 4
+const THRESHOLD = 4;
 
-export default function TBody<TData>({
-  height,
-  headerHeight,
-  border,
-  data,
-  summary,
-  onSortChange,
-}: TBodyProps<TData>) {
-  const [columns, container, sort, setSorting] = useBeastStore((state) => [
+export default function TBody({ height, headerHeight, border, summary, onSortChange }: TBodyProps) {
+  const [data, columns, container, sort, filters, setSorting] = useBeastStore((state) => [
+    state.data,
     state.columns,
     state.container,
     state.sort,
+    state.filters,
     state.setSorting,
   ]);
   const [[max, min], setMaxMin] = useState([0, 0]);
-  const [sortedData, setSortedData] = useState<TData[]>([]);
+  const [sortedData, setSortedData] = useState<Data>([]);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -48,9 +41,7 @@ export default function TBody<TData>({
   useEffect(() => {
     if (container) {
       const setMaxMinValues = () => {
-        const containerHeight =
-          container.getBoundingClientRect().height -
-          headerHeight * levels.length;
+        const containerHeight = container.getBoundingClientRect().height - headerHeight * levels.length;
         const visibleRows = Math.ceil(containerHeight / height);
         const topRow = Math.floor(container.scrollTop / height);
         const bottomRow = topRow + visibleRows;
@@ -58,7 +49,7 @@ export default function TBody<TData>({
         const minValue = Math.max(0, topRow - THRESHOLD);
 
         setMaxMin([maxValue, minValue]);
-      }
+      };
       container.addEventListener('scroll', () => {
         setMaxMinValues();
       });
@@ -67,8 +58,22 @@ export default function TBody<TData>({
   }, [container, headerHeight, height, levels.length, data.length]);
 
   useEffect(() => {
-    setSortedData(data);
-  }, [data]);
+    const someActive = Object.entries(filters).some(([key, value]) => value.length && value.length !== columns[key].filterOptions?.length);
+    setSortedData(someActive ?
+      data.filter((d) => {
+        let show = true;
+
+        for (const filterKey of Object.keys(filters)) {
+          if (filters[filterKey].includes(`${d[columns[filterKey].field]}`)) {
+            show = show && true;
+          } else {
+            show = show && false;
+          }
+        }
+        return show;
+      }) : data
+    );
+  }, [data, columns, filters]);
 
   useEffect(() => {
     if (sortedData.length > 0) {
@@ -80,10 +85,10 @@ export default function TBody<TData>({
         return;
       }
 
-      const sortData = (a: TData, b: TData) => {
+      const sortData = (a: Row, b: Row) => {
         for (const column of sortColumns) {
-          const valueA = a[column.field as keyof TData];
-          const valueB = b[column.field as keyof TData];
+          const valueA = a[column.field as keyof Row] as number;
+          const valueB = b[column.field as keyof Row] as number;
 
           if (valueA > valueB) {
             return column.sort?.order === SortType.ASC ? 1 : -1;
@@ -132,17 +137,15 @@ export default function TBody<TData>({
     for (let idx = min; idx < max; idx++) {
       const row = sortedData[idx];
 
-      renderArray.push(
-        <div
-          key={idx}
-          className={getClass()}
-          style={{ top: height * idx, height }}
-        >
-          {lastLevel?.map((column, idx) => (
-            <RowCell key={idx} height={height} row={row} columnDef={column} />
-          ))}
-        </div>
-      );
+      if (row) {
+        renderArray.push(
+          <div key={idx} className={getClass()} style={{ top: height * idx, height }}>
+            {lastLevel?.map((column, idx) => (
+              <RowCell key={idx} height={height} row={row} columnDef={column} />
+            ))}
+          </div>
+        );
+      }
     }
 
     return renderArray;
@@ -151,11 +154,8 @@ export default function TBody<TData>({
   return (
     <div className="grid-body">
       {sortedData.length > 0 && createDataSlice()}
-      {summary && (
-        <div
-          className="grid-row-cell"
-          style={{ height, top: height * data.length }}
-        >
+      {summary && sortedData.length >= (max - THRESHOLD) && (
+        <div className="grid-row-cell" style={{ height, top: height * data.length }}>
           ghost summary
         </div>
       )}

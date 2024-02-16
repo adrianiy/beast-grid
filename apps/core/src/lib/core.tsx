@@ -9,6 +9,7 @@ import {
   BeastGridApi,
   BeastGridConfig,
   Column,
+  Data,
   TableStyles,
 } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
@@ -30,20 +31,20 @@ export const defaultConfig = {
   headerHeight: HEADER_HEIGHT,
 };
 
-export function BeastGrid<TData>({
+export function BeastGrid<T>({
   config: userConfig,
   theme = 'default',
   api,
   onSortChange,
 }: {
-  config?: BeastGridConfig<TData>;
+  config?: BeastGridConfig<T>;
   theme?: string;
   api?: MutableRefObject<BeastGridApi | undefined>;
-  onSortChange?: (data: TData[], sortColumns: Column[]) => Promise<TData[]>;
+  onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState<
-    (BeastGridConfig<TData> & TableStyles) | undefined
+    (BeastGridConfig<T> & TableStyles) | undefined
   >();
   const [[beastGridStore, beastDndStore], setStores] = useState<
     [TGridStore | null, TDndStore | null]
@@ -51,7 +52,7 @@ export function BeastGrid<TData>({
 
   useEffect(() => {
     if (userConfig) {
-      const config: BeastGridConfig<TData> & TableStyles = {
+      const config: BeastGridConfig<T> & TableStyles = {
         ...defaultConfig,
         ...userConfig,
       };
@@ -67,10 +68,11 @@ export function BeastGrid<TData>({
         config.defaultColumnDef
       );
 
-      initialize(columns, ref.current);
+      initialize(columns, ref.current, config.data as Data);
 
-      const gridStore = () =>
+      const gridStore: TGridStore = () =>
         createGridStore({
+          data: config.data as Data,
           columns,
           container: ref.current as HTMLDivElement,
           sort: [],
@@ -96,13 +98,11 @@ export function BeastGrid<TData>({
           <TBody
             height={config.rowHeight}
             headerHeight={config.headerHeight}
-            data={config.data}
             border={config.border}
             summary={!!config.summarize}
             onSortChange={onSortChange}
           />
           <Summary
-            data={config.data}
             height={config.rowHeight}
             summary={!!config.summarize}
             border={config.border}

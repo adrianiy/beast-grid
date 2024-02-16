@@ -11,3 +11,7 @@ export enum Direction {
   LEFT = 'left',
   RIGHT = 'right',
 }
+
+export enum FilterType {
+  STRING = 'string'
+}
