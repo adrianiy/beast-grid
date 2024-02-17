@@ -38,7 +38,7 @@ export default function HeaderCell({ levelIdx, idx, height, column, columnDefs, 
       isDropTarget: true,
       onDragStart: () => (lastHitElement.current = null),
       onDirectionChange: () => (lastHitElement.current = null),
-      onAnimationFrame: hitTest,
+      onDrag: hitTest,
       onDragEnd,
     },
     container

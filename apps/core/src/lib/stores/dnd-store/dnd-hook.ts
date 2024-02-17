@@ -113,14 +113,14 @@ export const useDndHook = <T>(
     };
 
     const handleAnimations = () => {
+      options?.onAnimationFrame?.(coords.current);
+      
       if (!parent || !coords) {
         reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
         return;
       }
 
       _handleAutoScroll();
-
-      options?.onAnimationFrame?.(coords.current);
 
       reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
     };
