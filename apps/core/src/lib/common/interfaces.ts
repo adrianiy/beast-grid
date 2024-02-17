@@ -13,6 +13,16 @@ export interface StyleProps {
   flex: number;
 }
 
+export interface FilterProps {
+  filterOptions: IFilter[];
+}
+
+export interface MenuProps {
+  column: boolean;
+  filter: boolean;
+  grid: boolean;
+}
+
 export type ColumnId = string;
 
 export type IFilter = string | number | boolean;
@@ -22,12 +32,12 @@ export interface BaseColumnDef {
   field: string;
   sortable?: boolean;
   filterType?: FilterType;
-  filterOptions?: IFilter[];
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
+  menu?: boolean | Partial<MenuProps>;
 }
 
-export type ColumnDef = Partial<StyleProps> & BaseColumnDef;
+export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
@@ -80,4 +90,9 @@ export interface BeastGridApi {
   columns: ColumnStore;
   setColumns: (columns: ColumnStore) => void;
   setLoading: (loading: boolean) => void;
+}
+
+export interface Coords {
+  x: number;
+  y: number;
 }

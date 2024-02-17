@@ -1,11 +1,10 @@
 import { StoreApi, create } from 'zustand';
+import { Coords } from '../../common';
 
 export interface DragItem extends Record<string, unknown> {
   id: string;
   hidePreview?: boolean;
 }
-
-export type Coords = { x: number; y: number };
 
 export interface DndStore {
   dragItem?: DragItem;

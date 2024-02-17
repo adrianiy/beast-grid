@@ -17,12 +17,12 @@ import { TransitionProps } from '@mui/material/transitions';
 type Props = {
   qty: number;
   theme: string;
-  config?: Partial<BeastGridConfig>;
+  config?: Partial<BeastGridConfig<User>>;
 };
 const columnDefs: ColumnDef[] = [
   { headerName: 'ID', field: 'id', sortable: false },
-  { headerName: 'NAME', field: 'name', width: 200 },
-  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING },
+  { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true },
   ...months.map((month) => ({
     headerName: month.toUpperCase(),
     field: month,

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Coords, DragItem } from './store';
-import { useDndStore } from '../dnd-store';
-import { Direction } from '../../common';
+import { Coords, DragItem } from './../stores/dnd-store/store';
+import { useDndStore } from '../stores/dnd-store';
+import { Direction } from '../common';
 
 let emptyImage: HTMLImageElement;
 export function getEmptyImage() {

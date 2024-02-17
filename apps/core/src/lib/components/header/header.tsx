@@ -8,14 +8,14 @@ import { BeastGridConfig, Column } from '../../common/interfaces';
 
 import './header.scss';
 
-export default function Header({
+export default function Header<T>({
   height,
   multiSort,
   dragOptions,
 }: {
   height: number;
   multiSort?: boolean;
-  dragOptions?: BeastGridConfig['dragOptions'];
+  dragOptions?: BeastGridConfig<T>['dragOptions'];
 }) {
   const dragBounds = useRef(null);
 

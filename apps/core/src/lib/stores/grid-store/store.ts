@@ -16,6 +16,7 @@ interface GridState {
   data: Data;
   columns: ColumnStore;
   container: HTMLDivElement;
+  allowMultipleColumnSort: boolean;
   sort: ColumnId[];
 }
 

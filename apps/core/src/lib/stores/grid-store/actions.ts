@@ -84,13 +84,15 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
   if (!column.sort) {
     addSort(column, sortedColumns, multipleColumnSort, sortType);
+  } else if (sortType === column.sort?.order) {
+    removeSort(column, sortedColumns);
   } else if (column.sort?.order === SortType.ASC || sortType) {
     column.sort.order = sortType || SortType.DESC;
   } else {
     removeSort(column, sortedColumns);
-
-    columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
   }
+  
+  columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
 
   return { columns, sort: columnsWithSort.map((col) => col.id) };
 };
