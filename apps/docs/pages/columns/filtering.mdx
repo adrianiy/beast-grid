@@ -1,3 +1,35 @@
 # Filtering
 
-Under construction
+Enable column filtering by setting the `menu` property to `true` of and object with `filter` property set to `true`
+
+```tsx
+  const config: BeastGridConfig<User> = {
+    data,
+    columnDefs,
+    defaultColumnDef,
+    border: true,
+  };
+  const columnDefs: ColumnDef[] = [
+    { headerName: 'ID', field: 'userId', sortable: false, menu: { column: true, grid: true } },
+    { headerName: 'NAME', field: 'username', sortable: false, menu: true },
+    {
+      headerName: 'AMOUNT',
+      field: 'money',
+      width: 100,
+      menu: { column: true },
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'ORDERS',
+      field: 'orders',
+      menu: { column: true },
+      formatter: (value) => numeral(value).format('0,0'),
+    },
+  ];
+```
+
+Check a live example [here](../example/menu)
+
+
+
+

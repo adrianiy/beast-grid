@@ -41,7 +41,7 @@ export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnD
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
-  defaultColumnDef?: ColumnDef;
+  defaultColumnDef?: Partial<ColumnDef>;
   data: T;
   sortable?: boolean;
   mulitSort?: boolean;

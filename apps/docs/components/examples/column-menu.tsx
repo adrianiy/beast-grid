@@ -10,17 +10,19 @@ export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
     { headerName: 'ID', field: 'userId', sortable: false },
-    { headerName: 'NAME', field: 'username', sortable: false },
+    { headerName: 'NAME', field: 'username', sortable: false, menu: true },
     {
       headerName: 'AMOUNT',
       field: 'money',
       flex: 1,
+      menu: { column: true, grid: true },
       formatter: (value) => numeral(value).format('0,0 $'),
     },
     {
       headerName: 'ORDERS',
       field: 'orders',
       flex: 1,
+      menu: { column: true, grid: true },
       formatter: (value) => numeral(value).format('0,0'),
     },
   ];
@@ -29,6 +31,9 @@ export default function Grid() {
     columnDefs,
     border: true,
     mulitSort: true,
+    defaultColumnDef: {
+      menu: { column: true, grid: true }
+    }
   };
 
   return (

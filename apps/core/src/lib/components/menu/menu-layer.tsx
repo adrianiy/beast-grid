@@ -25,7 +25,6 @@ export default function MenuLayer() {
   const [columnId] = useMenuStore((state) => [state.column]);
   const [columns, multiSort] = useBeastStore((state) => [state.columns, state.allowMultipleColumnSort]);
 
-  console.log(columnId);
   if (!columnId) {
     return null;
   }
@@ -69,7 +68,7 @@ function HeaderMenu({ column, multiSort }: Props) {
       if (left < coontainerRect.left || left > coontainerRect.right) {
         setMenuColumn(undefined);
       } else {
-        setCoords({ x: left, y: coords?.y || bottom + 12 });
+        setCoords({ x: left, y: bottom + 12 });
       }
     };
 
@@ -80,10 +79,12 @@ function HeaderMenu({ column, multiSort }: Props) {
     };
 
     document.addEventListener('click', closeMenu);
+    document.addEventListener('scroll', moveMenu);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
       document.removeEventListener('click', closeMenu);
+      document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
   }, []);

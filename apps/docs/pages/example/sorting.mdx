@@ -29,7 +29,7 @@ export default function Grid() {
       formatter: (value) => numeral(value).format('0,0'),
     },
   ];
-  const config: BeastGridConfig<User> = {
+  const config: BeastGridConfig<User[]> = {
     data,
     columnDefs,
     border: true,

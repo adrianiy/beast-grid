@@ -69,6 +69,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         border: true,
         mulitSort: true,
         summarize: true,
+        defaultColumnDef: {
+          menu: { column: true, grid: true },
+        },
         ..._customConfig,
       });
     }

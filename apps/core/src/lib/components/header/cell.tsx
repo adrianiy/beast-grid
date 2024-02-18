@@ -116,6 +116,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, columnDef
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (menuColumn === column.id) {
+      setMenuColumn(undefined);
+      return;
+    }
     const rect = menuRef.current?.getBoundingClientRect();
     initializeMenu({
       column: column.id,
