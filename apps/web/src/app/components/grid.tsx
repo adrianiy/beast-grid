@@ -17,7 +17,7 @@ import { TransitionProps } from '@mui/material/transitions';
 type Props = {
   qty: number;
   theme: string;
-  config?: Partial<BeastGridConfig<User>>;
+  config?: Partial<BeastGridConfig<User[]>>;
 };
 const columnDefs: ColumnDef[] = [
   { headerName: 'ID', field: 'id', sortable: false },
@@ -38,7 +38,7 @@ function SlideTransition(props: SlideProps) {
 export default function Grid({ qty, theme, config: _customConfig }: Props) {
   const loading = useRef(false);
   const beastApi = useRef<BeastGridApi | undefined>();
-  const [config, setConfig] = useState<BeastGridConfig<User> | undefined>();
+  const [config, setConfig] = useState<BeastGridConfig<User[]> | undefined>();
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<boolean>(false);
 
