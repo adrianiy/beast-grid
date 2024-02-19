@@ -43,7 +43,7 @@ export default function Example() {
     setView(view);
   };
 
-  const config: Partial<BeastGridConfig<User>> = {
+  const config: Partial<BeastGridConfig<User[]>> = {
     headerHeight: 80,
     rowHeight: 60,
   };
@@ -123,7 +123,7 @@ export default function Example() {
           <Grid
             key="example"
             qty={count}
-            config={{ ...(theme === 'minimal-theme' ? config : {}) }}
+            config={theme === 'minimal-theme' ? config : undefined}
             theme={theme}
           />
         </div>

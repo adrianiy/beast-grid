@@ -1,5 +1,9 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { SortType } from './enums';
+import { FilterType, SortType } from './enums';
+
+export type Row = Record<string, string | number | unknown>;
+
+export type Data = Row[];
 
 export interface StyleProps {
   width: number;
@@ -9,22 +13,36 @@ export interface StyleProps {
   flex: number;
 }
 
+export interface FilterProps {
+  filterOptions: IFilter[];
+}
+
+export interface MenuProps {
+  column: boolean;
+  filter: boolean;
+  grid: boolean;
+}
+
 export type ColumnId = string;
+
+export type IFilter = string | number | boolean;
 
 export interface BaseColumnDef {
   headerName: string;
   field: string;
   sortable?: boolean;
+  filterType?: FilterType;
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
+  menu?: boolean | Partial<MenuProps>;
 }
 
-export type ColumnDef = Partial<StyleProps> & BaseColumnDef;
+export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
 
-export interface BeastGridConfig<TData> extends Partial<TableStyles> {
+export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
-  defaultColumnDef?: ColumnDef;
-  data: TData[];
+  defaultColumnDef?: Partial<ColumnDef>;
+  data: T;
   sortable?: boolean;
   mulitSort?: boolean;
   summarize?: boolean;
@@ -72,4 +90,9 @@ export interface BeastGridApi {
   columns: ColumnStore;
   setColumns: (columns: ColumnStore) => void;
   setLoading: (loading: boolean) => void;
+}
+
+export interface Coords {
+  x: number;
+  y: number;
 }

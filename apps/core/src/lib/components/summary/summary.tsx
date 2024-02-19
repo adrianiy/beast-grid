@@ -4,22 +4,21 @@ import numeral from 'numeral';
 import './summary.scss';
 import { useBeastStore } from './../../stores/beast-store';
 
-type TSummaryProps<TData> = {
-  data: TData[];
+type TSummaryProps = {
   height: number;
   summary: boolean;
   border?: boolean;
 };
 
-export default function Summary<TData>({ data, border, height, summary }: TSummaryProps<TData>) {
-  const [container] = useBeastStore((state) => [state.container]);
+export default function Summary({ border, height, summary }: TSummaryProps) {
+  const [data, container] = useBeastStore((state) => [state.data, state.container]);
   if (!summary) {
     return null;
   }
   
   return (
     <div className={cn('grid-summary row middle', border && 'bordered')} style={{ height, top: container.getBoundingClientRect().height - height }}>
-      Rows: { numeral(data.length).format('0,0 a') }
+      Rows: { numeral((data as unknown[]).length).format('0,0 a') }
     </div>
   );
 }

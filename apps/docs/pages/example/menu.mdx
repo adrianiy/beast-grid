@@ -1,5 +1,15 @@
-'use client'
+# Column Menu Example
 
+Here is an example of how to use the column menu in the BeastGrid component.
+
+In this example we have configured a shared column definition with `defaultColumnDef` that configures menu to show column and grid menu.
+
+For the `name`column we have configured the `menu` with `true` value, so this column will show all menu options (`column`, `filter` and `grid`).
+
+The `amount` and `orders` columns have a menu without `filter` option.
+
+
+```tsx
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
@@ -10,17 +20,19 @@ export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
     { headerName: 'ID', field: 'userId', sortable: false },
-    { headerName: 'NAME', field: 'username', sortable: false },
+    { headerName: 'NAME', field: 'username', sortable: false, menu: true },
     {
       headerName: 'AMOUNT',
       field: 'money',
       flex: 1,
+      menu: { column: true, grid: true },
       formatter: (value) => numeral(value).format('0,0 $'),
     },
     {
       headerName: 'ORDERS',
       field: 'orders',
       flex: 1,
+      menu: { column: true, grid: true },
       formatter: (value) => numeral(value).format('0,0'),
     },
   ];
@@ -29,6 +41,9 @@ export default function Grid() {
     columnDefs,
     border: true,
     mulitSort: true,
+    defaultColumnDef: {
+      menu: { column: true, grid: true }
+    }
   };
 
   return (
@@ -37,3 +52,10 @@ export default function Grid() {
     </div>
   );
 }
+```
+---
+
+import MenuExample from '../../components/examples/column-menu.tsx'
+
+<MenuExample />
+

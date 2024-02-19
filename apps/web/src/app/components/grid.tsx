@@ -8,6 +8,7 @@ import {
   BeastGridApi,
   BeastGridConfig,
   ColumnDef,
+  FilterType,
 } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
@@ -16,12 +17,12 @@ import { TransitionProps } from '@mui/material/transitions';
 type Props = {
   qty: number;
   theme: string;
-  config?: Partial<BeastGridConfig<User>>;
+  config?: Partial<BeastGridConfig<User[]>>;
 };
 const columnDefs: ColumnDef[] = [
   { headerName: 'ID', field: 'id', sortable: false },
-  { headerName: 'NAME', field: 'name', width: 200 },
-  { headerName: 'COUNTRY', field: 'country', width: 200 },
+  { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true },
   ...months.map((month) => ({
     headerName: month.toUpperCase(),
     field: month,
@@ -37,7 +38,7 @@ function SlideTransition(props: SlideProps) {
 export default function Grid({ qty, theme, config: _customConfig }: Props) {
   const loading = useRef(false);
   const beastApi = useRef<BeastGridApi | undefined>();
-  const [config, setConfig] = useState<BeastGridConfig<User> | undefined>();
+  const [config, setConfig] = useState<BeastGridConfig<User[]> | undefined>();
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<boolean>(false);
 
@@ -68,6 +69,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         border: true,
         mulitSort: true,
         summarize: true,
+        defaultColumnDef: {
+          menu: { column: true, grid: true },
+        },
         ..._customConfig,
       });
     }

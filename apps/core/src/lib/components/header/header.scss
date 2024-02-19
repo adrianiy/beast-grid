@@ -15,7 +15,7 @@
   border-top: var(--bg-border--1);
 }
 
-.grid-header-cell {
+.bg-grid-header__cell {
   cursor: pointer;
   user-select: none;
   position: absolute;
@@ -27,11 +27,25 @@
   border-top: var(--bg-border--1);
   resize: horizontal;
 
-  .grid-header-name {
+  .bg-grid-header__name {
     flex: 1;
   }
 
-  .grid-header-resize {
+  .bg-grid-header__menu {
+    opacity: 0;
+    transition: opacity var(--bg-transition--1);
+
+    &.active {
+      opacity: 1;
+    }
+  }
+  &:hover {
+    .bg-grid-header__menu {
+      opacity: 1;
+    }
+  }
+
+  .bg-grid-header__resize {
     position: absolute;
     display: flex;
     right: -4px;
@@ -52,12 +66,12 @@
     }
   }
 
-  .sort-icon {
+  .bg-sort-icon {
     font-size: var(--bg-size--3);
 
     svg {
       font-size: var(--bg-size--3);
       margin-left: var(--bg-size--1);
     }
-  }
+  }  
 }

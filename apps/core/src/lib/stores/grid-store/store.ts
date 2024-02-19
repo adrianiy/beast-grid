@@ -1,44 +1,68 @@
 import { StoreApi, create } from 'zustand';
 import {
+    addFilter,
   changeSort,
   hideColumn,
+  resetColumnConfig,
   resizeColumn,
+  selectAllFilters,
   setColumn,
   swapColumns,
 } from './actions';
-import { Column, ColumnId, ColumnStore } from './../../common/interfaces';
+import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
+import { SortType } from '../../common';
 
 interface GridState {
+  data: Data;
   columns: ColumnStore;
   container: HTMLDivElement;
+  allowMultipleColumnSort: boolean;
   sort: ColumnId[];
-  loading?: boolean;
-  sorting?: boolean;
 }
 
-export interface GridStore extends GridState {
+interface InferedState {
+  loading: boolean;
+  sorting: boolean;
+  filters: Record<ColumnId, IFilter[]>;
+}
+
+export interface GridStore extends GridState, InferedState {
+  setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
   setColumn: (args: { id: string; column: Column }) => void;
-  hideColumn: (id: string) => void;
-  swapColumns: (id1: string, id2: string) => void;
-  resizeColumn: (id: string, width: number) => void;
-  changeSort: (id: string, multipleColumnSort: boolean) => void;
+  hideColumn: (id: ColumnId) => void;
+  swapColumns: (id1: ColumnId, id2: ColumnId) => void;
+  resizeColumn: (id: ColumnId, width: number) => void;
+  resetColumnConfig: (id: ColumnId) => void;
+  changeSort: (id: ColumnId, multipleColumnSort: boolean) => void;
+  setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) => void;
   setLoading: (loading: boolean) => void;
   setSorting: (sorting: boolean) => void;
+  addFilter: (id: ColumnId, value: IFilter) => void;
+  selectAllFilters: (id: ColumnId) => void;
 }
 
 export const createGridStore = (initialState: GridState) =>
   create<GridStore>((set) => ({
     ...initialState,
+    filters: {},
+    loading: false,
+    sorting: false,
+    setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
-    hideColumn: (id: string) => set(hideColumn(id)),
-    swapColumns: (id1: string, id2: string) => set(swapColumns(id1, id2)),
-    resizeColumn: (id: string, width: number) => set(resizeColumn(id, width)),
-    changeSort: (id: string, multipleColumnSort: boolean) =>
+    hideColumn: (id: ColumnId) => set(hideColumn(id)),
+    swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
+    resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),
+    resetColumnConfig: (id: ColumnId) => set(resetColumnConfig(id)),
+    changeSort: (id: ColumnId, multipleColumnSort: boolean) =>
       set(changeSort(id, multipleColumnSort)),
+    setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) =>
+      set(changeSort(sort, multipleColumnSort, sortType)),
     setLoading: (loading: boolean) => set({ loading }),
     setSorting: (sorting: boolean) => set({ sorting }),
+    addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
+    selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
   }));
 
 export type TGridStore = () => StoreApi<GridStore>;

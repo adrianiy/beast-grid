@@ -6,6 +6,7 @@
   box-sizing: border-box;
   display: flex;
   width: 100%;
+  transition: var(--bg-transition--1);
 
   &.bordered {
     border-bottom: var(--bg-border--2);

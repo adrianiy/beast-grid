@@ -8,21 +8,18 @@ import { BeastGridConfig, Column } from '../../common/interfaces';
 
 import './header.scss';
 
-export default function Header({
+export default function Header<T>({
   height,
   multiSort,
   dragOptions,
 }: {
   height: number;
   multiSort?: boolean;
-  dragOptions?: BeastGridConfig<unknown>['dragOptions'];
+  dragOptions?: BeastGridConfig<T>['dragOptions'];
 }) {
   const dragBounds = useRef(null);
 
-  const [columns, changeSort] = useBeastStore((state) => [
-    state.columns,
-    state.changeSort,
-  ]);
+  const [columns] = useBeastStore((state) => [state.columns]);
 
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
@@ -31,18 +28,8 @@ export default function Header({
     return acc;
   }, [] as Column[][]);
 
-  const handleChangeSort = (column: Column) => () => {
-    if (column.sortable === false) return;
-
-    changeSort(column.id, !!multiSort);
-  };
-
   return (
-    <div
-      ref={dragBounds}
-      className="grid-header row between"
-      style={{ height: height * levels.length }}
-    >
+    <div ref={dragBounds} className="grid-header row between" style={{ height: height * levels.length }}>
       {levels.map((level, levelIdx) => (
         <div className="grid-header-row row" style={{ height }} key={levelIdx}>
           {level.map((column, idx) => (
@@ -50,10 +37,10 @@ export default function Header({
               key={idx}
               levelIdx={levelIdx}
               idx={idx}
+              multiSort={!!multiSort}
               height={height}
               column={column}
               columnDefs={columns}
-              changeSort={handleChangeSort}
               dragOptions={dragOptions}
             />
           ))}

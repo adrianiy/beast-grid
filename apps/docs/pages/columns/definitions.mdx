@@ -7,6 +7,12 @@ interface StyleProps {
   maxWidth: number;
   hidden: boolean;
   flex: number;
+  menu?: boolean | Partial<MenuProps>;
+}
+export interface MenuProps {
+  column: boolean;
+  filter: boolean;
+  grid: boolean;
 }
 interface ColumnDef extends Partial<StyleProps> {
   headerName: string;
@@ -26,16 +32,25 @@ const columns: ColumnDef[] = [
     field: 'name',
     minWidth: 100,
     maxWidth: 200,
+    menu: {
+      column: true,
+      filter: true,
+      grid: true,
+    },
     formatter: (value) => value.toUpperCase(),
   },
   {
     headerName: 'Age',
     field: 'age',
     width: 100,
+    menu: {
+      column: true
+    }
   },
   {
     headerName: 'Address',
     field: 'address',
+    menu: true
   },
   {
     headerName: 'Children',
@@ -109,3 +124,9 @@ Whether the column is hidden.
 ### Required: `false`
 
 The flex value of the column. Follows the same rules as the flex property in CSS.
+
+## `menu`
+### Type: `boolean | Partial<MenuProps>`
+### Required: `false`
+
+Whether to show the menu for the column. If `true`, it will show the default menu. If an object, it will show the menu with the properties specified in the object.
