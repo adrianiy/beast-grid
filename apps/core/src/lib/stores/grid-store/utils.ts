@@ -13,7 +13,7 @@ import { SortType } from '../../common';
 
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
-  defaultColumnDef?: ColumnDef,
+  defaultColumnDef?: Partial<ColumnDef>,
   level = 0,
   parent?: string
 ): ColumnStore => {
