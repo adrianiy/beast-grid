@@ -19,6 +19,8 @@ type Props<T> = {
   dragOptions?: BeastGridConfig<T>['dragOptions'];
 };
 
+const PADDING = 16;
+
 export default function HeaderCell<T>({ levelIdx, idx, height, column, columnDefs, dragOptions, multiSort }: Props<T>) {
   const menuRef = useRef<HTMLDivElement>(null);
   const lastX = useRef<number>(0);
@@ -71,9 +73,11 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, columnDef
     for (const element of dropTargets) {
       if (!element || element.id === column.id) continue;
 
-      const { left, right } = element.getBoundingClientRect();
+      const { left } = element.getBoundingClientRect();
+      const width = columnDefs[element.id].width;
+      const right = left + width;
       const { x } = pointer;
-      const hit = x > left && x < right;
+      const hit = x > (left - PADDING) && x < (right - PADDING);
 
       if (hit && element !== lastHitElement.current) {
         lastHitElement.current = element;
@@ -154,8 +158,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, columnDef
       <div
         className="bg-grid-header__cell__name row middle"
         data-name={column.headerName}
-        id={column.id}
         ref={drag}
+        id={column.id}
       >
         <span className="bg-grid-header-drop">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
