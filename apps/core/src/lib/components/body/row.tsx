@@ -5,7 +5,7 @@ type Props = {
   row: Row;
   columns: Column[];
   idx: number;
-  border: boolean;
+  border?: boolean;
   height: number;
   gap: number;
   level: number;
