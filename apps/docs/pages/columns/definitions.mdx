@@ -8,6 +8,8 @@ interface StyleProps {
   hidden: boolean;
   flex: number;
   menu?: boolean | Partial<MenuProps>;
+  aggregationLevel?: number;
+  aggregation?: AggregationType;
 }
 export interface MenuProps {
   column: boolean;
@@ -130,3 +132,24 @@ The flex value of the column. Follows the same rules as the flex property in CSS
 ### Required: `false`
 
 Whether to show the menu for the column. If `true`, it will show the default menu. If an object, it will show the menu with the properties specified in the object.
+
+## `aggregationLevel`
+### Type: `number`
+### Required: `false`
+
+If this level is set, data will be grouped by this column, on the specified level.
+
+## `aggregation`
+### Type: `AggregationType`
+### Required: `false`
+
+The type of aggregation to be used for this column. If not set, it will not show any data in the grouped row.
+
+The aggregation type is one of the following:
+
+- `sum`
+- `avg`
+- `min`
+- `max`
+- `count`
+
