@@ -6,7 +6,13 @@
   box-sizing: border-box;
   display: flex;
   width: 100%;
-  transition: var(--bg-transition--1);
+  transition: all ease-in-out var(--bg-transition--1);
+
+  svg {
+    &.active {
+      transform: rotate(90deg);
+    }
+  }
 
   &.bordered {
     border-bottom: var(--bg-border--2);

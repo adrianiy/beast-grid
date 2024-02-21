@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { RowCell } from './row-cell';
 
@@ -7,6 +7,7 @@ import { useBeastStore } from './../../stores/beast-store';
 import { Column, Data, Row, SortType } from '../../common';
 
 import './tbody.scss';
+import RowContainer from './row';
 
 type TBodyProps = {
   height: number;
@@ -20,6 +21,8 @@ const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 4;
 
 export default function TBody({ height, headerHeight, border, summary, onSortChange }: TBodyProps) {
+  const gaps = useRef<Record<number, number>>({});
+  const expandedRows = useRef<number>(0);
   const [data, columns, container, sort, filters, setSorting] = useBeastStore((state) => [
     state.data,
     state.columns,
@@ -46,7 +49,7 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
         const topRow = Math.floor(container.scrollTop / height);
         const bottomRow = topRow + visibleRows;
         const maxValue = Math.min(data.length, bottomRow + THRESHOLD);
-        const minValue = Math.max(0, topRow - THRESHOLD);
+        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows.current);
 
         setMaxMin([maxValue, minValue]);
       };
@@ -58,24 +61,29 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
   }, [container, headerHeight, height, levels.length, data.length]);
 
   useEffect(() => {
-    const someActive = Object.entries(filters).some(([key, value]) => value.length && value.length !== columns[key].filterOptions?.length);
-    setSortedData(someActive ?
-      data.filter((d) => {
-        let show = true;
+    const someActive = Object.entries(filters).some(
+      ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
+    );
+    setSortedData(
+      someActive
+        ? data.filter((d) => {
+          let show = true;
 
-        for (const filterKey of Object.keys(filters)) {
-          if (filters[filterKey].includes(`${d[columns[filterKey].field]}`)) {
-            show = show && true;
-          } else {
-            show = show && false;
+          for (const filterKey of Object.keys(filters)) {
+            if (filters[filterKey].includes(`${d[columns[filterKey].field]}`)) {
+              show = show && true;
+            } else {
+              show = show && false;
+            }
           }
-        }
-        return show;
-      }) : data
+          return show;
+        })
+        : data
     );
   }, [data, columns, filters]);
 
   useEffect(() => {
+    gaps.current = {};
     if (sortedData.length > 0) {
       const sortColumns = Object.values(columns)
         .filter((c) => c.sort)
@@ -104,6 +112,12 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
         if (onSortChange) {
           const result = await onSortChange(sortedData, sortColumns);
 
+          result.forEach((row, idx) => {
+            if (row._expanded) {
+              updateGaps(height * row.children.length, idx);
+            }
+          });
+
           if (result) {
             setSortedData(result);
           }
@@ -113,6 +127,11 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
           }
           setTimeout(() => {
             sortedData.sort(sortData);
+            sortedData.forEach((row, idx) => {
+              if (row._expanded) {
+                updateGaps(height * row.children.length, idx);
+              }
+            });
 
             setSortedData(sortedData);
             if (data.length > PERFORMANCE_LIMIT) {
@@ -128,37 +147,67 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
 
   const lastLevel = levels[levels.length - 1];
 
-  const getClass = () => {
-    return `grid-row ${border ? 'bordered' : ''}`;
+  const updateGaps = (gap: number, idx: number) => {
+    for (let i = idx + 1; i < data.length; i++) {
+      gaps.current[i] = (gaps.current[i] || 0) + gap;
+    }
+  };
+
+  const handleRowExpand = (row: Row, idx: number) => () => {
+    if (row._expanded) {
+      row._expanded = false;
+      expandedRows.current -= row.children.length;
+      updateGaps(height * row.children.length * -1, idx);
+      setMaxMin([max - row.children.length, min]);
+    } else {
+      row._expanded = true;
+      updateGaps(height * row.children.length, idx);
+      expandedRows.current += row.children.length;
+      setMaxMin([max + row.children.length, min]);
+    }
   };
 
   const createDataSlice = () => {
     const renderArray = [];
+    const childrenArray = [];
     for (let idx = min; idx < max; idx++) {
       const row = sortedData[idx];
 
       if (row) {
         renderArray.push(
-          <div key={idx} className={getClass()} style={{ top: height * idx, height }}>
-            {lastLevel?.map((column, idx) => (
-              <RowCell key={idx} height={height} row={row} columnDef={column} />
-            ))}
-          </div>
+          <RowContainer
+            key={idx}
+            row={row}
+            columns={lastLevel}
+            idx={idx}
+            border={border}
+            height={height}
+            onClick={handleRowExpand}
+            gap={gaps.current[idx] || 0}
+          />
         );
+        if (row._expanded) {
+          for (let i = 0; i < row.children.length; i++) {
+            const child = row.children[i];
+            childrenArray.push(
+              <RowContainer
+                key={`children-${idx}-${i}`}
+                row={child}
+                columns={lastLevel}
+                idx={idx + i + 1}
+                border={border}
+                height={height}
+                gap={gaps.current[idx] || 0}
+                level={1}
+              />
+            );
+          }
+        }
       }
     }
 
-    return renderArray;
+    return renderArray.concat(...childrenArray);
   };
 
-  return (
-    <div className="grid-body">
-      {sortedData.length > 0 && createDataSlice()}
-      {summary && sortedData.length >= (max - THRESHOLD) && (
-        <div className="grid-row-cell" style={{ height, top: height * data.length }}>
-          ghost summary
-        </div>
-      )}
-    </div>
-  );
+  return <div className="grid-body">{sortedData.length > 0 && createDataSlice()}</div>;
 }

@@ -15,3 +15,11 @@ export enum Direction {
 export enum FilterType {
   STRING = 'string'
 }
+
+export enum AggregationType {
+  SUM = 'sum',
+  AVG = 'avg',
+  COUNT = 'count',
+  MAX = 'max',
+  MIN = 'min',
+}

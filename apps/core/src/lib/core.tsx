@@ -63,11 +63,11 @@ export function BeastGrid<T>({
     if (ref.current && config?.columnDefs) {
       const columns = getColumnsFromDefs(config.columnDefs, config.defaultColumnDef);
 
-      initialize(columns, ref.current, config.data as Data);
+      const data = initialize(columns, ref.current, config.data as Data);
 
       const gridStore: TGridStore = () =>
         createGridStore({
-          data: config.data as Data,
+          data,
           columns,
           allowMultipleColumnSort: !!config.mulitSort,
           container: ref.current as HTMLDivElement,
