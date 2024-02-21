@@ -6,11 +6,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-function createRandomUser() {
+function createRandomUser(id) {
   return {
-    id: faker.string.uuid(),
+    id,
     name: faker.internet.userName(),
     country: faker.location.country(),
+    age: faker.number.int({ min: 18, max: 100 }),
     orders: faker.number.int({ min: 0, max: 100000 }),
     january: faker.number.int({ min: 0, max: 100000 }),
     february: faker.number.int({ min: 0, max: 100000 }),
@@ -28,7 +29,7 @@ function createRandomUser() {
 }
 
 const createData = (count) => {
-  return Array.from({ length: count }, () => createRandomUser());
+  return Array.from({ length: count }, (_,idx) => createRandomUser(idx));
 };
 
 const sortData = (sortColumns) => (a, b) => {

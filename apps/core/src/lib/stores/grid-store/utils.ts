@@ -7,9 +7,11 @@ import {
   ColumnStore,
   Data,
   IFilter,
+  Row,
 } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { SortType } from '../../common';
+import { groupBy } from '../../utils/functions';
 
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
@@ -60,6 +62,18 @@ export const getColumnsFromDefs = (
   return columns;
 };
 
+export const groupDataByColumnDefs = (columns: ColumnStore, data: Data): Data => {
+  const aggregationLevels = Object.values(columns).filter(c => c.aggregationLevel);
+  const aggregatedColumns = Object.values(columns).filter(c => c.aggregation);
+  
+  let finalData: Row[] = data;
+  aggregationLevels.forEach((column) => {
+    finalData = groupBy(finalData, column, aggregatedColumns);
+  });
+
+  return finalData;
+}
+
 export const getColumnArrayFromDefs = (
   columnStore: ColumnStore
 ): Column[][] => {
@@ -74,10 +88,13 @@ export const getColumnArrayFromDefs = (
   return columns;
 };
 
-export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data) => {
+export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data): Data => {
+  const finalData = groupDataByColumnDefs(columns, data);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
   moveColumns(columns);
+
+  return finalData;
 };
 
 export const setColumnsStyleProps = (

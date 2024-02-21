@@ -1,0 +1,53 @@
+# Grouping Example
+
+Here is an example of row grouping in Beast Grid.
+
+In this example, we have a list of users with their Country, name, amount, and orders. We want to group the data based on the user country, and sum amount and orders for each country.
+
+```tsx
+import 'beast-grid/style.css'
+
+import numeral from 'numeral';
+import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { User, data } from './data';
+
+export default function Grid() {
+
+  const columnDefs: ColumnDef[] = [
+    { headerName: 'COUNTRY', field: 'country', sortable: false, aggregationLevel: 1 },
+    { headerName: 'NAME', field: 'username', sortable: false },
+    {
+      headerName: 'AMOUNT',
+      field: 'money',
+      aggregation: AggregationType.SUM,
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'ORDERS',
+      field: 'orders',
+      aggregation: AggregationType.SUM,
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0'),
+    },
+  ];
+  const config: BeastGridConfig<User[]> = {
+    data,
+    columnDefs,
+    border: true,
+    mulitSort: true,
+  };
+
+  return (
+    <div style={{ height: 400, width: '100%' }}>
+      <BeastGrid config={config} />
+    </div>
+  );
+}
+```
+---
+
+import Example from '../../components/examples/grouping.tsx'
+
+<Example />
+

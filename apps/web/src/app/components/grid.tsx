@@ -4,6 +4,7 @@ import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
 import {
+    AggregationType,
   BeastGrid,
   BeastGridApi,
   BeastGridConfig,
@@ -20,12 +21,14 @@ type Props = {
   config?: Partial<BeastGridConfig<User[]>>;
 };
 const columnDefs: ColumnDef[] = [
-  { headerName: 'ID', field: 'id', sortable: false },
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true, aggregationLevel: 1 },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
   { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
-  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true },
-  ...months.map((month) => ({
+  { headerName: 'AGE', field: 'age', width: 100, menu: true },
+  ...months.map((month): ColumnDef => ({
     headerName: month.toUpperCase(),
     field: month,
+    aggregation: AggregationType.SUM,
     flex: 1,
     formatter: (value: number) => numeral(value).format('0,0 $')
   })),

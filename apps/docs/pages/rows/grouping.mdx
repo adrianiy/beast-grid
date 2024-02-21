@@ -1,0 +1,34 @@
+# Grouping
+
+BeastGrid supports grouping of data!
+
+You can group data by a column or multiple columns or adding a `children` attribute to the rows by yourself.
+
+To configure beastgrid to group data by a column, you can use the [`aggregationLevel`](../columns/definitions#aggregationlevel) attribute in the `columnDef` configuration.
+
+You might also want to set the aggregation function for the columns that are not being grouped. You can do this using the [`aggregation`](../columns/definitions#aggregation) attribute in the `columnDef` configuration.
+
+```tsx
+const columnDefs: ColumnDef[] = [
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true, aggregationLevel: 1 },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
+  { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+  { headerName: 'AGE', field: 'age', width: 100, menu: true },
+  ...months.map((month): ColumnDef => ({
+    headerName: month.toUpperCase(),
+    field: month,
+    aggregation: AggregationType.SUM,
+    flex: 1,
+    formatter: (value: number) => numeral(value).format('0,0 $')
+  })),
+];
+```
+
+In this example, the data will be grouped by the `country` column.
+
+
+You can check the [Grouping example](../example/grouping) to see it in action.
+
+
+
+

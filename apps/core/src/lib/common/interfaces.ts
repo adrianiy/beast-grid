@@ -1,7 +1,11 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { FilterType, SortType } from './enums';
+import { AggregationType, FilterType, SortType } from './enums';
 
-export type Row = Record<string, string | number | unknown>;
+export interface Row {
+  [key: string]: unknown;
+  id?: string;
+  children?: Row[];
+}
 
 export type Data = Row[];
 
@@ -35,6 +39,8 @@ export interface BaseColumnDef {
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
   menu?: boolean | Partial<MenuProps>;
+  aggregationLevel?: number;
+  aggregation?: AggregationType;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
