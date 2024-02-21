@@ -1,4 +1,4 @@
-import { Column } from "beast-grid";
+import { Column } from 'beast-grid';
 
 export interface User {
   userId: number;
@@ -35,7 +35,7 @@ export const sortData = async (data: User[], columns: Column[]) => {
   });
   const sortedData = await response.json();
   return sortedData;
-}
+};
 
 export const months = [
   'january',
@@ -58,12 +58,14 @@ import numeral from 'numeral';
 import { User, data, months } from '../api/data';
 
 const columnDefs: ColumnDef[] = [
-  { headerName: 'ID', field: 'id', sortable: false },
-  { headerName: 'NAME', field: 'name', width: 200 },
-  { headerName: 'COUNTRY', field: 'country', width: 200 },
-  ...months.map((month) => ({
+  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true, aggregationLevel: 1 },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
+  { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+  { headerName: 'AGE', field: 'age', width: 100, menu: true },
+  ...months.map((month): ColumnDef => ({
     headerName: month.toUpperCase(),
     field: month,
+    aggregation: AggregationType.SUM,
     flex: 1,
     formatter: (value: number) => numeral(value).format('0,0 $')
   })),
@@ -78,6 +80,9 @@ export default function Grid() {
     sortable: true,
     mulitSort: true,
     summarize: true,
+    defaultColumnDef: {
+      menu: { column: true, grid: true },
+    },
   };
 
   return (
