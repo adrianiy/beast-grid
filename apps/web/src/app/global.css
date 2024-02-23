@@ -67,15 +67,15 @@ html {
       --bg-background-color--1: var(--bg-demo-color--6);
       --bg-background-color--2: var(--bg-demo-color--3);
       --bg-text-color--1: var(--bg-demo-color--1);
-      --bg-border--1: 5px solid var(--bg-demo-color--0);
+      --bg-border--1: 1px solid var(--bg-demo-color--0);
     }
   }
   .minimal-theme {
     --bg-background-color--1: var(--bg-demo-color--7);
     --bg-background-color--2: var(--bg-demo-color--3);
     --bg-text-color--1: var(--bg-demo-color--1);
-    --bg-border--1: 5px solid var(--bg-demo-color--0);
-    --bg-border--2: 5px solid var(--bg-demo-color--0);
+    --bg-border--1: 1px solid var(--bg-demo-color--0);
+    --bg-border--2: 1px solid var(--bg-demo-color--0);
   }
   .dark-theme {
     --bg-background-color--1: #202127;

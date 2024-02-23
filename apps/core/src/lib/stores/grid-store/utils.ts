@@ -1,14 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Column,
-  ColumnDef,
-  ColumnStore,
-  Data,
-  IFilter,
-  Row,
-} from './../../common/interfaces';
+import { Column, ColumnDef, ColumnStore, Data, IFilter, Row } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { SortType } from '../../common';
 import { groupBy } from '../../utils/functions';
@@ -34,8 +27,9 @@ export const getColumnsFromDefs = (
     const column: Column = {
       ...(defaultColumnDef || {}),
       ...columnDef,
-      position: idx,
-      width: columnDef.width || columnDef.minWidth || MIN_COL_WIDTH,
+      children: columnDef.children as Column[],
+      position: idx * (columns[parent || '']?.position || 1),
+      width: 0,
       top: 0,
       left: 0,
       final: !columnDef.children || columnDef.children.length === 0,
@@ -47,36 +41,30 @@ export const getColumnsFromDefs = (
     columns[id] = column;
 
     if (columnDef.children) {
-      const childrenColumns = getColumnsFromDefs(
-        columnDef.children,
-        defaultColumnDef,
-        level + 1,
-        id
-      );
+      const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, id);
+      column.children = Object.values(childrenColumns);
 
       Object.assign(columns, childrenColumns);
     }
   });
 
-  // Return columns and accumulator
+  // Return columns
   return columns;
 };
 
 export const groupDataByColumnDefs = (columns: ColumnStore, data: Data): Data => {
-  const aggregationLevels = Object.values(columns).filter(c => c.aggregationLevel);
-  const aggregatedColumns = Object.values(columns).filter(c => c.aggregation);
-  
+  const aggregationLevels = Object.values(columns).filter((c) => c.aggregationLevel);
+  const aggregatedColumns = Object.values(columns).filter((c) => c.aggregation);
+
   let finalData: Row[] = data;
   aggregationLevels.forEach((column) => {
     finalData = groupBy(finalData, column, aggregatedColumns);
   });
 
   return finalData;
-}
+};
 
-export const getColumnArrayFromDefs = (
-  columnStore: ColumnStore
-): Column[][] => {
+export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => {
   const columns = Object.values(columnStore).reduce((acc, column) => {
     if (!acc[column.level]) {
       acc[column.level] = [];
@@ -97,20 +85,10 @@ export const initialize = (columns: ColumnStore, container: HTMLDivElement, data
   return finalData;
 };
 
-export const setColumnsStyleProps = (
-  columnStore: ColumnStore,
-  containeWidth: number
-): ColumnStore => {
-  const finalColumns = Object.values(columnStore).filter(
-    (column) => column.final && !column.hidden
-  );
-  const dynamicColumns = finalColumns.filter(
-    (column) => !column.width || column.flex
-  );
-  const totalFlex = dynamicColumns.reduce(
-    (acc, column) => acc + (column.flex ?? 0),
-    0
-  );
+export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
+  const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
+  const dynamicColumns = finalColumns.filter((column) => !column.width || column.flex);
+  const totalFlex = dynamicColumns.reduce((acc, column) => acc + (column.flex ?? 0), 0);
 
   // Calculate width for user defined columns
   const fixedWidth = finalColumns.reduce(
@@ -124,10 +102,10 @@ export const setColumnsStyleProps = (
   // Set width for flex columns
   dynamicColumns.forEach((column) => {
     const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
-    columnStore[column.id].width = Math.max(
-      flexWidth,
-      column.minWidth || MIN_COL_WIDTH
-    );
+    column.width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
+    if (column.parent) {
+      columnStore[column.parent].width += column.width;
+    }
   });
 
   return columnStore;
@@ -135,19 +113,15 @@ export const setColumnsStyleProps = (
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (column.filterType) {
-      const values = Array.from(
-        new Set(data.map((row) => row[column.field]))
-      ).sort() as IFilter[];
-      
+    if (column.filterType && column.field) {
+      const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
+
       column.filterOptions = values;
     }
   });
-}
+};
 
-export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
-  let left = 0;
-
+export const moveColumns = (columns: ColumnStore) => {
   const levels = Object.values(columns).reduce((acc, column) => {
     const level = column.level || 0;
     acc[level] = acc[level] || [];
@@ -156,17 +130,30 @@ export const moveColumns = (columns: ColumnStore, statingPosition = 0) => {
   }, [] as Column[][]);
 
   levels.forEach((level) => {
-    const sortedColumns = [...level].sort((a, b) => a.position - b.position);
+    let left = 0;
+    let lastParent: string | undefined;
+    // sort by parent position and then by column position
+    const sortedColumns = [...level].sort((a, b) => {
+      const [aParent, bParent] = [columns[a.parent as string], columns[b.parent as string]];
+
+      if (aParent?.left > bParent?.left || aParent?.position > bParent?.position) {
+        return 1;
+      } else if (aParent?.left < bParent?.left || aParent?.position < bParent?.position) {
+        return -1;
+      } else {
+        return a.left - b.left || a.position - b.position;
+      }
+    });
 
     sortedColumns.forEach((column) => {
+      if (lastParent !== column.parent) {
+        left = 0;
+        lastParent = column.parent;
+      }
       if (columns[column.id].hidden) {
         return;
       }
-      if (columns[column.id].position <= statingPosition) {
-        left += columns[column.id].width || 150;
-        return;
-      }
-      columns[column.id].left = left;
+      columns[column.id].left = left + (columns[column.parent as string]?.left || 0);
       left += columns[column.id].width || 150;
     });
   });
@@ -179,10 +166,7 @@ export const addSort = (
   order: SortType = SortType.ASC
 ) => {
   if (multipleColumnSort) {
-    const lastPriority = columnsWithSort.reduce(
-      (acc, col) => Math.max(acc, col.sort!.priority),
-      0
-    );
+    const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort!.priority), 0);
 
     column.sort = {
       order,
@@ -211,8 +195,62 @@ export const removeSort = (column: Column, columnsWithSort: Column[]) => {
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   let timeout: NodeJS.Timeout;
-  return function (this: unknown, ...args: unknown[]) {
+  return function(this: unknown, ...args: unknown[]) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), wait);
   };
 };
+
+export const getParentClone = (column: Column, columns: ColumnStore): Column => {
+  if (!column.parent) {
+    return column;
+  }
+  const id = uuidv4();
+  const parent = columns[column.parent];
+  const parentClone = { ...parent, id, original: column.parent, children: [column] };
+  parent.children = parent.children?.filter((child) => child.id !== column.id);
+  changeCloneStyles(column, parent, parentClone);
+
+  return getParentClone(parentClone, columns);
+}
+
+export const cloneColumn = (column: Column, columns: ColumnStore): Column => {
+  const parentClone = getParentClone(column, columns);
+
+  columns[parentClone.id] = parentClone;
+
+  return parentClone; 
+}
+
+export const changeCloneStyles = (column: Column, parent: Column, destiny: Column) => {
+  parent.width = parent.children?.reduce((acc, child) => acc + child.width, 0) || 0;
+  destiny.left = column.left;
+  destiny.width = column.width;
+}
+
+export const swapPositions = (column1: Column, column2: Column) => {
+    // change positions
+  if (column1.left < column2.left) {
+    column2.left = column1.left;
+    column1.left = column1.left + column2.width;
+  } else {
+    column1.left = column2.left;
+    column2.left = column2.left + column1.width;
+  }
+
+  if (column1.children) {
+    let left = column1.left;
+    column1.children.forEach((child) => {
+      child.left = left;
+      left += child.width;
+    });
+  }
+
+  if (column2.children) {
+    let left = column2.left;
+    column2.children.forEach((child) => {
+      child.left = left;
+      left += child.width;
+    });
+  }
+}

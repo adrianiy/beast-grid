@@ -1,6 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
-import DndLayer from './components/dnd/dnd-layer';
 import Header from './components/header/header';
 import TBody from './components/body/tbody';
 import Summary from './components/summary/summary';
@@ -90,7 +89,6 @@ export function BeastGrid<T>({
         <MenuStoreProvider createStore={menuStore}>
           <BeastGridProvider createStore={beastGridStore}>
             <BeastApi store={api} />
-            <DndLayer />
             <LoaderLayer />
             <MenuLayer />
             <Header

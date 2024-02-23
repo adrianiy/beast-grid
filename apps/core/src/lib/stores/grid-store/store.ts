@@ -2,6 +2,7 @@ import { StoreApi, create } from 'zustand';
 import {
     addFilter,
   changeSort,
+  fixColumnPositions,
   hideColumn,
   resetColumnConfig,
   resizeColumn,
@@ -31,6 +32,7 @@ export interface GridStore extends GridState, InferedState {
   setColumns: (columns: ColumnStore) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
+  fixColumnPositions: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
   resetColumnConfig: (id: ColumnId) => void;
@@ -52,6 +54,7 @@ export const createGridStore = (initialState: GridState) =>
     setColumns: (columns: ColumnStore) => set({ columns }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
+    fixColumnPositions: () => set(fixColumnPositions()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),
     resetColumnConfig: (id: ColumnId) => set(resetColumnConfig(id)),

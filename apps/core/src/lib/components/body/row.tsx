@@ -1,6 +1,8 @@
 import { Column, Row } from '../../common';
 import { RowCell } from './row-cell';
 
+import cn from 'classnames';
+
 type Props = {
   row: Row;
   columns: Column[];
@@ -12,17 +14,13 @@ type Props = {
   onClick?: (row: Row, idx: number) => () => void;
 };
 
-const LEVEL_PADDING = 24;
+const LEVEL_PADDING = 32;
 
 export default function RowContainer({ row, columns, idx, border, height, gap, level, onClick }: Props) {
-  const getClass = () => {
-    return `grid-row ${border ? 'bordered' : ''}`;
-  };
-  
   return (
     <div
       key={idx}
-      className={getClass()}
+      className={cn('grid-row', border && 'bordered', row.children && 'expandable')}
       style={{ top: (height * idx) + gap, height }}
       onClick={onClick?.(row, idx)}
     >

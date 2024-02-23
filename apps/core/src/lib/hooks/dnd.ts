@@ -1,16 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { DragItem } from './../stores/dnd-store/store';
 import { useDndStore } from '../stores/dnd-store';
 import { Coords, Direction } from '../common';
-
-let emptyImage: HTMLImageElement;
-export function getEmptyImage() {
-  if (!emptyImage) {
-    emptyImage = new Image();
-    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-  }
-  return emptyImage;
-}
 
 export type OnAnimationFrame = (direction: Direction, pointerCoords: Coords) => void;
 export type OnDirectionChange = (direction: Direction) => void;
@@ -18,16 +8,15 @@ export type OnDragStart = (e: DragEvent) => void;
 export type OnDrag = (e: DragEvent) => void;
 export type OnDragEnd = (e: DragEvent) => void;
 
-export const useDndHook = <T>(
-  item: DragItem & T,
+export const useDndHook = (
   options: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
     isDropTarget: boolean;
     onDirectionChange: (direction: Direction) => void;
     onDragStart: (e: DragEvent) => void;
-    onDrag: (e: DragEvent) => void;
-    onDragEnd: (e: DragEvent) => void;
+    onDrag: (e: DragEvent, pointerCoords: Coords) => void;
+    onDragEnd: (e: DragEvent, pointerCoords: Coords) => void;
     onAnimationFrame: (pointerCoords: Coords) => void;
   }>,
   parent?: HTMLDivElement
@@ -35,17 +24,13 @@ export const useDndHook = <T>(
   const ref = useRef<HTMLDivElement>(null);
   const reqAnimFrameNo = useRef<number>(0);
   const coords = useRef({ x: 0, y: 0 });
+  const pointer = useRef({ x: 0, y: 0 });
   const direction = useRef<Direction>();
-  const emptyImage = getEmptyImage();
-  const [setDragItem, setCoords, setPointer, setDirection, addDropTarget] = useDndStore((state) => [
-    state.setDragItem,
-    state.setCoords,
-    state.setPointer,
-    state.setDirection,
-    state.addDropTarget
+  const [addDropTarget] = useDndStore((state) => [
+    state.addDropTarget,
   ]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (options?.isDropTarget && ref.current) {
       addDropTarget(ref.current);
     }
@@ -114,7 +99,7 @@ export const useDndHook = <T>(
 
     const handleAnimations = () => {
       options?.onAnimationFrame?.(coords.current);
-      
+
       if (!parent || !coords) {
         reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
         return;
@@ -124,14 +109,9 @@ export const useDndHook = <T>(
 
       reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
     };
-    
+
     const onDragStart = (e: DragEvent) => {
-      setDragItem(item);
-      setPointer(_getPointerPositionInParent());
-
       coords.current = { x: e.clientX, y: e.clientY };
-
-      setCoords(coords.current);
 
       if (parent) {
         parent.style.overflow = 'hidden';
@@ -139,8 +119,6 @@ export const useDndHook = <T>(
       reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
 
       if (e.dataTransfer) {
-        e.dataTransfer.setData('id', item.id);
-        e.dataTransfer.setDragImage(emptyImage, -10, -10);
         e.dataTransfer.effectAllowed = 'move';
       }
 
@@ -157,16 +135,14 @@ export const useDndHook = <T>(
           direction.current = newDirection;
           options?.onDirectionChange?.(newDirection);
         }
-        setDirection(newDirection);
       }
 
       coords.current = { x: e.clientX, y: e.clientY };
+      pointer.current = _getPointerPositionInParent();
 
-      setCoords(coords.current);
-      setPointer(_getPointerPositionInParent());
 
       if (options?.onDrag) {
-        options.onDrag(e);
+        options.onDrag(e, pointer.current);
       }
     };
 
@@ -181,12 +157,11 @@ export const useDndHook = <T>(
         parent.style.overflow = 'scroll';
       }
       if (options?.onDragEnd) {
-        options.onDragEnd(e);
+        options.onDragEnd(e, pointer.current);
       }
-      setCoords({ x: 0, y: 0 });
-      setDragItem(undefined);
       return false;
     };
+
     if (ref.current) {
       const dragRef = ref.current;
 
@@ -205,6 +180,21 @@ export const useDndHook = <T>(
       };
     }
   }, [ref]);
+
+  useEffect(() => {
+    document.addEventListener('dragover', cancel, true);
+    document.addEventListener('dragenter', cancel, true);
+
+    return () => {
+      document.removeEventListener('dragover', cancel, true);
+      document.removeEventListener('dragenter', cancel, true);
+    };
+  }, []);
+
+  const cancel = (e: DragEvent) => {
+    e.preventDefault();
+    return false;
+  };
 
   return [ref];
 };

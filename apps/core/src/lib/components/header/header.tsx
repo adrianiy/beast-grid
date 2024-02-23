@@ -38,9 +38,8 @@ export default function Header<T>({
               levelIdx={levelIdx}
               idx={idx}
               multiSort={!!multiSort}
-              height={height}
+              height={height + (!column.children ? height * (levels.length - levelIdx - 1) : 0)}
               column={column}
-              columnDefs={columns}
               dragOptions={dragOptions}
             />
           ))}

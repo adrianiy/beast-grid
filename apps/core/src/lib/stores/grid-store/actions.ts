@@ -2,7 +2,7 @@
 import { Column, ColumnId, IFilter } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 
-import { addSort, moveColumns, removeSort, setColumnsStyleProps } from './utils';
+import { addSort, cloneColumn, moveColumns, removeSort, setColumnsStyleProps, swapPositions } from './utils';
 import { GridStore } from './store';
 import { FilterType, SortType } from '../../common';
 
@@ -36,39 +36,57 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
   const { columns } = state;
-  const column1 = columns[id1];
-  const column2 = columns[id2];
+  let column1 = columns[id1];
+  let column2 = columns[id2];
 
   if (!column1 || !column2) {
     return state;
   }
 
-  // change positions
-  const temp = column1.position;
-  column1.position = column2.position;
-  column2.position = temp;
-
-  if (column1.left < column2.left) {
-    column2.left = column1.left;
-    column1.left = column1.left + column2.width;
-  } else {
-    column1.left = column2.left;
-    column2.left = column2.left + column1.width;
+  if (column1.parent !== column2.parent) {
+    if (column1.parent) {
+      column1 = cloneColumn(column1, columns);
+    }
+    if (column2.parent) {
+      column2 = cloneColumn(column2, columns);
+    }
   }
 
-  moveColumns(columns);
+  // change positions
+  swapPositions(column1, column2);
 
   return { ...columns };
 };
+
+export const fixColumnPositions = () => (state: GridStore) => {
+  const { columns } = state;
+
+  moveColumns(columns);
+
+  return { columns };
+}
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
   const { columns } = state;
   const column = columns[id];
 
+  const prevWidth = column.width;
+
   column.width = Math.max(width, column.minWidth || MIN_COL_WIDTH);
   column.flex = undefined;
 
-  moveColumns(columns, column.position);
+  if (column.parent) {
+    const diff = column.width - prevWidth;
+    columns[column.parent].width += diff;
+  }
+  if (column.children) {
+    const diff = (column.width - prevWidth) / column.children.length;
+    column.children.forEach((child) => {
+      child.width += diff;
+    });
+  }
+
+  moveColumns(columns);
 
   return { columns };
 };
@@ -91,7 +109,7 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
   } else {
     removeSort(column, sortedColumns);
   }
-  
+
   columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
 
   return { columns, sort: columnsWithSort.map((col) => col.id) };
@@ -109,19 +127,18 @@ export const addFilter = (id: ColumnId, value: IFilter) => (state: GridStore) =>
     }
   }
 
-  return { columns, filters: {...filters} };
+  return { columns, filters: { ...filters } };
 };
 
 export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
   const { columns, filters } = state;
   const column = columns[id];
-  
+
   if (column.filterOptions?.length === filters[id]?.length) {
     filters[id] = [];
   } else {
     filters[id] = column.filterOptions as string[];
   }
-  
-  return { columns, filters: {...filters} };
-}
 
+  return { columns, filters: { ...filters } };
+};
