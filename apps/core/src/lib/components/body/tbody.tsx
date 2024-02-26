@@ -149,19 +149,7 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
         }
     }, [sort]);
 
-    const getFinalColumns = (columns: Column[]) => {
-        const finalColumns: Column[] = columns.reduce((acc, curr) => {
-            if (curr.children) {
-                return acc.concat(getFinalColumns(curr.children));
-            }
-            return acc.concat(curr);
-        }, [] as Column[]);
-
-        return finalColumns;
-    }
-    const lastLevel = levels.reduce((acc, curr) => {
-        return acc.concat(getFinalColumns(curr));
-    }, [] as Column[]);
+    const lastLevel = Object.values(columns).filter(c => c.final);
     
     const updateGaps = (gap: number, idx: number) => {
         for (let i = idx + 1; i < data.length; i++) {

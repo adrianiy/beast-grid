@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDndStore } from '../stores/dnd-store';
 import { Coords, Direction } from '../common';
+import { DragItem } from '../stores/dnd-store/store';
 
 export type OnAnimationFrame = (direction: Direction, pointerCoords: Coords) => void;
 export type OnDirectionChange = (direction: Direction) => void;
@@ -9,6 +10,7 @@ export type OnDrag = (e: DragEvent) => void;
 export type OnDragEnd = (e: DragEvent) => void;
 
 export const useDndHook = (
+  item: DragItem,
   options: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
@@ -26,8 +28,12 @@ export const useDndHook = (
   const coords = useRef({ x: 0, y: 0 });
   const pointer = useRef({ x: 0, y: 0 });
   const direction = useRef<Direction>();
-  const [addDropTarget] = useDndStore((state) => [
+  const preview = useRef<HTMLImageElement>(new Image());
+  const [addDropTarget, setDragItem, setPointer, setCoords] = useDndStore((state) => [
     state.addDropTarget,
+    state.setDragItem,
+    state.setPointer,
+    state.setCoords,
   ]);
 
   useEffect(() => {
@@ -71,6 +77,9 @@ export const useDndHook = (
         reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
         return;
       }
+
+      setPointer(pointer.current);
+      setCoords(coords.current);
       const { left, right } = parent.getBoundingClientRect();
       const pointerX = coords.current.x;
       const autoScrollMargin = options.autoScrollSpeed || 100;
@@ -111,6 +120,8 @@ export const useDndHook = (
     };
 
     const onDragStart = (e: DragEvent) => {
+      e.stopPropagation();
+      setDragItem(item);
       coords.current = { x: e.clientX, y: e.clientY };
 
       if (parent) {
@@ -120,6 +131,7 @@ export const useDndHook = (
 
       if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setDragImage(preview.current, 0, 0);
       }
 
       if (options?.onDragStart) {
@@ -128,6 +140,7 @@ export const useDndHook = (
     };
 
     const onDrag = (e: DragEvent) => {
+      e.stopPropagation();
       if (e.clientX !== coords.current.x) {
         const newDirection = e.clientX >= coords.current.x ? Direction.RIGHT : Direction.LEFT;
 
@@ -140,14 +153,14 @@ export const useDndHook = (
       coords.current = { x: e.clientX, y: e.clientY };
       pointer.current = _getPointerPositionInParent();
 
-
       if (options?.onDrag) {
         options.onDrag(e, pointer.current);
       }
     };
 
     const onDragEnd = (e: DragEvent) => {
-      e.preventDefault();
+      e.stopPropagation();
+      setDragItem(undefined);
 
       coords.current = { x: 0, y: 0 };
 
@@ -162,8 +175,13 @@ export const useDndHook = (
       return false;
     };
 
+    const cancel = (e: DragEvent) => {
+      e.preventDefault();
+      return false;
+    };
     if (ref.current) {
       const dragRef = ref.current;
+      preview.current.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
       dragRef.setAttribute('draggable', 'true');
 
@@ -172,29 +190,20 @@ export const useDndHook = (
       dragRef.addEventListener('drag', onDrag);
 
       dragRef.addEventListener('dragend', onDragEnd);
+      document.addEventListener('dragover', cancel, true);
+      document.addEventListener('dragenter', cancel, true);
 
       return () => {
+        cancelAnimationFrame(reqAnimFrameNo.current);
+        setDragItem(undefined);
+        document.removeEventListener('dragover', cancel, true);
+        document.removeEventListener('dragenter', cancel, true);
         dragRef.removeEventListener('dragstart', onDragStart);
         dragRef.removeEventListener('drag', onDrag);
         dragRef.removeEventListener('dragend', onDragEnd);
       };
     }
   }, [ref]);
-
-  useEffect(() => {
-    document.addEventListener('dragover', cancel, true);
-    document.addEventListener('dragenter', cancel, true);
-
-    return () => {
-      document.removeEventListener('dragover', cancel, true);
-      document.removeEventListener('dragenter', cancel, true);
-    };
-  }, []);
-
-  const cancel = (e: DragEvent) => {
-    e.preventDefault();
-    return false;
-  };
 
   return [ref];
 };

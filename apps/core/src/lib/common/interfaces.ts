@@ -80,10 +80,12 @@ export interface Column extends ColumnDef, Position {
   level: number;
   final: boolean;
   width: number;
-  children?: Column[];
+  childrenId?: ColumnId[];
   sort?: SortConfig;
   parent?: ColumnId;
   original?: ColumnId;
+  originalParent?: ColumnId;
+  logicDelete?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;

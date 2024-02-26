@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ArrowUpward, ArrowDownward, Menu, VisibilityOff } from '@mui/icons-material';
+import { ArrowUpward, ArrowDownward, Menu } from '@mui/icons-material';
 import { BeastGridConfig, Column, Coords, SortConfig } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
@@ -23,22 +23,25 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
-  const [columns, moveColumns, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
-    state.columns,
-    state.fixColumnPositions,
-    state.hideColumn,
-    state.swapColumns,
-    state.resizeColumn,
-    state.container,
-    state.changeSort,
-  ]);
-  const [pointer, coords, dropTargets] = useDndStore((state) => [state.pointer, state.coords, state.dropTargets]);
+  const [columns, hideColumn, cleanColumns, swapColumns, resizeColumn, container, changeSort] = useBeastStore(
+    (state) => [
+      state.columns,
+      state.hideColumn,
+      state.cleanColumns,
+      state.swapColumns,
+      state.resizeColumn,
+      state.container,
+      state.changeSort,
+    ]
+  );
+  const [dropTargets] = useDndStore((state) => [state.dropTargets]);
   const [menuColumn, initializeMenu, setMenuColumn] = useMenuStore((state) => [
     state.column,
     state.initializeState,
     state.setColumn,
   ]);
   const [drag] = useDndHook(
+    { id: column.id, text: column.headerName, isInside: true },
     {
       ...dragOptions,
       isDropTarget: true,
@@ -50,6 +53,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     container
   );
   const [resize] = useDndHook(
+    { id: column.id, hidePreview: true },
     {
       ...dragOptions,
       onAnimationFrame: handleResize,
@@ -70,7 +74,14 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function hitTest(_: DragEvent, pointer: Coords) {
     pointerPosition.current = pointer;
     for (const element of dropTargets) {
-      if (!element || element.id === column.id || columns[element.id].level !== column.level || element.id === lastHitElement.current?.id)
+      if (
+        !columns[element.id] ||
+        !element ||
+        element.id === column.id ||
+        columns[element.id].parent === column.id ||
+        (columns[element.id].level !== column.level && !columns[element.id].final) ||
+        element.id === lastHitElement.current?.id
+      )
         continue;
 
       const { left } = element.getBoundingClientRect();
@@ -109,9 +120,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     if (pointer.x < 0 || pointer.y < 0) {
       lastHitElement.current = null;
       hideColumn(column.id);
-    } else {
-      moveColumns();
     }
+    cleanColumns();
   }
 
   const handleChangeSort = () => {
@@ -143,7 +153,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     );
   };
 
-  if (column.hidden) return null;
+  if (column.hidden || column.logicDelete) return null;
 
   const RightSide = () => {
     if (column.menu) {
@@ -158,7 +168,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     }
 
     return null;
-  }
+  };
 
   return (
     <div

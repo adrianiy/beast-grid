@@ -17,8 +17,6 @@ export default function Header<T>({
   multiSort?: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
 }) {
-  const dragBounds = useRef(null);
-
   const [columns] = useBeastStore((state) => [state.columns]);
 
   const levels = Object.values(columns).reduce((acc, column) => {
@@ -29,7 +27,7 @@ export default function Header<T>({
   }, [] as Column[][]);
 
   return (
-    <div ref={dragBounds} className="grid-header row between" style={{ height: height * levels.length }}>
+    <div className="grid-header row between" style={{ height: height * levels.length }}>
       {levels.map((level, levelIdx) => (
         <div className="grid-header-row row" style={{ height }} key={levelIdx}>
           {level.map((column, idx) => (

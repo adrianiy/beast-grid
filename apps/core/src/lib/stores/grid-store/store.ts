@@ -1,7 +1,8 @@
 import { StoreApi, create } from 'zustand';
 import {
-    addFilter,
+  addFilter,
   changeSort,
+  deleteEmptyParents,
   fixColumnPositions,
   hideColumn,
   resetColumnConfig,
@@ -11,7 +12,8 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { SortType } from '../../common';
+import { BeastGridConfig, SortType } from '../../common';
+import { getColumnsFromDefs, initialize, moveColumns } from './utils';
 
 interface GridState {
   data: Data;
@@ -33,6 +35,7 @@ export interface GridStore extends GridState, InferedState {
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
   fixColumnPositions: () => void;
+  cleanColumns: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
   resetColumnConfig: (id: ColumnId) => void;
@@ -44,8 +47,24 @@ export interface GridStore extends GridState, InferedState {
   selectAllFilters: (id: ColumnId) => void;
 }
 
-export const createGridStore = (initialState: GridState) =>
-  create<GridStore>((set) => ({
+export const createGridStore = <T>(
+  { data: _data, columnDefs, defaultColumnDef, mulitSort }: BeastGridConfig<T>,
+  container: HTMLDivElement
+) => {
+  const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
+  const data = initialize(columns, container, _data as Data);
+  
+  moveColumns(columns);
+
+  const initialState = {
+    data,
+    columns,
+    allowMultipleColumnSort: !!mulitSort,
+    container,
+    sort: [],
+  };
+  
+  return create<GridStore>((set) => ({
     ...initialState,
     filters: {},
     loading: false,
@@ -55,11 +74,11 @@ export const createGridStore = (initialState: GridState) =>
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
     fixColumnPositions: () => set(fixColumnPositions()),
+    cleanColumns: () => set(deleteEmptyParents()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),
     resetColumnConfig: (id: ColumnId) => set(resetColumnConfig(id)),
-    changeSort: (id: ColumnId, multipleColumnSort: boolean) =>
-      set(changeSort(id, multipleColumnSort)),
+    changeSort: (id: ColumnId, multipleColumnSort: boolean) => set(changeSort(id, multipleColumnSort)),
     setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) =>
       set(changeSort(sort, multipleColumnSort, sortType)),
     setLoading: (loading: boolean) => set({ loading }),
@@ -67,5 +86,6 @@ export const createGridStore = (initialState: GridState) =>
     addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
   }));
+};
 
 export type TGridStore = () => StoreApi<GridStore>;

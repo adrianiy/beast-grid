@@ -2,7 +2,15 @@
 import { Column, ColumnId, IFilter } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 
-import { addSort, cloneColumn, moveColumns, removeSort, setColumnsStyleProps, swapPositions } from './utils';
+import {
+  addSort,
+  getSwappableClone,
+  mergeColumns,
+  moveColumns,
+  removeSort,
+  setColumnsStyleProps,
+  swapPositions,
+} from './utils';
 import { GridStore } from './store';
 import { FilterType, SortType } from '../../common';
 
@@ -44,18 +52,30 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   }
 
   if (column1.parent !== column2.parent) {
-    if (column1.parent) {
-      column1 = cloneColumn(column1, columns);
-    }
-    if (column2.parent) {
-      column2 = cloneColumn(column2, columns);
-    }
+    [column1, column2] = getSwappableClone(column1, column2, columns);
   }
 
   // change positions
   swapPositions(column1, column2);
+  mergeColumns(columns);
+
+  if (column1.id !== id1 || column2.id !== id2 || column1.childrenId || column2.childrenId) {
+    moveColumns(columns);
+  }
 
   return { ...columns };
+};
+
+export const deleteEmptyParents = () => (state: GridStore) => {
+  const { columns } = state;
+
+  Object.values(columns).forEach((column) => {
+    if (column.logicDelete) {
+      delete columns[column.id];
+    }
+  });
+
+  return { columns };
 };
 
 export const fixColumnPositions = () => (state: GridStore) => {
@@ -64,7 +84,7 @@ export const fixColumnPositions = () => (state: GridStore) => {
   moveColumns(columns);
 
   return { columns };
-}
+};
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
   const { columns } = state;
