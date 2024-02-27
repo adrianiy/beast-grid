@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDndStore } from '../stores/dnd-store';
 import { Coords, Direction } from '../common';
 import { DragItem } from '../stores/dnd-store/store';
@@ -29,6 +29,7 @@ export const useDndHook = (
   const pointer = useRef({ x: 0, y: 0 });
   const direction = useRef<Direction>();
   const preview = useRef<HTMLImageElement>(new Image());
+  const isDragging = useRef<boolean>(false);
   const [addDropTarget, setDragItem, setPointer, setCoords] = useDndStore((state) => [
     state.addDropTarget,
     state.setDragItem,
@@ -122,6 +123,7 @@ export const useDndHook = (
     const onDragStart = (e: DragEvent) => {
       e.stopPropagation();
       setDragItem(item);
+      isDragging.current = true;
       coords.current = { x: e.clientX, y: e.clientY };
 
       if (parent) {
@@ -161,6 +163,7 @@ export const useDndHook = (
     const onDragEnd = (e: DragEvent) => {
       e.stopPropagation();
       setDragItem(undefined);
+      isDragging.current = false;
 
       coords.current = { x: 0, y: 0 };
 
@@ -195,7 +198,9 @@ export const useDndHook = (
 
       return () => {
         cancelAnimationFrame(reqAnimFrameNo.current);
-        setDragItem(undefined);
+        if (isDragging.current) {
+          setDragItem(undefined);
+        }
         document.removeEventListener('dragover', cancel, true);
         document.removeEventListener('dragenter', cancel, true);
         dragRef.removeEventListener('dragstart', onDragStart);

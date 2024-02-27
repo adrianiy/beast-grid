@@ -54,9 +54,11 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   if (column1.parent !== column2.parent) {
     [column1, column2] = getSwappableClone(column1, column2, columns);
   }
+  console.log(JSON.parse(JSON.stringify(column1)), JSON.parse(JSON.stringify(column2)))
 
   // change positions
   swapPositions(column1, column2);
+  console.log(JSON.parse(JSON.stringify(column1)), JSON.parse(JSON.stringify(column2)))
   mergeColumns(columns);
 
   if (column1.id !== id1 || column2.id !== id2 || column1.childrenId || column2.childrenId) {

@@ -23,11 +23,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
-  const [columns, hideColumn, cleanColumns, swapColumns, resizeColumn, container, changeSort] = useBeastStore(
+  const [columns, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore(
     (state) => [
       state.columns,
       state.hideColumn,
-      state.cleanColumns,
       state.swapColumns,
       state.resizeColumn,
       state.container,
@@ -74,12 +73,15 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function hitTest(_: DragEvent, pointer: Coords) {
     pointerPosition.current = pointer;
     for (const element of dropTargets) {
+      const elementColumn = columns[element?.id];
       if (
-        !columns[element.id] ||
-        !element ||
+        !elementColumn ||
+        elementColumn.logicDelete ||
         element.id === column.id ||
-        columns[element.id].parent === column.id ||
-        (columns[element.id].level !== column.level && !columns[element.id].final) ||
+        elementColumn.parent === column.id ||
+        elementColumn.level > column.level ||
+        (elementColumn.level < column.level && !elementColumn.final) ||
+        element.id === column.parent ||
         element.id === lastHitElement.current?.id
       )
         continue;
@@ -121,7 +123,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       lastHitElement.current = null;
       hideColumn(column.id);
     }
-    cleanColumns();
   }
 
   const handleChangeSort = () => {
@@ -183,6 +184,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       id={column.id}
       data-name={column.headerName}
       data-level={column.level}
+      data-clone={column.original}
       onClick={handleChangeSort}
     >
       <div className="bg-grid-header__cell__name row middle">

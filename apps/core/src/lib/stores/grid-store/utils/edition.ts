@@ -1,43 +1,64 @@
-import { ColumnStore, Column, SortType } from '../../../common';
+import { ColumnStore, Column, SortType, ColumnId } from '../../../common';
 
 const _updateParent = (column: Column, parent: Column, columns: ColumnStore) => {
   parent.childrenId?.forEach((id, idx) => {
     columns[id].position = idx;
     columns[id].parent = parent.id;
-    columns[id].originalParent = undefined;
+    columns[id].originalParent = parent.original;
   });
   parent.width += column.width;
 };
 const _mergeIn = (parent: Column, column: Column, columns: ColumnStore) => {
-  parent.childrenId?.push(...column.childrenId || []);
+  parent.childrenId?.push(...(column.childrenId || []));
   _updateParent(column, parent, columns);
 };
 const _mergeTo = (parent: Column, column: Column, columns: ColumnStore) => {
-  parent.childrenId = [...column.childrenId || [], ...(parent.childrenId || [])];
+  parent.childrenId = [...(column.childrenId || []), ...(parent.childrenId || [])];
   _updateParent(column, parent, columns);
 };
 
+export const changePosition = (columns: ColumnStore, pivot: Column, ignoreIds: ColumnId[], increase: number) => {
+  Object.values(columns).forEach((column) => {
+    if (column.position >= pivot.position && column.level === pivot.level && !ignoreIds.includes(column.id)) {
+      column.position += increase;
+    }
+  });
+};
+
 export const mergeColumns = (columns: ColumnStore) => {
-  const sortedColumns = Object.values(columns).sort(
-    (a, b) =>
-      a.level - b.level ||
-      columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
-      a.position - b.position
-  ).filter((column) => (column.final && !column.parent) || column.childrenId);
+  const sortedColumns = Object.values(columns)
+    .sort(
+      (a, b) =>
+        a.level - b.level ||
+        columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
+        a.position - b.position
+    )
+    .filter((column) => (column.final && !column.parent) || column.childrenId);
   let lastColumn: Column = sortedColumns[0];
+  let position = 0;
 
   for (const column of sortedColumns) {
+    if (column.parent !== lastColumn.parent) {
+      position = 0;
+    }
+    columns[column.id].position = position;
+    position++;
     if (lastColumn.id === column.original) {
       _mergeIn(lastColumn, column, columns);
+      changePosition(columns, lastColumn, [lastColumn.id], -1);
       delete columns[column.id];
+      position--;
     }
     if (lastColumn.original === column.id) {
       _mergeTo(column, lastColumn, columns);
-      delete columns[lastColumn.id]
+      delete columns[lastColumn.id];
+      position--;
     }
     if (lastColumn.original && lastColumn.original === column.original) {
       _mergeIn(lastColumn, column, columns);
-      delete columns[column.id]
+      changePosition(columns, lastColumn, [lastColumn.id], -1);
+      delete columns[column.id];
+      position--;
     }
     lastColumn = column;
   }
@@ -65,7 +86,6 @@ export const moveColumns = (columns: ColumnStore) => {
     columns[column.id].left = left + (columns[column.parent as string]?.left || 0);
     left += columns[column.id].width || 150;
   }
-  console.log('move', JSON.parse(JSON.stringify(sortedColumns)));
 };
 
 export const addSort = (
