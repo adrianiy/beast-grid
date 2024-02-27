@@ -42,11 +42,11 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
 
   return Object.entries(groups).map(([key, children]) => {
     const calculatedFields = calculatedColumns.reduce((acc, column) => {
-      acc[column.field] = _calculate(children, column);
+      acc[column.field as string] = _calculate(children, column);
       return acc;
     }, {} as Record<string, number | null>);
     
-    return { [column.field]: key, children: children, ...calculatedFields };
+    return { [column.field as string]: key, children: children, ...calculatedFields };
   });
   
 }
