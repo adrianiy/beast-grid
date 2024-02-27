@@ -33,7 +33,7 @@ export type IFilter = string | number | boolean;
 
 export interface BaseColumnDef {
   headerName: string;
-  field: string;
+  field?: string;
   sortable?: boolean;
   filterType?: FilterType;
   children?: ColumnDef[];
@@ -80,8 +80,12 @@ export interface Column extends ColumnDef, Position {
   level: number;
   final: boolean;
   width: number;
+  childrenId?: ColumnId[];
   sort?: SortConfig;
   parent?: ColumnId;
+  original?: ColumnId;
+  originalParent?: ColumnId;
+  logicDelete?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;

@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import { DragHandle, VisibilityOff } from '@mui/icons-material';
 import { useDndStore } from './../../stores/dnd-store';
 
@@ -12,24 +10,9 @@ export default function DndLayer() {
     state.pointer,
   ]);
 
-  useEffect(() => {
-    document.addEventListener('dragover', cancel, true);
-    document.addEventListener('dragenter', cancel, true);
-
-    return () => {
-      document.removeEventListener('dragover', cancel, true);
-      document.removeEventListener('dragenter', cancel, true);
-    };
-  }, []);
-
-  const cancel = (e: DragEvent) => {
-    e.preventDefault();
-    return false;
-  };
-
   const renderItem = () => {
     if (!dragItem || !coords || dragItem.hidePreview) return null;
-
+    
     return (
       <BoxDragPreview
         text={dragItem.text as string}

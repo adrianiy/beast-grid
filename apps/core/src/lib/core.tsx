@@ -1,6 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
-import DndLayer from './components/dnd/dnd-layer';
 import Header from './components/header/header';
 import TBody from './components/body/tbody';
 import Summary from './components/summary/summary';
@@ -25,6 +24,7 @@ import MenuLayer from './components/menu/menu-layer';
 import cn from 'classnames';
 
 import './core.scss';
+import DndLayer from './components/dnd/dnd-layer';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -61,18 +61,7 @@ export function BeastGrid<T>({
 
   useEffect(() => {
     if (ref.current && config?.columnDefs) {
-      const columns = getColumnsFromDefs(config.columnDefs, config.defaultColumnDef);
-
-      const data = initialize(columns, ref.current, config.data as Data);
-
-      const gridStore: TGridStore = () =>
-        createGridStore({
-          data,
-          columns,
-          allowMultipleColumnSort: !!config.mulitSort,
-          container: ref.current as HTMLDivElement,
-          sort: [],
-        });
+      const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement);
       const dndStore = () => createDndStore();
       const menuStore = () => createMenuStore();
 

@@ -20,6 +20,9 @@
       border-bottom: var(--bg-border--2);
     }
   }
+  &.expandable {
+    cursor: pointer
+  }
 }
 .grid-row-cell {
   position: absolute;
@@ -33,4 +36,9 @@
   text-overflow: ellipsis;
   color: var(--bg-text-color--1);
   background-color: var(--bg-background-color--1);
+
+
+  svg {
+    margin-right: var(--bg-size--2);
+  }
 }

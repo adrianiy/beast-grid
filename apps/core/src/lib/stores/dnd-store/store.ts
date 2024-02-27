@@ -18,7 +18,6 @@ export interface DndStore {
   setDirection: (direction?: 'right' | 'left') => void;
   addDropTarget: (target: HTMLElement) => void;
 }
-
 export const createDndStore = () =>
   create<DndStore>((set) => ({
     pointer: { x: 0, y: 0 },
@@ -27,17 +26,18 @@ export const createDndStore = () =>
     setCoords: (coords?: Coords) => set({ coords }),
     setPointer: (pointer?: Coords) => set({ pointer }),
     setDirection: (direction?: 'right' | 'left') => set({ direction }),
-    addDropTarget: (target: HTMLElement) => set((state) => {
-      const { dropTargets } = state;
+    addDropTarget: (target: HTMLElement) =>
+      set((state) => {
+        const { dropTargets } = state;
 
-      if (dropTargets.includes(target)) {
+        if (dropTargets.includes(target)) {
+          return { dropTargets };
+        }
+
+        dropTargets.push(target);
+
         return { dropTargets };
-      }
-      
-      dropTargets.push(target);
-
-      return { dropTargets };
-    }),
+      }),
   }));
 
 export type TDndStore = () => StoreApi<DndStore>;

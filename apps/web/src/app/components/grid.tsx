@@ -3,14 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import {
-    AggregationType,
-  BeastGrid,
-  BeastGridApi,
-  BeastGridConfig,
-  ColumnDef,
-  FilterType,
-} from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, FilterType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -21,17 +14,38 @@ type Props = {
   config?: Partial<BeastGridConfig<User[]>>;
 };
 const columnDefs: ColumnDef[] = [
-  { headerName: 'COUNTRY', field: 'country', width: 200, filterType: FilterType.STRING, menu: true, aggregationLevel: 1 },
+  {
+    headerName: 'COUNTRY',
+    field: 'country',
+    width: 200,
+    filterType: FilterType.STRING,
+    menu: true,
+    aggregationLevel: 1,
+  },
   { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
-  { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
-  { headerName: 'AGE', field: 'age', width: 100, menu: true },
-  ...months.map((month): ColumnDef => ({
-    headerName: month.toUpperCase(),
-    field: month,
-    aggregation: AggregationType.SUM,
-    flex: 1,
-    formatter: (value: number) => numeral(value).format('0,0 $')
-  })),
+  {
+    headerName: 'USER',
+    menu: false,
+    children: [
+      { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+      { headerName: 'AGE', field: 'age', width: 100, menu: true },
+    ],
+  },
+  {
+    headerName: 'MONTHS',
+    menu: false,
+    children: [
+      ...months.map(
+        (month): ColumnDef => ({
+          headerName: month.toUpperCase(),
+          field: month,
+          aggregation: AggregationType.SUM,
+          flex: 1,
+          formatter: (value: number) => numeral(value).format('0,0 $'),
+        })
+      ),
+    ],
+  },
 ];
 
 function SlideTransition(props: SlideProps) {
@@ -90,22 +104,15 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={error}
         onClose={handleClose}
-        TransitionComponent={
-          SlideTransition as React.ComponentType<TransitionProps>
-        }
+        TransitionComponent={SlideTransition as React.ComponentType<TransitionProps>}
         key={'copied'}
         autoHideDuration={1200}
       >
-        <Alert
-          onClose={handleClose}
-          severity="error"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleClose} severity="error" variant="filled" sx={{ width: '100%' }}>
           Error fetching data :(
         </Alert>
       </Snackbar>
-      <BeastGrid config={config} api={beastApi} theme={theme}/>
+      <BeastGrid config={config} api={beastApi} theme={theme} />
     </>
   );
 }

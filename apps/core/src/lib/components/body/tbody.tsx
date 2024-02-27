@@ -22,6 +22,7 @@ const THRESHOLD = 4;
 
 export default function TBody({ height, headerHeight, border, summary, onSortChange }: TBodyProps) {
     const gaps = useRef<Record<number, number>>({});
+    const lastScroll = useRef<number>(0);
     const expandedRows = useRef<number>(0);
     const [data, columns, container, sort, filters, setSorting] = useBeastStore((state) => [
         state.data,
@@ -53,8 +54,11 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
 
                 setMaxMin([maxValue, minValue]);
             };
-            container.addEventListener('scroll', () => {
-                setMaxMinValues();
+            container.addEventListener('scroll', (e) => {
+                if (container.scrollTop !== lastScroll.current) {
+                    setMaxMinValues();
+                }
+                lastScroll.current = container.scrollTop;
             });
             setMaxMinValues();
         }
@@ -70,7 +74,7 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
                       let show = true;
 
                       for (const filterKey of Object.keys(filters)) {
-                          if (filters[filterKey].includes(`${d[columns[filterKey].field]}`)) {
+                          if (filters[filterKey].includes(`${d[columns[filterKey].field as string]}`)) {
                               show = show && true;
                           } else {
                               show = show && false;
@@ -145,8 +149,8 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
         }
     }, [sort]);
 
-    const lastLevel = levels[levels.length - 1];
-
+    const lastLevel = Object.values(columns).filter(c => c.final);
+    
     const updateGaps = (gap: number, idx: number) => {
         for (let i = idx + 1; i < data.length; i++) {
             gaps.current[i] = (gaps.current[i] || 0) + gap;
@@ -209,7 +213,7 @@ export default function TBody({ height, headerHeight, border, summary, onSortCha
             }
         }
 
-        return renderArray.concat(...childrenArray);
+        return renderArray.concat(...childrenArray).concat(summary ? <RowContainer key="summary" row={{}} columns={lastLevel} idx={max} border={border} height={height} gap={gaps.current[max] || 0} level={0} /> : []);
     };
 
     return <div className="grid-body">{sortedData.length > 0 && createDataSlice()}</div>;
