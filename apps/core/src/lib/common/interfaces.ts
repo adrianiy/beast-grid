@@ -53,13 +53,17 @@ export interface StyleConfig {
   maxHeight: number;
   border: boolean;
 }
-export interface RowConfig { 
+export interface RowConfig {
   height: number;
   border: boolean;
 }
 export interface HeaderConfig {
   height: number;
   border: boolean;
+}
+export interface dragOptions {
+  autoScrollSpeed: number;
+  autoScrollMargin: number;
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
@@ -70,10 +74,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   row?: Partial<RowConfig>;
   header?: Partial<HeaderConfig>;
   style?: Partial<StyleConfig>;
-  dragOptions?: Partial<{
-    autoScrollSpeed: number;
-    autoScrollMargin: number;
-  }>
+  dragOptions?: Partial<dragOptions>;
 }
 
 export interface TableStyles {

@@ -1,31 +1,15 @@
+import { Steps } from 'nextra/components'
+
 # Quick Start
 
-## Installation
+<Steps>
+### Install the package
 
 ```bash
 npm i beast-grid
 ```
 
-
-## Fist steps
-
-### Prepare your DOM
-
-Beast grid needs a container with a `width` and `height` to be rendered.
-
-```css
-#container {
-  width: 100%;
-  height: 400px
-}
-```
-```html
-<div id="container">
-...
-</div>
-```
-
-### Prepare your styles
+### Import the styles
 
 You can use the default theme or create your own.
 
@@ -42,6 +26,21 @@ import 'beast-grid/style.css';
 ...
 ```
 
+### Size Matters
+
+To use Beast grid you can configure a container with a `width` and `height` to be rendered, or just use the `style` prop to define the size of the grid.
+
+```css
+#container {
+  width: 100%;
+  height: 400px
+}
+```
+```html
+<div id="container">
+...
+</div>
+```
 
 ### Configure the Beast!
 
@@ -96,3 +95,5 @@ export default function Grid({ count, theme, config: _customConfig }: Props) {
   );
 }
 ```
+</Steps>
+

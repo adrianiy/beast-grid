@@ -55,8 +55,6 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     [column1, column2] = getSwappableClone(column1, column2, columns);
   }
 
-  console.log(JSON.parse(JSON.stringify(column1)), JSON.parse(JSON.stringify(column2)));
-  
   // change positions
   swapPositions(column1, column2);
   mergeColumns(columns);

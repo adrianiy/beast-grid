@@ -1,0 +1,45 @@
+# Example
+
+```tsx
+const columns: ColumnDef[] = [
+  {
+    headerName: 'Name',
+    field: 'name',
+    minWidth: 100,
+    maxWidth: 200,
+    menu: {
+      column: true,
+      filter: true,
+      grid: true,
+    },
+    formatter: (value) => value.toUpperCase(),
+  },
+  {
+    headerName: 'Age',
+    field: 'age',
+    width: 100,
+    menu: {
+      column: true
+    }
+  },
+  {
+    headerName: 'Address',
+    field: 'address',
+    menu: true
+  },
+  {
+    headerName: 'Children',
+    field: 'children',
+    children: [
+      {
+        headerName: 'Name',
+        field: 'name',
+      },
+      {
+        headerName: 'Age',
+        field: 'age',
+      },
+    ],
+  },
+];
+```

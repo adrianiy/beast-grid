@@ -70,7 +70,7 @@ export function BeastGrid<T>({
             <MenuLayer />
             <Header
               height={config.header?.height || defaultConfig.headerHeight}
-              border={config.header?.border}
+              border={config.header?.border ?? true}
               multiSort={config.sort?.multiple}
               dragOptions={config.dragOptions}
             />
@@ -88,7 +88,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme, { border: config?.style?.border, headerBorder: config?.header?.border })} ref={ref}>
+    <div className={cn('beast-grid', 'default', theme, { border: config?.style?.border, headerBorder: config?.header?.border ?? true })} ref={ref}>
       {renderGrid()}
     </div>
   );
