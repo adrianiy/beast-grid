@@ -1,20 +1,21 @@
 import { ColumnStore, Column, SortType, ColumnId } from '../../../common';
 
-const _updateParent = (column: Column, parent: Column, columns: ColumnStore) => {
+const _updateParent = (parent: Column, columns: ColumnStore) => {
+  parent.width = 0;
   parent.childrenId?.forEach((id, idx) => {
     columns[id].position = idx;
     columns[id].parent = parent.id;
     columns[id].originalParent = parent.original;
+    parent.width += columns[id].width;
   });
-  parent.width += column.width;
 };
 const _mergeIn = (parent: Column, column: Column, columns: ColumnStore) => {
   parent.childrenId?.push(...(column.childrenId || []));
-  _updateParent(column, parent, columns);
+  _updateParent(parent, columns);
 };
 const _mergeTo = (parent: Column, column: Column, columns: ColumnStore) => {
   parent.childrenId = [...(column.childrenId || []), ...(parent.childrenId || [])];
-  _updateParent(column, parent, columns);
+  _updateParent(parent, columns);
 };
 
 export const changePosition = (columns: ColumnStore, pivot: Column, ignoreIds: ColumnId[], increase: number) => {
@@ -31,16 +32,14 @@ export const mergeColumns = (columns: ColumnStore) => {
       (a, b) =>
         a.level - b.level ||
         columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
-        a.position - b.position
+        a.position - b.position ||
+        a.left - b.left
     )
     .filter((column) => (column.final && !column.parent) || column.childrenId);
   let lastColumn: Column = sortedColumns[0];
-  let position = 0;
+  let position = 1;
 
-  for (const column of sortedColumns) {
-    if (column.parent !== lastColumn.parent) {
-      position = 0;
-    }
+  for (const column of sortedColumns.slice(1)) {
     columns[column.id].position = position;
     position++;
     if (lastColumn.id === column.original) {
@@ -51,6 +50,7 @@ export const mergeColumns = (columns: ColumnStore) => {
     }
     if (lastColumn.original === column.id) {
       _mergeTo(column, lastColumn, columns);
+      column.position = lastColumn.position;
       delete columns[lastColumn.id];
       position--;
     }
@@ -69,7 +69,8 @@ export const moveColumns = (columns: ColumnStore) => {
     (a, b) =>
       a.level - b.level ||
       columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
-      a.position - b.position
+      a.position - b.position ||
+      a.left - b.left
   );
 
   let left = 0;
@@ -80,7 +81,7 @@ export const moveColumns = (columns: ColumnStore) => {
       left = 0;
       lastColumn = column;
     }
-    if (column.hidden || column.logicDelete) {
+    if (column.hidden) {
       continue;
     }
     columns[column.id].left = left + (columns[column.parent as string]?.left || 0);

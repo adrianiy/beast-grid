@@ -13,8 +13,15 @@
   width: 100%;
   position: relative;
   box-sizing: border-box;
-  border-bottom: var(--bg-border--1);
 
+  &.bordered {
+    border-bottom: var(--bg-border--1);
+
+    .bg-grid-header__cell {
+      border-bottom: var(--bg-border--1);
+      border-top: var(--bg-border--1);
+    }
+  }
   &:not(:first-child) {
     .bg-grid-header__cell {
       border-top: none;
@@ -30,8 +37,6 @@
   transition: all linear var(--bg-transition--1);
   box-sizing: border-box;
   background-color: var(--bg-background-color--1);
-  border-bottom: var(--bg-border--1);
-  border-top: var(--bg-border--1);
   resize: horizontal;
   z-index: 1;
 

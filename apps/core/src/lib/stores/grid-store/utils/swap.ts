@@ -63,9 +63,6 @@ export const getSwappableClone = (column1: Column, column2: Column, columns: Col
 export const swapPositions = (column1: Column, column2: Column) => {
   // change positions
   const position = column2.position;
-  const left = column2.left;
   column2.position = column1.position;
-  column2.left = column1.left;
   column1.position = position;
-  column1.left = left;
 };

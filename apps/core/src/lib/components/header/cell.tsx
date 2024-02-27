@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { ArrowUpward, ArrowDownward, Menu } from '@mui/icons-material';
-import { BeastGridConfig, Column, Coords, SortConfig } from './../../common/interfaces';
+import { BeastGridConfig, Column, Coords, SortState } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
@@ -145,7 +145,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     });
   };
 
-  const renderSortIcon = (sort: SortConfig) => {
+  const renderSortIcon = (sort: SortState) => {
     return (
       <div className="bg-sort-icon row middle">
         {sort.order === 'asc' ? <ArrowUpward /> : <ArrowDownward />}

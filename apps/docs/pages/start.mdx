@@ -80,8 +80,13 @@ export default function Grid({ count, theme, config: _customConfig }: Props) {
   const config: BeastGridConfig<User[]> = {
     data,
     columnDefs,
-    border: true,
-    mulitSort: true,
+    style: {
+      border: true
+    },
+    sort: {
+      enabled: true,
+      multiple: true
+    },
     theme,
     ..._customConfig,
   };

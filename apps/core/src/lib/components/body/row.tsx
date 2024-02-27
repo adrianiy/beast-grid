@@ -20,7 +20,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
   return (
     <div
       key={idx}
-      className={cn('grid-row', border && 'bordered', row.children && 'expandable')}
+      className={cn('grid-row', { bordered: border, expandable: row.children })}
       style={{ top: (height * idx) + gap, height }}
       onClick={onClick?.(row, idx)}
     >

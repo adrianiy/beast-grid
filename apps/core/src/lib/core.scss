@@ -45,6 +45,15 @@
     overflow: hidden;
   }
 
+  &.border {
+      border: var(--bg-border--1);
+  }
+  &.headerBorder {
+    .bg-grid-header__cell {
+      border-top: none;
+    }
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }

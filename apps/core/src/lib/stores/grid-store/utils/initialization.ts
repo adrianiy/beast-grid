@@ -25,8 +25,8 @@ export const getColumnsFromDefs = (
     const column: Column = {
       ...(defaultColumnDef || {}),
       ...columnDef,
+      width: columnDef.width || 0,
       position: idx,
-      width: 0,
       top: 0,
       left: 0,
       final: !columnDef.children || columnDef.children.length === 0,
@@ -34,12 +34,12 @@ export const getColumnsFromDefs = (
       parent,
       level,
     };
-
     columns[id] = column;
 
     if (columnDef.children) {
       const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, id);
       column.childrenId = Object.values(childrenColumns).map((c) => c.id);
+      column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
 
       Object.assign(columns, childrenColumns);
     }

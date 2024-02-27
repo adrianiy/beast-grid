@@ -83,8 +83,8 @@ export const useDndHook = (
       setCoords(coords.current);
       const { left, right } = parent.getBoundingClientRect();
       const pointerX = coords.current.x;
-      const autoScrollMargin = options.autoScrollSpeed || 100;
-      const autoScrollSpeed = options.autoScrollMargin || 40;
+      const autoScrollMargin = options.autoScrollSpeed || 150;
+      const autoScrollSpeed = options.autoScrollMargin || 10;
       let changeX = 0;
 
       const gap = _getMaxScroll(parent) - parent.scrollLeft;

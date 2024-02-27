@@ -6,14 +6,18 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import { BeastGridConfig, Column } from '../../common/interfaces';
 
+import cls from 'classnames';
+
 import './header.scss';
 
 export default function Header<T>({
   height,
+  border,
   multiSort,
   dragOptions,
 }: {
   height: number;
+  border?: boolean;
   multiSort?: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
 }) {
@@ -29,7 +33,7 @@ export default function Header<T>({
   return (
     <div className="grid-header row between" style={{ height: height * levels.length }}>
       {levels.map((level, levelIdx) => (
-        <div className="grid-header-row row" style={{ height }} key={levelIdx}>
+        <div className={cls("grid-header-row row", { bordered: border })} style={{ height }} key={levelIdx}>
           {level.map((column, idx) => (
             <HeaderCell
               key={idx}

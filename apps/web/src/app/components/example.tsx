@@ -44,8 +44,14 @@ export default function Example() {
   };
 
   const config: Partial<BeastGridConfig<User[]>> = {
-    headerHeight: 80,
-    rowHeight: 60,
+    header: {
+      height: 80,
+      border: true,
+    },
+    row: {
+      height: 60,
+      border: true
+    },
   };
   return (
     <section className="demo" id="demo">

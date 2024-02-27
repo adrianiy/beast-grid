@@ -7,17 +7,29 @@ Configure your grid with a simple `BeastGridConfig` object. check the [example](
 ## Properties
 
 ```tsx
-export interface TableStyles {
-  rowHeight: number;
-  headerHeight: number;
-  border?: boolean;
+export interface SortConfig {
+  enabled: boolean;
+  multiple: boolean;
 }
+export interface StyleConfig {
+  maxHeight: number;
+  border: boolean;
+}
+export interface RowConfig { 
+  height: number;
+}
+export interface HeaderConfig {
+  height: number;
+}
+
 export interface BeastGridConfig extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: ColumnDef;
   data: TData[];
-  mulitSort?: boolean;
-  summarize?: boolean;
+  sort?: Partial<SortConfig>;
+  row?: Partial<RowConfig>;
+  header?: Partial<HeaderConfig>;
+  style?: Partial<StyleConfig>;
   dragOptions?: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
@@ -30,10 +42,9 @@ export interface BeastGridConfig extends Partial<TableStyles> {
 | [`columnDefs`](columns/definitions) | `ColumnDef[]` | `[]` | Array of column definitions |
 | `defaultColumnDef` | `ColumnDef` | `undefined` | Default column definition. Applied to all columns |
 | `data` | `TData[]` | `[]` | Array of data |
-| `mulitSort` | `boolean` | `false` | Enable multi column sorting |
-| `summarize` | `boolean` | `false` | Enable summarization |
-| `rowHeight` | `number` | `48` | Row height |
-| `headerHeight` | `number` | `48` | Header height |
+| `sort` | `Partial<SortConfig>` | `{ enabled: false, multiple: false }` | Sort options |
+| `row` | `Partial<RowConfig>` | `{ height: 48 }` | Row options |
+| `header` | `Partial<HeaderConfig>` | `{ height: 48 }` | Header options |
 | `border` | `boolean` | `false` | Enable border |
 | `dragOptions` | `Partial<{ autoScrollSpeed: number; autoScrollMargin: number; }>` | `undefined` | Drag options. autoScrollSpeed changes scroll speed when mouse is in edge zone (controlled with autoScrollMargin) |
 

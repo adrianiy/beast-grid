@@ -45,13 +45,31 @@ export interface BaseColumnDef {
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
 
+export interface SortConfig {
+  enabled: boolean;
+  multiple: boolean;
+}
+export interface StyleConfig {
+  maxHeight: number;
+  border: boolean;
+}
+export interface RowConfig { 
+  height: number;
+  border: boolean;
+}
+export interface HeaderConfig {
+  height: number;
+  border: boolean;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: Partial<ColumnDef>;
   data: T;
-  sortable?: boolean;
-  mulitSort?: boolean;
-  summarize?: boolean;
+  sort?: Partial<SortConfig>;
+  row?: Partial<RowConfig>;
+  header?: Partial<HeaderConfig>;
+  style?: Partial<StyleConfig>;
   dragOptions?: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
@@ -69,7 +87,7 @@ export interface Position {
   left: number;
 }
 
-export interface SortConfig {
+export interface SortState {
   order: SortType;
   priority: number;
 }
@@ -81,7 +99,7 @@ export interface Column extends ColumnDef, Position {
   final: boolean;
   width: number;
   childrenId?: ColumnId[];
-  sort?: SortConfig;
+  sort?: SortState;
   parent?: ColumnId;
   original?: ColumnId;
   originalParent?: ColumnId;

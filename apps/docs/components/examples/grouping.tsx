@@ -30,7 +30,9 @@ export default function Grid() {
     data: dataToGroup,
     columnDefs,
     border: true,
-    mulitSort: true,
+    sort: {
+      enabled: true
+    }
   };
 
   return (

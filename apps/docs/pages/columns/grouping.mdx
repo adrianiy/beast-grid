@@ -1,3 +1,43 @@
 # Grouping
 
-Under construction
+
+To use header grouping just add a `children` array to the header object. The children array should contain the same type of objects as the main header array. The children array can be nested to create multi-level headers (not tested yet).
+
+```tsx
+const columnDefs: ColumnDef[] = [
+  {
+    headerName: 'COUNTRY',
+    field: 'country',
+    width: 200,
+    filterType: FilterType.STRING,
+    menu: true,
+    aggregationLevel: 1,
+  },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
+  {
+    headerName: 'USER',
+    menu: false,
+    children: [
+      { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+      { headerName: 'AGE', field: 'age', width: 100, menu: true },
+    ],
+  },
+  {
+    headerName: 'MONTHS',
+    menu: false,
+    children: [
+      ...months.map(
+        (month): ColumnDef => ({
+          headerName: month.toUpperCase(),
+          field: month,
+          aggregation: AggregationType.SUM,
+          flex: 1,
+          formatter: (value: number) => numeral(value).format('0,0 $'),
+        })
+      ),
+    ],
+  },
+];
+```
+
+Check a live example [here](../example/header-grouping)

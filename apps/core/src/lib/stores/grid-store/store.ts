@@ -48,7 +48,7 @@ export interface GridStore extends GridState, InferedState {
 }
 
 export const createGridStore = <T>(
-  { data: _data, columnDefs, defaultColumnDef, mulitSort }: BeastGridConfig<T>,
+  { data: _data, columnDefs, defaultColumnDef, sort }: BeastGridConfig<T>,
   container: HTMLDivElement
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
@@ -59,7 +59,7 @@ export const createGridStore = <T>(
   const initialState = {
     data,
     columns,
-    allowMultipleColumnSort: !!mulitSort,
+    allowMultipleColumnSort: !!sort?.multiple,
     container,
     sort: [],
   };
