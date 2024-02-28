@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDndStore } from '../stores/dnd-store';
 import { Coords, Direction } from '../common';
 import { DragItem } from '../stores/dnd-store/store';

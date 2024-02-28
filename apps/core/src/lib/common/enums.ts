@@ -23,3 +23,8 @@ export enum AggregationType {
   MAX = 'max',
   MIN = 'min',
 }
+
+export enum PinType {
+  LEFT = 'left',
+  RIGHT = 'right',
+}

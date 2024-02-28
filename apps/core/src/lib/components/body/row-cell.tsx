@@ -13,19 +13,19 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
   return value as string;
 }
 
-export function RowCell({ idx, height, row, columnDef, leftPadding }: { height: number; row: Row; columnDef: Column, idx: number, leftPadding: number }) {
+export function RowCell({ height, row, columnDef, leftPadding }: { height: number; row: Row; columnDef: Column, leftPadding: number }) {
   if (columnDef.hidden) {
     return null;
   }
 
   const Chevron = () => {
-    if (idx || (!row.children && !row._children)) {
+    if (!columnDef.aggregationLevel || !row.children) {
       return null
     }
-    
-    return <ChevronRight className={cn(!!row._expanded && 'active')}/>
+
+    return <ChevronRight className={cn(!!row._expanded && 'active')} />
   }
-  
+
   return (
     <div
       data-hidden={columnDef.hidden}
@@ -33,7 +33,9 @@ export function RowCell({ idx, height, row, columnDef, leftPadding }: { height: 
       style={{ height, left: columnDef.left + leftPadding, width: columnDef.width }}
     >
       <Chevron />
-      {getProperty(row, columnDef)}
+      <div className="grid-row-value">
+        { getProperty(row, columnDef) }
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import {
   addFilter,
   changeSort,
   deleteEmptyParents,
-  fixColumnPositions,
   hideColumn,
   resetColumnConfig,
   resizeColumn,
@@ -12,7 +11,7 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, SortType } from '../../common';
+import { BeastGridConfig, PinType, SortType } from '../../common';
 import { getColumnsFromDefs, initialize, moveColumns } from './utils';
 
 interface GridState {
@@ -34,7 +33,6 @@ export interface GridStore extends GridState, InferedState {
   setColumns: (columns: ColumnStore) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
-  fixColumnPositions: () => void;
   cleanColumns: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
@@ -73,7 +71,6 @@ export const createGridStore = <T>(
     setColumns: (columns: ColumnStore) => set({ columns }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
-    fixColumnPositions: () => set(fixColumnPositions()),
     cleanColumns: () => set(deleteEmptyParents()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),

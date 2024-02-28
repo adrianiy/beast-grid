@@ -1,44 +1,49 @@
 .grid-body {
-  position: relative;
+    position: relative;
 }
 .grid-row {
-  position: absolute;
-  box-sizing: border-box;
-  display: flex;
-  width: 100%;
-  transition: all ease-in-out var(--bg-transition--1);
+    position: absolute;
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    transition: all ease-in-out var(--bg-transition--1);
 
-  svg {
-    &.active {
-      transform: rotate(90deg);
+    svg {
+        font-size: var(--bg-size--3);
+        &.active {
+            transform: rotate(90deg);
+        }
     }
-  }
 
-  &.bordered {
-    border-bottom: var(--bg-border--2);
-    .grid-row-cell {
-      border-bottom: var(--bg-border--2);
+    &.bordered {
+        border-bottom: var(--bg-border--2);
+        .grid-row-cell {
+            border-bottom: var(--bg-border--2);
+        }
     }
-  }
-  &.expandable {
-    cursor: pointer
-  }
+    &.expandable {
+        cursor: pointer;
+    }
 }
 .grid-row-cell {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  transition: var(--bg-transition--1);
-  box-sizing: border-box;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--bg-text-color--1);
-  background-color: var(--bg-background-color--1);
+    position: absolute;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    transition: var(--bg-transition--1);
+    box-sizing: border-box;
+    color: var(--bg-text-color--1);
+    background-color: var(--bg-background-color--1);
 
+    .grid-row-value {
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-  svg {
-    margin-right: var(--bg-size--2);
-  }
+    svg {
+        margin-right: var(--bg-size--2);
+    }
 }
