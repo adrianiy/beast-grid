@@ -30,7 +30,9 @@ export default function Grid() {
     data,
     columnDefs,
     border: true,
-    mulitSort: true,
+    sort: {
+      enabled: true,
+    },
     defaultColumnDef: {
       menu: { column: true, grid: true }
     }

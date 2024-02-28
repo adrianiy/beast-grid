@@ -2,5 +2,6 @@
   "basic": "Basic",
   "sorting": "Sorting",
   "menu": "Column menu",
-  "grouping": "Grouping"
+  "grouping": "Grouping",
+  "header-grouping": "Nested headers"
 }

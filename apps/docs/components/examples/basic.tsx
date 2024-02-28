@@ -8,8 +8,8 @@ import { User, data } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'ID', field: 'userId' },
-    { headerName: 'NAME', field: 'username' },
+    { headerName: 'ID', field: 'userId', sortable: false },
+    { headerName: 'NAME', field: 'username', sortable: false },
     {
       headerName: 'AMOUNT',
       field: 'money',
@@ -26,8 +26,13 @@ export default function Grid() {
   const config: BeastGridConfig<User[]> = {
     data,
     columnDefs,
-    border: true,
-    mulitSort: true,
+    style: {
+      border: true
+    },
+    sort: {
+      enabled: true,
+      multiple: true
+    },
   };
 
   return (

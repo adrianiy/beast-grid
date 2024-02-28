@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 # Column definitions
 
 ```tsx
@@ -25,123 +27,109 @@ interface ColumnDef extends Partial<StyleProps> {
 }
 ```
 
-# Column definition example
+<Callout>
+    The column definitions are used to define the columns of the grid. It is a recursive structure, so you can define [columns inside columns](nesting).
+</Callout>
 
-```tsx
-const columns: ColumnDef[] = [
-  {
-    headerName: 'Name',
-    field: 'name',
-    minWidth: 100,
-    maxWidth: 200,
-    menu: {
-      column: true,
-      filter: true,
-      grid: true,
-    },
-    formatter: (value) => value.toUpperCase(),
-  },
-  {
-    headerName: 'Age',
-    field: 'age',
-    width: 100,
-    menu: {
-      column: true
-    }
-  },
-  {
-    headerName: 'Address',
-    field: 'address',
-    menu: true
-  },
-  {
-    headerName: 'Children',
-    field: 'children',
-    children: [
-      {
-        headerName: 'Name',
-        field: 'name',
-      },
-      {
-        headerName: 'Age',
-        field: 'age',
-      },
-    ],
-  },
-];
-```
+<Callout type="info">
+  Check the example in the [Example](../example) section.
+</Callout>
 
-# Properties
+## Properties
 
-## `headerName`
-### Type: `string`
-### Required: `true`
+### headerName
+
+| Type | Required |
+| ---- | -------- |
+| `string` | `true` |
 
 The name of the column.
 
-## `field`
-### Type: `string`
-### Required: `true`
+### field
+
+| Type | Required |
+| ---- | -------- |
+| `string` | `true` |
 
 The field to be displayed in the column. Must match the field name in the data.
 
-## `children`
-### Type: `ColumnDef[]`
-### Required: `false`
+### children
  
+| Type | Required |
+| ---- | -------- |
+| `ColumnDef[]` | `false` |
+
 The children columns of the column.
 
-## `formatter`
-### Type: `(value: unknown) => string`
-### Required: `false`
+### formatter
+
+| Type | Required |
+| ---- | -------- |
+| `(value: unknown) => string` | `false` |
 
 A function to format the value of the column.
 
-## `width`
-### Type: `number`
-### Required: `false`
+### width
+
+| Type | Required |
+| ---- | -------- |
+| `number` | `false` |
 
 The width of the column.
 
-## `minWidth`
-### Type: `number`
-### Required: `false`
+### minWidth
+
+| Type | Required |
+| ---- | -------- |
+| `number` | `false` |
 
 The minimum width of the column.
 
-## `maxWidth`
-### Type: `number`
-### Required: `false`
+### maxWidth
+
+| Type | Required |
+| ---- | -------- |
+| `number` | `false` |
 
 The maximum width of the column.
 
-## `hidden`
-### Type: `boolean`
-### Required: `false`
+### hidden
+
+| Type | Required |
+| ---- | -------- |
+| `boolean` | `false` |
 
 Whether the column is hidden.
 
-## `flex`
-### Type: `number`
-### Required: `false`
+### flex
+
+| Type | Required |
+| ---- | -------- |
+| `number` | `false` |
 
 The flex value of the column. Follows the same rules as the flex property in CSS.
 
-## `menu`
-### Type: `boolean | Partial<MenuProps>`
-### Required: `false`
+### menu
+
+| Type | Required |
+| ---- | -------- |
+| `boolean` | `false` |
 
 Whether to show the menu for the column. If `true`, it will show the default menu. If an object, it will show the menu with the properties specified in the object.
 
-## `aggregationLevel`
-### Type: `number`
-### Required: `false`
+### aggregationLevel
+
+| Type | Required |
+| ---- | -------- |
+| `number` | `false` |
 
 If this level is set, data will be grouped by this column, on the specified level.
 
-## `aggregation`
-### Type: `AggregationType`
-### Required: `false`
+### aggregation
+
+| Type | Required |
+| ---- | -------- |
+| `AggregationType` | `false` |
 
 The type of aggregation to be used for this column. If not set, it will not show any data in the grouped row.
 
@@ -153,3 +141,4 @@ The aggregation type is one of the following:
 - `max`
 - `count`
 
+Check how it works in the [Row Grouping](../rows/grouping) section.

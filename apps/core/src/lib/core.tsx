@@ -2,13 +2,11 @@ import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
 import Header from './components/header/header';
 import TBody from './components/body/tbody';
-import Summary from './components/summary/summary';
 
-import { BeastGridApi, BeastGridConfig, Column, Data, TableStyles } from './common/interfaces';
+import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
 
 import { BeastGridProvider, BeastApi } from './stores/beast-store';
-import { getColumnsFromDefs, initialize } from './stores/grid-store/utils';
 
 import { DndStoreProvider } from './stores/dnd-store';
 import { MenuStoreProvider } from './stores/menu-store';
@@ -32,7 +30,7 @@ export const defaultConfig = {
 };
 
 export function BeastGrid<T>({
-  config: userConfig,
+  config,
   theme = 'default',
   api,
   onSortChange,
@@ -43,23 +41,11 @@ export function BeastGrid<T>({
   onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [config, setConfig] = useState<(BeastGridConfig<T> & TableStyles) | undefined>();
   const [[beastGridStore, beastDndStore, menuStore], setStores] = useState<
     [TGridStore | null, TDndStore | null, TMenuStore | null]
   >([null, null, null]);
 
-  useEffect(() => {
-    if (userConfig) {
-      const config: BeastGridConfig<T> & TableStyles = {
-        ...defaultConfig,
-        ...userConfig,
-      };
-
-      setConfig(config);
-    }
-  }, [userConfig]);
-
-  useEffect(() => {
+    useEffect(() => {
     if (ref.current && config?.columnDefs) {
       const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement);
       const dndStore = () => createDndStore();
@@ -67,7 +53,7 @@ export function BeastGrid<T>({
 
       setStores([gridStore, dndStore, menuStore]);
     }
-  }, [ref, config?.columnDefs, config?.defaultColumnDef]);
+  }, [ref, config]);
 
   const renderGrid = () => {
     if (!config || !beastGridStore || !beastDndStore || !menuStore) {
@@ -83,18 +69,18 @@ export function BeastGrid<T>({
             <LoaderLayer />
             <MenuLayer />
             <Header
-              height={config.headerHeight}
-              multiSort={config.mulitSort}
+              height={config.header?.height || defaultConfig.headerHeight}
+              border={config.header?.border ?? true}
+              multiSort={config.sort?.multiple}
               dragOptions={config.dragOptions}
             />
             <TBody
-              height={config.rowHeight}
-              headerHeight={config.headerHeight}
-              border={config.border}
-              summary={!!config.summarize}
+              rowHeight={config.row?.height || defaultConfig.rowHeight}
+              headerHeight={config.header?.height || defaultConfig.headerHeight}
+              maxHeight={config.style?.maxHeight}
+              border={config.row?.border}
               onSortChange={onSortChange}
             />
-            <Summary height={config.rowHeight} summary={!!config.summarize} border={config.border} />
           </BeastGridProvider>
         </MenuStoreProvider>
       </DndStoreProvider>
@@ -102,7 +88,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+    <div className={cn('beast-grid', 'default', theme, { border: config?.style?.border, headerBorder: config?.header?.border ?? true })} ref={ref}>
       {renderGrid()}
     </div>
   );

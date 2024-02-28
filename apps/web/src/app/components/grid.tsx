@@ -83,9 +83,20 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
       setConfig({
         data,
         columnDefs,
-        border: true,
-        mulitSort: true,
-        summarize: true,
+        style: {
+          maxHeight: 300,
+          border: true
+        },
+        header: {
+          border: true
+        },
+        row: {
+          border: true
+        },
+        sort: {
+          enabled: true,
+          multiple: true
+        },
         defaultColumnDef: {
           menu: { column: true, grid: true },
         },

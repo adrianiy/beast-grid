@@ -1,0 +1,32 @@
+import { Callout } from 'nextra/components'
+
+# Column definitions
+
+```tsx
+interface StyleProps {
+  width: number;
+  minWidth: number;
+  maxWidth: number;
+  hidden: boolean;
+  flex: number;
+  menu?: boolean | Partial<MenuProps>;
+  aggregationLevel?: number;
+  aggregation?: AggregationType;
+}
+export interface MenuProps {
+  column: boolean;
+  filter: boolean;
+  grid: boolean;
+}
+interface ColumnDef extends Partial<StyleProps> {
+  headerName: string;
+  field: string;
+  children?: ColumnDef[];
+  formatter?: (value: unknown) => string;
+
+}
+```
+<Callout type="info">
+  For more info check [Column Docs](../columns/definitions)
+</Callout>
+

@@ -1,20 +1,17 @@
 {
   "index": "Introduction",
   "start": "Quik Start",
-  "example": "Examples",
-  "----": {
-    "type": "separator"
-  },
   "theming": "Theming",
-  "---": {
+  "----": {
     "type": "separator"
   },
   "configuration": "Configuration",
   "columns": "Column configuration",
-  "--": {
+  "rows": "Row configuration",
+  "---": {
     "type": "separator"
   },
-  "rows": "Row configuration",
+  "example": "Examples",
   "-----": {
     "type": "separator"
   },

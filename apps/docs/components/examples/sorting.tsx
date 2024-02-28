@@ -28,7 +28,10 @@ export default function Grid() {
     data,
     columnDefs,
     border: true,
-    mulitSort: true,
+    sort: {
+      enabled: true,
+      multiple: true,
+    },
   };
 
   return (

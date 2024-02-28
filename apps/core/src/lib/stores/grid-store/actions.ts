@@ -59,9 +59,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   swapPositions(column1, column2);
   mergeColumns(columns);
 
-  if (column1.id !== id1 || column2.id !== id2 || column1.childrenId || column2.childrenId) {
-    moveColumns(columns);
-  }
+  moveColumns(columns);
 
   return { ...columns };
 };

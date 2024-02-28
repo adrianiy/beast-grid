@@ -1,6 +1,7 @@
 {
   "definitions": "Column Definitions",
+  "example": "Example",
   "sorting": "Sorting",
   "filtering": "Filtering",
-  "grouping": "Grouping"
+  "nesting": "Nesting"
 }
