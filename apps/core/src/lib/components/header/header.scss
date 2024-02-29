@@ -40,6 +40,11 @@
     resize: horizontal;
     z-index: 1;
 
+    &__left {
+        width: 100%;
+        overflow: hidden;
+    }
+
     .bg-grid-header__cell__name {
         display: block;
         max-width: 100%;

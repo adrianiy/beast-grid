@@ -27,7 +27,7 @@ const columnDefs: ColumnDef[] = [
     headerName: 'USER',
     menu: false,
     children: [
-      { headerName: 'NAME', field: 'name', width: 200, menu: { column: true, grid: true } },
+      { headerName: 'NAME AND SURNAME', field: 'name', width: 200, menu: { column: true, grid: true } },
       { headerName: 'AGE', field: 'age', width: 100, menu: true },
     ],
   },
