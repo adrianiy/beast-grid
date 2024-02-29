@@ -3,5 +3,6 @@
   "example": "Example",
   "sorting": "Sorting",
   "filtering": "Filtering",
-  "nesting": "Nesting"
+  "nesting": "Nesting",
+  "pinning": "Pinning"
 }

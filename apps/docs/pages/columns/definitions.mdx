@@ -21,6 +21,7 @@ export interface MenuProps {
 interface ColumnDef extends Partial<StyleProps> {
   headerName: string;
   field: string;
+  pinned?: PinType;
   children?: ColumnDef[];
   formatter?: (value: unknown) => string;
 
@@ -52,6 +53,27 @@ The name of the column.
 | `string` | `true` |
 
 The field to be displayed in the column. Must match the field name in the data.
+
+### pinned [BETA]
+
+<Callout type="warning">
+  BETA FEATURE! This feature is still in beta and may not work as expected.
+</Callout>
+
+| Type | Required |
+| ---- | -------- |
+| `PinType` | `false` |
+
+Whether the column is pinned. The pin type is one of the following:
+
+- `left`
+- `right`
+- `top`
+- `bottom`
+
+<Callout type="info">
+  Only `left` is supported at the moment.
+</Callout>
 
 ### children
  
