@@ -20,7 +20,7 @@ export default function Header<T>({
   border?: boolean;
   multiSort?: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
-  events?: HeaderEvents;
+  events?: Partial<HeaderEvents>;
 }) {
   const [columns] = useBeastStore((state) => [state.columns]);
 

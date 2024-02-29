@@ -4,18 +4,18 @@
 
 ```tsx
 export interface RowEvents {
-  onHover: {
-    highlight?: boolean;
-    callback?: (row: Row, idx: number) => void;
-  },
-  onClick: {
-    callback?: (row: Row, idx: number) => void;
-  }
+  onHover: Partial<{
+    highlight: boolean;
+    callback: (row: Row, idx: number) => void;
+  }>,
+  onClick: Partial<{
+    callback: (row: Row, idx: number) => void;
+  }>
 }
 export interface RowConfig { 
   height?: number;
   border?: boolean;
-  events?: RowEvents;
+  events?: Partial<RowEvents>;
 }
 ```
 

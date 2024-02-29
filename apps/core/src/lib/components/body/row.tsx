@@ -11,7 +11,7 @@ type Props = {
   height: number;
   gap: number;
   level: number;
-  events?: RowEvents;
+  events?: Partial<RowEvents>;
   onClick?: (row: Row, idx: number) => void;
 };
 
@@ -27,7 +27,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
   }
 
   const handleClick = () => {
-    if (events?.onClick) {
+    if (events?.onClick?.callback) {
       events.onClick.callback(row, idx);
     }
 
@@ -39,7 +39,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
   return (
     <div
       key={idx}
-      className={cn('grid-row', { bordered: border, expandable: row.children, withHighlight: events?.onHover.highlight })}
+      className={cn('grid-row', { bordered: border, expandable: row.children, withHighlight: events?.onHover?.highlight })}
       style={{ top: (height * idx) + gap, height, width: totalWidth }}
       onClick={handleClick}
     >

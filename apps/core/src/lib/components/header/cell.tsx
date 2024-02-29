@@ -16,7 +16,7 @@ type Props<T> = {
   column: Column;
   multiSort: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
-  events?: HeaderEvents;
+  events?: Partial<HeaderEvents>;
 };
 
 export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptions, multiSort, events }: Props<T>) {
@@ -124,11 +124,11 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     if (pointer.x < 0 || pointer.y < 0) {
       lastHitElement.current = null;
       
-      if (events?.onDropOutside.hide) {
+      if (events?.onDropOutside?.hide) {
         hideColumn(column.id);
       }
 
-      if (events?.onDropOutside.callback) {
+      if (events?.onDropOutside?.callback) {
         events.onDropOutside.callback(column);
       }
     }

@@ -4,15 +4,15 @@
 
 ```tsx
 export interface HeaderEvents {
-  onDropOutside: {
-    hide?: boolean;
-    callback?: (column: Column) => void;
-  }
+  onDropOutside: Partial<{
+    hide: boolean;
+    callback: (column: Column) => void;
+  }>
 }
 export interface HeaderConfig { 
   height?: number;
   border?: boolean;
-  events?: HeaderEvents;
+  events?: Partial<HeaderEvents>;
 }
 ```
 

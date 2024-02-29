@@ -14,7 +14,7 @@ type TBodyProps = {
     border?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     filters?: Record<string, string[]>;
-    events?: RowEvents;
+    events?: Partial<RowEvents>;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
