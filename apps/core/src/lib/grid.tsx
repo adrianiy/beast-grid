@@ -1,11 +1,14 @@
 import { BeastGridConfig, Column, Data } from './common';
 import SimpleBar from 'simplebar-react';
+import SimpleBarCore from 'simplebar-core';
 import TBody from './components/body/tbody';
 import Header from './components/header/header';
 
 import cn from 'classnames';
 
 import 'simplebar-react/dist/simplebar.min.css';
+import { useEffect, useRef } from 'react';
+import { useBeastStore } from './stores/beast-store';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
@@ -14,8 +17,19 @@ type Props<T> = {
 };
 
 export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T>) {
+  const [setScrollElement] = useBeastStore((state) => [state.setScrollElement]);
+  const ref = useRef<SimpleBarCore>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      console.log(ref.current)
+      setScrollElement(ref.current.getScrollElement() as HTMLDivElement);
+    }
+  }, [ref])
+  
   return <SimpleBar
     style={{ height: config.style?.maxHeight }}
+    ref={ref}
     className={cn('beast-grid__container', {
       border: config?.style?.border,
       headerBorder: config?.header?.border ?? true,

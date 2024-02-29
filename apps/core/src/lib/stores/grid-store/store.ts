@@ -11,7 +11,7 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, PinType, SortType } from '../../common';
+import { BeastGridConfig, SortType } from '../../common';
 import { getColumnsFromDefs, initialize, moveColumns } from './utils';
 
 interface GridState {
@@ -25,12 +25,14 @@ interface GridState {
 interface InferedState {
   loading: boolean;
   sorting: boolean;
+  scrollElement: HTMLDivElement;
   filters: Record<ColumnId, IFilter[]>;
 }
 
 export interface GridStore extends GridState, InferedState {
   setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
+  setScrollElement: (container: HTMLDivElement) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
   cleanColumns: () => void;
@@ -67,8 +69,10 @@ export const createGridStore = <T>(
     filters: {},
     loading: false,
     sorting: false,
+    scrollElement: null as unknown as HTMLDivElement,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
+    setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
     cleanColumns: () => set(deleteEmptyParents()),
