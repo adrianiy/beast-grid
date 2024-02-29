@@ -182,7 +182,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
   return (
     <div
-      className="bg-grid-header__cell row middle between"
+      className={cn("bg-grid-header__cell row middle between", { lastPinned: column.lastPinned })}
       key={`${levelIdx}-${idx}-${column.id}`}
       style={{
         height,

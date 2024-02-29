@@ -72,7 +72,7 @@
         left: 0;
         z-index: 2;
 
-        >:last-child {
+        .lastPinned {
             border-right: var(--bg-border--1);
             
             .bg-grid-header__resize {

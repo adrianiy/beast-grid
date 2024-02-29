@@ -22,16 +22,17 @@ const THRESHOLD = 4;
 
 export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSortChange, events }: TBodyProps) {
     const gaps = useRef<Record<number, number>>({});
-    const lastScroll = useRef<number>(0);
-    const expandedRows = useRef<number>(0);
-    const [data, columns, container, sort, filters, setSorting] = useBeastStore((state) => [
+    const [data, columns, container, scrollElement, sort, filters, setSorting] = useBeastStore((state) => [
         state.data,
         state.columns,
         state.container,
+        state.scrollElement,
         state.sort,
         state.filters,
         state.setSorting,
     ]);
+    const [expandedRows, setExpandedRows] = useState<number>(0);
+    const [lastScroll, setLastScroll] = useState<number>(0);
     const [[max, min], setMaxMin] = useState([0, 0]);
     const [sortedData, setSortedData] = useState<Data>([]);
 
@@ -43,26 +44,25 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     }, [] as Column[][]);
 
     useEffect(() => {
-        if (container) {
-            const setMaxMinValues = () => {
-                const containerHeight = maxHeight || container.getBoundingClientRect().height - headerHeight * levels.length;
-                const visibleRows = Math.ceil(containerHeight / rowHeight);
-                const topRow = Math.floor(container.scrollTop / rowHeight);
-                const bottomRow = topRow + visibleRows;
-                const maxValue = Math.min(data.length, bottomRow + THRESHOLD);
-                const minValue = Math.max(0, topRow - THRESHOLD - expandedRows.current);
-
-                setMaxMin([maxValue, minValue]);
-            };
-            container.addEventListener('scroll', () => {
-                if (container.scrollTop !== lastScroll.current) {
-                    setMaxMinValues();
+        if (scrollElement && container) {
+            scrollElement.addEventListener('scroll', () => {
+                if (scrollElement.scrollTop !== lastScroll) {
+                    setLastScroll(scrollElement.scrollTop);
                 }
-                lastScroll.current = container.scrollTop;
             });
-            setMaxMinValues();
         }
-    }, [container, headerHeight, rowHeight, levels.length, data.length]);
+    }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
+
+    useEffect(() => {
+        const containerHeight = maxHeight || container.getBoundingClientRect().height - headerHeight * levels.length;
+        const visibleRows = Math.ceil(containerHeight / rowHeight);
+        const topRow = Math.floor(lastScroll / rowHeight);
+        const bottomRow = topRow + visibleRows;
+        const maxValue = Math.min(data.length + expandedRows, bottomRow + THRESHOLD);
+        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
+
+        setMaxMin([maxValue, minValue]);
+    }, [lastScroll, expandedRows, data.length]);
 
     useEffect(() => {
         const someActive = Object.entries(filters).some(
@@ -71,17 +71,17 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         setSortedData(
             someActive
                 ? data.filter((d) => {
-                      let show = true;
+                    let show = true;
 
-                      for (const filterKey of Object.keys(filters)) {
-                          if (filters[filterKey].includes(`${d[columns[filterKey].field as string]}`)) {
-                              show = show && true;
-                          } else {
-                              show = show && false;
-                          }
-                      }
-                      return show;
-                  })
+                    for (const filterKey of Object.keys(filters)) {
+                        if (filters[filterKey].includes(`${d[columns[filterKey].field as string]}`)) {
+                            show = show && true;
+                        } else {
+                            show = show && false;
+                        }
+                    }
+                    return show;
+                })
                 : data
         );
     }, [data, columns, filters]);
@@ -149,8 +149,8 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         }
     }, [sort]);
 
-    const lastLevel = Object.values(columns).filter(c => c.final);
-    
+    const lastLevel = Object.values(columns).filter((c) => c.final);
+
     const updateGaps = (gap: number, idx: number) => {
         for (let i = idx + 1; i < data.length; i++) {
             gaps.current[i] = (gaps.current[i] || 0) + gap;
@@ -160,14 +160,12 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     const handleRowExpand = (row: Row, idx: number) => {
         if (row._expanded) {
             row._expanded = false;
-            expandedRows.current -= row.children?.length || 0;
+            setExpandedRows((state) => state - (row.children?.length || 0));
             updateGaps(rowHeight * (row.children?.length || 0) * -1, idx);
-            setMaxMin([max, min]);
         } else {
             row._expanded = true;
             updateGaps(rowHeight * (row.children?.length || 0), idx);
-            expandedRows.current += row.children?.length || 0;
-            setMaxMin([max + (row.children?.length || 0), min]);
+            setExpandedRows(state => state + (row.children?.length || 0));
         }
     };
 
@@ -219,12 +217,17 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     };
 
     const getStyleProps = (dataSlice: JSX.Element[]) => {
+        console.log(max);
         return {
-            height: Math.min(dataSlice.length * rowHeight, maxHeight || Infinity),
-        }
-    }
+            height: max * rowHeight,
+        };
+    };
 
     const dataSlice = createDataSlice();
-    
-    return <div className="grid-body" style={getStyleProps(dataSlice)}>{dataSlice}</div>;
+
+    return (
+        <div className="grid-body" style={getStyleProps(dataSlice)}>
+            {dataSlice}
+        </div>
+    );
 }

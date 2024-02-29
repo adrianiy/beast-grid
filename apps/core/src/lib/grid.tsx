@@ -27,7 +27,7 @@ export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T
   }, [ref])
   
   return <SimpleBar
-    style={{ height: config.style?.maxHeight }}
+    style={{ maxHeight: config.style?.maxHeight }}
     ref={ref}
     className={cn('beast-grid__container', {
       border: config?.style?.border,
@@ -43,6 +43,7 @@ export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T
     <TBody
       rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
       headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
+      maxHeight={config.style?.maxHeight}
       border={config.row?.border}
       onSortChange={onSortChange}
       events={config.row?.events}
