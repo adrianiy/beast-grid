@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, FilterType } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, FilterType, PinType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -16,13 +16,13 @@ type Props = {
 const columnDefs: ColumnDef[] = [
   {
     headerName: 'COUNTRY',
+    pinned: PinType.LEFT,
     field: 'country',
     width: 200,
     filterType: FilterType.STRING,
     menu: true,
     aggregationLevel: 1,
   },
-  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
   {
     headerName: 'USER',
     menu: false,
@@ -31,6 +31,7 @@ const columnDefs: ColumnDef[] = [
       { headerName: 'AGE', field: 'age', width: 100, menu: true },
     ],
   },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1, pinned: PinType.LEFT },
   {
     headerName: 'MONTHS',
     menu: false,
@@ -84,7 +85,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         data,
         columnDefs,
         style: {
-          maxHeight: 300,
+          maxHeight: 600,
           border: true
         },
         header: {

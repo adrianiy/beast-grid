@@ -1,4 +1,4 @@
-import { ColumnStore, Column, SortType, ColumnId } from '../../../common';
+import { ColumnStore, Column, SortType, ColumnId, PinType } from '../../../common';
 
 const _updateParent = (parent: Column, columns: ColumnStore) => {
   parent.width = 0;
@@ -31,17 +31,17 @@ export const mergeColumns = (columns: ColumnStore) => {
     .sort(
       (a, b) =>
         a.level - b.level ||
+        (a.pinned === PinType.LEFT ? 0 : 1) - (b.pinned === PinType.LEFT ? 0 : 1) ||
         columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
         a.position - b.position ||
         a.left - b.left
     )
     .filter((column) => (column.final && !column.parent) || column.childrenId);
   let lastColumn: Column = sortedColumns[0];
-  let position = 1;
+  let position = 0;
 
   for (const column of sortedColumns.slice(1)) {
-    columns[column.id].position = position;
-    position++;
+    columns[column.id].position = ++position;
     if (lastColumn.id === column.original) {
       _mergeIn(lastColumn, column, columns);
       changePosition(columns, lastColumn, [lastColumn.id], -1);
@@ -68,6 +68,7 @@ export const moveColumns = (columns: ColumnStore) => {
   const sortedColumns = Object.values(columns).sort(
     (a, b) =>
       a.level - b.level ||
+      (a.pinned === PinType.LEFT ? 0 : 1) - (b.pinned === PinType.LEFT ? 0 : 1) ||
       columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
       a.position - b.position ||
       a.left - b.left
@@ -77,10 +78,11 @@ export const moveColumns = (columns: ColumnStore) => {
   let lastColumn: Column = sortedColumns[0];
 
   for (const column of sortedColumns) {
-    if (lastColumn.parent !== column.parent) {
+    if (column.parent && lastColumn.parent !== column.parent) {
       left = 0;
-      lastColumn = column;
     }
+    lastColumn.lastPinned = column.pinned !== lastColumn.pinned && column.level === lastColumn.level;
+    lastColumn = column;
     if (column.hidden) {
       continue;
     }

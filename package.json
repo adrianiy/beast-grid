@@ -6,7 +6,8 @@
     "docs:install": "cd apps/docs && npm install",
     "docs:dev": "cd apps/docs && npm run dev",
     "docs:build": "cd apps/docs && npm run build",
-    "core:publish": "cd dist/apps/core && npm publish"
+    "core:publish": "cd dist/apps/core && npm publish",
+    "mic:dev": "cd apps/mic && npm run start"
   },
   "private": true,
   "dependencies": {
@@ -26,6 +27,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-loader-spinner": "^6.1.6",
+    "simplebar-react": "^3.2.4",
     "thin-backend": "^0.12.1",
     "tslib": "^2.3.0",
     "uuid": "^9.0.1",

@@ -77,6 +77,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       if (
         !elementColumn ||
         elementColumn.logicDelete ||
+        elementColumn.pinned !== column.pinned ||
         element.id === column.id ||
         elementColumn.parent === column.id ||
         elementColumn.level > column.level ||
@@ -177,8 +178,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       key={`${levelIdx}-${idx}-${column.id}`}
       style={{
         height,
-        width: columns[column.id].width,
-        left: columns[column.id].left,
+        width: column.width,
+        left: column.left
       }}
       ref={drag}
       id={column.id}
@@ -187,8 +188,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       data-clone={column.original}
       onClick={handleChangeSort}
     >
-      <div className="bg-grid-header__cell__name row middle">
-        <span className="bg-grid-header-drop">{column.headerName}</span>
+      <div className="bg-grid-header__cell__left row middle" style={{ width: column.width }}>
+        <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
 

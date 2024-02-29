@@ -3,5 +3,6 @@
   "sorting": "Sorting",
   "menu": "Column menu",
   "grouping": "Grouping",
-  "header-grouping": "Nested headers"
+  "header-grouping": "Nested headers",
+  "pinning": "Pinning columns"
 }

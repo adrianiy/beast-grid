@@ -55,6 +55,8 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     [column1, column2] = getSwappableClone(column1, column2, columns);
   }
 
+  console.log(column1, column2);
+
   // change positions
   swapPositions(column1, column2);
   mergeColumns(columns);
@@ -76,14 +78,6 @@ export const deleteEmptyParents = () => (state: GridStore) => {
   return { columns };
 };
 
-export const fixColumnPositions = () => (state: GridStore) => {
-  const { columns } = state;
-
-  moveColumns(columns);
-
-  return { columns };
-};
-
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
   const { columns } = state;
   const column = columns[id];
@@ -99,8 +93,8 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
   }
   if (column.children) {
     const diff = (column.width - prevWidth) / column.children.length;
-    column.children.forEach((child) => {
-      child.width = (child.width || 0 ) + diff;
+    column.childrenId?.forEach((child) => {
+      columns[child].width = (columns[child].width || 0 ) + diff;
     });
   }
 

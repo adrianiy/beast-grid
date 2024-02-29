@@ -8,7 +8,7 @@ export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
   defaultColumnDef?: Partial<ColumnDef>,
   level = 0,
-  parent?: string
+  parent?: Column
 ): ColumnStore => {
   // If no columnDefs, return empty object
   if (columnDefs.length === 0) {
@@ -27,17 +27,18 @@ export const getColumnsFromDefs = (
       ...columnDef,
       width: columnDef.width || 0,
       position: idx,
+      pinned: parent?.pinned || columnDef.pinned,
       top: 0,
       left: 0,
       final: !columnDef.children || columnDef.children.length === 0,
       id,
-      parent,
+      parent: parent?.id,
       level,
     };
     columns[id] = column;
 
     if (columnDef.children) {
-      const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, id);
+      const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, column);
       column.childrenId = Object.values(childrenColumns).map((c) => c.id);
       column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
 

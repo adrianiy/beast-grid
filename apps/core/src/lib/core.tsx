@@ -1,8 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 
-import Header from './components/header/header';
-import TBody from './components/body/tbody';
-
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
 
@@ -23,6 +20,7 @@ import cn from 'classnames';
 
 import './core.scss';
 import DndLayer from './components/dnd/dnd-layer';
+import Grid from './grid';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -68,19 +66,7 @@ export function BeastGrid<T>({
             <DndLayer />
             <LoaderLayer />
             <MenuLayer />
-            <Header
-              height={config.header?.height || defaultConfig.headerHeight}
-              border={config.header?.border ?? true}
-              multiSort={config.sort?.multiple}
-              dragOptions={config.dragOptions}
-            />
-            <TBody
-              rowHeight={config.row?.height || defaultConfig.rowHeight}
-              headerHeight={config.header?.height || defaultConfig.headerHeight}
-              maxHeight={config.style?.maxHeight}
-              border={config.row?.border}
-              onSortChange={onSortChange}
-            />
+            <Grid config={config} defaultConfig={defaultConfig} onSortChange={onSortChange} />
           </BeastGridProvider>
         </MenuStoreProvider>
       </DndStoreProvider>
@@ -88,7 +74,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme, { border: config?.style?.border, headerBorder: config?.header?.border ?? true })} ref={ref}>
+    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
       {renderGrid()}
     </div>
   );

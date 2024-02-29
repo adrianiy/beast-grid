@@ -3,7 +3,6 @@ import {
   addFilter,
   changeSort,
   deleteEmptyParents,
-  fixColumnPositions,
   hideColumn,
   resetColumnConfig,
   resizeColumn,
@@ -26,15 +25,16 @@ interface GridState {
 interface InferedState {
   loading: boolean;
   sorting: boolean;
+  scrollElement: HTMLDivElement;
   filters: Record<ColumnId, IFilter[]>;
 }
 
 export interface GridStore extends GridState, InferedState {
   setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
+  setScrollElement: (container: HTMLDivElement) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
-  fixColumnPositions: () => void;
   cleanColumns: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
@@ -69,11 +69,12 @@ export const createGridStore = <T>(
     filters: {},
     loading: false,
     sorting: false,
+    scrollElement: null as unknown as HTMLDivElement,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
+    setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
-    fixColumnPositions: () => set(fixColumnPositions()),
     cleanColumns: () => set(deleteEmptyParents()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),

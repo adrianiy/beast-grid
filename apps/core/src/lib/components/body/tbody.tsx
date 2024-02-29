@@ -13,6 +13,7 @@ type TBodyProps = {
     maxHeight?: number;
     border?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
+    filters?: Record<string, string[]>;
 };
 
 const PERFORMANCE_LIMIT = 1000000;

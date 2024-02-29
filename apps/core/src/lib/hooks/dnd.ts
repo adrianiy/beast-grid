@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDndStore } from '../stores/dnd-store';
-import { Coords, Direction } from '../common';
+import { Coords, Direction, PinType } from '../common';
 import { DragItem } from '../stores/dnd-store/store';
+import { useBeastStore } from '../stores/beast-store';
 
 export type OnAnimationFrame = (direction: Direction, pointerCoords: Coords) => void;
 export type OnDirectionChange = (direction: Direction) => void;
@@ -30,12 +31,14 @@ export const useDndHook = (
   const direction = useRef<Direction>();
   const preview = useRef<HTMLImageElement>(new Image());
   const isDragging = useRef<boolean>(false);
+  const leftPinnedWidth = useRef<number>(0);
   const [addDropTarget, setDragItem, setPointer, setCoords] = useDndStore((state) => [
     state.addDropTarget,
     state.setDragItem,
     state.setPointer,
     state.setCoords,
   ]);
+  const [scrollElement, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
 
   useEffect(() => {
     if (options?.isDropTarget && ref.current) {
@@ -81,13 +84,14 @@ export const useDndHook = (
 
       setPointer(pointer.current);
       setCoords(coords.current);
-      const { left, right } = parent.getBoundingClientRect();
+      const { left: _raw, right } = parent.getBoundingClientRect();
+      const left = _raw + leftPinnedWidth.current;
       const pointerX = coords.current.x;
       const autoScrollMargin = options.autoScrollSpeed || 150;
       const autoScrollSpeed = options.autoScrollMargin || 10;
       let changeX = 0;
 
-      const gap = _getMaxScroll(parent) - parent.scrollLeft;
+      const gap = _getMaxScroll(scrollElement) - scrollElement.scrollLeft;
       if (gap < 0) {
         changeX = gap;
       } else if (pointerX > right - autoScrollMargin && gap) {
@@ -95,15 +99,15 @@ export const useDndHook = (
           autoScrollSpeed,
           (autoScrollSpeed * (1 - Math.max(0, right - pointerX) / autoScrollMargin)) | 0
         );
-      } else if (pointerX < left + autoScrollMargin && parent.scrollLeft) {
+      } else if (pointerX < left + autoScrollMargin && scrollElement.scrollLeft) {
         changeX = Math.max(
-          -parent.scrollLeft,
+          -scrollElement.scrollLeft,
           (-autoScrollSpeed * (1 - Math.max(0, pointerX - left) / autoScrollMargin)) | 0
         );
       }
 
-      if (changeX) {
-        parent.scrollLeft += changeX;
+      if (changeX && scrollElement) {
+        scrollElement.scrollLeft += changeX;
       }
     };
 
@@ -182,9 +186,16 @@ export const useDndHook = (
       e.preventDefault();
       return false;
     };
-    if (ref.current) {
+    
+    if (ref.current && scrollElement) { 
       const dragRef = ref.current;
       preview.current.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
+      if (columns) {
+        leftPinnedWidth.current = Object.values(columns).reduce((acc, column) => {
+          return column.pinned === PinType.LEFT ? acc + column.width : acc;
+        }, 0);
+      }
 
       dragRef.setAttribute('draggable', 'true');
 
@@ -208,7 +219,7 @@ export const useDndHook = (
         dragRef.removeEventListener('dragend', onDragEnd);
       };
     }
-  }, [ref]);
+  }, [ref, scrollElement, columns]);
 
   return [ref];
 };

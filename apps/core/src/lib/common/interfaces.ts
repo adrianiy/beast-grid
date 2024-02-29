@@ -1,5 +1,5 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, FilterType, SortType } from './enums';
+import { AggregationType, FilterType, PinType, SortType } from './enums';
 
 export interface Row {
   [key: string]: unknown;
@@ -33,6 +33,7 @@ export type IFilter = string | number | boolean;
 
 export interface BaseColumnDef {
   headerName: string;
+  pinned?: PinType;
   field?: string;
   sortable?: boolean;
   filterType?: FilterType;
@@ -105,6 +106,7 @@ export interface Column extends ColumnDef, Position {
   original?: ColumnId;
   originalParent?: ColumnId;
   logicDelete?: boolean;
+  lastPinned?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;
