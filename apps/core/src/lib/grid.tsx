@@ -22,7 +22,6 @@ export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T
 
   useEffect(() => {
     if (ref.current) {
-      console.log(ref.current)
       setScrollElement(ref.current.getScrollElement() as HTMLDivElement);
     }
   }, [ref])
@@ -46,6 +45,7 @@ export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T
       headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
       border={config.row?.border}
       onSortChange={onSortChange}
+      events={config.row?.events}
     />
   </SimpleBar>;
 }

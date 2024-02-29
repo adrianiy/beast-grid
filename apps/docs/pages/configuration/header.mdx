@@ -3,9 +3,16 @@
 ## Properties
 
 ```tsx
+export interface HeaderEvents {
+  onDropOutside: Partial<{
+    hide: boolean;
+    callback: (column: Column) => void;
+  }>
+}
 export interface HeaderConfig { 
   height?: number;
   border?: boolean;
+  events?: Partial<HeaderEvents>;
 }
 ```
 
@@ -24,3 +31,31 @@ Configures the height of the row.
 | boolean | false |  false |
 
 If true, a border will be added to the bottom of the header.
+
+### events
+
+| Type | Required |
+| ---- | -------- |
+| HeaderEvents | false |
+
+Configures the events of the header.
+
+#### onDropOutside
+
+Handles the event when a column is dropped outside the header.
+
+##### hide
+
+| Type | Required | Default |
+| ---- | -------- | ------- |
+| boolean | false |  false |
+
+If true, the column will be hidden when dropped outside the header.
+
+##### callback
+
+| Type | Required |
+| ---- | -------- |
+| (column: Column) => void | false |
+
+Callback function that will be called when a column is dropped outside the header.

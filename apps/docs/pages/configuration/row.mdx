@@ -3,9 +3,19 @@
 ## Properties
 
 ```tsx
+export interface RowEvents {
+  onHover: Partial<{
+    highlight: boolean;
+    callback: (row: Row, idx: number) => void;
+  }>,
+  onClick: Partial<{
+    callback: (row: Row, idx: number) => void;
+  }>
+}
 export interface RowConfig { 
   height?: number;
   border?: boolean;
+  events?: Partial<RowEvents>;
 }
 ```
 
@@ -24,3 +34,44 @@ Configures the height of the row.
 | boolean | false |  false |
 
 If true, a border will be added to the bottom of the row.
+
+### events
+
+| Type | Required | Default |
+| ---- | -------- | ------- |
+| RowEvents | false |  undefined |
+
+Configures the events of the row.
+
+#### onHover
+
+Handles the hover event of the row.
+
+##### highlight
+
+| Type | Required | Default |
+| ---- | -------- | ------- |
+| boolean | false |  false |
+
+If true, the row will be highlighted on hover.
+
+##### callback
+
+| Type | Required |
+| ---- | -------- |
+| (row: Row, idx: number) => void | false |
+
+The callback function that will be called when the row is hovered.
+
+
+#### onClick
+
+Handles the click event of the row.
+
+##### callback
+
+| Type | Required |
+| ---- | -------- |
+| (row: Row, idx: number) => void | false |
+
+The callback function that will be called when the row is clicked.

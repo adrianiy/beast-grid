@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useBeastStore } from './../../stores/beast-store';
 
-import { Column, Data, Row, SortType } from '../../common';
+import { Column, Data, Row, RowEvents, SortType } from '../../common';
 
 import './tbody.scss';
 import RowContainer from './row';
@@ -14,12 +14,13 @@ type TBodyProps = {
     border?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     filters?: Record<string, string[]>;
+    events?: Partial<RowEvents>;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 4;
 
-export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSortChange }: TBodyProps) {
+export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSortChange, events }: TBodyProps) {
     const gaps = useRef<Record<number, number>>({});
     const lastScroll = useRef<number>(0);
     const expandedRows = useRef<number>(0);
@@ -156,7 +157,7 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         }
     };
 
-    const handleRowExpand = (row: Row, idx: number) => () => {
+    const handleRowExpand = (row: Row, idx: number) => {
         if (row._expanded) {
             row._expanded = false;
             expandedRows.current -= row.children?.length || 0;
@@ -185,8 +186,9 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
                         idx={idx}
                         border={border}
                         height={rowHeight}
-                        level={0}
+                        level={1}
                         onClick={handleRowExpand}
+                        events={events}
                         gap={gaps.current[idx] || 0}
                     />
                 );
@@ -203,7 +205,8 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
                                     border={border}
                                     height={rowHeight}
                                     gap={gaps.current[idx] || 0}
-                                    level={1}
+                                    level={2}
+                                    events={events}
                                 />
                             );
                         }

@@ -7,18 +7,20 @@ import { BeastGridConfig, Column } from '../../common/interfaces';
 import cls from 'classnames';
 
 import './header.scss';
-import { PinType } from '../../common';
+import { HeaderEvents, PinType } from '../../common';
 
 export default function Header<T>({
   height,
   border,
   multiSort,
   dragOptions,
+  events
 }: {
   height: number;
   border?: boolean;
   multiSort?: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
+  events?: Partial<HeaderEvents>;
 }) {
   const [columns] = useBeastStore((state) => [state.columns]);
 
@@ -41,6 +43,7 @@ export default function Header<T>({
         height={height + (!column.children ? height * (levels.length - levelIdx - 1) : 0)}
         column={column}
         dragOptions={dragOptions}
+        events={events}
       />
     ));
   }

@@ -24,6 +24,13 @@
     &.expandable {
         cursor: pointer;
     }
+    &.withHighlight {
+        &:hover {
+            .grid-row-cell {
+                background-color: var(--bg-hover-color--1);
+            }
+        }
+    }
 }
 .grid-row-cell {
     position: absolute;
@@ -44,6 +51,6 @@
     }
 
     svg {
-        margin-right: var(--bg-size--2);
+        margin-right: var(--bg-size--1);
     }
 }

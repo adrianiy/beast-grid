@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { ArrowUpward, ArrowDownward, Menu } from '@mui/icons-material';
-import { BeastGridConfig, Column, Coords, SortState } from './../../common/interfaces';
+import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
@@ -16,9 +16,10 @@ type Props<T> = {
   column: Column;
   multiSort: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
+  events?: Partial<HeaderEvents>;
 };
 
-export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptions, multiSort }: Props<T>) {
+export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptions, multiSort, events }: Props<T>) {
   const menuRef = useRef<HTMLDivElement>(null);
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
@@ -122,7 +123,14 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function onDragEnd(_: DragEvent, pointer: Coords) {
     if (pointer.x < 0 || pointer.y < 0) {
       lastHitElement.current = null;
-      hideColumn(column.id);
+      
+      if (events?.onDropOutside?.hide) {
+        hideColumn(column.id);
+      }
+
+      if (events?.onDropOutside?.callback) {
+        events.onDropOutside.callback(column);
+      }
     }
   }
 

@@ -54,13 +54,30 @@ export interface StyleConfig {
   maxHeight: number;
   border: boolean;
 }
+export interface RowEvents {
+  onHover: Partial<{
+    highlight: boolean;
+    callback: (row: Row, idx: number) => void;
+  }>,
+  onClick: Partial<{
+    callback: (row: Row, idx: number) => void;
+  }>
+}
 export interface RowConfig {
   height: number;
   border: boolean;
+  events: Partial<RowEvents>;
+}
+export interface HeaderEvents {
+  onDropOutside: Partial<{
+    hide: boolean;
+    callback: (column: Column) => void;
+  }>
 }
 export interface HeaderConfig {
   height: number;
   border: boolean;
+  events: Partial<HeaderEvents>;
 }
 export interface dragOptions {
   autoScrollSpeed: number;

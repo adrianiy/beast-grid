@@ -63,7 +63,7 @@ export function BeastGrid<T>({
         <MenuStoreProvider createStore={menuStore}>
           <BeastGridProvider createStore={beastGridStore}>
             <BeastApi store={api} />
-            <DndLayer />
+            <DndLayer  config={config} />
             <LoaderLayer />
             <MenuLayer />
             <Grid config={config} defaultConfig={defaultConfig} onSortChange={onSortChange} />

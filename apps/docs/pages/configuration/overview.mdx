@@ -28,10 +28,12 @@ export interface StyleConfig {
 export interface RowConfig { 
   height: number;
   border: boolean;
+  events: Partial<RowEvents>;
 }
 export interface HeaderConfig {
   height: number;
   border: boolean;
+  events: Partial<HeaderEvents>;
 }
 export interface dragOptions {
   autoScrollSpeed: number;
