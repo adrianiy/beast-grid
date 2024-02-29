@@ -92,7 +92,12 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           border: true
         },
         row: {
-          border: true
+          border: true,
+          events: {
+            onHover: {
+              highlight: true
+            }
+          }
         },
         sort: {
           enabled: true,

@@ -1,4 +1,4 @@
-import { Column, PinType, Row } from '../../common';
+import { Column, PinType, Row, RowEvents } from '../../common';
 import { RowCell } from './row-cell';
 
 import cn from 'classnames';
@@ -11,26 +11,37 @@ type Props = {
   height: number;
   gap: number;
   level: number;
-  onClick?: (row: Row, idx: number) => () => void;
+  events?: RowEvents;
+  onClick?: (row: Row, idx: number) => void;
 };
 
-const LEVEL_PADDING = 32;
+const LEVEL_PADDING = 16;
 
-export default function RowContainer({ row, columns, idx, border, height, gap, level, onClick }: Props) {
+export default function RowContainer({ row, columns, idx, border, height, gap, level, onClick, events }: Props) {
   const totalWidth = columns.reduce((acc, curr) => acc + curr.width, 0);
 
   const renderRow = (pinType: PinType | undefined) => {
     return columns.filter(column => column.pinned === pinType).map((column, idx) => (
-      <RowCell key={idx} height={height} row={row} columnDef={column} leftPadding={level && column.aggregationLevel ? LEVEL_PADDING : 0} />
+      <RowCell key={idx} height={height} row={row} columnDef={column} paddingLeft={LEVEL_PADDING * (column.aggregationLevel ? level : 1)} />
     ));
+  }
+
+  const handleClick = () => {
+    if (events?.onClick) {
+      events.onClick.callback(row, idx);
+    }
+
+    if (onClick) {
+      onClick(row, idx);
+    }
   }
   
   return (
     <div
       key={idx}
-      className={cn('grid-row', { bordered: border, expandable: row.children })}
+      className={cn('grid-row', { bordered: border, expandable: row.children, withHighlight: events?.onHover.highlight })}
       style={{ top: (height * idx) + gap, height, width: totalWidth }}
-      onClick={onClick?.(row, idx)}
+      onClick={handleClick}
     >
       <div className="grid-left-pin">{renderRow(PinType.LEFT)}</div>
       {renderRow(undefined)}

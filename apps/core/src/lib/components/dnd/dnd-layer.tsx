@@ -1,9 +1,10 @@
 import { DragHandle, VisibilityOff } from '@mui/icons-material';
 import { useDndStore } from './../../stores/dnd-store';
+import { BeastGridConfig } from '../../common';
 
 import './dnd-layer.scss';
 
-export default function DndLayer() {
+export default function DndLayer<T>({ config }: { config: BeastGridConfig<T>}) {
   const [dragItem, coords, pointer] = useDndStore((state) => [
     state.dragItem,
     state.coords,
@@ -19,6 +20,7 @@ export default function DndLayer() {
         isInside={pointer.x > 0 && pointer.y > 0}
         top={coords?.y}
         left={coords?.x}
+        hide={config?.header?.events?.onDropOutside?.hide}
       />
     );
   };
@@ -31,9 +33,10 @@ interface BoxDragPreviewProps {
   isInside: boolean;
   top?: number;
   left?: number;
+  hide?: boolean;
 }
 
-const BoxDragPreview = ({ text, isInside, top, left }: BoxDragPreviewProps) => {
+const BoxDragPreview = ({ text, isInside, top, left, hide }: BoxDragPreviewProps) => {
   return (
     <div
       className="dnd-drag-preview"
@@ -42,7 +45,7 @@ const BoxDragPreview = ({ text, isInside, top, left }: BoxDragPreviewProps) => {
         left,
       }}
     >
-      {isInside ? (
+      {isInside || !hide ? (
         <DragHandle style={{ fontSize: 12 }} />
       ) : (
         <VisibilityOff style={{ fontSize: 12 }} />
