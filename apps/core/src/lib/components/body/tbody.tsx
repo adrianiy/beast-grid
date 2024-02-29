@@ -217,7 +217,6 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     };
 
     const getStyleProps = (dataSlice: JSX.Element[]) => {
-        console.log(max);
         return {
             height: max * rowHeight,
         };
