@@ -17,6 +17,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
+    "animate.css": "^4.1.1",
     "classnames": "^2.5.1",
     "dracula-prism": "^2.1.16",
     "express": "^4.18.2",

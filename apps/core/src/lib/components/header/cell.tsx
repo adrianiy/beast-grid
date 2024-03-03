@@ -24,16 +24,14 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
-  const [columns, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore(
-    (state) => [
-      state.columns,
-      state.hideColumn,
-      state.swapColumns,
-      state.resizeColumn,
-      state.container,
-      state.changeSort,
-    ]
-  );
+  const [columns, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
+    state.columns,
+    state.hideColumn,
+    state.swapColumns,
+    state.resizeColumn,
+    state.container,
+    state.changeSort,
+  ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
   const [menuColumn, initializeMenu, setMenuColumn] = useMenuStore((state) => [
     state.column,
@@ -123,7 +121,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function onDragEnd(_: DragEvent, pointer: Coords) {
     if (pointer.x < 0 || pointer.y < 0) {
       lastHitElement.current = null;
-      
+
       if (events?.onDropOutside?.hide) {
         hideColumn(column.id);
       }
@@ -146,11 +144,9 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       setMenuColumn(undefined);
       return;
     }
-    const rect = menuRef.current?.getBoundingClientRect();
     initializeMenu({
       column: column.id,
-      coords: { x: rect?.left || 0, y: (rect?.bottom || 0) + 12 },
-      clipRef: menuRef.current,
+      clipRef: () => menuRef.current,
     });
   };
 
@@ -166,42 +162,42 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   if (column.hidden || column.logicDelete) return null;
 
   const RightSide = () => {
-    if (column.menu) {
-      return (
-        <div className="bg-grid-header__cell__menu row middle" ref={menuRef}>
-          <Menu
-            className={cn('bg-grid-header__menu', menuColumn === column.id && 'active')}
-            onClick={handleMenuClick}
-          />
-        </div>
-      );
+    if (!column.menu) {
+      return null;
     }
 
-    return null;
+    return (
+      <div className="bg-grid-header__cell__menu row middle">
+        <Menu
+          ref={menuRef}
+          className={cn('bg-grid-header__menu', menuColumn === column.id && 'active')}
+          onClick={handleMenuClick}
+        />
+      </div>
+    );
   };
 
   return (
     <div
-      className={cn("bg-grid-header__cell row middle between", { lastPinned: column.lastPinned })}
+      className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
       key={`${levelIdx}-${idx}-${column.id}`}
       style={{
         height,
         width: column.width,
-        left: column.left
+        left: column.left,
       }}
       ref={drag}
       id={column.id}
       data-name={column.headerName}
       data-level={column.level}
       data-clone={column.original}
-      onClick={handleChangeSort}
     >
-      <div className="bg-grid-header__cell__left row middle">
+      <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
         <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
 
-      <div className="bg-grid-header__cell__menu row middle" ref={menuRef}>
+      <div className="bg-grid-header__cell__menu row middle">
         <RightSide />
       </div>
 

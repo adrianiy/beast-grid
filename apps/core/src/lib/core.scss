@@ -32,7 +32,6 @@
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     border-collapse: collapse;
     border-spacing: 0;
     box-sizing: border-box;
@@ -61,24 +60,25 @@
         }
     }
 
-    &__column--pinned {
-        position: absolute;
-        left: 0;
-        z-index: 2;
-    }
-    
     .grid-left-pin {
         position: sticky;
         left: 0;
         z-index: 2;
+        border-right: var(--bg-border--1);
 
         .lastPinned {
-            border-right: var(--bg-border--1);
-            
             .bg-grid-header__resize {
                 opacity: 0;
             }
         }
+    }
+    .grid-right-pin {
+        position: sticky;
+        float: right;
+        right: 0;
+        top: 0;
+        z-index: 2;
+        border-left: var(--bg-border--1);
     }
 
     &::-webkit-scrollbar {

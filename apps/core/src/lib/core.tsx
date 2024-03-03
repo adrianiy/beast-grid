@@ -15,12 +15,13 @@ import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
 import MenuLayer from './components/menu/menu-layer';
+import DndLayer from './components/dnd/dnd-layer';
+import Grid from './grid';
 
 import cn from 'classnames';
 
 import './core.scss';
-import DndLayer from './components/dnd/dnd-layer';
-import Grid from './grid';
+import 'animate.css';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,

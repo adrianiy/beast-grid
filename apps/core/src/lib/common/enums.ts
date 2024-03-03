@@ -12,10 +12,6 @@ export enum Direction {
   RIGHT = 'right',
 }
 
-export enum FilterType {
-  STRING = 'string'
-}
-
 export enum AggregationType {
   SUM = 'sum',
   AVG = 'avg',

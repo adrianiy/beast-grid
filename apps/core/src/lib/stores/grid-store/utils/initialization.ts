@@ -102,7 +102,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (column.filterType && column.field) {
+    if (column.menu?.filter && column.field) {
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;

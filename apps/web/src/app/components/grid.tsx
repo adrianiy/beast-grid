@@ -16,25 +16,26 @@ type Props = {
 const columnDefs: ColumnDef[] = [
   {
     headerName: 'COUNTRY',
-    pinned: PinType.LEFT,
     field: 'country',
     width: 200,
-    filterType: FilterType.STRING,
-    menu: true,
+    sortable: true,
+    menu: {
+      pin: true,
+      filter: true
+    },
     aggregationLevel: 1,
   },
   {
     headerName: 'USER',
-    menu: false,
     children: [
-      { headerName: 'NAME AND SURNAME', field: 'name', width: 200, menu: { column: true, grid: true } },
-      { headerName: 'AGE', field: 'age', width: 100, menu: true },
+      { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true } },
+      { headerName: 'AGE', field: 'age', width: 100, sortable: true, menu: { grid: true } },
     ],
   },
-  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1, pinned: PinType.LEFT },
+  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
   {
     headerName: 'MONTHS',
-    menu: false,
+    sortable: true,
     children: [
       ...months.map(
         (month): ColumnDef => ({
@@ -104,7 +105,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           multiple: true
         },
         defaultColumnDef: {
-          menu: { column: true, grid: true },
+          menu: { pin: true },
         },
         ..._customConfig,
       });

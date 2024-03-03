@@ -24,7 +24,7 @@ export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T
     if (ref.current) {
       setScrollElement(ref.current.getScrollElement() as HTMLDivElement);
     }
-  }, [ref])
+  }, [ref, setScrollElement])
   
   return <SimpleBar
     style={{ maxHeight: config.style?.maxHeight }}

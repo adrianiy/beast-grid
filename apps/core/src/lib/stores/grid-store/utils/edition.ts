@@ -64,8 +64,8 @@ export const mergeColumns = (columns: ColumnStore) => {
   }
 };
 
-export const moveColumns = (columns: ColumnStore) => {
-  const sortedColumns = Object.values(columns).sort(
+export const moveColumns = (columns: ColumnStore, pinTypes = [PinType.LEFT, undefined]) => {
+  const sortedColumns = Object.values(columns).filter(column => pinTypes.includes(column.pinned)).sort(
     (a, b) =>
       a.level - b.level ||
       (a.pinned === PinType.LEFT ? 0 : 1) - (b.pinned === PinType.LEFT ? 0 : 1) ||
@@ -88,6 +88,10 @@ export const moveColumns = (columns: ColumnStore) => {
     }
     columns[column.id].left = left + (columns[column.parent as string]?.left || 0);
     left += columns[column.id].width || 150;
+  }
+
+  if (!pinTypes.includes(PinType.RIGHT)) {
+    moveColumns(columns, [PinType.RIGHT]);
   }
 };
 

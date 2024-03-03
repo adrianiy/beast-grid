@@ -12,7 +12,7 @@ import {
   swapPositions,
 } from './utils';
 import { GridStore } from './store';
-import { FilterType, SortType } from '../../common';
+import { PinType, SortType } from '../../common';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
   const { columns } = state;
@@ -55,8 +55,6 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     [column1, column2] = getSwappableClone(column1, column2, columns);
   }
 
-  console.log(column1, column2);
-
   // change positions
   swapPositions(column1, column2);
   mergeColumns(columns);
@@ -94,7 +92,7 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
   if (column.children) {
     const diff = (column.width - prevWidth) / column.children.length;
     column.childrenId?.forEach((child) => {
-      columns[child].width = (columns[child].width || 0 ) + diff;
+      columns[child].width = (columns[child].width || 0) + diff;
     });
   }
 
@@ -129,14 +127,11 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
 export const addFilter = (id: ColumnId, value: IFilter) => (state: GridStore) => {
   const { columns, filters } = state;
-  const column = columns[id];
 
-  if (column.filterType === FilterType.STRING) {
-    if (filters[id]?.includes(value as string)) {
-      filters[id] = filters[id]?.filter((val) => val !== value);
-    } else {
-      filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-    }
+  if (filters[id]?.includes(value as string)) {
+    filters[id] = filters[id]?.filter((val) => val !== value);
+  } else {
+    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
   }
 
   return { columns, filters: { ...filters } };
@@ -154,3 +149,20 @@ export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
 
   return { columns, filters: { ...filters } };
 };
+
+export const pinColumn = (id: ColumnId, pin?: PinType) => (state: GridStore) => {
+  const { columns } = state;
+  const column = columns[id];
+
+  column.pinned = pin;
+
+  if (column.childrenId) {
+    column.childrenId.forEach((child) => {
+      columns[child].pinned = pin;
+    });
+  }
+
+  moveColumns(columns);
+
+  return { columns };
+}

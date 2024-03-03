@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useBeastStore } from './../../stores/beast-store';
 
+import RowContainer from './row';
+
 import { Column, Data, Row, RowEvents, SortType } from '../../common';
 
 import './tbody.scss';
-import RowContainer from './row';
 
 type TBodyProps = {
     rowHeight: number;
@@ -54,8 +55,8 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
 
     useEffect(() => {
-        const containerHeight = maxHeight || container.getBoundingClientRect().height - headerHeight * levels.length;
-        const visibleRows = Math.ceil(containerHeight / rowHeight);
+        const containerHeight = (maxHeight ? maxHeight : container.getBoundingClientRect().height) - headerHeight * levels.length;
+        const visibleRows = Math.floor(containerHeight / rowHeight);
         const topRow = Math.floor(lastScroll / rowHeight);
         const bottomRow = topRow + visibleRows;
         const maxValue = Math.min(data.length + expandedRows, bottomRow + THRESHOLD);
@@ -216,16 +217,16 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         return renderArray.concat(...childrenArray);
     };
 
-    const getStyleProps = (dataSlice: JSX.Element[]) => {
+    const getStyleProps = () => {
         return {
-            height: max * rowHeight,
+            height: data.length * rowHeight,
         };
     };
 
     const dataSlice = createDataSlice();
 
     return (
-        <div className="grid-body" style={getStyleProps(dataSlice)}>
+        <div className="grid-body" style={getStyleProps()}>
             {dataSlice}
         </div>
     );

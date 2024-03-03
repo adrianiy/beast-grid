@@ -1,5 +1,5 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, FilterType, PinType, SortType } from './enums';
+import { AggregationType, PinType, SortType } from './enums';
 
 export interface Row {
   [key: string]: unknown;
@@ -23,6 +23,7 @@ export interface FilterProps {
 
 export interface MenuProps {
   column: boolean;
+  pin: boolean;
   filter: boolean;
   grid: boolean;
 }
@@ -36,10 +37,9 @@ export interface BaseColumnDef {
   pinned?: PinType;
   field?: string;
   sortable?: boolean;
-  filterType?: FilterType;
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
-  menu?: boolean | Partial<MenuProps>;
+  menu?: Partial<MenuProps>;
   aggregationLevel?: number;
   aggregation?: AggregationType;
 }

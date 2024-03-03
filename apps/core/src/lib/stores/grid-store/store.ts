@@ -4,6 +4,7 @@ import {
   changeSort,
   deleteEmptyParents,
   hideColumn,
+  pinColumn,
   resetColumnConfig,
   resizeColumn,
   selectAllFilters,
@@ -11,7 +12,7 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, SortType } from '../../common';
+import { BeastGridConfig, PinType, SortType } from '../../common';
 import { getColumnsFromDefs, initialize, moveColumns } from './utils';
 
 interface GridState {
@@ -45,6 +46,7 @@ export interface GridStore extends GridState, InferedState {
   setSorting: (sorting: boolean) => void;
   addFilter: (id: ColumnId, value: IFilter) => void;
   selectAllFilters: (id: ColumnId) => void;
+  pinColumn: (id: ColumnId, pin?: PinType) => void;
 }
 
 export const createGridStore = <T>(
@@ -86,6 +88,7 @@ export const createGridStore = <T>(
     setSorting: (sorting: boolean) => set({ sorting }),
     addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
+    pinColumn: (id: ColumnId, pin?: PinType) => set(pinColumn(id, pin)),
   }));
 };
 
