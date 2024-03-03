@@ -66,9 +66,11 @@
         z-index: 2;
         border-right: var(--bg-border--1);
 
-        .lastPinned {
-            .bg-grid-header__resize {
-                opacity: 0;
+        .grid-header-row {
+            .bg-grid-header__cell:last-child {
+                .bg-grid-header__resize {
+                    opacity: 0;
+                }
             }
         }
     }
@@ -79,7 +81,7 @@
         top: 0;
         z-index: 2;
         border-left: var(--bg-border--1);
-        
+
         .bg-grid-header__resize {
             opacity: 0;
         }

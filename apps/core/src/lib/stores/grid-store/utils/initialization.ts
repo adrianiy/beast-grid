@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ColumnDef, ColumnStore, Column, Data, Row, IFilter } from "../../../common";
+import { ColumnDef, ColumnStore, Column, Data, Row, IFilter, PinType } from "../../../common";
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
 import { groupBy } from '../../../utils/functions';
@@ -28,7 +28,7 @@ export const getColumnsFromDefs = (
       ...deepmerge(defaultColumnDef || {}, columnDef),
       width: columnDef.width || 0,
       position: idx,
-      pinned: parent?.pinned || columnDef.pinned,
+      pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
       top: 0,
       left: 0,
       final: !columnDef.children || columnDef.children.length === 0,

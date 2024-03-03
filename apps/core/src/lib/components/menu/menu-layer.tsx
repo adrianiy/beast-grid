@@ -143,7 +143,7 @@ export default function HeaderMenu({ column, multiSort, vertical, horizontal, cl
   };
   
   const handlePinColumn = (pinType: PinType) => () => {
-    pinColumn(column.id, column.pinned === pinType ? undefined : pinType);
+    pinColumn(column.id, column.pinned === pinType ? PinType.NONE : pinType);
     onClose()
   }
 

@@ -31,7 +31,6 @@ export const mergeColumns = (columns: ColumnStore) => {
     .sort(
       (a, b) =>
         a.level - b.level ||
-        (a.pinned === PinType.LEFT ? 0 : 1) - (b.pinned === PinType.LEFT ? 0 : 1) ||
         columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
         a.position - b.position ||
         a.left - b.left
@@ -64,32 +63,38 @@ export const mergeColumns = (columns: ColumnStore) => {
   }
 };
 
-export const moveColumns = (columns: ColumnStore, pinType?: PinType, initialLeft?: number) => {
-  const sortedColumns = Object.values(columns).filter(column => pinType === column.pinned).sort(
-    (a, b) =>
-      a.level - b.level ||
-      (a.pinned === PinType.LEFT ? 0 : 1) - (b.pinned === PinType.LEFT ? 0 : 1) ||
-      columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
-      a.position - b.position ||
-      a.left - b.left
-  );
-
+export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinType: PinType, initialLeft?: number) => {
   let lastColumn: Column = sortedColumns[0];
   let left = initialLeft ?? (lastColumn?.left || 0);
 
   for (const column of sortedColumns) {
+    if (column.pinned !== pinType || column.hidden) {
+      continue;
+    }
     if (column.parent && lastColumn.parent !== column.parent) {
       left = 0;
     }
-    lastColumn.lastPinned = column.pinned !== lastColumn.pinned && column.level === lastColumn.level;
     lastColumn = column;
-    if (column.hidden) {
-      continue;
-    }
+    
     columns[column.id].left = left + (columns[column.parent as string]?.left || 0);
     left += columns[column.id].width || 150;
   }
-};
+
+  return left;
+}
+
+const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
+
+export const sortColumns = (columns: ColumnStore) => {
+  return Object.values(columns).sort(
+    (a, b) =>
+      PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
+      a.level - b.level ||
+      columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
+      a.position - b.position ||
+      a.left - b.left
+  );
+}
 
 export const addSort = (
   column: Column,

@@ -219,7 +219,7 @@ export const useDndHook = (
         dragRef.removeEventListener('dragend', onDragEnd);
       };
     }
-  }, [ref, scrollElement, columns]);
+  }, [ref, scrollElement]);
 
   return [ref];
 };

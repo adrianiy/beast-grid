@@ -39,6 +39,9 @@
         }
     }
 }
+.grid-row-content {
+    position: relative;
+}
 .grid-row-cell {
     position: absolute;
     display: flex;

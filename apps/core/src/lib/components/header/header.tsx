@@ -8,6 +8,7 @@ import cls from 'classnames';
 
 import './header.scss';
 import { HeaderEvents, PinType } from '../../common';
+import HeaderSection from './headerSection';
 
 type Props<T> = {
     height: number;
@@ -35,46 +36,38 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
         ...levels.map((level) => level.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0))
     );
 
-    const renderHeaderRow = (level: Column[], levelIdx: number, pinType: PinType | undefined) => {
-        return level
-            .filter((column) => column.pinned === pinType)
-            .map((column, idx) => (
-                <HeaderCell
-                    key={idx}
-                    levelIdx={0}
-                    idx={idx}
-                    multiSort={!!multiSort}
-                    height={height + (!column.children ? height * (levels.length - levelIdx - 1) : 0)}
-                    column={column}
-                    dragOptions={dragOptions}
-                    events={events}
-                />
-            ));
-    };
-
-    const renderLevels = (width: number, pinType?: PinType) => {
-        return levels.map((level, levelIdx) => (
-            <div className={cls('grid-header-row row', { bordered: border })} style={{ height, width }} key={levelIdx}>
-                {renderHeaderRow(level, levelIdx, pinType)}
-            </div>
-        ));
-    };
-
     return (
         <div className="grid-header row" style={{ height: height * levels.length, width: totalWidth }}>
-            {leftWidth > 0 && (
-                <div className="grid-left-pin" style={{ width: leftWidth }}>
-                    {renderLevels(leftWidth, PinType.LEFT)}
-                </div>
-            )}
-            <div className="grid-header-content" style={{ width: totalWidth, transform: `translateX(-${leftWidth}px)` }}>
-                {renderLevels(totalWidth - leftWidth - rightWidth)}
-            </div>
-            {rightWidth > 0 && (
-                <div className="grid-right-pin" style={{ width: rightWidth }}>
-                    {renderLevels(rightWidth, PinType.RIGHT)}
-                </div>
-            )}
+            <HeaderSection
+                width={leftWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.LEFT}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
+            <HeaderSection
+                width={totalWidth - leftWidth - rightWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.NONE}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
+            <HeaderSection
+                width={rightWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.RIGHT}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
         </div>
     );
 }

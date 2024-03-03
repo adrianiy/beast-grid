@@ -22,6 +22,7 @@ export enum AggregationType {
 
 export enum PinType {
   LEFT = 'left',
+  NONE = 'none',
   RIGHT = 'right',
 }
 

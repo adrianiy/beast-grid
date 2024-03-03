@@ -8,8 +8,8 @@
     z-index: 3;
 }
 
-.grid-header-section {
-    position: absolute;
+.grid-header-content {
+    position: relative;
 
     &.left {
         left: 0;
@@ -24,7 +24,7 @@
     position: relative;
     box-sizing: border-box;
 
-    &.bordered {
+    &.border {
         border-bottom: var(--bg-border--1);
 
         .bg-grid-header__cell {

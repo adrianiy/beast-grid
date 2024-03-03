@@ -13,7 +13,7 @@ import {
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
 import { BeastGridConfig, PinType, SortType } from '../../common';
-import { getColumnsFromDefs, initialize, moveColumns } from './utils';
+import { getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
   data: Data;
@@ -25,6 +25,7 @@ interface GridState {
 }
 
 interface InferedState {
+  sortedColumns: Column[];
   loading: boolean;
   sorting: boolean;
   scrollElement: HTMLDivElement;
@@ -58,12 +59,14 @@ export const createGridStore = <T>(
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
   const data = initialize(columns, container, _data as Data);
+  const sortedColumns = sortColumns(columns);
   
-  moveColumns(columns);
+  moveColumns(columns, sortedColumns, PinType.NONE);
 
   const initialState = {
     data,
     columns,
+    sortedColumns,
     allowMultipleColumnSort: !!sort?.multiple,
     container,
     theme,

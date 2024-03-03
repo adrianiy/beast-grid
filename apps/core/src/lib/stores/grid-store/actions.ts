@@ -9,6 +9,7 @@ import {
   moveColumns,
   removeSort,
   setColumnsStyleProps,
+  sortColumns,
   swapPositions,
 } from './utils';
 import { GridStore } from './store';
@@ -32,20 +33,22 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
-  const { columns, container } = state;
+  const { columns, sortedColumns, container } = state;
   const column = columns[id];
   column.hidden = !column.hidden;
 
   setColumnsStyleProps(columns, container.offsetWidth);
-  moveColumns(columns);
+  moveColumns(columns, sortedColumns, column.pinned);
 
   return { columns };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
   const { columns } = state;
+  let { sortedColumns } = state;
   let column1 = columns[id1];
   let column2 = columns[id2];
+  let left = 0;
 
   if (!column1 || !column2) {
     return state;
@@ -59,9 +62,11 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   swapPositions(column1, column2);
   mergeColumns(columns);
 
-  moveColumns(columns, column1.pinned);
+  sortedColumns = sortColumns(columns);
 
-  return { ...columns };
+  moveColumns(columns, sortedColumns, column1.pinned, 0);
+
+  return { columns, sortedColumns };
 };
 
 export const deleteEmptyParents = () => (state: GridStore) => {
@@ -77,7 +82,7 @@ export const deleteEmptyParents = () => (state: GridStore) => {
 };
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
-  const { columns } = state;
+  const { columns, sortedColumns } = state;
   const column = columns[id];
 
   const prevWidth = column.width;
@@ -96,7 +101,8 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
     });
   }
 
-  moveColumns(columns);
+  const left = moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE, left);
 
   return { columns };
 };
@@ -150,8 +156,8 @@ export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
   return { columns, filters: { ...filters } };
 };
 
-export const pinColumn = (id: ColumnId, pin?: PinType) => (state: GridStore) => {
-  const { columns } = state;
+export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
+  const { columns, sortedColumns } = state;
   const column = columns[id];
 
   column.pinned = pin;
@@ -162,9 +168,9 @@ export const pinColumn = (id: ColumnId, pin?: PinType) => (state: GridStore) => 
     });
   }
 
-  moveColumns(columns, PinType.LEFT)
-  moveColumns(columns)
-  moveColumns(columns, PinType.RIGHT, 0)
+  moveColumns(columns, sortedColumns, PinType.LEFT)
+  moveColumns(columns, sortedColumns, PinType.NONE, 0)
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
 
   return { columns };
 }

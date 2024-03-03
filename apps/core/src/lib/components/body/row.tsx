@@ -64,7 +64,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
                 </div>
             )}
             <div className="grid-row-content" style={{ width: totalWidth }}>
-                {renderRow(undefined)}
+                {renderRow(PinType.NONE)}
             </div>
             {rightWidth > 0 && (
                 <div className="grid-right-pin" style={{ minWidth: rightWidth }}>
