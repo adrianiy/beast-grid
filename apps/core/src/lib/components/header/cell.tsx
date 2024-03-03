@@ -1,13 +1,15 @@
-import { useRef } from 'react';
-import { ArrowUpward, ArrowDownward, Menu } from '@mui/icons-material';
+import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
+import { IconDotsVertical, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
-import { useMenuStore } from '../../stores/menu-store';
+import HeaderMenu from '../menu/menu-layer';
 
 import cn from 'classnames';
+import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
 
 type Props<T> = {
   levelIdx: number;
@@ -20,7 +22,7 @@ type Props<T> = {
 };
 
 export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptions, multiSort, events }: Props<T>) {
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<SVGSVGElement>(null);
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
@@ -33,11 +35,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     state.changeSort,
   ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
-  const [menuColumn, initializeMenu, setMenuColumn] = useMenuStore((state) => [
-    state.column,
-    state.initializeState,
-    state.setColumn,
-  ]);
+  const [showMenu, setShowMenu] = useState(false);
   const [drag] = useDndHook(
     { id: column.id, text: column.headerName, isInside: true },
     {
@@ -62,7 +60,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function onDragStart() {
     lastX.current = 0;
     lastHitElement.current = null;
-    setMenuColumn(undefined);
+    setShowMenu(false)
   }
 
   function onDirectionChange() {
@@ -138,22 +136,15 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     changeSort(column.id, !!multiSort);
   };
 
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (menuColumn === column.id) {
-      setMenuColumn(undefined);
-      return;
-    }
-    initializeMenu({
-      column: column.id,
-      clipRef: () => menuRef.current,
-    });
+  const handleMenuClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setShowMenu((state) => !state);
   };
 
   const renderSortIcon = (sort: SortState) => {
     return (
       <div className="bg-sort-icon row middle">
-        {sort.order === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+        {sort.order === 'asc' ? <IconSortAscending size={16} /> : <IconSortDescending size={16} />}
         {sort.priority > 0 && <span className="bg-sort-priority">{sort.priority}</span>}
       </div>
     );
@@ -168,12 +159,31 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
     return (
       <div className="bg-grid-header__cell__menu row middle">
-        <Menu
+        <IconDotsVertical
           ref={menuRef}
-          className={cn('bg-grid-header__menu', menuColumn === column.id && 'active')}
+          size={16}
+          className={cn('bg-grid-header__menu', { active: showMenu })}
           onClick={handleMenuClick}
         />
       </div>
+    );
+  };
+
+  const Menu = () => {
+    if (!showMenu) {
+      return null;
+    }
+
+    return createPortal(
+      <HeaderMenu
+        column={column}
+        multiSort={multiSort}
+        clipRef={() => menuRef.current as SVGSVGElement}
+        onClose={handleMenuClick}
+        horizontal={MenuHorizontalPosition.LEFT}
+        vertical={MenuVerticalPosition.BOTTOM}
+      />,
+      document.body
     );
   };
 
@@ -202,6 +212,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       </div>
 
       <div ref={resize} className="bg-grid-header__resize" />
+      <Menu />
     </div>
   );
 }

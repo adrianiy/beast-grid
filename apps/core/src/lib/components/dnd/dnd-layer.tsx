@@ -1,8 +1,8 @@
-import { DragHandle, VisibilityOff } from '@mui/icons-material';
 import { useDndStore } from './../../stores/dnd-store';
 import { BeastGridConfig } from '../../common';
 
 import './dnd-layer.scss';
+import { IconArrowsMove, IconEyeOff } from '@tabler/icons-react';
 
 export default function DndLayer<T>({ config }: { config: BeastGridConfig<T>}) {
   const [dragItem, coords, pointer] = useDndStore((state) => [
@@ -46,9 +46,9 @@ const BoxDragPreview = ({ text, isInside, top, left, hide }: BoxDragPreviewProps
       }}
     >
       {isInside || !hide ? (
-        <DragHandle style={{ fontSize: 12 }} />
+        <IconArrowsMove size={12} />
       ) : (
-        <VisibilityOff style={{ fontSize: 12 }} />
+        <IconEyeOff size={12} />
       )}
       {text}
     </div>

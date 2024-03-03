@@ -24,3 +24,13 @@ export enum PinType {
   LEFT = 'left',
   RIGHT = 'right',
 }
+
+export enum MenuVerticalPosition {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
+
+export enum MenuHorizontalPosition {
+  LEFT = 'left',
+  RIGHT = 'right',
+}

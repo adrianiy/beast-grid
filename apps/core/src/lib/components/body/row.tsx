@@ -49,7 +49,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
     return (
         <div
             key={idx}
-            className={cn('grid-row', {
+            className={cn('grid-row', 'animate__animated animate__faster animate__fadeIn', {
                 child: level > 1,
                 bordered: border,
                 expandable: row.children,

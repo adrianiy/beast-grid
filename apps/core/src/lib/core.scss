@@ -79,6 +79,10 @@
         top: 0;
         z-index: 2;
         border-left: var(--bg-border--1);
+        
+        .bg-grid-header__resize {
+            opacity: 0;
+        }
     }
 
     &::-webkit-scrollbar {

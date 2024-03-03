@@ -1,46 +1,37 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 
 import { ArrowDownward, ArrowUpward, Check, ChevronRight, Close } from '@mui/icons-material';
-import { Column, Coords, IFilter, SortType, MenuProps, PinType } from '../../common';
+import { Column, IFilter, SortType, MenuProps, PinType, MenuVerticalPosition, MenuHorizontalPosition } from '../../common';
 
 import { useBeastStore } from '../../stores/beast-store';
-import { useMenuStore } from '../../stores/menu-store';
 
 import cn from 'classnames';
 
 import './menu-layer.scss';
+import { IconSortAscending, IconSortDescending } from '@tabler/icons-react';
 
 type Props = {
   column: Column;
   multiSort: boolean;
-  coords?: Coords;
+  vertical: MenuVerticalPosition;
+  horizontal: MenuHorizontalPosition;
+  clipRef: () => SVGSVGElement;
+  onClose: () => void;
 };
 
-export default function MenuLayer() {
-  const [columnId] = useMenuStore((state) => [state.column]);
-  const [columns, multiSort] = useBeastStore((state) => [state.columns, state.allowMultipleColumnSort]);
-
-  if (!columnId) {
-    return null;
-  }
-
-  return <HeaderMenu column={columns[columnId]} multiSort={multiSort} />;
-}
-
-function HeaderMenu({ column, multiSort }: Props) {
+export default function HeaderMenu({ column, multiSort, vertical, horizontal, clipRef, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [verticalPosition, setVerticalPosition] = useState<MenuVerticalPosition>(vertical);
+  const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
+  const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [searchValue, setSearchValue] = useState('');
-  const [clipRef, coords, setCoords, setMenuColumn] = useMenuStore((state) => [
-    state.clipRef,
-    state.coords,
-    state.setCoords,
-    state.setColumn,
-  ]);
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
 
-  const [container, columns, filters, hideColumn, addFilter, selectAll, setSort, resetColumn, pinColumn] = useBeastStore(
+  const [container, columns, theme, filters, hideColumn, addFilter, selectAll, setSort, resetColumn, pinColumn] = useBeastStore(
     (state) => [
       state.scrollElement,
       state.columns,
+      state.theme,
       state.filters,
       state.hideColumn,
       state.addFilter,
@@ -55,31 +46,54 @@ function HeaderMenu({ column, multiSort }: Props) {
     const leftPinned = Object.values(columns)
       .filter((col) => col.pinned === 'left')
       .reduce((acc, curr) => acc + curr.width, 0);
+    
     const moveMenu = () => {
-      if (!clipRef || !clipRef()) {
+      if (!clipRef) {
         return;
       }
 
-      const { left: cLeft, top: cTop, right: cRight } = container.getBoundingClientRect();
-      const { left, bottom } = clipRef().getBoundingClientRect();
+      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
+      const { bottom: mB, width } = menuRef.current?.getBoundingClientRect() || { left: 0, top: 0, right: 0, bottom: 0, width: 0 };
+      const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      const x = left - cLeft;
-      const y = bottom - cTop + 12;
-      const min = column.pinned !== PinType.LEFT ? leftPinned : 0;
-      const max = cRight - cLeft;
-
-      if (x < min || x > max) {
-        setMenuColumn(undefined);
+      const x = window.scrollX + left;
+      const y = window.scrollY + bottom + 8;
+      
+      setCoords({ x, y });
+      
+      if (mB > window.innerHeight) {
+        setVerticalPosition(MenuVerticalPosition.TOP);
+      }
+      if (right > cRight) {
+        onClose();
+        return;
+      }
+      if (left + (width * 2) > cRight) {
+        setHorizontalSubmenuPosition(MenuHorizontalPosition.RIGHT);
+      } else {
+        setHorizontalSubmenuPosition(MenuHorizontalPosition.LEFT);
+      }
+      if (left + width > cRight) {
+        setHorizontalPosition(MenuHorizontalPosition.RIGHT);
+        return;
+      } else {
+        setHorizontalPosition(MenuHorizontalPosition.LEFT);
       }
 
-      setCoords({ x, y });
+      if (column.pinned) {
+        return;
+      }
+      if (left < cLeft + leftPinned || (x + width) > cRight) {
+        onClose();
+      }
+
     };
 
     moveMenu();
 
     const closeMenu = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuColumn(undefined);
+        onClose();
       }
     };
 
@@ -88,7 +102,6 @@ function HeaderMenu({ column, multiSort }: Props) {
     }, 300);
 
     document.addEventListener('click', closeMenu);
-    document.addEventListener('scroll', moveMenu);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
@@ -96,7 +109,7 @@ function HeaderMenu({ column, multiSort }: Props) {
       document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
-  }, []);
+  }, [verticalPosition, horizontalPosition]);
 
   const handleSetSort =
     (sort: SortType): MouseEventHandler<HTMLDivElement> =>
@@ -131,7 +144,7 @@ function HeaderMenu({ column, multiSort }: Props) {
   
   const handlePinColumn = (pinType: PinType) => () => {
     pinColumn(column.id, column.pinned === pinType ? undefined : pinType);
-    setMenuColumn(undefined)
+    onClose()
   }
 
   const renderSort = () => {
@@ -142,10 +155,10 @@ function HeaderMenu({ column, multiSort }: Props) {
       return (
         <div className="bg-menu__content column config">
           <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.ASC)}>
-            <ArrowUpward /> Ascending
+            <IconSortAscending size={16} /> Ascending
           </div>
           <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.DESC)}>
-            <ArrowDownward />
+            <IconSortDescending size={16} />
             Descending
           </div>
           <div className="bg-menu__separator" />
@@ -162,7 +175,7 @@ function HeaderMenu({ column, multiSort }: Props) {
             {column.sort?.order === SortType.DESC ? 'Ascending' : 'Descending'}
           </div>
           <div className="bg-menu__item row middle" onClick={handleResetColumn}>
-            <Close /> Reset column
+            <Close /> Reset sort
           </div>
           <div className="bg-menu__separator" />
         </div>
@@ -181,14 +194,14 @@ function HeaderMenu({ column, multiSort }: Props) {
           <ChevronRight />
         </div>
         <div className="bg-menu__separator" />
-        <div className="bg-menu__item__submenu column">
+        <div className={cn("bg-menu__item__submenu column", horizontalSubmenuPosition)}>
           <div className="bg-menu__item row middle between" onClick={handlePinColumn(PinType.LEFT)}>
-            { column.pinned === PinType.LEFT ?  "Unpin column" : "Pin left"}
+            Pin left
             { column.pinned === PinType.LEFT ?  <Check /> : null }
           </div>
           <div className="bg-menu__separator--transparent" />
           <div className="bg-menu__item row middle" onClick={handlePinColumn(PinType.RIGHT)}>
-            { column.pinned === PinType.RIGHT ?  "Unpin column" : "Pin right"}
+            Pin right
             { column.pinned === PinType.RIGHT ?  <Check /> : null }
           </div>
         </div>
@@ -238,7 +251,7 @@ function HeaderMenu({ column, multiSort }: Props) {
           <ChevronRight />
         </div>
         <div className="bg-menu__separator" />
-        <div className="bg-menu__item__submenu column">
+        <div className={cn("bg-menu__item__submenu column", horizontalSubmenuPosition)}>
           <input
             type="text"
             autoFocus
@@ -280,8 +293,8 @@ function HeaderMenu({ column, multiSort }: Props) {
   return (
     <div
       ref={menuRef}
-      className="bg-menu__container animate__animated animate__fadeIn"
-      style={{ top: coords?.y, left: coords?.x }}
+      className={cn("bg-menu__container animate__animated animate__faster animate__fadeIn", horizontalPosition, theme)}
+      style={{ top: coords.y, left: coords.x }}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="bg-menu__wrapper animate__animated animate__faster animate__fadeInDown">

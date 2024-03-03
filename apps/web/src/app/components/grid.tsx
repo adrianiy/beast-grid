@@ -35,13 +35,13 @@ const columnDefs: ColumnDef[] = [
   { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
   {
     headerName: 'MONTHS',
-    sortable: true,
     children: [
       ...months.map(
         (month): ColumnDef => ({
           headerName: month.toUpperCase(),
           field: month,
           aggregation: AggregationType.SUM,
+          sortable: true,
           flex: 1,
           formatter: (value: number) => numeral(value).format('0,0 $'),
         })

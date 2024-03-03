@@ -18,6 +18,7 @@ import { getColumnsFromDefs, initialize, moveColumns } from './utils';
 interface GridState {
   data: Data;
   columns: ColumnStore;
+  theme: string;
   container: HTMLDivElement;
   allowMultipleColumnSort: boolean;
   sort: ColumnId[];
@@ -33,6 +34,7 @@ interface InferedState {
 export interface GridStore extends GridState, InferedState {
   setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
+  setTheme: (theme: string) => void;
   setScrollElement: (container: HTMLDivElement) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
@@ -51,7 +53,8 @@ export interface GridStore extends GridState, InferedState {
 
 export const createGridStore = <T>(
   { data: _data, columnDefs, defaultColumnDef, sort }: BeastGridConfig<T>,
-  container: HTMLDivElement
+  container: HTMLDivElement,
+  theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
   const data = initialize(columns, container, _data as Data);
@@ -63,6 +66,7 @@ export const createGridStore = <T>(
     columns,
     allowMultipleColumnSort: !!sort?.multiple,
     container,
+    theme,
     sort: [],
   };
   
@@ -74,6 +78,7 @@ export const createGridStore = <T>(
     scrollElement: null as unknown as HTMLDivElement,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
+    setTheme: (theme: string) => set({ theme }),
     setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),

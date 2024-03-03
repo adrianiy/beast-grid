@@ -96,7 +96,7 @@
             top: 50%;
             right: 4px;
             width: 1px;
-            height: 50%;
+            height: 75%;
             background-color: var(--bg-background-color--2);
             transform: translateY(-50%);
         }
@@ -106,8 +106,7 @@
         font-size: var(--bg-size--3);
 
         svg {
-            font-size: var(--bg-size--3);
-            margin-left: var(--bg-size--1);
+            margin: 0 var(--bg-size--1);
         }
     }
 }

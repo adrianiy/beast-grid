@@ -4,6 +4,8 @@ import { ColumnDef, ColumnStore, Column, Data, Row, IFilter } from "../../../com
 import { MIN_COL_WIDTH } from './../../../common/globals';
 import { groupBy } from '../../../utils/functions';
 
+import deepmerge from 'deepmerge';
+
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
   defaultColumnDef?: Partial<ColumnDef>,
@@ -23,8 +25,7 @@ export const getColumnsFromDefs = (
   columnDefs.forEach((columnDef, idx) => {
     const id = uuidv4();
     const column: Column = {
-      ...(defaultColumnDef || {}),
-      ...columnDef,
+      ...deepmerge(defaultColumnDef || {}, columnDef),
       width: columnDef.width || 0,
       position: idx,
       pinned: parent?.pinned || columnDef.pinned,

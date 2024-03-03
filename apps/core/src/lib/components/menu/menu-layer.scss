@@ -3,29 +3,25 @@
     user-select: none;
     border: var(--bg-border--3);
     background-color: var(--bg-background-color--1);
+    color: var(--bg-text-color--1);
+    padding: var(--bg-size--1) 0;
+    transition: transform ease-in-out var(--bg-transition--1);
     width: 250px;
     z-index: 2;
     overflow: hidden;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,.05),rgba(0,0,0,.05) 0 0.625rem 0.9375rem -0.3125rem,rgba(0,0,0,.04) 0 0.4375rem 0.4375rem -0.3125rem;
+
+    &.right {
+        transform: translateX(calc(-100% + 16px));
+    }
 
     svg {
         font-size: var(--bg-size--4);
     }
 
-    .bg-nav-bar__container {
-        border-bottom: var(--bg-border--3);
-        padding: var(--bg-size--4);
-        gap: var(--bg-size--4);
-        cursor: pointer;
-
-        .bg-nav-bar__item {
-            color: var(--bg-text-color--3);
-            &.active {
-                color: var(--bg-text-color--1);
-            }
-        }
-    }
     .bg-menu__separator {
         border-bottom: var(--bg-border--3);
+        margin: var(--bg-size--1) 0;
 
         &--light {
             border-bottom: var(--bg-border--2);
@@ -40,7 +36,8 @@
             flex: 1;
             color: var(--bg-text-color--1);
             gap: var(--bg-size--3);
-            padding: var(--bg-size--4);
+            padding: var(--bg-size--2);
+            margin: 0 var(--bg-size--1);
             cursor: pointer;
 
             &:hover {
@@ -62,11 +59,18 @@
         .bg-menu__item__submenu {
             display: none;
             position: absolute;
-            margin-top: -1px;
+            margin-top: calc(calc(var(--bg-size--1) * -1) - 1px);
+            padding: var(--bg-size--1) 0;
             border: var(--bg-border--3);
             background-color: var(--bg-background-color--1);
             width: 250px;
             left: 100%;
+            box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,.05),rgba(0,0,0,.05) 0 0.625rem 0.9375rem -0.3125rem,rgba(0,0,0,.04) 0 0.4375rem 0.4375rem -0.3125rem;
+
+            &.right {
+                left: auto;
+                right: 100%;
+            }
         }
 
         &:hover {
@@ -85,7 +89,8 @@
         .bg-menu__filter__item {
             color: var(--bg-text-color--1);
             gap: var(--bg-size--3);
-            padding: var(--bg-size--4);
+            padding: var(--bg-size--2);
+            margin: 0 var(--bg-size--1);
             cursor: pointer;
 
             span {
@@ -96,7 +101,7 @@
             }
 
             &--big {
-                padding: var(--bg-size--4);
+                padding: var(--bg-size--2) var(--bg-size--4);
                 gap: var(--bg-size--3);
             }
 

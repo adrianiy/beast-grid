@@ -14,7 +14,6 @@ import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 
 import LoaderLayer, { Loader } from './components/loader/loader';
-import MenuLayer from './components/menu/menu-layer';
 import DndLayer from './components/dnd/dnd-layer';
 import Grid from './grid';
 
@@ -46,13 +45,13 @@ export function BeastGrid<T>({
 
     useEffect(() => {
     if (ref.current && config?.columnDefs) {
-      const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement);
+      const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme);
       const dndStore = () => createDndStore();
       const menuStore = () => createMenuStore();
 
       setStores([gridStore, dndStore, menuStore]);
     }
-  }, [ref, config]);
+  }, [ref, config, theme]);
 
   const renderGrid = () => {
     if (!config || !beastGridStore || !beastDndStore || !menuStore) {
@@ -66,8 +65,7 @@ export function BeastGrid<T>({
             <BeastApi store={api} />
             <DndLayer  config={config} />
             <LoaderLayer />
-            <MenuLayer />
-            <Grid config={config} defaultConfig={defaultConfig} onSortChange={onSortChange} />
+            <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
           </BeastGridProvider>
         </MenuStoreProvider>
       </DndStoreProvider>
