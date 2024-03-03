@@ -1,15 +1,15 @@
 import { useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { IconDotsVertical, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
+import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
+
 import HeaderMenu from '../menu/menu-layer';
 
 import cn from 'classnames';
-import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
 
 type Props<T> = {
   levelIdx: number;
@@ -60,7 +60,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   function onDragStart() {
     lastX.current = 0;
     lastHitElement.current = null;
-    setShowMenu(false)
+    setShowMenu(false);
   }
 
   function onDirectionChange() {
@@ -170,20 +170,16 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   };
 
   const Menu = () => {
-    if (!showMenu) {
-      return null;
-    }
-
-    return createPortal(
+    return (
       <HeaderMenu
+        visible={showMenu}
         column={column}
         multiSort={multiSort}
         clipRef={() => menuRef.current as SVGSVGElement}
         onClose={handleMenuClick}
         horizontal={MenuHorizontalPosition.LEFT}
         vertical={MenuVerticalPosition.BOTTOM}
-      />,
-      document.body
+      />
     );
   };
 
@@ -203,7 +199,9 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       data-clone={column.original}
     >
       <div className="bg-grid-header__cell__left row middle">
-        <span className="bg-grid-header-drop bg-grid-header__cell__name" onClick={handleChangeSort}>{column.headerName}</span>
+        <span className="bg-grid-header-drop bg-grid-header__cell__name" onClick={handleChangeSort}>
+          {column.headerName}
+        </span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
 
