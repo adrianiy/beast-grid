@@ -44,7 +44,7 @@ export default function HeaderMenu({ column, multiSort, vertical, horizontal, cl
 
   useEffect(() => {
     const leftPinned = Object.values(columns)
-      .filter((col) => col.pinned === 'left')
+      .filter((col) => col.pinned === PinType.LEFT)
       .reduce((acc, curr) => acc + curr.width, 0);
     
     const moveMenu = () => {
@@ -80,7 +80,7 @@ export default function HeaderMenu({ column, multiSort, vertical, horizontal, cl
         setHorizontalPosition(MenuHorizontalPosition.LEFT);
       }
 
-      if (column.pinned) {
+      if (column.pinned !== PinType.NONE) {
         return;
       }
       if (left < cLeft + leftPinned || (x + width) > cRight) {
