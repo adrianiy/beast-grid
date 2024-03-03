@@ -202,8 +202,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       data-level={column.level}
       data-clone={column.original}
     >
-      <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-        <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
+      <div className="bg-grid-header__cell__left row middle">
+        <span className="bg-grid-header-drop bg-grid-header__cell__name" onClick={handleChangeSort}>{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
 

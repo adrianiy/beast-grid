@@ -59,7 +59,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   swapPositions(column1, column2);
   mergeColumns(columns);
 
-  moveColumns(columns);
+  moveColumns(columns, column1.pinned);
 
   return { ...columns };
 };
@@ -162,7 +162,9 @@ export const pinColumn = (id: ColumnId, pin?: PinType) => (state: GridStore) => 
     });
   }
 
-  moveColumns(columns);
+  moveColumns(columns, PinType.LEFT)
+  moveColumns(columns)
+  moveColumns(columns, PinType.RIGHT, 0)
 
   return { columns };
 }

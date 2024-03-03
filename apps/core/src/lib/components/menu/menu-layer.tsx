@@ -184,7 +184,7 @@ export default function HeaderMenu({ column, multiSort, vertical, horizontal, cl
   };
 
   const renderPin = () => {
-    if (!column.menu?.pin) {
+    if (!column.menu?.pin || column.parent) {
       return null;
     }
     return (
