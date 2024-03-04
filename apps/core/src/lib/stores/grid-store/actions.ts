@@ -42,6 +42,11 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
       columns[child].hidden = column.hidden;
     });
   }
+  if (column.parent) {
+    const parent = columns[column.parent];
+    const allChildrenHidden = parent.childrenId?.every((child) => columns[child].hidden);
+    parent.hidden = allChildrenHidden;
+  }
 
   setColumnsStyleProps(columns, container.offsetWidth);
   moveColumns(columns, sortedColumns, column.pinned);

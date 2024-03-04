@@ -48,9 +48,22 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
     arrow?.classList.toggle('rotate');
   };
 
-  const renderOptions = (_columns: Column[]) => {
+  const renderOptions = (_columns: Column[], parentMatch?: boolean) => {
     return _columns?.map((item, idx) => {
       const children = Object.values(columns).filter((c) => item.childrenId?.includes(c.id));
+      const matchSearch = !searchValue || item.headerName.toLowerCase().includes(searchValue.toLowerCase());
+      const hasChildren = item.childrenId?.length || 0;
+      const hasMatchedChildren = children.some((c) =>
+        c.headerName.toLowerCase().includes(searchValue.toLowerCase())
+      );
+
+      if (!matchSearch && !hasChildren && !parentMatch) {
+        return null;
+      }
+
+      if (hasChildren && !hasMatchedChildren && !matchSearch) {
+        return null;
+      }
 
       return (
         <div
@@ -63,10 +76,6 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
             className="bg-sidebar__item row middle"
             style={{
               paddingLeft: `calc(${item.level + 1} * var(--bg-size--3))`,
-              display:
-                searchValue && !item.headerName.toLowerCase().includes(searchValue.toLowerCase())
-                  ? 'none'
-                  : 'flex',
             }}
           >
             <ChevronDownIcon
@@ -74,9 +83,7 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
               className={cn('trigger', { disabled: !item.childrenId })}
               onClick={handleExpandRow(item.id, item.childrenId?.length || 0)}
             />
-            <div className="bg-sidebar__item__header row middle"
-            onClick={handleGridChange(item)}
-            >
+            <div className="bg-sidebar__item__header row middle" onClick={handleGridChange(item)}>
               <Checkbox.Root className="bg-checkbox__root" checked={!item.hidden} id={item.id}>
                 <Checkbox.Indicator className="bg-checbox__indicator row center middle">
                   <CheckIcon />
@@ -91,7 +98,7 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
             id={`bg-sidebar__children__${item.id}`}
             style={{ height: 37 * children.length }}
           >
-            {renderOptions(children)}
+            {renderOptions(children, matchSearch)}
           </div>
         </div>
       );
@@ -110,6 +117,7 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
           autoFocus
           placeholder="Search..."
           className="bg-sidebar__search"
+          value={searchValue}
           onChange={handleSearch}
         />
         <div className="bg-sidebar__separator" />
