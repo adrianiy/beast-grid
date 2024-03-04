@@ -19,6 +19,8 @@
   gap: 12px;
 
   svg {
-    font-size: var(--bg-size--3);
+    --size: var(--bg-size--3);
+    width: var(--size);
+    height: var(--size);
   }
 }

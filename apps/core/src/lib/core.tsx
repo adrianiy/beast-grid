@@ -18,6 +18,7 @@ import cn from 'classnames';
 
 import './core.scss';
 import 'animate.css';
+import SideBar from './components/sidebar/sidebar';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -49,7 +50,7 @@ export function BeastGrid<T>({
 
   const renderGrid = () => {
     if (!config || !beastGridStore || !beastDndStore) {
-      return <Loader />;
+      return <div style={{ height: config?.style?.maxHeight || 300 }}><Loader /></div>
     }
 
     return (
@@ -57,7 +58,8 @@ export function BeastGrid<T>({
         <BeastGridProvider createStore={beastGridStore}>
           <BeastApi store={api} />
           <DndLayer config={config} />
-          <LoaderLayer />
+          <LoaderLayer config={config} />
+          <SideBar config={config}/>
           <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
         </BeastGridProvider>
       </DndStoreProvider>

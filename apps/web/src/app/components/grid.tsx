@@ -105,7 +105,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           multiple: true
         },
         defaultColumnDef: {
-          menu: { pin: true },
+          menu: { pin: true, grid: true },
         },
         ..._customConfig,
       });

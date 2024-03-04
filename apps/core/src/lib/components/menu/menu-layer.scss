@@ -9,14 +9,21 @@
     width: 250px;
     z-index: 2;
     overflow: hidden;
-    box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,.05),rgba(0,0,0,.05) 0 0.625rem 0.9375rem -0.3125rem,rgba(0,0,0,.04) 0 0.4375rem 0.4375rem -0.3125rem;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
+        rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
+
+    svg {
+        --size: var(--bg-size--4);
+        width: var(--size);
+        height: var(--size);
+
+        &.small {
+            --size: var(--bg-size--3);
+        }
+    }
 
     &.right {
         transform: translateX(calc(-100% + 16px));
-    }
-
-    svg {
-        font-size: var(--bg-size--4);
     }
 
     .bg-menu__separator {
@@ -39,6 +46,10 @@
             padding: var(--bg-size--2);
             margin: 0 var(--bg-size--1);
             cursor: pointer;
+
+            .left {
+                gap: var(--bg-size--3);
+            }
 
             &:hover {
                 background-color: var(--bg-hover-color--1);
@@ -65,7 +76,8 @@
             background-color: var(--bg-background-color--1);
             width: 250px;
             left: 100%;
-            box-shadow: 0 0.0625rem 0.1875rem rgba(0,0,0,.05),rgba(0,0,0,.05) 0 0.625rem 0.9375rem -0.3125rem,rgba(0,0,0,.04) 0 0.4375rem 0.4375rem -0.3125rem;
+            box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
+                rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
 
             &.right {
                 left: auto;
@@ -86,14 +98,34 @@
             max-height: 300px;
             overflow: auto;
         }
-        .bg-menu__filter__item {
+        .bg-menu__filter__item,
+        .bg-menu__grid__item {
             color: var(--bg-text-color--1);
             gap: var(--bg-size--3);
             padding: var(--bg-size--2);
             margin: 0 var(--bg-size--1);
             cursor: pointer;
+            
+            button {
+                all: unset;
 
-            span {
+                svg {
+                    --size: 100%;
+                }
+            }
+            .bg-checkbox__root {
+                --size: var(--bg-size--3);
+                background-color: white;
+                border: var(--bg-border--3);
+                width: var(--size);
+                height: var(--size);
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+
+            label {
                 width: 100%;
                 white-space: nowrap;
                 overflow: hidden;
@@ -101,7 +133,7 @@
             }
 
             &--big {
-                padding: var(--bg-size--2) var(--bg-size--4);
+                padding: var(--bg-size--2);
                 gap: var(--bg-size--3);
             }
 

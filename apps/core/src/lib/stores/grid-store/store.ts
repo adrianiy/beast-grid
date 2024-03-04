@@ -12,7 +12,7 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, PinType, SortType } from '../../common';
+import { BeastGridConfig, PinType, SideBarConfig, SortType } from '../../common';
 import { getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
@@ -30,6 +30,7 @@ interface InferedState {
   sorting: boolean;
   scrollElement: HTMLDivElement;
   filters: Record<ColumnId, IFilter[]>;
+  sideBarConfig: SideBarConfig | null;
 }
 
 export interface GridStore extends GridState, InferedState {
@@ -49,7 +50,8 @@ export interface GridStore extends GridState, InferedState {
   setSorting: (sorting: boolean) => void;
   addFilter: (id: ColumnId, value: IFilter) => void;
   selectAllFilters: (id: ColumnId) => void;
-  pinColumn: (id: ColumnId, pin?: PinType) => void;
+  pinColumn: (id: ColumnId, pin: PinType) => void;
+  setSideBarConfig: (config: SideBarConfig | null) => void;
 }
 
 export const createGridStore = <T>(
@@ -79,6 +81,7 @@ export const createGridStore = <T>(
     loading: false,
     sorting: false,
     scrollElement: null as unknown as HTMLDivElement,
+    sideBarConfig: null,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
     setTheme: (theme: string) => set({ theme }),
@@ -96,7 +99,8 @@ export const createGridStore = <T>(
     setSorting: (sorting: boolean) => set({ sorting }),
     addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
-    pinColumn: (id: ColumnId, pin?: PinType) => set(pinColumn(id, pin)),
+    pinColumn: (id: ColumnId, pin: PinType) => set(pinColumn(id, pin)),
+    setSideBarConfig: (config: SideBarConfig | null) => set({ sideBarConfig: config }),
   }));
 };
 

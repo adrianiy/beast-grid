@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
-import { IconDotsVertical, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
+import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
 
 import MenuLayer from '../menu/menu-layer';
@@ -145,7 +145,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const renderSortIcon = (sort: SortState) => {
     return (
       <div className="bg-sort-icon row middle">
-        {sort.order === 'asc' ? <IconSortAscending size={16} /> : <IconSortDescending size={16} />}
+        {sort.order === 'asc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
         {sort.priority > 0 && <span className="bg-sort-priority">{sort.priority}</span>}
       </div>
     );
@@ -160,11 +160,11 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
     return (
       <div className="bg-grid-header__cell__menu row middle">
-        <IconDotsVertical 
+        <DotsVerticalIcon
           ref={menuRef}
-          size={16}
           className={cn('bg-grid-header__menu', { active: showMenu })}
-          onClick={handleMenuClick} />
+          onClick={handleMenuClick}
+        />
       </div>
     );
   };

@@ -35,3 +35,8 @@ export enum MenuHorizontalPosition {
   LEFT = 'left',
   RIGHT = 'right',
 }
+
+export enum SideBarConfig {
+  GRID = 'grid',
+  FILTERS = 'filters'
+}
