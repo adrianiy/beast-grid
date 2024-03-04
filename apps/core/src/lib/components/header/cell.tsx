@@ -91,7 +91,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       const { x } = pointer;
       const hit = x > left && x < right;
 
-      if (hit && lastHitElement.current !== element) {
+      if (x > 0 && hit && lastHitElement.current !== element) {
         lastHitElement.current = element;
         swapColumns(column.id, element.id);
         break;
