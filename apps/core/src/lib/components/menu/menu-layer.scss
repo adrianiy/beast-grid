@@ -7,7 +7,7 @@
     padding: var(--bg-size--1) 0;
     transition: transform ease-in-out var(--bg-transition--1);
     width: 250px;
-    z-index: 2;
+    z-index: 300;
     overflow: hidden;
     box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
         rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
@@ -51,8 +51,21 @@
                 gap: var(--bg-size--3);
             }
 
+            .cross-overlay {
+                position: absolute;
+                height: var(--bg-size--4);
+                width: 1px;
+                background-color: var(--bg-color--1);
+                transform: rotate(32deg);
+                left: 19px;
+            }
+
             &:hover {
                 background-color: var(--bg-hover-color--1);
+            }
+
+            &__filler {
+                width: var(--bg-size--4);
             }
         }
 
@@ -105,7 +118,7 @@
             padding: var(--bg-size--2);
             margin: 0 var(--bg-size--1);
             cursor: pointer;
-            
+
             button {
                 all: unset;
 
@@ -117,8 +130,10 @@
                 --size: var(--bg-size--3);
                 background-color: white;
                 border: var(--bg-border--3);
-                width: var(--size);
-                height: var(--size);
+                max-width: var(--size);
+                max-height: var(--size);
+                min-width: var(--size);
+                min-height: var(--size);
                 display: flex;
                 flex-direction: row;
                 align-items: center;
@@ -149,9 +164,8 @@
         input[type='text'] {
             outline: none;
             border: none;
+            line-height: 21px;
             background-color: transparent;
-            line-height: var(--bg-size--5);
-            font-size: inherit;
             color: var(--bg-text-color--1);
         }
     }

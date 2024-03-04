@@ -40,3 +40,8 @@ export enum SideBarConfig {
   GRID = 'grid',
   FILTERS = 'filters'
 }
+
+export enum BusActions {
+  EXPAND = '@bg/expandAll',
+  COLLAPSE = '@bg/collapseAll',
+}

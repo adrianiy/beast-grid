@@ -111,8 +111,12 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   });
 };
 
+export const getGroupedData = (columns: ColumnStore, data: Data): Data => {
+  return groupDataByColumnDefs(columns, data);
+}
+
 export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data): Data => {
-  const finalData = groupDataByColumnDefs(columns, data);
+  const finalData = getGroupedData(columns, data);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
 

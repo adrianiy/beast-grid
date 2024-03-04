@@ -6,24 +6,21 @@ import {
   CheckIcon,
   ChevronRightIcon,
   Cross1Icon,
+  StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
+import { dispatch } from 'use-bus'
 
 import { useBeastStore } from '../../stores/beast-store';
 
-import {
-  Column,
-  MenuHorizontalPosition,
-  MenuProps,
-  PinType,
-  SideBarConfig,
-  SortType,
-} from '../../common';
+import { BusActions, Column, MenuHorizontalPosition, MenuProps, PinType, SideBarConfig, SortType } from '../../common';
+import MenuFilters from './menu-filters';
+import { capitalize } from '../../utils/functions';
 
 import cn from 'classnames';
 
 import './menu-layer.scss';
-import MenuFilters from './menu-filters';
+import { getGroupedData } from '../../stores/grid-store/utils';
 
 type Props = {
   visible: boolean;
@@ -49,15 +46,16 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns, setSort, resetColumn, pinColumn, setSidebar] =
-    useBeastStore((state) => [
-      state.scrollElement,
-      state.columns,
-      state.setSort,
-      state.resetColumnConfig,
-      state.pinColumn,
-      state.setSideBarConfig
-    ]);
+  const [container, data, columns, setSort, resetColumn, pinColumn, setSidebar, setData] = useBeastStore((state) => [
+    state.scrollElement,
+    state.initialData,
+    state.columns,
+    state.setSort,
+    state.resetColumnConfig,
+    state.pinColumn,
+    state.setSideBarConfig,
+    state.setData,
+  ]);
 
   useEffect(() => {
     const leftPinned = Object.values(columns)
@@ -149,7 +147,19 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const showConfig = () => {
     onClose();
     setSidebar(SideBarConfig.GRID);
-  }
+  };
+
+  const handleGroupByColumn = () => {
+    if (!column.aggregationLevel) {
+      column.aggregationLevel = 1;
+    } else {
+      dispatch(BusActions.COLLAPSE);
+      delete column.aggregationLevel;
+    }
+    const _data = getGroupedData(columns, data);
+
+    setData(_data)
+  };
 
   const renderSort = () => {
     if (!column.sortable) {
@@ -198,7 +208,10 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     return (
       <div className="bg-menu__content column config">
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
-          Pin
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Pin
+          </div>
           <ChevronRightIcon />
         </div>
         <div className="bg-menu__separator" />
@@ -243,13 +256,57 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     return (
       <div className="bg-menu__content column filter">
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
-          Filter
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Filter
+          </div>
           <ChevronRightIcon />
         </div>
         <div className="bg-menu__separator" />
         <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
           <MenuFilters column={column} />
         </div>
+      </div>
+    );
+  };
+
+  const renderColumnOptions = () => {
+    if (!column.menu || !(column.menu as MenuProps)?.column) {
+      return null;
+    }
+
+    const extraColumnOptions = () => {
+      if (!column.aggregationLevel) {
+        return null;
+      }
+
+      return <>
+        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.EXPAND)}>
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Expand all rows
+          </div>
+        </div>
+        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.COLLAPSE)}>
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Collapse all rows
+          </div>
+        </div>
+      </>
+    }
+
+    return (
+      <div className="bg-menu__content column filter">
+        <div className="bg-menu__item row middle between" onClick={handleGroupByColumn}>
+          <div className="row middle left">
+            <StackIcon />
+            {column.aggregationLevel && <div className="cross-overlay" />}
+            {column.aggregationLevel ? 'Ungroup' : `Group by ${capitalize(column.headerName)}`}
+          </div>
+        </div>
+        {extraColumnOptions()}
+        <div className="bg-menu__separator" />
       </div>
     );
   };
@@ -270,6 +327,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         {renderPin()}
         {renderFilter()}
         {renderGridConfig()}
+        {renderColumnOptions()}
       </div>
     </div>
   );

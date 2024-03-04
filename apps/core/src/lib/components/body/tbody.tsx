@@ -4,9 +4,10 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import RowContainer from './row';
 
-import { Column, Data, Row, RowEvents, SortType } from '../../common';
+import { BusActions, Column, Data, Row, RowEvents, SortType } from '../../common';
 
 import './tbody.scss';
+import useBus from 'use-bus';
 
 type TBodyProps = {
     rowHeight: number;
@@ -19,7 +20,7 @@ type TBodyProps = {
 };
 
 const PERFORMANCE_LIMIT = 1000000;
-const THRESHOLD = 4;
+const THRESHOLD = 5;
 
 export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSortChange, events }: TBodyProps) {
     const gaps = useRef<Record<number, number>>({});
@@ -150,6 +151,18 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         }
     }, [sort]);
 
+    useBus(
+        BusActions.EXPAND,
+        () => sortedData.forEach((row, idx) => forceRowExpand(row, idx, true)),
+        [sortedData]
+    )
+
+    useBus(
+        BusActions.COLLAPSE,
+        () => sortedData.forEach((row, idx) => forceRowExpand(row, idx, false)),
+        [sortedData]
+    )
+
     const lastLevel = Object.values(columns).filter((c) => c.final);
 
     const updateGaps = (gap: number, idx: number) => {
@@ -158,15 +171,33 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
         }
     };
 
+    const forceRowExpand = (row: Row, idx: number, value: boolean) => {
+        if (row._expanded !== value) {
+            if (value) {
+                expandRow(row, idx);
+            } else {
+                collapseRow(row, idx);
+            }
+        }
+    }
+
+    const expandRow = (row: Row, idx: number) => {
+        row._expanded = true;
+        updateGaps(rowHeight * (row.children?.length || 0), idx);
+        setExpandedRows((state) => state + (row.children?.length || 0));
+    }
+
+    const collapseRow = (row: Row, idx: number) => {
+        row._expanded = false;
+        setExpandedRows((state) => state - (row.children?.length || 0));
+        updateGaps(rowHeight * (row.children?.length || 0) * -1, idx);
+    }
+
     const handleRowExpand = (row: Row, idx: number) => {
         if (row._expanded) {
-            row._expanded = false;
-            setExpandedRows((state) => state - (row.children?.length || 0));
-            updateGaps(rowHeight * (row.children?.length || 0) * -1, idx);
+            collapseRow(row, idx);
         } else {
-            row._expanded = true;
-            updateGaps(rowHeight * (row.children?.length || 0), idx);
-            setExpandedRows(state => state + (row.children?.length || 0));
+            expandRow(row, idx);
         }
     };
 
@@ -219,7 +250,7 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
 
     const getStyleProps = () => {
         return {
-            height: data.length * rowHeight,
+            height: sortedData.length * rowHeight,
         };
     };
 

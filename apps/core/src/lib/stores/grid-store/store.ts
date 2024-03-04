@@ -25,6 +25,7 @@ interface GridState {
 }
 
 interface InferedState {
+  initialData: Data;
   sortedColumns: Column[];
   loading: boolean;
   sorting: boolean;
@@ -67,6 +68,7 @@ export const createGridStore = <T>(
 
   const initialState = {
     data,
+    initialData: data,
     columns,
     sortedColumns,
     allowMultipleColumnSort: !!sort?.multiple,

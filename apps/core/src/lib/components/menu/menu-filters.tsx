@@ -27,7 +27,7 @@ export default function MenuFilters(props: Props) {
   useEffect(() => {
     if (filters[column.id]?.length === column.filterOptions?.length) {
       setChecked(true);
-    } else if (filters[column.id]?.length === 0) {
+    } else if (!filters[column.id]?.length) {
       setChecked(false);
     } else {
       setChecked('indeterminate');

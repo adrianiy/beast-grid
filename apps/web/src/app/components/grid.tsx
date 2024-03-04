@@ -21,9 +21,9 @@ const columnDefs: ColumnDef[] = [
     sortable: true,
     menu: {
       pin: true,
-      filter: true
+      filter: true,
+      column: true
     },
-    aggregationLevel: 1,
   },
   {
     headerName: 'USER',
