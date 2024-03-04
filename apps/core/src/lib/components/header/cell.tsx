@@ -1,13 +1,13 @@
 import { useRef, useState } from 'react';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { IconDotsVertical, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
+import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
+
+import MenuLayer from '../menu/menu-layer';
+
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
-
-import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
-
-import HeaderMenu from '../menu/menu-layer';
 
 import cn from 'classnames';
 
@@ -26,8 +26,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
-  const [columns, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
+  const [showMenu, setShowMenu] = useState(false);
+  const [columns, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.columns,
+    state.theme,
     state.hideColumn,
     state.swapColumns,
     state.resizeColumn,
@@ -35,7 +37,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     state.changeSort,
   ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
-  const [showMenu, setShowMenu] = useState(false);
   const [drag] = useDndHook(
     { id: column.id, text: column.headerName, isInside: true },
     {
@@ -136,9 +137,9 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     changeSort(column.id, !!multiSort);
   };
 
-  const handleMenuClick = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setShowMenu((state) => !state);
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(state => !state);
   };
 
   const renderSortIcon = (sort: SortState) => {
@@ -159,27 +160,12 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
     return (
       <div className="bg-grid-header__cell__menu row middle">
-        <IconDotsVertical
+        <IconDotsVertical 
           ref={menuRef}
           size={16}
           className={cn('bg-grid-header__menu', { active: showMenu })}
-          onClick={handleMenuClick}
-        />
+          onClick={handleMenuClick} />
       </div>
-    );
-  };
-
-  const Menu = () => {
-    return (
-      <HeaderMenu
-        visible={showMenu}
-        column={column}
-        multiSort={multiSort}
-        clipRef={() => menuRef.current as SVGSVGElement}
-        onClose={handleMenuClick}
-        horizontal={MenuHorizontalPosition.LEFT}
-        vertical={MenuVerticalPosition.BOTTOM}
-      />
     );
   };
 
@@ -198,10 +184,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       data-level={column.level}
       data-clone={column.original}
     >
-      <div className="bg-grid-header__cell__left row middle">
-        <span className="bg-grid-header-drop bg-grid-header__cell__name" onClick={handleChangeSort}>
-          {column.headerName}
-        </span>
+      <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
+        <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
         {column.sort && renderSortIcon(column.sort)}
       </div>
 
@@ -210,7 +194,16 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       </div>
 
       <div ref={resize} className="bg-grid-header__resize" />
-      <Menu />
+      <MenuLayer
+        visible={showMenu}
+        clipRef={() => menuRef.current as SVGSVGElement}
+        column={column}
+        multiSort={multiSort}
+        theme={theme}
+        vertical={MenuVerticalPosition.BOTTOM}
+        horizontal={MenuHorizontalPosition.LEFT}
+        onClose={() => setShowMenu(false)}
+      />
     </div>
   );
 }

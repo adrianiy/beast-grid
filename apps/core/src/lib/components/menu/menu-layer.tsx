@@ -1,27 +1,27 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { IconCheck, IconChevronRight, IconSortAscending, IconSortDescending, IconX } from '@tabler/icons-react';
 
-import { ArrowDownward, ArrowUpward, Check, ChevronRight, Close } from '@mui/icons-material';
+import { useBeastStore } from '../../stores/beast-store';
+
 import {
   Column,
   IFilter,
-  SortType,
-  MenuProps,
-  PinType,
-  MenuVerticalPosition,
   MenuHorizontalPosition,
+  MenuProps,
+  MenuVerticalPosition,
+  PinType,
+  SortType,
 } from '../../common';
-
-import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
 
 import './menu-layer.scss';
-import { IconSortAscending, IconSortDescending } from '@tabler/icons-react';
-import { createPortal } from 'react-dom';
 
 type Props = {
   visible: boolean;
   column: Column;
+  theme: string;
   multiSort: boolean;
   vertical: MenuVerticalPosition;
   horizontal: MenuHorizontalPosition;
@@ -29,27 +29,25 @@ type Props = {
   onClose: () => void;
 };
 
-export default function HeaderMenu(props: Props) {
+export default function MenuLayer(props: Props) {
   if (!props.visible) {
     return null;
   }
 
-  return createPortal(<Menu {...props} />, document.body);
+  return createPortal(<HeaderMenu {...props} />, document.body);
 }
 
-function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClose }: Props) {
+function HeaderMenu({ column, multiSort, theme, vertical, horizontal, clipRef, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [verticalPosition, setVerticalPosition] = useState<MenuVerticalPosition>(vertical);
+  const [searchValue, setSearchValue] = useState('');
   const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
-  const [searchValue, setSearchValue] = useState('');
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns, theme, filters, hideColumn, addFilter, selectAll, setSort, resetColumn, pinColumn] =
+  const [container, columns, filters, hideColumn, addFilter, selectAll, setSort, resetColumn, pinColumn] =
     useBeastStore((state) => [
       state.scrollElement,
       state.columns,
-      state.theme,
       state.filters,
       state.hideColumn,
       state.addFilter,
@@ -60,9 +58,6 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
     ]);
 
   useEffect(() => {
-    if (!visible) {
-      return;
-    }
     const leftPinned = Object.values(columns)
       .filter((col) => col.pinned === PinType.LEFT)
       .reduce((acc, curr) => acc + curr.width, 0);
@@ -134,7 +129,7 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
       document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
-  }, [verticalPosition, horizontalPosition, visible]);
+  }, []);
 
   const handleSetSort =
     (sort: SortType): MouseEventHandler<HTMLDivElement> =>
@@ -196,11 +191,15 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
             className={cn('bg-menu__item row middle')}
             onClick={handleSetSort(column.sort?.order === SortType.ASC ? SortType.DESC : SortType.ASC)}
           >
-            {column.sort?.order === SortType.DESC ? <ArrowUpward /> : <ArrowDownward />}
+            {column.sort?.order === SortType.DESC ? (
+              <IconSortAscending size={16} />
+            ) : (
+              <IconSortDescending size={16} />
+            )}
             {column.sort?.order === SortType.DESC ? 'Ascending' : 'Descending'}
           </div>
           <div className="bg-menu__item row middle" onClick={handleResetColumn}>
-            <Close /> Reset sort
+            <IconX size={16} /> Reset sort
           </div>
           <div className="bg-menu__separator" />
         </div>
@@ -216,18 +215,18 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
       <div className="bg-menu__content column config">
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
           Pin
-          <ChevronRight />
+          <IconChevronRight size={16} />
         </div>
         <div className="bg-menu__separator" />
         <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
           <div className="bg-menu__item row middle between" onClick={handlePinColumn(PinType.LEFT)}>
             Pin left
-            {column.pinned === PinType.LEFT ? <Check /> : null}
+            {column.pinned === PinType.LEFT ? <IconCheck size={16} /> : null}
           </div>
           <div className="bg-menu__separator--transparent" />
           <div className="bg-menu__item row middle" onClick={handlePinColumn(PinType.RIGHT)}>
             Pin right
-            {column.pinned === PinType.RIGHT ? <Check /> : null}
+            {column.pinned === PinType.RIGHT ? <IconCheck size={16} /> : null}
           </div>
         </div>
       </div>
@@ -273,7 +272,7 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
       <div className="bg-menu__content column filter">
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
           Filter
-          <ChevronRight />
+          <IconChevronRight size={16} />
         </div>
         <div className="bg-menu__separator" />
         <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
@@ -323,7 +322,7 @@ function Menu({ visible, column, multiSort, vertical, horizontal, clipRef, onClo
         horizontalPosition,
         theme
       )}
-      style={{ top: coords.y, left: coords.x }}
+      style={{ top: coords?.y, left: coords?.x }}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="bg-menu__wrapper animate__animated animate__faster animate__fadeInDown">
