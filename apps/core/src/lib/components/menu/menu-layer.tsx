@@ -1,5 +1,6 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { FormattedMessage } from 'react-intl';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -9,7 +10,7 @@ import {
   StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
-import { dispatch } from 'use-bus'
+import { dispatch } from 'use-bus';
 
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -157,9 +158,8 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       delete column.aggregationLevel;
     }
     const _data = getGroupedData(columns, data);
-    console.log(_data)
 
-    setData(_data)
+    setData(_data);
   };
 
   const renderSort = () => {
@@ -170,11 +170,12 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       return (
         <div className="bg-menu__content column config">
           <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.ASC)}>
-            <ArrowUpIcon className="small" /> Ascending
+            <ArrowUpIcon className="small" />
+            <FormattedMessage id="menu.sort.asc" defaultMessage="Ascending" />
           </div>
           <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.DESC)}>
             <ArrowDownIcon className="small" />
-            Descending
+            <FormattedMessage id="menu.sort.desc" defaultMessage="Descending" />
           </div>
           <div className="bg-menu__separator" />
         </div>
@@ -194,7 +195,8 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
             {column.sort?.order === SortType.DESC ? 'Ascending' : 'Descending'}
           </div>
           <div className="bg-menu__item row middle" onClick={handleResetColumn}>
-            <Cross1Icon className="small" /> Reset sort
+            <Cross1Icon className="small" />
+            <FormattedMessage id="menu.sort.reset" defaultMessage="Reset" />
           </div>
           <div className="bg-menu__separator" />
         </div>
@@ -211,19 +213,19 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
           <div className="row middle left">
             <div className="bg-menu__item__filler" />
-            Pin
+            <FormattedMessage id="menu.pin.pin" defaultMessage="Pin" />
           </div>
           <ChevronRightIcon />
         </div>
         <div className="bg-menu__separator" />
         <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
           <div className="bg-menu__item row middle between" onClick={handlePinColumn(PinType.LEFT)}>
-            Pin left
+            <FormattedMessage id="menu.pin.left" defaultMessage="Pin left" />
             {column.pinned === PinType.LEFT ? <CheckIcon /> : null}
           </div>
           <div className="bg-menu__separator--transparent" />
           <div className="bg-menu__item row middle" onClick={handlePinColumn(PinType.RIGHT)}>
-            Pin right
+            <FormattedMessage id="menu.pin.right" defaultMessage="Pin right" />
             {column.pinned === PinType.RIGHT ? <CheckIcon /> : null}
           </div>
         </div>
@@ -241,7 +243,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between" onClick={showConfig}>
           <div className="row middle left">
             <TableIcon />
-            Manage grid
+            <FormattedMessage id="menu.grid" defaultMessage="Grid configuration" />
           </div>
         </div>
         <div className="bg-menu__separator" />
@@ -259,7 +261,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
           <div className="row middle left">
             <div className="bg-menu__item__filler" />
-            Filter
+            <FormattedMessage id="menu.filter" defaultMessage="Filter" />
           </div>
           <ChevronRightIcon />
         </div>
@@ -281,21 +283,23 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         return null;
       }
 
-      return <>
-        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.EXPAND)}>
-          <div className="row middle left">
-            <div className="bg-menu__item__filler" />
-            Expand all rows
+      return (
+        <>
+          <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.EXPAND)}>
+            <div className="row middle left">
+              <div className="bg-menu__item__filler" />
+              <FormattedMessage id="menu.column.expand" defaultMessage="Expand all rows" />
+            </div>
           </div>
-        </div>
-        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.COLLAPSE)}>
-          <div className="row middle left">
-            <div className="bg-menu__item__filler" />
-            Collapse all rows
+          <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.COLLAPSE)}>
+            <div className="row middle left">
+              <div className="bg-menu__item__filler" />
+              <FormattedMessage id="menu.column.collapse" defaultMessage="Collapse all rows" />
+            </div>
           </div>
-        </div>
-      </>
-    }
+        </>
+      );
+    };
 
     return (
       <div className="bg-menu__content column filter">
@@ -303,7 +307,11 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
           <div className="row middle left">
             <StackIcon />
             {column.aggregationLevel && <div className="cross-overlay" />}
-            {column.aggregationLevel ? 'Ungroup' : `Group by ${capitalize(column.headerName)}`}
+            <FormattedMessage
+              id={column.aggregationLevel ? 'menu.column.ungroup' : 'menu.column.group'}
+              defaultMessage="Group by"
+              values={{ headerName: capitalize(column.headerName) }}
+            />
           </div>
         </div>
         {extraColumnOptions()}

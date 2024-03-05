@@ -33,7 +33,7 @@ export function RowCell({ height, row, columnDef, paddingLeft }: { height: numbe
       style={{ height, left: columnDef.left, paddingLeft: paddingLeft, width: columnDef.width }}
     >
       <Chevron />
-      <div className="grid-row-value">
+      <div className="grid-row-value" style={{ display: columnDef.aggregationLevel && !row.children ? 'none' : 'flex' }}>
         { getProperty(row, columnDef) }
       </div>
     </div>
