@@ -10,7 +10,7 @@ export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
     { headerName: 'ID', field: 'userId', sortable: false },
-    { headerName: 'NAME', field: 'username', sortable: false, menu: true },
+    { headerName: 'NAME', field: 'username', sortable: false, menu: { filter: true } },
     {
       headerName: 'AMOUNT',
       field: 'money',
@@ -29,7 +29,9 @@ export default function Grid() {
   const config: BeastGridConfig<User[]> = {
     data,
     columnDefs,
-    border: true,
+    style: {
+      border: true
+    },
     sort: {
       enabled: true,
     },

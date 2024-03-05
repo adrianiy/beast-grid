@@ -86,7 +86,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         data,
         columnDefs,
         style: {
-          maxHeight: 600,
           border: true
         },
         header: {

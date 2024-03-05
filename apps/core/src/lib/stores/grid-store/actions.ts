@@ -59,7 +59,6 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
   let { sortedColumns } = state;
   let column1 = columns[id1];
   let column2 = columns[id2];
-  let left = 0;
 
   if (!column1 || !column2) {
     return state;
@@ -112,8 +111,8 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
     });
   }
 
-  const left = moveColumns(columns, sortedColumns, PinType.LEFT);
-  moveColumns(columns, sortedColumns, PinType.NONE, left);
+  moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE);
 
   return { columns };
 };

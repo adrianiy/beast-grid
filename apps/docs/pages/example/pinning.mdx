@@ -17,10 +17,17 @@ export default function Grid() {
         { headerName: 'NAME', field: 'username', sortable: false },
 
       ],
-      pinned: PinType.LEFT
+      pinned: PinType.LEFT 
     },
     {
       headerName: 'AMOUNT',
+      field: 'money',
+      aggregation: AggregationType.SUM,
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'UNITS',
       field: 'money',
       aggregation: AggregationType.SUM,
       flex: 1,

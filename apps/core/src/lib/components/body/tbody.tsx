@@ -253,7 +253,7 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
 
     const getStyleProps = () => {
         return {
-            height: sortedData.length * rowHeight,
+            height: (sortedData.length + expandedRows) * rowHeight,
         };
     };
 

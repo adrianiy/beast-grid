@@ -25,6 +25,13 @@ export default function Grid() {
       formatter: (value) => numeral(value).format('0,0 $'),
     },
     {
+      headerName: 'UNITS',
+      field: 'money',
+      aggregation: AggregationType.SUM,
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
       headerName: 'ORDERS',
       field: 'orders',
       aggregation: AggregationType.SUM,

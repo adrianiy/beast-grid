@@ -67,7 +67,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+    <div className={cn('beast-grid bg-flex', 'default', theme)} ref={ref}>
       {renderGrid()}
     </div>
   );

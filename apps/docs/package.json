@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "beast-grid": "^0.0.27",
+    "beast-grid": "^0.0.29",
     "next": "^13.0.6",
     "nextra": "latest",
     "nextra-theme-docs": "latest",
