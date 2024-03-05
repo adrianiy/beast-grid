@@ -200,7 +200,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
         column={column}
         multiSort={multiSort}
         theme={theme}
-        vertical={MenuVerticalPosition.BOTTOM}
         horizontal={MenuHorizontalPosition.LEFT}
         onClose={() => setShowMenu(false)}
       />
