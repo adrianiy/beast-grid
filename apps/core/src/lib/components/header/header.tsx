@@ -1,61 +1,67 @@
-import HeaderCell from './cell';
-
 import { useBeastStore } from './../../stores/beast-store';
 
 import { BeastGridConfig, Column } from '../../common/interfaces';
 
-import cls from 'classnames';
-
 import './header.scss';
 import { HeaderEvents, PinType } from '../../common';
+import HeaderSection from './headerSection';
 
-export default function Header<T>({
-  height,
-  border,
-  multiSort,
-  dragOptions,
-  events
-}: {
-  height: number;
-  border?: boolean;
-  multiSort?: boolean;
-  dragOptions?: BeastGridConfig<T>['dragOptions'];
-  events?: Partial<HeaderEvents>;
-}) {
-  const [columns] = useBeastStore((state) => [state.columns]);
+type Props<T> = {
+    height: number;
+    border?: boolean;
+    multiSort?: boolean;
+    dragOptions?: BeastGridConfig<T>['dragOptions'];
+    events?: Partial<HeaderEvents>;
+};
 
-  const levels = Object.values(columns).reduce((acc, column) => {
-    const level = column.level || 0;
-    acc[level] = acc[level] || [];
-    acc[level].push(column);
-    return acc;
-  }, [] as Column[][]);
+export default function Header<T>({ height, border, multiSort, dragOptions, events }: Props<T>) {
+    const [columns] = useBeastStore((state) => [state.columns]);
 
-  const totalWidth = Math.max(...levels.map(level => level.reduce((acc, curr) => acc + curr.width, 0)));
+    const levels = Object.values(columns).reduce((acc, column) => {
+        const level = column.level || 0;
+        acc[level] = acc[level] || [];
+        acc[level].push(column);
+        return acc;
+    }, [] as Column[][]);
 
-  const renderHeaderRow = (level: Column[], levelIdx: number, pinType: PinType | undefined) => {
-    return level.filter(column => column.pinned === pinType).map((column, idx) => (
-      <HeaderCell
-        key={idx}
-        levelIdx={0}
-        idx={idx}
-        multiSort={!!multiSort}
-        height={height + (!column.children ? height * (levels.length - levelIdx - 1) : 0)}
-        column={column}
-        dragOptions={dragOptions}
-        events={events}
-      />
-    ));
-  }
+    const levelZero = levels[0].filter((column) => !column.hidden);
 
-  return (
-    <div className="grid-header row between" style={{ height: height * levels.length, width: totalWidth }}>
-      {levels.map((level, levelIdx) => (
-        <div className={cls("grid-header-row row", { bordered: border })} style={{ height }} key={levelIdx}>
-          <div className="grid-left-pin">{renderHeaderRow(level, levelIdx, PinType.LEFT)}</div>
-          {renderHeaderRow(level, levelIdx, undefined)}
+    const totalWidth = levelZero.reduce((acc, curr) => acc + curr.width, 0)
+    const leftWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
+    const rightWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
+
+    return (
+        <div className="grid-header row" style={{ height: height * levels.length, width: totalWidth }}>
+            <HeaderSection
+                width={leftWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.LEFT}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
+            <HeaderSection
+                width={totalWidth - leftWidth - rightWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.NONE}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
+            <HeaderSection
+                width={rightWidth}
+                height={height}
+                headers={levels}
+                pinType={PinType.RIGHT}
+                border={border}
+                multiSort={multiSort}
+                dragOptions={dragOptions}
+                events={events}
+            />
         </div>
-      ))}
-    </div>
-  );
+    );
 }

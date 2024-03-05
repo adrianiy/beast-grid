@@ -29,7 +29,7 @@ export function RowCell({ height, row, columnDef, paddingLeft }: { height: numbe
   return (
     <div
       data-hidden={columnDef.hidden}
-      className={cn("grid-row-cell", { lastPinned: columnDef.lastPinned })}
+      className={cn("grid-row-cell", { lastPinned: columnDef.lastPinned, expandable: row.children || columnDef.aggregationLevel })}
       style={{ height, left: columnDef.left, paddingLeft: paddingLeft, width: columnDef.width }}
     >
       <Chevron />

@@ -91,6 +91,7 @@ body {
   line-height: inherit;
   font-size: var(--bg-demo-size--2);
   font-weight: 300;
+  font-size: 14px;
   line-height: 1.5;
   background-color: var(--bg-demo-color--0);
   color: var(--bg-demo-color--1);

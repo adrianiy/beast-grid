@@ -9,12 +9,10 @@ interface StyleProps {
   maxWidth: number;
   hidden: boolean;
   flex: number;
-  menu?: boolean | Partial<MenuProps>;
-  aggregationLevel?: number;
-  aggregation?: AggregationType;
 }
 export interface MenuProps {
   column: boolean;
+  pin: boolean;
   filter: boolean;
   grid: boolean;
 }
@@ -24,7 +22,9 @@ interface ColumnDef extends Partial<StyleProps> {
   pinned?: PinType;
   children?: ColumnDef[];
   formatter?: (value: unknown) => string;
-
+  menu?: Partial<MenuProps>;
+  aggregationLevel?: number;
+  aggregation?: AggregationType;
 }
 ```
 
@@ -135,9 +135,9 @@ The flex value of the column. Follows the same rules as the flex property in CSS
 
 | Type | Required |
 | ---- | -------- |
-| `boolean` | `false` |
+| `Partial<MenuProps>` | `false` |
 
-Whether to show the menu for the column. If `true`, it will show the default menu. If an object, it will show the menu with the properties specified in the object.
+The [menu options](./menu/overview) for the column.
 
 ### aggregationLevel
 

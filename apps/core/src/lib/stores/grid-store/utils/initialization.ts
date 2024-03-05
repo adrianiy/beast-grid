@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ColumnDef, ColumnStore, Column, Data, Row, IFilter } from "../../../common";
+import { ColumnDef, ColumnStore, Column, Data, Row, IFilter, PinType } from "../../../common";
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
 import { groupBy } from '../../../utils/functions';
+
+import deepmerge from 'deepmerge';
 
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
@@ -23,11 +25,10 @@ export const getColumnsFromDefs = (
   columnDefs.forEach((columnDef, idx) => {
     const id = uuidv4();
     const column: Column = {
-      ...(defaultColumnDef || {}),
-      ...columnDef,
+      ...deepmerge(defaultColumnDef || {}, columnDef),
       width: columnDef.width || 0,
       position: idx,
-      pinned: parent?.pinned || columnDef.pinned,
+      pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
       top: 0,
       left: 0,
       final: !columnDef.children || columnDef.children.length === 0,
@@ -74,8 +75,17 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
   return columns;
 };
 
+const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => {
+  if (!column.childrenId) {
+    return column.width || 0;
+  }
+
+  return column.childrenId.reduce((acc, childId) => acc + _getChildrenWidth(columnStore[childId], columnStore), 0);
+}
+
 export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
   const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
+  const notFinalColumns = Object.values(columnStore).filter((column) => !column.final && !column.hidden);
   const dynamicColumns = finalColumns.filter((column) => !column.width || column.flex);
   const totalFlex = dynamicColumns.reduce((acc, column) => acc + (column.flex ?? 0), 0);
 
@@ -92,17 +102,19 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
   dynamicColumns.forEach((column) => {
     const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
     column.width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
-    if (column.parent) {
-      columnStore[column.parent].width += column.width;
-    }
   });
+
+  // Calculate parent widths based on children
+  notFinalColumns.forEach((column) => {
+    column.width = _getChildrenWidth(column, columnStore);
+  })
 
   return columnStore;
 };
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (column.filterType && column.field) {
+    if (column.menu?.filter && column.field) {
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;
@@ -110,8 +122,12 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   });
 };
 
+export const getGroupedData = (columns: ColumnStore, data: Data): Data => {
+  return groupDataByColumnDefs(columns, data);
+}
+
 export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data): Data => {
-  const finalData = groupDataByColumnDefs(columns, data);
+  const finalData = getGroupedData(columns, data);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
 

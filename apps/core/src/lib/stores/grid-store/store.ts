@@ -4,6 +4,7 @@ import {
   changeSort,
   deleteEmptyParents,
   hideColumn,
+  pinColumn,
   resetColumnConfig,
   resizeColumn,
   selectAllFilters,
@@ -11,27 +12,32 @@ import {
   swapColumns,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, SortType } from '../../common';
-import { getColumnsFromDefs, initialize, moveColumns } from './utils';
+import { BeastGridConfig, PinType, SideBarConfig, SortType } from '../../common';
+import { getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
   data: Data;
   columns: ColumnStore;
+  theme: string;
   container: HTMLDivElement;
   allowMultipleColumnSort: boolean;
   sort: ColumnId[];
 }
 
 interface InferedState {
+  initialData: Data;
+  sortedColumns: Column[];
   loading: boolean;
   sorting: boolean;
   scrollElement: HTMLDivElement;
   filters: Record<ColumnId, IFilter[]>;
+  sideBarConfig: SideBarConfig | null;
 }
 
 export interface GridStore extends GridState, InferedState {
   setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
+  setTheme: (theme: string) => void;
   setScrollElement: (container: HTMLDivElement) => void;
   setColumn: (args: { id: string; column: Column }) => void;
   hideColumn: (id: ColumnId) => void;
@@ -45,22 +51,30 @@ export interface GridStore extends GridState, InferedState {
   setSorting: (sorting: boolean) => void;
   addFilter: (id: ColumnId, value: IFilter) => void;
   selectAllFilters: (id: ColumnId) => void;
+  pinColumn: (id: ColumnId, pin: PinType) => void;
+  setSideBarConfig: (config: SideBarConfig | null) => void;
 }
 
 export const createGridStore = <T>(
   { data: _data, columnDefs, defaultColumnDef, sort }: BeastGridConfig<T>,
-  container: HTMLDivElement
+  container: HTMLDivElement,
+  theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
   const data = initialize(columns, container, _data as Data);
+  const sortedColumns = sortColumns(columns);
   
-  moveColumns(columns);
+  moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE);
 
   const initialState = {
     data,
+    initialData: data,
     columns,
+    sortedColumns,
     allowMultipleColumnSort: !!sort?.multiple,
     container,
+    theme,
     sort: [],
   };
   
@@ -70,8 +84,10 @@ export const createGridStore = <T>(
     loading: false,
     sorting: false,
     scrollElement: null as unknown as HTMLDivElement,
+    sideBarConfig: null,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
+    setTheme: (theme: string) => set({ theme }),
     setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
     setColumn: (payload) => set(setColumn(payload.id, payload.column)),
     hideColumn: (id: ColumnId) => set(hideColumn(id)),
@@ -86,6 +102,8 @@ export const createGridStore = <T>(
     setSorting: (sorting: boolean) => set({ sorting }),
     addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
+    pinColumn: (id: ColumnId, pin: PinType) => set(pinColumn(id, pin)),
+    setSideBarConfig: (config: SideBarConfig | null) => set({ sideBarConfig: config }),
   }));
 };
 

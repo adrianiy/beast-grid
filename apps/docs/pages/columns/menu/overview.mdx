@@ -1,0 +1,58 @@
+# Column Menu
+
+```tsx
+export interface MenuProps {
+  column: boolean;
+  pin: boolean;
+  filter: boolean;
+  grid: boolean;
+}
+```
+
+You can configure the column menu by passing the `MenuProps` object to the `menu` prop.
+
+This menu allow user to:
+
+- Pin the column
+- Filter the column
+- Acces the grid settings
+- Manage group options
+
+## Properties
+
+### column
+
+| Property | Type    | Default | Description |
+| -------- | ------- | ------- | ----------- |
+| column   | boolean | false    | Enable/Disable the column menu |
+
+Shows column options in the menu.
+
+- Group by this column.
+- Remove groupping.
+- Expand all groups.
+- Collapse all groups.
+
+### pin
+
+| Property | Type    | Default | Description |
+| -------- | ------- | ------- | ----------- |
+| pin      | boolean | false    | Enable/Disable the pin option |
+
+Shows pin option in the menu. This option allows to pin the column to the left or right.
+
+### filter
+
+| Property | Type    | Default | Description |
+| -------- | ------- | ------- | ----------- |
+| filter   | boolean | false    | Enable/Disable the filter option |
+
+Shows filter option in the menu. This option allows to filter the column.
+
+### grid
+
+| Property | Type    | Default | Description |
+| -------- | ------- | ------- | ----------- |
+| grid     | boolean | false    | Enable/Disable the grid option |
+
+Shows grid option in the menu. This option allows to access the grid settings.

@@ -25,7 +25,11 @@ const columns: ColumnDef[] = [
   {
     headerName: 'Address',
     field: 'address',
-    menu: true
+    menu: {
+      column: true,
+      grid: true,
+      filter: true
+    }
   },
   {
     headerName: 'Children',

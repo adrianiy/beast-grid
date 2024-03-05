@@ -9,10 +9,11 @@ import {
   moveColumns,
   removeSort,
   setColumnsStyleProps,
+  sortColumns,
   swapPositions,
 } from './utils';
 import { GridStore } from './store';
-import { FilterType, SortType } from '../../common';
+import { PinType, SortType } from '../../common';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
   const { columns } = state;
@@ -32,18 +33,30 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
-  const { columns, container } = state;
+  const { columns, sortedColumns, container } = state;
   const column = columns[id];
   column.hidden = !column.hidden;
 
+  if (column.childrenId) {
+    column.childrenId.forEach((child) => {
+      columns[child].hidden = column.hidden;
+    });
+  }
+  if (column.parent) {
+    const parent = columns[column.parent];
+    const allChildrenHidden = parent.childrenId?.every((child) => columns[child].hidden);
+    parent.hidden = allChildrenHidden;
+  }
+
   setColumnsStyleProps(columns, container.offsetWidth);
-  moveColumns(columns);
+  moveColumns(columns, sortedColumns, column.pinned);
 
   return { columns };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
   const { columns } = state;
+  let { sortedColumns } = state;
   let column1 = columns[id1];
   let column2 = columns[id2];
 
@@ -55,15 +68,15 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     [column1, column2] = getSwappableClone(column1, column2, columns);
   }
 
-  console.log(column1, column2);
-
   // change positions
   swapPositions(column1, column2);
   mergeColumns(columns);
 
-  moveColumns(columns);
+  sortedColumns = sortColumns(columns);
 
-  return { ...columns };
+  moveColumns(columns, sortedColumns, column1.pinned, 0);
+
+  return { columns, sortedColumns };
 };
 
 export const deleteEmptyParents = () => (state: GridStore) => {
@@ -79,7 +92,7 @@ export const deleteEmptyParents = () => (state: GridStore) => {
 };
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
-  const { columns } = state;
+  const { columns, sortedColumns } = state;
   const column = columns[id];
 
   const prevWidth = column.width;
@@ -94,11 +107,12 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
   if (column.children) {
     const diff = (column.width - prevWidth) / column.children.length;
     column.childrenId?.forEach((child) => {
-      columns[child].width = (columns[child].width || 0 ) + diff;
+      columns[child].width = (columns[child].width || 0) + diff;
     });
   }
 
-  moveColumns(columns);
+  moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE);
 
   return { columns };
 };
@@ -129,14 +143,11 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
 export const addFilter = (id: ColumnId, value: IFilter) => (state: GridStore) => {
   const { columns, filters } = state;
-  const column = columns[id];
 
-  if (column.filterType === FilterType.STRING) {
-    if (filters[id]?.includes(value as string)) {
-      filters[id] = filters[id]?.filter((val) => val !== value);
-    } else {
-      filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-    }
+  if (filters[id]?.includes(value as string)) {
+    filters[id] = filters[id]?.filter((val) => val !== value);
+  } else {
+    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
   }
 
   return { columns, filters: { ...filters } };
@@ -154,3 +165,22 @@ export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
 
   return { columns, filters: { ...filters } };
 };
+
+export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
+  const { columns, sortedColumns } = state;
+  const column = columns[id];
+
+  column.pinned = pin;
+
+  if (column.childrenId) {
+    column.childrenId.forEach((child) => {
+      columns[child].pinned = pin;
+    });
+  }
+
+  moveColumns(columns, sortedColumns, PinType.LEFT)
+  moveColumns(columns, sortedColumns, PinType.NONE, 0)
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
+
+  return { columns };
+}

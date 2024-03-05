@@ -2,7 +2,6 @@
   "definitions": "Column Definitions",
   "example": "Example",
   "sorting": "Sorting",
-  "filtering": "Filtering",
   "nesting": "Nesting",
-  "pinning": "Pinning"
+  "menu": "Menu"
 }

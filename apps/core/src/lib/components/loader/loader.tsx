@@ -2,10 +2,11 @@ import { InfinitySpin } from 'react-loader-spinner';
 import { useBeastStore } from '../../stores/beast-store';
 
 import './loader.scss';
+import { BeastGridConfig } from '../../common';
 
-export function Loader({ sorting, top }: { sorting?: boolean, top?: number }) {
+export function Loader({ sorting, top, maxHeight }: { sorting?: boolean, top?: number, maxHeight?: number }) {
   return (
-    <div className="beast-grid__loader row middle center" style={{ top }}>
+    <div className="beast-grid__loader row middle center" style={{ top, height: maxHeight }}>
       <div className="beast-grid__loader__overlay" />
       {sorting ? (
         <span>Sorting...</span>
@@ -16,7 +17,7 @@ export function Loader({ sorting, top }: { sorting?: boolean, top?: number }) {
   );
 }
 
-export default function LoaderLayer() {
+export default function LoaderLayer<T>({ config }: { config: BeastGridConfig<T> }) {
   const [loading, sorting, container] = useBeastStore((state) => [
     state.loading,
     state.sorting,
@@ -30,5 +31,5 @@ export default function LoaderLayer() {
 
   container.classList.add('beast-grid--loading');
 
-  return <Loader sorting={sorting} top={container?.scrollTop} />;
+  return <Loader sorting={sorting} top={container?.scrollTop} maxHeight={config.style?.maxHeight} />;
 }

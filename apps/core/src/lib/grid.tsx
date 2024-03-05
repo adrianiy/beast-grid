@@ -13,21 +13,26 @@ import { useBeastStore } from './stores/beast-store';
 type Props<T> = {
   config: BeastGridConfig<T>;
   defaultConfig: Partial<BeastGridConfig<T>>;
+  theme: string;
   onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
-export default function Grid<T>({ config, defaultConfig, onSortChange }: Props<T>) {
-  const [setScrollElement] = useBeastStore((state) => [state.setScrollElement]);
+export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
+  const [setScrollElement, setTheme] = useBeastStore((state) => [state.setScrollElement, state.setTheme]);
   const ref = useRef<SimpleBarCore>(null);
 
   useEffect(() => {
     if (ref.current) {
       setScrollElement(ref.current.getScrollElement() as HTMLDivElement);
     }
-  }, [ref])
+  }, [ref, setScrollElement])
+
+  useEffect(() => {
+    setTheme(theme);
+  }, [theme, setTheme])
   
   return <SimpleBar
-    style={{ maxHeight: config.style?.maxHeight }}
+    style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
     ref={ref}
     className={cn('beast-grid__container', {
       border: config?.style?.border,

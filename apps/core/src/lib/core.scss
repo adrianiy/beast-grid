@@ -1,3 +1,4 @@
+
 :root {
     display: block;
     height: 100%;
@@ -29,6 +30,8 @@
     --bg-text-color--3: var(--bg-color--3);
 }
 .beast-grid {
+    @import 'flex';
+    
     position: relative;
     width: 100%;
     height: 100%;
@@ -61,92 +64,34 @@
         }
     }
 
-    &__column--pinned {
-        position: absolute;
-        left: 0;
-        z-index: 2;
-    }
-    
     .grid-left-pin {
         position: sticky;
         left: 0;
         z-index: 2;
+        border-right: var(--bg-border--1);
 
-        .lastPinned {
-            border-right: var(--bg-border--1);
-            
-            .bg-grid-header__resize {
-                opacity: 0;
+        .grid-header-row {
+            .bg-grid-header__cell:last-child {
+                .bg-grid-header__resize {
+                    opacity: 0;
+                }
             }
+        }
+    }
+    .grid-right-pin {
+        position: sticky;
+        float: right;
+        right: 0;
+        top: 0;
+        z-index: 2;
+        border-left: var(--bg-border--1);
+
+        .bg-grid-header__resize {
+            opacity: 0;
         }
     }
 
     &::-webkit-scrollbar {
         display: none;
-    }
-
-    .row {
-        display: flex;
-
-        &.center {
-            justify-content: center;
-        }
-        &.end {
-            justify-content: flex-end;
-        }
-        &.start {
-            justify-content: flex-start;
-        }
-        &.between {
-            justify-content: space-between;
-        }
-        &.around {
-            justify-content: space-around;
-        }
-        &.evenly {
-            justify-content: space-evenly;
-        }
-        &.top {
-            align-items: flex-start;
-        }
-        &.middle {
-            align-items: center;
-        }
-        &.bottom {
-            align-items: flex-end;
-        }
-    }
-
-    .column {
-        display: flex;
-        flex-direction: column;
-
-        &.center {
-            justify-content: center;
-        }
-        &.end {
-            justify-content: flex-end;
-        }
-        &.start {
-            justify-content: flex-start;
-        }
-        &.between {
-            justify-content: space-between;
-        }
-        &.around {
-            justify-content: space-around;
-        }
-        &.evenly {
-            justify-content: space-evenly;
-        }
-        &.top {
-            align-items: flex-start;
-        }
-        &.middle {
-            align-items: center;
-        }
-        &.bottom {
-            align-items: flex-end;
-        }
     }
 }

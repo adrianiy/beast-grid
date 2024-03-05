@@ -10,12 +10,18 @@
     transition: all ease-in-out var(--bg-transition--1);
 
     svg {
-        font-size: var(--bg-size--3);
+        font-size: var(--bg-size--4);
         &.active {
             transform: rotate(90deg);
         }
     }
-
+    &.child {
+        .expandable {
+            .grid-row-value {
+                margin-left: var(--bg-size--1);
+            }
+        }
+    }
     &.bordered {
         border-bottom: var(--bg-border--2);
         .grid-row-cell {
@@ -32,6 +38,9 @@
             }
         }
     }
+}
+.grid-row-content {
+    position: relative;
 }
 .grid-row-cell {
     position: absolute;

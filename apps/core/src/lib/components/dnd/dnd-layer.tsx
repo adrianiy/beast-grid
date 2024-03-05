@@ -1,5 +1,5 @@
-import { DragHandle, VisibilityOff } from '@mui/icons-material';
 import { useDndStore } from './../../stores/dnd-store';
+import { EyeNoneIcon, MoveIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig } from '../../common';
 
 import './dnd-layer.scss';
@@ -46,9 +46,9 @@ const BoxDragPreview = ({ text, isInside, top, left, hide }: BoxDragPreviewProps
       }}
     >
       {isInside || !hide ? (
-        <DragHandle style={{ fontSize: 12 }} />
+        <MoveIcon />
       ) : (
-        <VisibilityOff style={{ fontSize: 12 }} />
+        <EyeNoneIcon />
       )}
       {text}
     </div>

@@ -12,10 +12,6 @@ export enum Direction {
   RIGHT = 'right',
 }
 
-export enum FilterType {
-  STRING = 'string'
-}
-
 export enum AggregationType {
   SUM = 'sum',
   AVG = 'avg',
@@ -26,5 +22,26 @@ export enum AggregationType {
 
 export enum PinType {
   LEFT = 'left',
+  NONE = 'none',
   RIGHT = 'right',
+}
+
+export enum MenuVerticalPosition {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
+
+export enum MenuHorizontalPosition {
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+
+export enum SideBarConfig {
+  GRID = 'grid',
+  FILTERS = 'filters'
+}
+
+export enum BusActions {
+  EXPAND = '@bg/expandAll',
+  COLLAPSE = '@bg/collapseAll',
 }

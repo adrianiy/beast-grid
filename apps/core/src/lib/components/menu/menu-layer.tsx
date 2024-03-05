@@ -1,85 +1,124 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CheckIcon,
+  ChevronRightIcon,
+  Cross1Icon,
+  StackIcon,
+  TableIcon,
+} from '@radix-ui/react-icons';
+import { dispatch } from 'use-bus'
 
-import { ArrowDownward, ArrowUpward, Close } from '@mui/icons-material';
 import { useBeastStore } from '../../stores/beast-store';
-import { Column, Coords, IFilter, SortType } from '../../common';
+
+import { BusActions, Column, MenuHorizontalPosition, MenuProps, PinType, SideBarConfig, SortType } from '../../common';
+import MenuFilters from './menu-filters';
+import { capitalize } from '../../utils/functions';
 
 import cn from 'classnames';
-import { useMenuStore } from '../../stores/menu-store';
 
 import './menu-layer.scss';
-
-enum Tab {
-  TAB1 = 'Config.',
-  TAB2 = 'Filter',
-  TAB3 = 'Grid',
-}
+import { getGroupedData } from '../../stores/grid-store/utils';
 
 type Props = {
+  visible: boolean;
   column: Column;
+  theme: string;
   multiSort: boolean;
-  coords?: Coords;
+  horizontal: MenuHorizontalPosition;
+  clipRef: () => SVGSVGElement;
+  onClose: () => void;
 };
 
-export default function MenuLayer() {
-  const [columnId] = useMenuStore((state) => [state.column]);
-  const [columns, multiSort] = useBeastStore((state) => [state.columns, state.allowMultipleColumnSort]);
-
-  if (!columnId) {
+export default function MenuLayer(props: Props) {
+  if (!props.visible) {
     return null;
   }
 
-  return <HeaderMenu column={columns[columnId]} multiSort={multiSort} />;
+  return createPortal(<HeaderMenu {...props} />, document.body);
 }
 
-function HeaderMenu({ column, multiSort }: Props) {
+function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [searchValue, setSearchValue] = useState('');
-  const [activeTab, setActiveTab] = useState(Tab.TAB1);
-  const [clipRef, coords, setCoords, setMenuColumn] = useMenuStore((state) => [
-    state.clipRef,
-    state.coords,
-    state.setCoords,
-    state.setColumn,
+  const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
+  const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
+  const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
+
+  const [container, data, columns, setSort, resetColumn, pinColumn, setSidebar, setData] = useBeastStore((state) => [
+    state.scrollElement,
+    state.initialData,
+    state.columns,
+    state.setSort,
+    state.resetColumnConfig,
+    state.pinColumn,
+    state.setSideBarConfig,
+    state.setData,
   ]);
 
-  const [container, columns, filters, hideColumn, addFilter, selectAll, setSort, resetColumn] = useBeastStore(
-    (state) => [
-      state.container,
-      state.columns,
-      state.filters,
-      state.hideColumn,
-      state.addFilter,
-      state.selectAllFilters,
-      state.setSort,
-      state.resetColumnConfig,
-    ]
-  );
-
   useEffect(() => {
+    const leftPinned = Object.values(columns)
+      .filter((col) => col.pinned === PinType.LEFT)
+      .reduce((acc, curr) => acc + curr.width, 0);
+
     const moveMenu = () => {
       if (!clipRef) {
         return;
       }
 
-      const coontainerRect = container.getBoundingClientRect();
-      const { left, bottom } = clipRef.getBoundingClientRect();
+      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
+      const { width } = menuRef.current?.getBoundingClientRect() || {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+      };
+      const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      if (left < coontainerRect.left || left > coontainerRect.right) {
-        setMenuColumn(undefined);
+      const x = window.scrollX + left;
+      const y = window.scrollY + bottom + 8;
+
+      setCoords({ x, y });
+
+      if (right > cRight) {
+        onClose();
+        return;
+      }
+      if (left + width * 2 > cRight) {
+        setHorizontalSubmenuPosition(MenuHorizontalPosition.RIGHT);
       } else {
-        setCoords({ x: left, y: bottom + 12 });
+        setHorizontalSubmenuPosition(MenuHorizontalPosition.LEFT);
+      }
+      if (left + width > cRight) {
+        setHorizontalPosition(MenuHorizontalPosition.RIGHT);
+        return;
+      } else {
+        setHorizontalPosition(MenuHorizontalPosition.LEFT);
+      }
+
+      if (column.pinned !== PinType.NONE) {
+        return;
+      }
+      if (left < cLeft + leftPinned || x + width > cRight) {
+        onClose();
       }
     };
+
+    moveMenu();
 
     const closeMenu = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuColumn(undefined);
+        onClose();
       }
     };
 
+    setTimeout(() => {
+      menuRef.current?.style.setProperty('overflow', 'visible');
+    }, 400);
+
     document.addEventListener('click', closeMenu);
-    document.addEventListener('scroll', moveMenu);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
@@ -88,12 +127,6 @@ function HeaderMenu({ column, multiSort }: Props) {
       container.removeEventListener('scroll', moveMenu);
     };
   }, []);
-
-  const handleTabChange =
-    (tab: Tab): MouseEventHandler<HTMLDivElement> =>
-      () => {
-        setActiveTab(tab);
-      };
 
   const handleSetSort =
     (sort: SortType): MouseEventHandler<HTMLDivElement> =>
@@ -106,49 +139,93 @@ function HeaderMenu({ column, multiSort }: Props) {
     resetColumn(column.id);
   };
 
-  const handleGridChange = (column: Column) => () => {
-    hideColumn(column.id);
-  }
-
-  const handleFilterChange =
-    (value: IFilter): MouseEventHandler<HTMLDivElement> =>
-      () => {
-        addFilter(column.id, value);
-      };
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.value;
-
-    setSearchValue(searchValue);
+  const handlePinColumn = (pinType: PinType) => () => {
+    pinColumn(column.id, column.pinned === pinType ? PinType.NONE : pinType);
+    onClose();
   };
 
-  const handleSelectAll: MouseEventHandler<HTMLDivElement> = () => {
-    selectAll(column.id);
+  const showConfig = () => {
+    onClose();
+    setSidebar(SideBarConfig.GRID);
   };
 
-  const renderConfig = () => {
-    if (activeTab !== Tab.TAB1) {
+  const handleGroupByColumn = () => {
+    if (!column.aggregationLevel) {
+      column.aggregationLevel = 1;
+    } else {
+      dispatch(BusActions.COLLAPSE);
+      delete column.aggregationLevel;
+    }
+    const _data = getGroupedData(columns, data);
+    console.log(_data)
+
+    setData(_data)
+  };
+
+  const renderSort = () => {
+    if (!column.sortable) {
       return null;
     }
+    if (!column.sort) {
+      return (
+        <div className="bg-menu__content column config">
+          <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.ASC)}>
+            <ArrowUpIcon className="small" /> Ascending
+          </div>
+          <div className={cn('bg-menu__item row middle')} onClick={handleSetSort(SortType.DESC)}>
+            <ArrowDownIcon className="small" />
+            Descending
+          </div>
+          <div className="bg-menu__separator" />
+        </div>
+      );
+    } else {
+      return (
+        <div className="bg-menu__content column config">
+          <div
+            className={cn('bg-menu__item row middle')}
+            onClick={handleSetSort(column.sort?.order === SortType.ASC ? SortType.DESC : SortType.ASC)}
+          >
+            {column.sort?.order === SortType.DESC ? (
+              <ArrowUpIcon className="small" />
+            ) : (
+              <ArrowDownIcon className="small" />
+            )}
+            {column.sort?.order === SortType.DESC ? 'Ascending' : 'Descending'}
+          </div>
+          <div className="bg-menu__item row middle" onClick={handleResetColumn}>
+            <Cross1Icon className="small" /> Reset sort
+          </div>
+          <div className="bg-menu__separator" />
+        </div>
+      );
+    }
+  };
 
+  const renderPin = () => {
+    if (!column.menu?.pin || column.parent) {
+      return null;
+    }
     return (
       <div className="bg-menu__content column config">
-        <div
-          className={cn('bg-config__item row middle', column.sort?.order === SortType.DESC && 'inactive')}
-          onClick={handleSetSort(SortType.ASC)}
-        >
-          <ArrowUpward /> Ascending
-        </div>
-        <div
-          className={cn('bg-config__item row middle', column.sort?.order === SortType.ASC && 'inactive')}
-          onClick={handleSetSort(SortType.DESC)}
-        >
-          <ArrowDownward />
-          Descending
+        <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Pin
+          </div>
+          <ChevronRightIcon />
         </div>
         <div className="bg-menu__separator" />
-        <div className="bg-config__item row middle" onClick={handleResetColumn}>
-          <Close /> Reset column
+        <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
+          <div className="bg-menu__item row middle between" onClick={handlePinColumn(PinType.LEFT)}>
+            Pin left
+            {column.pinned === PinType.LEFT ? <CheckIcon /> : null}
+          </div>
+          <div className="bg-menu__separator--transparent" />
+          <div className="bg-menu__item row middle" onClick={handlePinColumn(PinType.RIGHT)}>
+            Pin right
+            {column.pinned === PinType.RIGHT ? <CheckIcon /> : null}
+          </div>
         </div>
       </div>
     );
@@ -156,115 +233,103 @@ function HeaderMenu({ column, multiSort }: Props) {
 
   // grid columns visibility configuration
   const renderGridConfig = () => {
-    if (activeTab !== Tab.TAB3) {
+    if (!column.menu || !(column.menu as MenuProps)?.grid) {
       return null;
     }
-
-    return <div className="bg-menu__content column grid-config">
-        <input
-          type="text"
-          placeholder="Search"
-          className="bg-menu__grid__search"
-          onChange={handleSearch}
-        />
-        <div className="bg-menu__filter__container column">
-          {Object.values(columns)?.map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-menu__grid__item row middle"
-              style={{
-                display:
-                  searchValue && !item.headerName.toLowerCase().includes(searchValue.toLowerCase())
-                    ? 'none'
-                    : 'flex',
-              }}
-              onClick={handleGridChange(item)}
-            >
-              <input type="checkbox" readOnly checked={!item.hidden} />
-              <span>{item.headerName}</span>
-            </div>
-          ))}
+    return (
+      <div className="bg-menu__content column filter">
+        <div className="bg-menu__item bg-menu__item--with-submenu row middle between" onClick={showConfig}>
+          <div className="row middle left">
+            <TableIcon />
+            Manage grid
+          </div>
         </div>
-      
-    </div>;
+        <div className="bg-menu__separator" />
+      </div>
+    );
   };
 
   const renderFilter = () => {
-    if (activeTab !== Tab.TAB2) {
+    if (!column.menu || !(column.menu as MenuProps)?.filter) {
       return null;
     }
-
     // render checkboxes for filterData
     return (
       <div className="bg-menu__content column filter">
-        <input
-          type="text"
-          placeholder="Search"
-          className="bg-menu__filter__search"
-          onChange={handleSearch}
-        />
-        <div className="bg-menu__filter__container column">
-          {column.filterOptions?.map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-menu__filter__item row middle"
-              style={{
-                display:
-                  searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase())
-                    ? 'none'
-                    : 'flex',
-              }}
-              onClick={handleFilterChange(item)}
-            >
-              <input type="checkbox" readOnly checked={!!filters[column.id]?.includes(item)} />
-              <span>{item}</span>
-            </div>
-          ))}
+        <div className="bg-menu__item bg-menu__item--with-submenu row middle between">
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Filter
+          </div>
+          <ChevronRightIcon />
         </div>
         <div className="bg-menu__separator" />
-        <div className="bg-config__item row middle" onClick={handleSelectAll}>
-          <input
-            type="checkbox"
-            readOnly
-            checked={filters[column.id]?.length === column.filterOptions?.length}
-          />
-          <span>Select all</span>
+        <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
+          <MenuFilters column={column} />
         </div>
       </div>
     );
   };
 
-  const getTabs = () => {
-    if (typeof column.menu === 'boolean') {
-      return [Tab.TAB1, Tab.TAB2, Tab.TAB3];
-    } else {
-      return [column.menu?.column && Tab.TAB1, column.menu?.filter && Tab.TAB2, column.menu?.grid && Tab.TAB3].filter(Boolean)
+  const renderColumnOptions = () => {
+    if (!column.menu || !(column.menu as MenuProps)?.column) {
+      return null;
     }
-  }
 
-  const tabs = getTabs();
-  
+    const extraColumnOptions = () => {
+      if (!column.aggregationLevel) {
+        return null;
+      }
+
+      return <>
+        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.EXPAND)}>
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Expand all rows
+          </div>
+        </div>
+        <div className="bg-menu__item row middle between" onClick={() => dispatch(BusActions.COLLAPSE)}>
+          <div className="row middle left">
+            <div className="bg-menu__item__filler" />
+            Collapse all rows
+          </div>
+        </div>
+      </>
+    }
+
+    return (
+      <div className="bg-menu__content column filter">
+        <div className="bg-menu__item row middle between" onClick={handleGroupByColumn}>
+          <div className="row middle left">
+            <StackIcon />
+            {column.aggregationLevel && <div className="cross-overlay" />}
+            {column.aggregationLevel ? 'Ungroup' : `Group by ${capitalize(column.headerName)}`}
+          </div>
+        </div>
+        {extraColumnOptions()}
+        <div className="bg-menu__separator" />
+      </div>
+    );
+  };
+
   return (
     <div
       ref={menuRef}
-      className="bg-menu__container"
+      className={cn(
+        'bg-menu__container animate__animated animate__faster animate__fadeIn',
+        horizontalPosition,
+        theme
+      )}
       style={{ top: coords?.y, left: coords?.x }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="bg-nav-bar__container row middle">
-        {tabs.map((tab, idx) => (
-          <div
-            key={idx}
-            className={cn('bg-nav-bar__item', activeTab === tab && 'active')}
-            onClick={handleTabChange(tab as Tab)}
-          >
-            {tab}
-          </div>
-        ))}
+      <div className="bg-menu__wrapper animate__animated animate__faster animate__fadeInDown">
+        {renderSort()}
+        {renderPin()}
+        {renderFilter()}
+        {renderGridConfig()}
+        {renderColumnOptions()}
       </div>
-      {renderConfig()}
-      {renderFilter()}
-      {renderGridConfig()}
     </div>
   );
 }
