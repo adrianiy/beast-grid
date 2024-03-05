@@ -32,7 +32,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
   }, [theme, setTheme])
   
   return <SimpleBar
-    style={{ maxHeight: config.style?.maxHeight }}
+    style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
     ref={ref}
     className={cn('beast-grid__container', {
       border: config?.style?.border,
