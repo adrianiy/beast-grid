@@ -18,9 +18,10 @@ type Props = {
 const LEVEL_PADDING = 16;
 
 export default function RowContainer({ row, columns, idx, border, height, gap, level, onClick, events }: Props) {
-    const leftWidth = columns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
-    const totalWidth = columns.reduce((acc, curr) => acc + curr.width, 0);
-    const rightWidth = columns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
+    const visibleColumns = columns.filter((column) => !column.hidden);
+    const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
+    const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
+    const rightWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
 
     const renderRow = (pinType: PinType | undefined) => {
         return columns

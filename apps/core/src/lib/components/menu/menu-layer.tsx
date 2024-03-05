@@ -116,7 +116,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
 
     setTimeout(() => {
       menuRef.current?.style.setProperty('overflow', 'visible');
-    }, 300);
+    }, 400);
 
     document.addEventListener('click', closeMenu);
     container.addEventListener('scroll', moveMenu);
@@ -157,6 +157,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       delete column.aggregationLevel;
     }
     const _data = getGroupedData(columns, data);
+    console.log(_data)
 
     setData(_data)
   };

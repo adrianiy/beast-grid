@@ -172,6 +172,9 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
     };
 
     const forceRowExpand = (row: Row, idx: number, value: boolean) => {
+        if (row._expanded == null && !value) {
+            return;
+        }
         if (row._expanded !== value) {
             if (value) {
                 expandRow(row, idx);

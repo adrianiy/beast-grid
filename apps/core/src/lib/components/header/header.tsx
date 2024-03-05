@@ -1,10 +1,6 @@
-import HeaderCell from './cell';
-
 import { useBeastStore } from './../../stores/beast-store';
 
 import { BeastGridConfig, Column } from '../../common/interfaces';
-
-import cls from 'classnames';
 
 import './header.scss';
 import { HeaderEvents, PinType } from '../../common';
@@ -28,13 +24,11 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
         return acc;
     }, [] as Column[][]);
 
-    const totalWidth = Math.max(...levels.map((level) => level.reduce((acc, curr) => acc + curr.width, 0)));
-    const leftWidth = Math.max(
-        ...levels.map((level) => level.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0))
-    );
-    const rightWidth = Math.max(
-        ...levels.map((level) => level.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0))
-    );
+    const levelZero = levels[0].filter((column) => !column.hidden);
+
+    const totalWidth = levelZero.reduce((acc, curr) => acc + curr.width, 0)
+    const leftWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
+    const rightWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
 
     return (
         <div className="grid-header row" style={{ height: height * levels.length, width: totalWidth }}>

@@ -75,8 +75,17 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
   return columns;
 };
 
+const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => {
+  if (!column.childrenId) {
+    return column.width || 0;
+  }
+
+  return column.childrenId.reduce((acc, childId) => acc + _getChildrenWidth(columnStore[childId], columnStore), 0);
+}
+
 export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
   const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
+  const notFinalColumns = Object.values(columnStore).filter((column) => !column.final && !column.hidden);
   const dynamicColumns = finalColumns.filter((column) => !column.width || column.flex);
   const totalFlex = dynamicColumns.reduce((acc, column) => acc + (column.flex ?? 0), 0);
 
@@ -93,10 +102,12 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
   dynamicColumns.forEach((column) => {
     const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
     column.width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
-    if (column.parent) {
-      columnStore[column.parent].width += column.width;
-    }
   });
+
+  // Calculate parent widths based on children
+  notFinalColumns.forEach((column) => {
+    column.width = _getChildrenWidth(column, columnStore);
+  })
 
   return columnStore;
 };
