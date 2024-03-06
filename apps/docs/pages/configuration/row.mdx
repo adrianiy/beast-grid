@@ -12,10 +12,14 @@ export interface RowEvents {
     callback: (row: Row, idx: number) => void;
   }>
 }
+export interface RowGroupConfig {
+  showChildName: boolean;
+}
 export interface RowConfig { 
   height?: number;
   border?: boolean;
   events?: Partial<RowEvents>;
+  groups?: RowGroupConfig;
 }
 ```
 
@@ -75,3 +79,21 @@ Handles the click event of the row.
 | (row: Row, idx: number) => void | false |
 
 The callback function that will be called when the row is clicked.
+
+### groups
+
+| Type | Required | Default |
+| ---- | -------- | ------- |
+| RowGroupConfig | false |  undefined |
+
+Configures how the row groups will be displayed.
+
+#### showChildName
+
+| Type | Required | Default |
+| ---- | -------- | ------- |
+| boolean | false |  false |
+
+If true, the name of the child will be displayed in the row group.
+
+
