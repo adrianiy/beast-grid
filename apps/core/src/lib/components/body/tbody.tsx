@@ -25,7 +25,7 @@ const THRESHOLD = 5;
 
 export default function TBody({ rowHeight, headerHeight, config, maxHeight, border, onSortChange, events }: TBodyProps) {
     const gaps = useRef<Record<string, number>>({});
-    const [data, columns, container, scrollElement, sort, filters, setSorting] = useBeastStore((state) => [
+    const [data, columns, container, scrollElement, sort, filters, setSorting, groupOrder] = useBeastStore((state) => [
         state.data,
         state.columns,
         state.container,
@@ -33,6 +33,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         state.sort,
         state.filters,
         state.setSorting,
+        state.groupOrder
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
@@ -168,6 +169,10 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
             } else {
                 collapseRow(row);
             }
+
+            if (row.children) {
+                row.children.forEach((child) => forceRowExpand(child, value));
+            }
         }
     }
 
@@ -218,6 +223,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 row={row}
                 columns={lastLevel}
                 config={config}
+                groupOrder={groupOrder}
                 idx={idx}
                 border={border}
                 height={rowHeight}

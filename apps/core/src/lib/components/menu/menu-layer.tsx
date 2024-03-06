@@ -21,7 +21,6 @@ import { capitalize } from '../../utils/functions';
 import cn from 'classnames';
 
 import './menu-layer.scss';
-import { getGroupedData } from '../../stores/grid-store/utils';
 
 type Props = {
   visible: boolean;
@@ -47,15 +46,14 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, data, columns, setSort, resetColumn, pinColumn, setSidebar, setData] = useBeastStore((state) => [
+  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, toggleColumnGroup] = useBeastStore((state) => [
     state.scrollElement,
-    state.initialData,
     state.columns,
     state.setSort,
     state.resetColumnConfig,
     state.pinColumn,
     state.setSideBarConfig,
-    state.setData,
+    state.toggleColumnGroup
   ]);
 
   useEffect(() => {
@@ -151,16 +149,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   };
 
   const handleGroupByColumn = () => {
-    if (!column.aggregationLevel) {
-      const maxAggLevel = Math.max(...Object.values(columns).map((col) => col.aggregationLevel || 0));
-      column.aggregationLevel = maxAggLevel + 1;
-    } else {
-      dispatch(BusActions.COLLAPSE);
-      delete column.aggregationLevel;
-    }
-    const _data = getGroupedData(columns, data);
-
-    setData(_data);
+    toggleColumnGroup(column.id);
     onClose();
   };
 

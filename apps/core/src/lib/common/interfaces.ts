@@ -41,7 +41,7 @@ export interface BaseColumnDef {
   children?: ColumnDef[];
   formatter?: (value: string & number) => string;
   menu?: Partial<MenuProps>;
-  aggregationLevel?: number;
+  rowGroup?: boolean;
   aggregation?: AggregationType;
 }
 
@@ -59,10 +59,10 @@ export interface RowEvents {
   onHover: Partial<{
     highlight: boolean;
     callback: (row: Row, idx: number) => void;
-  }>,
+  }>;
   onClick: Partial<{
     callback: (row: Row, idx: number) => void;
-  }>
+  }>;
 }
 
 export interface RowGroupConfig {
@@ -78,7 +78,7 @@ export interface HeaderEvents {
   onDropOutside: Partial<{
     hide: boolean;
     callback: (column: Column) => void;
-  }>
+  }>;
 }
 export interface HeaderConfig {
   height: number;
@@ -90,6 +90,12 @@ export interface dragOptions {
   autoScrollMargin: number;
 }
 
+export interface GroupConstructor {
+    header: (column: Column) => string;
+    hideOriginal: boolean;
+    field: string;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: Partial<ColumnDef>;
@@ -99,6 +105,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   header?: Partial<HeaderConfig>;
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
+  group?: Partial<GroupConstructor>;
 }
 
 export interface TableStyles {

@@ -5,6 +5,7 @@ import { MIN_COL_WIDTH } from './../../common/globals';
 import {
   addSort,
   getSwappableClone,
+  groupDataByColumnDefs,
   mergeColumns,
   moveColumns,
   removeSort,
@@ -183,4 +184,24 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
 
   return { columns };
+}
+
+export const toggleColumnGroup = (id: ColumnId) => (state: GridStore) => {
+  let { groupOrder } = state;
+  
+  const { columns, initialData } = state;
+  const column = columns[id];
+  const aggColumns = Object.values(columns).filter((col) => col.aggregation);
+  
+  if (column.rowGroup) {
+    groupOrder = groupOrder.filter((col) => col !== id);
+    column.rowGroup = false;
+  } else {
+    column.rowGroup = true;
+    groupOrder.push(id);
+  }
+
+  const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
+
+  return { columns, groupOrder, data };
 }

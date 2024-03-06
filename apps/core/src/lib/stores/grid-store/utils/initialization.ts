@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ColumnDef, ColumnStore, Column, Data, Row, IFilter, PinType } from "../../../common";
+import { ColumnDef, ColumnStore, Column, Data, Row, IFilter, PinType, ColumnId } from "../../../common";
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
 import { groupBy } from '../../../utils/functions';
@@ -62,18 +62,17 @@ export const createVirtualIds = (data: Data): Data => {
   });
 }
 
-export const groupDataByColumnDefs = (columns: ColumnStore, data: Data, aggLevel = 1): Data => {
-  const aggregationLevel = Object.values(columns).find((c) => c.aggregationLevel === aggLevel);
-  const aggregatedColumns = Object.values(columns).filter((c) => c.aggregation);
+export const groupDataByColumnDefs = (columns: ColumnStore, aggColumns: Column[],  data: Data, groupOrder: ColumnId[], level = 0): Data => {
+  const aggregationLevel = Object.values(columns).find((c) => c.rowGroup && c.id === groupOrder[level]);
 
   if (!aggregationLevel) {
     return data;
   }
 
-  const finalData: Row[] = groupBy(data, aggregationLevel , aggregatedColumns);
+  const finalData: Row[] = groupBy(data, aggregationLevel , aggColumns);
 
   finalData.forEach((row) => {
-    row.children = groupDataByColumnDefs(columns, row.children || [], aggLevel + 1);
+    row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
   })
 
   return finalData;
@@ -138,12 +137,10 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   });
 };
 
-export const getGroupedData = (columns: ColumnStore, data: Data): Data => {
-  return groupDataByColumnDefs(columns, data);
-}
 
-export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data): Data => {
-  const finalData = getGroupedData(columns, data);
+export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data, groupOrder: ColumnId[]): Data => {
+  const aggColumns = Object.values(columns).filter((c) => c.aggregation);
+  const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
 

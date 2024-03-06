@@ -10,9 +10,10 @@ import {
   selectAllFilters,
   setColumn,
   swapColumns,
+  toggleColumnGroup,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, PinType, SideBarConfig, SortType } from '../../common';
+import { BeastGridConfig, GroupConstructor, PinType, SideBarConfig, SortType } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
@@ -25,6 +26,8 @@ interface GridState {
 }
 
 interface InferedState {
+  group: GroupConstructor;
+  groupOrder: ColumnId[];
   initialData: Data;
   sortedColumns: Column[];
   loading: boolean;
@@ -44,6 +47,7 @@ export interface GridStore extends GridState, InferedState {
   cleanColumns: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
+  toggleColumnGroup: (id: ColumnId) => void;
   resetColumnConfig: (id: ColumnId) => void;
   changeSort: (id: ColumnId, multipleColumnSort: boolean) => void;
   setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) => void;
@@ -56,13 +60,14 @@ export interface GridStore extends GridState, InferedState {
 }
 
 export const createGridStore = <T>(
-  { data: _data, columnDefs, defaultColumnDef, sort }: BeastGridConfig<T>,
+  { data: _data, columnDefs, defaultColumnDef, sort, group }: BeastGridConfig<T>,
   container: HTMLDivElement,
   theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
   const data = initialize(columns, container, createVirtualIds(_data as Data));
   const sortedColumns = sortColumns(columns);
+  const groupOrder = columnDefs.filter((col) => col.group).map((col) => col.id);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);
@@ -70,6 +75,8 @@ export const createGridStore = <T>(
   const initialState = {
     data,
     initialData: data,
+    group,
+    groupOrder,
     columns,
     sortedColumns,
     allowMultipleColumnSort: !!sort?.multiple,
@@ -94,6 +101,7 @@ export const createGridStore = <T>(
     cleanColumns: () => set(deleteEmptyParents()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),
+    toggleColumnGroup: (id: ColumnId) => set(toggleColumnGroup(id)),
     resetColumnConfig: (id: ColumnId) => set(resetColumnConfig(id)),
     changeSort: (id: ColumnId, multipleColumnSort: boolean) => set(changeSort(id, multipleColumnSort)),
     setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) =>
