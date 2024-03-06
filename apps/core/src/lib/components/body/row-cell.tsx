@@ -1,10 +1,16 @@
 import { ChevronRight } from '@mui/icons-material';
-import { Column, ColumnId, Row, RowConfig } from './../../common/interfaces';
+import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
 
 import cn from 'classnames';
+import { LEVEL_PADDING } from '../../common';
 
-function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column): string {
-  const value = obj[columnDef.field as Key];
+function getProperty<Type, Key extends keyof Type>(obj: Type, level: number, columnDef: Column, columns: ColumnStore, groupOrder: ColumnId[]): string {
+  let field = columnDef.field;
+
+  if (columnDef.tree) {
+    field = columns[groupOrder[level - 1]]?.field || field;
+  }
+  const value = obj[field as Key];
 
   if (columnDef.formatter) {
     return columnDef.formatter(value as number & string);
@@ -14,16 +20,20 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
 }
 
 type Props = {
-  height: number; row: Row; columnDef: Column, paddingLeft: number, config?: Partial<RowConfig>, level: number; groupOrder: ColumnId[];
+  height: number; row: Row; columnDef: Column, paddingLeft: number, config?: Partial<RowConfig>, level: number; groupOrder: ColumnId[]; columns: ColumnStore
 }
-export function RowCell({ height, row, columnDef, paddingLeft, config, level, groupOrder }: Props) {
+export function RowCell({ height, row, columnDef, paddingLeft, config, level, groupOrder, columns }: Props) {
   if (columnDef.hidden) {
     return null;
   }
 
   const Chevron = () => {
-    if (!row.children || !columnDef.rowGroup || groupOrder[level - 1] !== columnDef.id) {
+    if (!row.children || !columnDef.rowGroup || (groupOrder[level - 1] !== columnDef.id && !columnDef.tree)) {
       return null
+    }
+
+    if (level - 1 === groupOrder.length && row.children?.length === 1) {
+      return null;
     }
 
     return <ChevronRight className={cn(!!row._expanded && 'active')} />
@@ -33,11 +43,11 @@ export function RowCell({ height, row, columnDef, paddingLeft, config, level, gr
     <div
       data-hidden={columnDef.hidden}
       className={cn("grid-row-cell", { lastPinned: columnDef.lastPinned, expandable: row.children || columnDef.rowGroup })}
-      style={{ height, left: columnDef.left, paddingLeft: paddingLeft, width: columnDef.width }}
+      style={{ height, left: columnDef.left, paddingLeft: paddingLeft + (columnDef.tree ? LEVEL_PADDING * (level - 1) : 1), width: columnDef.width }}
     >
       <Chevron />
-      <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.rowGroup || row.children?.length) ? 'flex' : 'none' }}>
-        {getProperty(row, columnDef)}
+      <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.rowGroup || row.children?.length || columnDef.tree) ? 'flex' : 'none' }}>
+        {getProperty(row, level, columnDef, columns, groupOrder)}
       </div>
     </div>
   );

@@ -90,10 +90,11 @@ export interface dragOptions {
   autoScrollMargin: number;
 }
 
-export interface GroupConstructor {
-    header: (column: Column) => string;
-    hideOriginal: boolean;
-    field: string;
+export interface TreeConstructor {
+  name: string;
+  showOriginal: boolean;
+  field: string;
+  width: number;
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
@@ -105,7 +106,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   header?: Partial<HeaderConfig>;
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
-  group?: Partial<GroupConstructor>;
+  tree?: Partial<TreeConstructor>;
 }
 
 export interface TableStyles {
@@ -138,6 +139,7 @@ export interface Column extends ColumnDef, Position {
   originalParent?: ColumnId;
   logicDelete?: boolean;
   lastPinned?: boolean;
+  tree?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;

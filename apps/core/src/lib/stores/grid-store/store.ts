@@ -13,7 +13,7 @@ import {
   toggleColumnGroup,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, GroupConstructor, PinType, SideBarConfig, SortType } from '../../common';
+import { BeastGridConfig, PinType, SideBarConfig, SortType, TreeConstructor } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
@@ -26,7 +26,7 @@ interface GridState {
 }
 
 interface InferedState {
-  group: GroupConstructor;
+  tree: Partial<TreeConstructor> | undefined;
   groupOrder: ColumnId[];
   initialData: Data;
   sortedColumns: Column[];
@@ -60,14 +60,15 @@ export interface GridStore extends GridState, InferedState {
 }
 
 export const createGridStore = <T>(
-  { data: _data, columnDefs, defaultColumnDef, sort, group }: BeastGridConfig<T>,
+  { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
   container: HTMLDivElement,
   theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
-  const data = initialize(columns, container, createVirtualIds(_data as Data));
   const sortedColumns = sortColumns(columns);
-  const groupOrder = columnDefs.filter((col) => col.group).map((col) => col.id);
+  const groupOrder = sortedColumns.filter((col) => col.rowGroup).map((col) => col.id);
+  
+  const data = initialize(columns, container, createVirtualIds(_data as Data), groupOrder);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);
@@ -75,7 +76,7 @@ export const createGridStore = <T>(
   const initialState = {
     data,
     initialData: data,
-    group,
+    tree,
     groupOrder,
     columns,
     sortedColumns,

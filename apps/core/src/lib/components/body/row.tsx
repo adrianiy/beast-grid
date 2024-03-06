@@ -1,4 +1,4 @@
-import { Column, ColumnId, PinType, Row, RowConfig, RowEvents } from '../../common';
+import { Column, ColumnId, ColumnStore, PinType, Row, RowConfig, RowEvents } from '../../common';
 import { RowCell } from './row-cell';
 
 import cn from 'classnames';
@@ -6,7 +6,8 @@ import cn from 'classnames';
 type Props = {
     row: Row;
     columns: Column[];
-    groupOrder?: ColumnId[];
+    columnStore: ColumnStore;
+    groupOrder: ColumnId[];
     idx: number;
     config?: Partial<RowConfig>;
     border?: boolean;
@@ -19,7 +20,7 @@ type Props = {
 
 const LEVEL_PADDING = 16;
 
-export default function RowContainer({ row, columns, groupOrder, config, idx, border, height, gap, level, onClick, events }: Props) {
+export default function RowContainer({ row, columns, columnStore, groupOrder, config, idx, border, height, gap, level, onClick, events }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
@@ -33,6 +34,7 @@ export default function RowContainer({ row, columns, groupOrder, config, idx, bo
                     key={idx}
                     height={height}
                     row={row}
+                    columns={columnStore}
                     groupOrder={groupOrder}
                     level={level}
                     config={config}

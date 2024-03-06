@@ -63,7 +63,7 @@ export const createVirtualIds = (data: Data): Data => {
 }
 
 export const groupDataByColumnDefs = (columns: ColumnStore, aggColumns: Column[],  data: Data, groupOrder: ColumnId[], level = 0): Data => {
-  const aggregationLevel = Object.values(columns).find((c) => c.rowGroup && c.id === groupOrder[level]);
+  const aggregationLevel = Object.values(columns).find((c) => groupOrder && c.id === groupOrder[level]);
 
   if (!aggregationLevel) {
     return data;
@@ -91,6 +91,9 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
 };
 
 const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => {
+  if (column.hidden) {
+    return 0;
+  }
   if (!column.childrenId) {
     return column.width || 0;
   }

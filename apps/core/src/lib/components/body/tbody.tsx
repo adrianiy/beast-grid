@@ -222,6 +222,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 key={row._id}
                 row={row}
                 columns={lastLevel}
+                columnStore={columns}
                 config={config}
                 groupOrder={groupOrder}
                 idx={idx}

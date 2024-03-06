@@ -12,9 +12,11 @@ import {
   setColumnsStyleProps,
   sortColumns,
   swapPositions,
+  toggleHide,
 } from './utils';
 import { GridStore } from './store';
 import { PinType, SortType } from '../../common';
+import { createGroupColumn } from './utils/group';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
   const { columns } = state;
@@ -36,18 +38,8 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
   const { columns, sortedColumns, container } = state;
   const column = columns[id];
-  column.hidden = !column.hidden;
 
-  if (column.childrenId) {
-    column.childrenId.forEach((child) => {
-      columns[child].hidden = column.hidden;
-    });
-  }
-  if (column.parent) {
-    const parent = columns[column.parent];
-    const allChildrenHidden = parent.childrenId?.every((child) => columns[child].hidden);
-    parent.hidden = allChildrenHidden;
-  }
+  toggleHide(column, columns);
 
   setColumnsStyleProps(columns, container.offsetWidth);
   moveColumns(columns, sortedColumns, column.pinned);
@@ -187,12 +179,14 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
 }
 
 export const toggleColumnGroup = (id: ColumnId) => (state: GridStore) => {
-  let { groupOrder } = state;
+  let { groupOrder, sortedColumns } = state;
   
-  const { columns, initialData } = state;
-  const column = columns[id];
+  const { columns, initialData, tree, container } = state;
+  let column = columns[id];
   const aggColumns = Object.values(columns).filter((col) => col.aggregation);
-  
+
+  column = createGroupColumn(column, columns, container, tree);
+   
   if (column.rowGroup) {
     groupOrder = groupOrder.filter((col) => col !== id);
     column.rowGroup = false;
@@ -201,7 +195,14 @@ export const toggleColumnGroup = (id: ColumnId) => (state: GridStore) => {
     groupOrder.push(id);
   }
 
+
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-  return { columns, groupOrder, data };
+  sortedColumns = sortColumns(columns);
+  
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0)
+  moveColumns(columns, sortedColumns, PinType.NONE, 0)
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
+
+  return { columns, groupOrder, data, sortedColumns };
 }
