@@ -152,7 +152,8 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
 
   const handleGroupByColumn = () => {
     if (!column.aggregationLevel) {
-      column.aggregationLevel = 1;
+      const maxAggLevel = Math.max(...Object.values(columns).map((col) => col.aggregationLevel || 0));
+      column.aggregationLevel = maxAggLevel + 1;
     } else {
       dispatch(BusActions.COLLAPSE);
       delete column.aggregationLevel;
@@ -160,6 +161,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     const _data = getGroupedData(columns, data);
 
     setData(_data);
+    onClose();
   };
 
   const renderSort = () => {
@@ -310,7 +312,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
             <FormattedMessage
               id={column.aggregationLevel ? 'menu.column.ungroup' : 'menu.column.group'}
               defaultMessage="Group by"
-              values={{ headerName: capitalize(column.headerName) }}
+              values={{ columnName: capitalize(column.headerName) }}
             />
           </div>
         </div>

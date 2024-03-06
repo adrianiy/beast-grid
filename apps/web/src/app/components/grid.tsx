@@ -28,7 +28,7 @@ const columnDefs: ColumnDef[] = [
   {
     headerName: 'USER',
     children: [
-      { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true } },
+      { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true, column: true } },
       { headerName: 'AGE', field: 'age', width: 100, sortable: true, menu: { grid: true } },
     ],
   },
@@ -98,6 +98,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             onHover: {
               highlight: true
             }
+          },
+          groups: {
+            showChildName: true
           }
         },
         sort: {

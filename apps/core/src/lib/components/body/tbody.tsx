@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
 
 import RowContainer from './row';
 
-import { BusActions, Column, Data, Row, RowEvents, SortType } from '../../common';
+import { BusActions, Column, Data, Row, RowConfig, RowEvents, SortType } from '../../common';
 
 import './tbody.scss';
-import useBus from 'use-bus';
 
 type TBodyProps = {
     rowHeight: number;
     headerHeight: number;
+    config?: Partial<RowConfig>;
     maxHeight?: number;
     border?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
@@ -22,8 +23,8 @@ type TBodyProps = {
 const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 5;
 
-export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSortChange, events }: TBodyProps) {
-    const gaps = useRef<Record<number, number>>({});
+export default function TBody({ rowHeight, headerHeight, config, maxHeight, border, onSortChange, events }: TBodyProps) {
+    const gaps = useRef<Record<string, number>>({});
     const [data, columns, container, scrollElement, sort, filters, setSorting] = useBeastStore((state) => [
         state.data,
         state.columns,
@@ -118,11 +119,7 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
                 if (onSortChange) {
                     const result = await onSortChange(sortedData, sortColumns);
 
-                    result.forEach((row, idx) => {
-                        if (row._expanded) {
-                            updateGaps(rowHeight * (row.children?.length || 0), idx);
-                        }
-                    });
+                    updateGaps(0, result);
 
                     if (result) {
                         setSortedData(result);
@@ -133,11 +130,7 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
                     }
                     setTimeout(() => {
                         sortedData.sort(sortData);
-                        sortedData.forEach((row, idx) => {
-                            if (row._expanded) {
-                                updateGaps(rowHeight * (row.children?.length || 0), idx);
-                            }
-                        });
+                        updateGaps(0, sortedData);
 
                         setSortedData(sortedData);
                         if (data.length > PERFORMANCE_LIMIT) {
@@ -153,102 +146,114 @@ export default function TBody({ rowHeight, headerHeight, maxHeight, border, onSo
 
     useBus(
         BusActions.EXPAND,
-        () => sortedData.forEach((row, idx) => forceRowExpand(row, idx, true)),
+        () => sortedData.forEach((row) => forceRowExpand(row, true)),
         [sortedData]
     )
 
     useBus(
         BusActions.COLLAPSE,
-        () => sortedData.forEach((row, idx) => forceRowExpand(row, idx, false)),
+        () => sortedData.forEach((row) => forceRowExpand(row, false)),
         [sortedData]
     )
 
     const lastLevel = Object.values(columns).filter((c) => c.final);
 
-    const updateGaps = (gap: number, idx: number) => {
-        for (let i = idx + 1; i < data.length; i++) {
-            gaps.current[i] = (gaps.current[i] || 0) + gap;
-        }
-    };
-
-    const forceRowExpand = (row: Row, idx: number, value: boolean) => {
+    const forceRowExpand = (row: Row, value: boolean) => {
         if (row._expanded == null && !value) {
             return;
         }
         if (row._expanded !== value) {
             if (value) {
-                expandRow(row, idx);
+                expandRow(row);
             } else {
-                collapseRow(row, idx);
+                collapseRow(row);
             }
         }
     }
 
-    const expandRow = (row: Row, idx: number) => {
-        row._expanded = true;
-        updateGaps(rowHeight * (row.children?.length || 0), idx);
-        setExpandedRows((state) => state + (row.children?.length || 0));
+    const updateGaps = (gap = 0, gapData = sortedData): number => {
+        for (let idx = 0; idx < gapData.length; idx++) {
+            const row = gapData[idx];
+            if (row) {
+                gaps.current[row._id as string] = gap;
+                if (row.children && row._expanded) {
+                    gap = updateGaps(gap, row.children);
+                }
+                gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
+
+            }
+        }
+
+        return gap;
     }
 
-    const collapseRow = (row: Row, idx: number) => {
+    const expandRow = (row: Row) => {
+        row._expanded = true;
+        setExpandedRows((state) => state + (row.children?.length || 0));
+        updateGaps();
+    }
+
+    const collapseRow = (row: Row) => {
         row._expanded = false;
         setExpandedRows((state) => state - (row.children?.length || 0));
-        updateGaps(rowHeight * (row.children?.length || 0) * -1, idx);
+        updateGaps();
     }
 
-    const handleRowExpand = (row: Row, idx: number) => {
+    const handleRowExpand = (row: Row) => () =>  {
         if (row._expanded) {
-            collapseRow(row, idx);
+            collapseRow(row);
         } else {
-            expandRow(row, idx);
+            expandRow(row);
         }
     };
 
+    const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, level: number, gap: number): number => {
+        if (!renderArray[level - 1]) {
+            renderArray[level - 1] = [];
+        }
+
+        renderArray[level - 1].push(
+            <RowContainer
+                key={row._id}
+                row={row}
+                columns={lastLevel}
+                config={config}
+                idx={idx}
+                border={border}
+                height={rowHeight}
+                level={level}
+                onClick={handleRowExpand(row)}
+                events={events}
+                gap={gaps.current[row._id as string] || 0}
+            />
+        )
+
+        if (row.children && row._expanded) {
+            for (let i = 0; i < row.children.length; i++) {
+                const child = row.children[i];
+                gap = addRowToSlice(renderArray, child, idx + i + 1, level + 1, gap);
+
+                gap += child._expanded ? (child.children?.length || 0) * rowHeight : 0;
+            }
+        }
+
+        return gap;
+    }
+
     const createDataSlice = () => {
-        const renderArray = [];
-        const childrenArray = [];
+        const renderArray: ReactNode[][] = [];
+        let gap = 0;
         for (let idx = min; idx < max; idx++) {
             const row = sortedData[idx];
 
             if (row) {
-                renderArray.push(
-                    <RowContainer
-                        key={idx}
-                        row={row}
-                        columns={lastLevel}
-                        idx={idx}
-                        border={border}
-                        height={rowHeight}
-                        level={1}
-                        onClick={handleRowExpand}
-                        events={events}
-                        gap={gaps.current[idx] || 0}
-                    />
-                );
-                if (row._expanded) {
-                    for (let i = 0; i < (row.children?.length || 0); i++) {
-                        const child = row.children?.[i];
-                        if (child) {
-                            childrenArray.push(
-                                <RowContainer
-                                    key={`children-${idx}-${i}`}
-                                    row={child}
-                                    columns={lastLevel}
-                                    idx={idx + i + 1}
-                                    border={border}
-                                    height={rowHeight}
-                                    gap={gaps.current[idx] || 0}
-                                    level={2}
-                                    events={events}
-                                />
-                            );
-                        }
-                    }
-                }
+                gap = addRowToSlice(renderArray, row, idx, 1, gap);
             }
+
+            gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
         }
 
-        return renderArray.concat(...childrenArray);
+        return renderArray.flat();
     };
 
     const getStyleProps = () => {

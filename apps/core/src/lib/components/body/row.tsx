@@ -1,4 +1,4 @@
-import { Column, PinType, Row, RowEvents } from '../../common';
+import { Column, PinType, Row, RowConfig, RowEvents } from '../../common';
 import { RowCell } from './row-cell';
 
 import cn from 'classnames';
@@ -7,17 +7,18 @@ type Props = {
     row: Row;
     columns: Column[];
     idx: number;
+    config?: Partial<RowConfig>;
     border?: boolean;
     height: number;
     gap: number;
     level: number;
     events?: Partial<RowEvents>;
-    onClick?: (row: Row, idx: number) => void;
+    onClick?: () => void;
 };
 
 const LEVEL_PADDING = 16;
 
-export default function RowContainer({ row, columns, idx, border, height, gap, level, onClick, events }: Props) {
+export default function RowContainer({ row, columns, config, idx, border, height, gap, level, onClick, events }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
@@ -31,8 +32,10 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
                     key={idx}
                     height={height}
                     row={row}
+                    level={level}
+                    config={config}
                     columnDef={column}
-                    paddingLeft={LEVEL_PADDING * (column.aggregationLevel ? level : 1)}
+                    paddingLeft={LEVEL_PADDING * (column.aggregationLevel && !row.children ? level : 1)}
                 />
             ));
     };
@@ -43,7 +46,7 @@ export default function RowContainer({ row, columns, idx, border, height, gap, l
         }
 
         if (onClick) {
-            onClick(row, idx);
+            onClick();
         }
     };
 

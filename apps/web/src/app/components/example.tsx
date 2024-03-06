@@ -50,7 +50,7 @@ export default function Example() {
     },
     row: {
       height: 60,
-      border: true
+      border: true,
     },
   };
   return (

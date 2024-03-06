@@ -1,5 +1,5 @@
 import { ChevronRight } from '@mui/icons-material';
-import { Column, Row } from './../../common/interfaces';
+import { Column, Row, RowConfig } from './../../common/interfaces';
 
 import cn from 'classnames';
 
@@ -13,13 +13,13 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
   return value as string;
 }
 
-export function RowCell({ height, row, columnDef, paddingLeft }: { height: number; row: Row; columnDef: Column, paddingLeft: number }) {
+export function RowCell({ height, row, columnDef, paddingLeft, config, level }: { height: number; row: Row; columnDef: Column, paddingLeft: number, config?: Partial<RowConfig>, level: number }) {
   if (columnDef.hidden) {
     return null;
   }
 
   const Chevron = () => {
-    if (!columnDef.aggregationLevel || !row.children) {
+    if (!row.children || columnDef.aggregationLevel !== level) {
       return null
     }
 
@@ -33,7 +33,7 @@ export function RowCell({ height, row, columnDef, paddingLeft }: { height: numbe
       style={{ height, left: columnDef.left, paddingLeft: paddingLeft, width: columnDef.width }}
     >
       <Chevron />
-      <div className="grid-row-value" style={{ display: columnDef.aggregationLevel && !row.children ? 'none' : 'flex' }}>
+      <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.aggregationLevel || row.children?.length) ? 'flex' : 'none' }}>
         { getProperty(row, columnDef) }
       </div>
     </div>

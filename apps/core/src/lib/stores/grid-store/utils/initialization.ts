@@ -51,14 +51,30 @@ export const getColumnsFromDefs = (
   return columns;
 };
 
-export const groupDataByColumnDefs = (columns: ColumnStore, data: Data): Data => {
-  const aggregationLevels = Object.values(columns).filter((c) => c.aggregationLevel);
+export const createVirtualIds = (data: Data): Data => {
+  return data.map((row, idx) => {
+    return {
+      ...row,
+      _id: uuidv4(),
+      _originalIdx: idx,
+      children: row.children ? createVirtualIds(row.children) : undefined,
+    };
+  });
+}
+
+export const groupDataByColumnDefs = (columns: ColumnStore, data: Data, aggLevel = 1): Data => {
+  const aggregationLevel = Object.values(columns).find((c) => c.aggregationLevel === aggLevel);
   const aggregatedColumns = Object.values(columns).filter((c) => c.aggregation);
 
-  let finalData: Row[] = data;
-  aggregationLevels.forEach((column) => {
-    finalData = groupBy(finalData, column, aggregatedColumns);
-  });
+  if (!aggregationLevel) {
+    return data;
+  }
+
+  const finalData: Row[] = groupBy(data, aggregationLevel , aggregatedColumns);
+
+  finalData.forEach((row) => {
+    row.children = groupDataByColumnDefs(columns, row.children || [], aggLevel + 1);
+  })
 
   return finalData;
 };
