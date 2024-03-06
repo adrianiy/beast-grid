@@ -1,4 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { IntlProvider } from 'react-intl'
 
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
@@ -12,13 +13,15 @@ import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
 import DndLayer from './components/dnd/dnd-layer';
+import SideBar from './components/sidebar/sidebar';
 import Grid from './grid';
+
+import messages from './utils/intl';
 
 import cn from 'classnames';
 
 import './core.scss';
 import 'animate.css';
-import SideBar from './components/sidebar/sidebar';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -28,11 +31,13 @@ export const defaultConfig = {
 export function BeastGrid<T>({
   config,
   theme = 'default',
+  locale = 'en',
   api,
   onSortChange,
 }: {
   config?: BeastGridConfig<T>;
   theme?: string;
+  locale?: string;
   api?: MutableRefObject<BeastGridApi | undefined>;
   onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 }) {
@@ -56,11 +61,13 @@ export function BeastGrid<T>({
     return (
       <DndStoreProvider createStore={beastDndStore}>
         <BeastGridProvider createStore={beastGridStore}>
-          <BeastApi store={api} />
-          <DndLayer config={config} />
-          <LoaderLayer config={config} />
-          <SideBar config={config}/>
-          <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+          <IntlProvider messages={messages[locale]} locale={locale}>
+            <BeastApi store={api} />
+            <DndLayer config={config} />
+            <LoaderLayer config={config} />
+            <SideBar config={config} />
+            <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+          </IntlProvider>
         </BeastGridProvider>
       </DndStoreProvider>
     );

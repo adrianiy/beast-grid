@@ -1,4 +1,5 @@
 import { AggregationType, Column, Data, Row, SortType } from '../common';
+import { v4 as uuidv4 } from 'uuid';
 
 export const sortData =
   <TData,>(sortColumns: Column[]) =>
@@ -46,7 +47,7 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
       return acc;
     }, {} as Record<string, number | null>);
     
-    return { [column.field as string]: key, children: children, ...calculatedFields };
+    return { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
   });
   
 }

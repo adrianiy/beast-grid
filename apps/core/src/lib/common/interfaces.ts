@@ -3,7 +3,8 @@ import { AggregationType, PinType, SortType } from './enums';
 
 export interface Row {
   [key: string]: unknown;
-  id?: string;
+  _id?: string;
+  _orignalIdx?: number;
   children?: Row[];
 }
 
@@ -63,9 +64,14 @@ export interface RowEvents {
     callback: (row: Row, idx: number) => void;
   }>
 }
+
+export interface RowGroupConfig {
+  showChildName: boolean;
+}
 export interface RowConfig {
   height: number;
   border: boolean;
+  groups: RowGroupConfig;
   events: Partial<RowEvents>;
 }
 export interface HeaderEvents {

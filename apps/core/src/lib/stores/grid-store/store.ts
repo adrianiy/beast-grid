@@ -13,7 +13,7 @@ import {
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
 import { BeastGridConfig, PinType, SideBarConfig, SortType } from '../../common';
-import { getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
+import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
   data: Data;
@@ -61,7 +61,7 @@ export const createGridStore = <T>(
   theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
-  const data = initialize(columns, container, _data as Data);
+  const data = initialize(columns, container, createVirtualIds(_data as Data));
   const sortedColumns = sortColumns(columns);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);

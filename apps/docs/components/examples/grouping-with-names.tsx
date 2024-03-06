@@ -33,6 +33,11 @@ export default function Grid() {
     border: true,
     sort: {
       enabled: true
+    },
+    row: {
+      groups: {
+        showChildName: true
+      }
     }
   };
 

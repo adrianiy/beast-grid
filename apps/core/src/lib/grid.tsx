@@ -48,6 +48,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     <TBody
       rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
       headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
+      config={config.row}
       maxHeight={config.style?.maxHeight}
       border={config.row?.border}
       onSortChange={onSortChange}
