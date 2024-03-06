@@ -270,7 +270,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     }
 
     const extraColumnOptions = () => {
-      if (!column.aggregationLevel) {
+      if (!column.rowGroup) {
         return null;
       }
 
@@ -297,9 +297,9 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         <div className="bg-menu__item row middle between" onClick={handleGroupByColumn}>
           <div className="row middle left">
             <StackIcon />
-            {column.aggregationLevel && <div className="cross-overlay" />}
+            {column.rowGroup && <div className="cross-overlay" />}
             <FormattedMessage
-              id={column.aggregationLevel ? 'menu.column.ungroup' : 'menu.column.group'}
+              id={column.rowGroup ? 'menu.column.ungroup' : 'menu.column.group'}
               defaultMessage="Group by"
               values={{ columnName: capitalize(column.headerName) }}
             />

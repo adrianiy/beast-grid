@@ -20,6 +20,10 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, containe
         position: 0,
         level: 0,
         final: true,
+        menu: {
+          ...tree.menu,
+          column: true
+        },
         width: tree.width || MIN_COL_WIDTH,
       };
       columns[newColumn.id] = newColumn;

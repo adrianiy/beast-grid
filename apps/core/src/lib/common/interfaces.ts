@@ -95,6 +95,7 @@ export interface TreeConstructor {
   showOriginal: boolean;
   field: string;
   width: number;
+  menu: Partial<MenuProps>;
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
