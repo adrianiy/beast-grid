@@ -99,9 +99,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
               highlight: true
             }
           },
-          groups: {
-            showChildName: true
-          }
         },
         sort: {
           enabled: true,
