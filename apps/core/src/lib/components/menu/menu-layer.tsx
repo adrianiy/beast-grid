@@ -46,14 +46,15 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, toggleColumnGroup] = useBeastStore((state) => [
+  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] = useBeastStore((state) => [
     state.scrollElement,
     state.columns,
     state.setSort,
     state.resetColumnConfig,
     state.pinColumn,
     state.setSideBarConfig,
-    state.toggleColumnGroup
+    state.groupByColumn,
+    state.unGroupColumn
   ]);
 
   useEffect(() => {
@@ -149,7 +150,11 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   };
 
   const handleGroupByColumn = () => {
-    toggleColumnGroup(column.id);
+    if (column.rowGroup) {
+      ungroup(column.id);
+    } else {
+      groupByColumn(column.id);
+    }
     onClose();
   };
 

@@ -3,6 +3,7 @@ import {
   addFilter,
   changeSort,
   deleteEmptyParents,
+  groupByColumn,
   hideColumn,
   pinColumn,
   resetColumnConfig,
@@ -10,7 +11,7 @@ import {
   selectAllFilters,
   setColumn,
   swapColumns,
-  toggleColumnGroup,
+  unGroupColumn,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
 import { BeastGridConfig, PinType, SideBarConfig, SortType, TreeConstructor } from '../../common';
@@ -47,7 +48,8 @@ export interface GridStore extends GridState, InferedState {
   cleanColumns: () => void;
   swapColumns: (id1: ColumnId, id2: ColumnId) => void;
   resizeColumn: (id: ColumnId, width: number) => void;
-  toggleColumnGroup: (id: ColumnId) => void;
+  groupByColumn: (id: ColumnId) => void;
+  unGroupColumn: (id: ColumnId) => void;
   resetColumnConfig: (id: ColumnId) => void;
   changeSort: (id: ColumnId, multipleColumnSort: boolean) => void;
   setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) => void;
@@ -102,7 +104,8 @@ export const createGridStore = <T>(
     cleanColumns: () => set(deleteEmptyParents()),
     swapColumns: (id1: ColumnId, id2: ColumnId) => set(swapColumns(id1, id2)),
     resizeColumn: (id: ColumnId, width: number) => set(resizeColumn(id, width)),
-    toggleColumnGroup: (id: ColumnId) => set(toggleColumnGroup(id)),
+    groupByColumn: (id: ColumnId) => set(groupByColumn(id)),
+    unGroupColumn: (id: ColumnId) => set(unGroupColumn(id)),
     resetColumnConfig: (id: ColumnId) => set(resetColumnConfig(id)),
     changeSort: (id: ColumnId, multipleColumnSort: boolean) => set(changeSort(id, multipleColumnSort)),
     setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) =>

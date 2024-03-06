@@ -171,38 +171,62 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
     });
   }
 
-  moveColumns(columns, sortedColumns, PinType.LEFT)
-  moveColumns(columns, sortedColumns, PinType.NONE, 0)
-  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
+  moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns };
-}
+};
 
-export const toggleColumnGroup = (id: ColumnId) => (state: GridStore) => {
-  let { groupOrder, sortedColumns } = state;
-  
-  const { columns, initialData, tree, container } = state;
-  let column = columns[id];
+export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
+  const { columns, tree, container, groupOrder, initialData } = state;
   const aggColumns = Object.values(columns).filter((col) => col.aggregation);
+  const column = columns[id];
 
-  column = createGroupColumn(column, columns, container, tree);
-   
-  if (column.rowGroup) {
-    groupOrder = groupOrder.filter((col) => col !== id);
-    column.rowGroup = false;
-  } else {
-    column.rowGroup = true;
-    groupOrder.push(id);
+  const newColumn = createGroupColumn(column, columns, tree);
+
+  if (!tree?.showOriginal) {
+    toggleHide(column, columns);
+    setColumnsStyleProps(columns, container.offsetWidth);
   }
 
-
+  newColumn.rowGroup = true;
+  groupOrder.push(id);
+  
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-  sortedColumns = sortColumns(columns);
-  
-  moveColumns(columns, sortedColumns, PinType.LEFT, 0)
-  moveColumns(columns, sortedColumns, PinType.NONE, 0)
-  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
+  const sortedColumns = sortColumns(columns);
+
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns, groupOrder, data, sortedColumns };
 }
+
+export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
+  const { columns, groupOrder, container, initialData } = state;
+  const aggColumns = Object.values(columns).filter((col) => col.aggregation);
+  const column = columns[id];
+
+  column.rowGroup = false;
+
+  if (column.tree) {
+    groupOrder.forEach((col) => {
+      toggleHide(columns[col], columns);
+    });
+    setColumnsStyleProps(columns, container.offsetWidth);
+    delete columns[column.id];
+  }
+  
+  const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
+
+  const sortedColumns = sortColumns(columns);
+
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+
+  return { columns, groupOrder, data, sortedColumns };
+}
+

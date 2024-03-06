@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Column, ColumnStore, TreeConstructor, MIN_COL_WIDTH, PinType } from '../../../common';
-import { changePosition, toggleHide } from './edition';
-import { setColumnsStyleProps } from './initialization';
+import { changePosition } from './edition';
 
-export const createGroupColumn = (column: Column, columns: ColumnStore, container: HTMLDivElement, tree?: Partial<TreeConstructor>) => {
+export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: Partial<TreeConstructor>) => {
   let newColumn = column;
   if (tree) {
     const treeColumn = Object.values(columns).find((col) => col.tree);
@@ -28,11 +27,6 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, containe
       };
       columns[newColumn.id] = newColumn;
       changePosition(columns, newColumn, [newColumn.id], 1);
-    }
-
-    if (!tree.showOriginal) {
-      toggleHide(column, columns);
-      setColumnsStyleProps(columns, container.offsetWidth);
     }
   }
 
