@@ -4,5 +4,6 @@
   "menu": "Column menu",
   "grouping": "Grouping",
   "header-grouping": "Nested headers",
-  "pinning": "Pinning columns"
+  "pinning": "Pinning columns",
+  "tree": "Tree"
 }

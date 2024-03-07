@@ -11,7 +11,7 @@ export default function Grid() {
   const columnDefs: ColumnDef[] = [
     {
       headerName: 'USER', children: [
-        { headerName: 'COUNTRY', field: 'country', sortable: false, aggregationLevel: 1 },
+        { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
         { headerName: 'NAME', field: 'username', sortable: false },
 
       ],

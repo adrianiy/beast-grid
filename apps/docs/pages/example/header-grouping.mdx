@@ -5,14 +5,19 @@
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
-import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
-import { User, data } from './data';
+import { AggregationType, BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { User, dataToGroup } from './data';
 
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'COUNTRY', field: 'country', sortable: false, aggregationLevel: 1 },
-    { headerName: 'NAME', field: 'username', sortable: false },
+    {
+      headerName: 'USER', children: [
+        { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
+        { headerName: 'NAME', field: 'username', sortable: false },
+
+      ]
+    },
     {
       headerName: 'AMOUNT',
       field: 'money',

@@ -240,7 +240,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 const child = row.children[i];
                 gap = addRowToSlice(renderArray, child, idx + i + 1, level + 1, gap);
 
-                gap += child._expanded ? (child.children?.length || 0) * rowHeight : 0;
+                gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
             }
         }
 
@@ -257,7 +257,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 gap = addRowToSlice(renderArray, row, idx, 1, gap);
             }
 
-            gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
+            gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
         }
 
         return renderArray.flat();

@@ -67,10 +67,10 @@ export const createGridStore = <T>(
   theme: string
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
-  const sortedColumns = sortColumns(columns);
-  const groupOrder = sortedColumns.filter((col) => col.rowGroup).map((col) => col.id);
+  const groupOrder = Object.values(columns).filter((col) => col.rowGroup).map((col) => col.id);
   
-  const data = initialize(columns, container, createVirtualIds(_data as Data), groupOrder);
+  const data = initialize(columns, container, createVirtualIds(_data as Data), groupOrder, tree);
+  const sortedColumns = sortColumns(columns);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);

@@ -185,7 +185,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 
   const newColumn = createGroupColumn(column, columns, tree);
 
-  if (!tree?.showOriginal) {
+  if (tree && !tree.showOriginal) {
     toggleHide(column, columns);
     setColumnsStyleProps(columns, container.offsetWidth);
   }

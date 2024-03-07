@@ -101,14 +101,13 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             }
           },
         },
-        tree: {
-          name: 'GROUP',
-          field: 'name',
-          width: 300,
-        },
         sort: {
           enabled: true,
           multiple: true
+        },
+        tree: {
+          name: 'GROUP',
+          field: 'name'
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
