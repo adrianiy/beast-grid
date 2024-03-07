@@ -25,7 +25,7 @@ export default function Welcome() {
               code="npm i beast-grid@0.0.32"
               language={'sh'}
               canCopy
-              style={{ width: 190 }}
+              style={{ width: 250 }}
             />
             <Button
               variant="outlined"
