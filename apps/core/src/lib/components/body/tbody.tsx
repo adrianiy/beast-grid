@@ -109,7 +109,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         return column.sort?.order === SortType.ASC ? -1 : 1;
                     }
                 }
-                return a._originalIdx - b._originalIdx;
+                return (a._originalIdx as number) - (b._originalIdx as number);
             };
 
             const asyncSort = async () => {

@@ -1,5 +1,5 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
-import useBus from 'use-bus';
+import useBus, { EventAction, dispatch } from 'use-bus';
 import { FormattedMessage } from 'react-intl';
 import {
   ArrowDownIcon,
@@ -10,7 +10,6 @@ import {
   StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
-import { dispatch } from 'use-bus';
 
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -331,8 +330,8 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
 export default function MenuLayer() {
   const [props, setProps] = useState<Props | null>();
   
-  useBus(BusActions.SHOW_MENU, ({ payload: newProps }: { payload: Props }) => {
-    setProps(newProps);
+  useBus((event) => event.type === BusActions.SHOW_MENU, (event: EventAction) => {
+    setProps(event.payload as Props);
   }, []);
 
   useBus(BusActions.HIDE_MENU, () => {
