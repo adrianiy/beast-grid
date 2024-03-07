@@ -31,19 +31,16 @@ export default function Toolbar<T>({ config }: Props<T>) {
     return (
       <div className={cn("bg-toolbar__button row middle", config.toolbar?.position)} onClick={handleDownload}>
         <DownloadIcon />
-        <label>
+        <span>
           <FormattedMessage id="toolbar.download" />
-        </label>
+        </span>
       </div>
     );
   };
 
   return (
-    <div className={cn("bg-toolbar row end between", config.toolbar?.position)}>
-      <div className="bg-toolbar__left"></div>
-      <div className="bg-toolbar__right row middle end">
+    <div className={cn("bg-toolbar row end", config.toolbar?.position)}>
         <Download />
-      </div>
     </div>
   );
 }

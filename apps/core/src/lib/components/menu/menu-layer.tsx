@@ -27,9 +27,10 @@ type Props = {
   multiSort: boolean;
   horizontal: MenuHorizontalPosition;
   clipRef: () => SVGSVGElement;
+  onClose: () => void;
 };
 
-const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) => {
+const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
@@ -65,14 +66,17 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
         width: 0,
       };
       const { left, right, bottom } = clipRef().getBoundingClientRect();
+      
 
-      const x = window.screenX + left;
-      const y = window.screenY + bottom - 28;
+      console.log('left', left, 'cLeft', cLeft, 'right', right, 'bottom', bottom, 'cRight', cRight, window.screenX, window.screenY)
+      const x = left;
+
+      const y = bottom + 12;
 
       setCoords({ x, y });
 
       if (right > cRight) {
-        dispatch(BusActions.HIDE_MENU);
+        onClose();
         return;
       }
       if (left + width * 2 > cRight) {
@@ -91,7 +95,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
         return;
       }
       if (left < cLeft + leftPinned || x + width > cRight) {
-        dispatch(BusActions.HIDE_MENU);
+        onClose();
       }
     };
 
@@ -99,7 +103,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
 
     const closeMenu = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        dispatch(BusActions.HIDE_MENU);
+        onClose();
       }
     };
 
@@ -132,11 +136,11 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
 
   const handlePinColumn = (pinType: PinType) => () => {
     pinColumn(column.id, column.pinned === pinType ? PinType.NONE : pinType);
-    dispatch(BusActions.HIDE_MENU);
+    onClose();
   };
 
   const showConfig = () => {
-    dispatch(BusActions.HIDE_MENU);
+    onClose();
     setSidebar(SideBarConfig.GRID);
   };
 
@@ -146,7 +150,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
     } else {
       groupByColumn(column.id);
     }
-    dispatch(BusActions.HIDE_MENU);
+    onClose();
   };
 
   const renderSort = () => {

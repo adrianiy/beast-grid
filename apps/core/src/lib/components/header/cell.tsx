@@ -140,6 +140,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setShowMenu(true);
     dispatch({
       type: BusActions.SHOW_MENU,
       payload: {
@@ -148,6 +149,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
         theme,
         horizontal: MenuHorizontalPosition.LEFT,
         clipRef: () => menuRef.current as SVGSVGElement,
+        onClose: () => {
+          setShowMenu(false);
+          dispatch(BusActions.HIDE_MENU);
+        }
       },
     });
   };

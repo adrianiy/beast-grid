@@ -13,13 +13,14 @@ export default function DndLayer<T>({ config }: { config: BeastGridConfig<T>}) {
 
   const renderItem = () => {
     if (!dragItem || !coords || dragItem.hidePreview) return null;
+    console.log(window.screenX)
     
     return (
       <BoxDragPreview
         text={dragItem.text as string}
         isInside={pointer.x > 0 && pointer.y > 0}
-        top={pointer?.y}
-        left={pointer?.x}
+        top={coords?.y + 12}
+        left={coords?.x + 12}
         hide={config?.header?.events?.onDropOutside?.hide}
       />
     );
