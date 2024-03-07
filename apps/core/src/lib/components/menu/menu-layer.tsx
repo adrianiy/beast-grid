@@ -1,5 +1,5 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import useBus, { EventAction, dispatch } from 'use-bus';
 import { FormattedMessage } from 'react-intl';
 import {
   ArrowDownIcon,
@@ -10,7 +10,6 @@ import {
   StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
-import { dispatch } from 'use-bus';
 
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -23,24 +22,14 @@ import cn from 'classnames';
 import './menu-layer.scss';
 
 type Props = {
-  visible: boolean;
   column: Column;
   theme: string;
   multiSort: boolean;
   horizontal: MenuHorizontalPosition;
   clipRef: () => SVGSVGElement;
-  onClose: () => void;
 };
 
-export default function MenuLayer(props: Props) {
-  if (!props.visible) {
-    return null;
-  }
-
-  return createPortal(<HeaderMenu {...props} />, document.body);
-}
-
-function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) {
+const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
@@ -67,7 +56,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         return;
       }
 
-      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
+      const { left: cLeft, right: cRight, top: cTop } = container.getBoundingClientRect();
       const { width } = menuRef.current?.getBoundingClientRect() || {
         left: 0,
         top: 0,
@@ -77,13 +66,13 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       };
       const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      const x = window.scrollX + left;
-      const y = window.scrollY + bottom + 8;
+      const x = left - cLeft;
+      const y = bottom + 8 - cTop;
 
       setCoords({ x, y });
 
       if (right > cRight) {
-        onClose();
+        dispatch(BusActions.HIDE_MENU);
         return;
       }
       if (left + width * 2 > cRight) {
@@ -102,7 +91,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         return;
       }
       if (left < cLeft + leftPinned || x + width > cRight) {
-        onClose();
+        dispatch(BusActions.HIDE_MENU);
       }
     };
 
@@ -110,7 +99,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
 
     const closeMenu = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose();
+        dispatch(BusActions.HIDE_MENU);
       }
     };
 
@@ -141,11 +130,11 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
 
   const handlePinColumn = (pinType: PinType) => () => {
     pinColumn(column.id, column.pinned === pinType ? PinType.NONE : pinType);
-    onClose();
+    dispatch(BusActions.HIDE_MENU);
   };
 
   const showConfig = () => {
-    onClose();
+    dispatch(BusActions.HIDE_MENU);
     setSidebar(SideBarConfig.GRID);
   };
 
@@ -155,7 +144,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     } else {
       groupByColumn(column.id);
     }
-    onClose();
+    dispatch(BusActions.HIDE_MENU);
   };
 
   const renderSort = () => {
@@ -337,3 +326,27 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     </div>
   );
 }
+
+export default function MenuLayer() {
+  const [props, setProps] = useState<Props | null>();
+  
+  useBus((event) => event.type === BusActions.SHOW_MENU, (event: EventAction) => {
+    setProps(event.payload as Props);
+  }, []);
+
+  useBus(BusActions.HIDE_MENU, () => {
+    setProps(null);
+  }, []);
+
+
+  const renderMenu = () => {
+    if (!props) {
+      return null;
+    }
+    
+    return <HeaderMenu {...props} />
+  }
+  
+  return renderMenu();
+}
+

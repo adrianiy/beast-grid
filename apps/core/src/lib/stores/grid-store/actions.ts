@@ -205,7 +205,8 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 }
 
 export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
-  const { columns, groupOrder, container, initialData } = state;
+  const { columns, container, initialData } = state;
+  let { groupOrder } = state;
   const aggColumns = Object.values(columns).filter((col) => col.aggregation);
   const column = columns[id];
 
@@ -215,11 +216,15 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
     groupOrder.forEach((col) => {
       toggleHide(columns[col], columns);
     });
+    groupOrder = [];
     setColumnsStyleProps(columns, container.offsetWidth);
     delete columns[column.id];
+  } else {
+    groupOrder = groupOrder.filter((col) => col !== id);
   }
   
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
+  console.log(data, initialData)
 
   const sortedColumns = sortColumns(columns);
 
