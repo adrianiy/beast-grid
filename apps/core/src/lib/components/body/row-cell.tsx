@@ -1,7 +1,8 @@
 import { ChevronRight } from '@mui/icons-material';
-import { Column, Row, RowConfig } from './../../common/interfaces';
+import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
 
 import cn from 'classnames';
+import { LEVEL_PADDING } from '../../common';
 
 function getProperty<Type, Key extends keyof Type>(obj: Type, level: number, columnDef: Column, columns: ColumnStore, groupOrder: ColumnId[]): string {
   let field = columnDef.field;
@@ -45,8 +46,8 @@ export function RowCell({ height, row, columnDef, config, level, groupOrder, col
       style={{ height, left: columnDef.left, paddingLeft: LEVEL_PADDING + (columnDef.tree ? LEVEL_PADDING * level : 0) + (columnDef.tree && !row.children ? LEVEL_PADDING : 0), width: columnDef.width }}
     >
       <Chevron />
-      <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.aggregationLevel || row.children?.length) ? 'flex' : 'none' }}>
-        { getProperty(row, columnDef) }
+      <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.rowGroup || row.children?.length || columnDef.tree) ? 'flex' : 'none' }}>
+        {getProperty(row, level, columnDef, columns, groupOrder)}
       </div>
     </div>
   );

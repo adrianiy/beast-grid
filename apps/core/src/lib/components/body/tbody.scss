@@ -15,13 +15,6 @@
             transform: rotate(90deg);
         }
     }
-    &.child {
-        .expandable {
-            .grid-row-value {
-                margin-left: var(--bg-size--1);
-            }
-        }
-    }
     &.bordered {
         border-bottom: var(--bg-border--2);
         .grid-row-cell {

@@ -11,6 +11,7 @@ function createRandomUser(id) {
     id,
     name: faker.internet.userName(),
     country: faker.location.country(),
+    language: faker.lorem.word(),
     age: faker.number.int({ min: 18, max: 100 }),
     orders: faker.number.int({ min: 0, max: 100000 }),
     january: faker.number.int({ min: 0, max: 100000 }),

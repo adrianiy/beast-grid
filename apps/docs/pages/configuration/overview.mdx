@@ -43,6 +43,13 @@ export interface dragOptions {
   autoScrollSpeed: number;
   autoScrollMargin: number;
 }
+export interface TreeConstructor {
+  name: string;
+  showOriginal: boolean;
+  field: string;
+  width: number;
+  menu: Partial<MenuProps>;
+}
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
@@ -53,6 +60,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   header?: Partial<HeaderConfig>;
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
+  tree?: Partial<TreeConstructor>;
 }
 ```
 
@@ -87,3 +95,7 @@ Style options. Check the [style config](style) for more information.
 ### dragOptions
 
 Drag options. Check the [drag options](drag) for more information.
+
+### tree
+
+Tree options. If active all row groups will be represented as a tree drilldown. Check the [tree constructor](tree) for more information.

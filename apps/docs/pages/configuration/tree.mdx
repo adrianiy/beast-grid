@@ -1,0 +1,63 @@
+# Tree
+
+When `tree` is configured, the grid groups will be displayed in a tree structure. 
+
+The tree structure will render each group as a tree level, and use the `field` property to display the last leaf
+
+## Properties
+
+```tsx
+export interface TreeConstructor {
+  name?: string;
+  showOriginal?: boolean;
+  field?: string;
+  width?: number;
+  menu?: Partial<MenuProps>;
+}
+```
+
+### name
+
+| Property | Type   | Default | Description |
+| -------- | ------ | ------- | ----------- |
+| name     | string |         | The name of the column |
+
+This name will be used as tree column name.
+
+### showOriginal
+
+| Property     | Type    | Default | Description |
+| ------------ | ------- | ------- | ----------- |
+| showOriginal | boolean | false   | Show the original column |
+
+When `showOriginal` is `true`, the original column will be displayed in the grid.
+
+### field
+
+| Property | Type   | Default | Description |
+| -------- | ------ | ------- | ----------- |
+| field    | string |      | The field to display |
+
+The `field` property is used to display the last leaf of the tree.
+
+### width
+
+| Property | Type   | Default | Description |
+| -------- | ------ | ------- | ----------- |
+| width    | number | 150     | The width of the column |
+
+The `width` property is used to set the width of the column.
+
+### menu
+
+| Property | Type             | Default | Description |
+| -------- | ---------------- | ------- | ----------- |
+| menu     | `Partial<MenuProps>` |         | The menu configuration |
+
+The `menu` property is used to configure the menu of the column.
+
+
+## Example
+
+Check a live example [here](/example/tree)
+

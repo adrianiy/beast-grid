@@ -21,7 +21,6 @@ import { capitalize } from '../../utils/functions';
 import cn from 'classnames';
 
 import './menu-layer.scss';
-import { getGroupedData } from '../../stores/grid-store/utils';
 
 type Props = {
   visible: boolean;
@@ -47,15 +46,15 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, data, columns, setSort, resetColumn, pinColumn, setSidebar, setData] = useBeastStore((state) => [
+  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] = useBeastStore((state) => [
     state.scrollElement,
-    state.initialData,
     state.columns,
     state.setSort,
     state.resetColumnConfig,
     state.pinColumn,
     state.setSideBarConfig,
-    state.setData,
+    state.groupByColumn,
+    state.unGroupColumn
   ]);
 
   useEffect(() => {
@@ -151,16 +150,11 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   };
 
   const handleGroupByColumn = () => {
-    if (!column.aggregationLevel) {
-      const maxAggLevel = Math.max(...Object.values(columns).map((col) => col.aggregationLevel || 0));
-      column.aggregationLevel = maxAggLevel + 1;
+    if (column.rowGroup) {
+      ungroup(column.id);
     } else {
-      dispatch(BusActions.COLLAPSE);
-      delete column.aggregationLevel;
+      groupByColumn(column.id);
     }
-    const _data = getGroupedData(columns, data);
-
-    setData(_data);
     onClose();
   };
 
@@ -281,7 +275,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     }
 
     const extraColumnOptions = () => {
-      if (!column.aggregationLevel) {
+      if (!column.rowGroup) {
         return null;
       }
 
@@ -308,9 +302,9 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         <div className="bg-menu__item row middle between" onClick={handleGroupByColumn}>
           <div className="row middle left">
             <StackIcon />
-            {column.aggregationLevel && <div className="cross-overlay" />}
+            {column.rowGroup && <div className="cross-overlay" />}
             <FormattedMessage
-              id={column.aggregationLevel ? 'menu.column.ungroup' : 'menu.column.group'}
+              id={column.rowGroup ? 'menu.column.ungroup' : 'menu.column.group'}
               defaultMessage="Group by"
               values={{ columnName: capitalize(column.headerName) }}
             />

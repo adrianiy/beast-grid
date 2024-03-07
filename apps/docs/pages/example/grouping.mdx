@@ -8,13 +8,14 @@ In this example, we have a list of users with their Country, name, amount, and o
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
-import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
-import { User, data } from './data';
+import { AggregationType, BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { User, dataToGroup } from './data';
 
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'COUNTRY', field: 'country', sortable: false, aggregationLevel: 1 },
+    { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
+    { headerName: 'LANGUAGE', field: 'language', rowGroup: true },
     { headerName: 'NAME', field: 'username', sortable: false },
     {
       headerName: 'AMOUNT',
@@ -32,12 +33,12 @@ export default function Grid() {
     },
   ];
   const config: BeastGridConfig<User[]> = {
-    data,
+    data: dataToGroup,
     columnDefs,
     border: true,
     sort: {
-      enabled: true,
-    },
+      enabled: true
+    }
   };
 
   return (

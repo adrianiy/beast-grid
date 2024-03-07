@@ -9,9 +9,9 @@ import { User, dataToGroup } from './data';
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    { headerName: 'COUNTRY', field: 'country', sortable: false, aggregationLevel: 1 },
+    { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
+    { headerName: 'LANGUAGE', field: 'language', rowGroup: true },
     { headerName: 'NAME', field: 'username', sortable: false },
-    { headerName: 'LANGUAGE', field: 'language', aggregationLevel: 2 },
     {
       headerName: 'AMOUNT',
       field: 'money',

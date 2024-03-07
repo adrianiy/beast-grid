@@ -1,4 +1,4 @@
-import { Column, PinType, Row, RowConfig, RowEvents } from '../../common';
+import { Column, ColumnId, ColumnStore, PinType, Row, RowConfig, RowEvents } from '../../common';
 import { RowCell } from './row-cell';
 
 import cn from 'classnames';
@@ -6,6 +6,8 @@ import cn from 'classnames';
 type Props = {
     row: Row;
     columns: Column[];
+    columnStore: ColumnStore;
+    groupOrder: ColumnId[];
     idx: number;
     config?: Partial<RowConfig>;
     border?: boolean;
@@ -30,6 +32,8 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
                     key={idx}
                     height={height}
                     row={row}
+                    columns={columnStore}
+                    groupOrder={groupOrder}
                     level={level}
                     config={config}
                     columnDef={column}
