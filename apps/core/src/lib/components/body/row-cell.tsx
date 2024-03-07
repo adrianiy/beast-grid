@@ -3,8 +3,13 @@ import { Column, Row, RowConfig } from './../../common/interfaces';
 
 import cn from 'classnames';
 
-function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column): string {
-  const value = obj[columnDef.field as Key];
+function getProperty<Type, Key extends keyof Type>(obj: Type, level: number, columnDef: Column, columns: ColumnStore, groupOrder: ColumnId[]): string {
+  let field = columnDef.field;
+
+  if (columnDef.tree) {
+    field = columns[groupOrder[level]]?.field || field;
+  }
+  const value = obj[field as Key];
 
   if (columnDef.formatter) {
     return columnDef.formatter(value as number & string);
@@ -13,14 +18,21 @@ function getProperty<Type, Key extends keyof Type>(obj: Type, columnDef: Column)
   return value as string;
 }
 
-export function RowCell({ height, row, columnDef, paddingLeft, config, level }: { height: number; row: Row; columnDef: Column, paddingLeft: number, config?: Partial<RowConfig>, level: number }) {
+type Props = {
+  height: number; row: Row; columnDef: Column, config?: Partial<RowConfig>, level: number; groupOrder: ColumnId[]; columns: ColumnStore
+}
+export function RowCell({ height, row, columnDef, config, level, groupOrder, columns }: Props) {
   if (columnDef.hidden) {
     return null;
   }
 
   const Chevron = () => {
-    if (!row.children || columnDef.aggregationLevel !== level) {
+    if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree)) {
       return null
+    }
+
+    if (level === groupOrder.length && row.children?.length === 1) {
+      return null;
     }
 
     return <ChevronRight className={cn(!!row._expanded && 'active')} />
@@ -29,8 +41,8 @@ export function RowCell({ height, row, columnDef, paddingLeft, config, level }: 
   return (
     <div
       data-hidden={columnDef.hidden}
-      className={cn("grid-row-cell", { lastPinned: columnDef.lastPinned, expandable: row.children || columnDef.aggregationLevel })}
-      style={{ height, left: columnDef.left, paddingLeft: paddingLeft, width: columnDef.width }}
+      className={cn("grid-row-cell", { lastPinned: columnDef.lastPinned, expandable: row.children || columnDef.rowGroup })}
+      style={{ height, left: columnDef.left, paddingLeft: LEVEL_PADDING + (columnDef.tree ? LEVEL_PADDING * level : 0) + (columnDef.tree && !row.children ? LEVEL_PADDING : 0), width: columnDef.width }}
     >
       <Chevron />
       <div className="grid-row-value" style={{ display: (config?.groups?.showChildName || !columnDef.aggregationLevel || row.children?.length) ? 'flex' : 'none' }}>

@@ -16,9 +16,7 @@ type Props = {
     onClick?: () => void;
 };
 
-const LEVEL_PADDING = 16;
-
-export default function RowContainer({ row, columns, config, idx, border, height, gap, level, onClick, events }: Props) {
+export default function RowContainer({ row, columns, columnStore, groupOrder, config, idx, border, height, gap, level, onClick, events }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
@@ -35,7 +33,6 @@ export default function RowContainer({ row, columns, config, idx, border, height
                     level={level}
                     config={config}
                     columnDef={column}
-                    paddingLeft={LEVEL_PADDING * (column.aggregationLevel && !row.children ? level : 1)}
                 />
             ));
     };
@@ -53,8 +50,8 @@ export default function RowContainer({ row, columns, config, idx, border, height
     return (
         <div
             key={idx}
-            className={cn('grid-row', level > 1 && 'animate__animated animate__faster animate__fadeIn', {
-                child: level > 1,
+            className={cn('grid-row', level > 0 && 'animate__animated animate__faster animate__fadeIn', {
+                child: level > 0,
                 bordered: border,
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,

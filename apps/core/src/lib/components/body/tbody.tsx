@@ -208,11 +208,11 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
     };
 
     const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, level: number, gap: number): number => {
-        if (!renderArray[level - 1]) {
-            renderArray[level - 1] = [];
+        if (!renderArray[level]) {
+            renderArray[level] = [];
         }
 
-        renderArray[level - 1].push(
+        renderArray[level].push(
             <RowContainer
                 key={row._id}
                 row={row}
@@ -247,7 +247,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
             const row = sortedData[idx];
 
             if (row) {
-                gap = addRowToSlice(renderArray, row, idx, 1, gap);
+                gap = addRowToSlice(renderArray, row, idx, 0, gap);
             }
 
             gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
