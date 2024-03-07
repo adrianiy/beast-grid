@@ -98,6 +98,13 @@ export interface TreeConstructor {
   menu: Partial<MenuProps>;
 }
 
+export interface ToolBar {
+  download: boolean;
+  grid: boolean;
+  filter: boolean;
+  chart: boolean;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: Partial<ColumnDef>;
@@ -108,6 +115,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
   tree?: Partial<TreeConstructor>;
+  toolbar?: Partial<ToolBar>;
 }
 
 export interface TableStyles {
