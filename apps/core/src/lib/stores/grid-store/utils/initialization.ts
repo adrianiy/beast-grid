@@ -1,10 +1,22 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ColumnDef, ColumnStore, Column, Data, Row, IFilter, PinType } from "../../../common";
+import {
+  ColumnDef,
+  ColumnStore,
+  Column,
+  Data,
+  Row,
+  IFilter,
+  PinType,
+  ColumnId,
+  TreeConstructor,
+} from '../../../common';
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
 import { groupBy } from '../../../utils/functions';
 
 import deepmerge from 'deepmerge';
+import { createGroupColumn } from './group';
+import { toggleHide } from './edition';
 
 export const getColumnsFromDefs = (
   columnDefs: ColumnDef[],
@@ -60,21 +72,26 @@ export const createVirtualIds = (data: Data): Data => {
       children: row.children ? createVirtualIds(row.children) : undefined,
     };
   });
-}
+};
 
-export const groupDataByColumnDefs = (columns: ColumnStore, data: Data, aggLevel = 1): Data => {
-  const aggregationLevel = Object.values(columns).find((c) => c.aggregationLevel === aggLevel);
-  const aggregatedColumns = Object.values(columns).filter((c) => c.aggregation);
+export const groupDataByColumnDefs = (
+  columns: ColumnStore,
+  aggColumns: Column[],
+  data: Data,
+  groupOrder: ColumnId[],
+  level = 0
+): Data => {
+  const aggregationLevel = Object.values(columns).find((c) => groupOrder && c.id === groupOrder[level]);
 
   if (!aggregationLevel) {
     return data;
   }
 
-  const finalData: Row[] = groupBy(data, aggregationLevel , aggregatedColumns);
+  const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
 
   finalData.forEach((row) => {
-    row.children = groupDataByColumnDefs(columns, row.children || [], aggLevel + 1);
-  })
+    row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
+  });
 
   return finalData;
 };
@@ -92,12 +109,15 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
 };
 
 const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => {
+  if (column.hidden) {
+    return 0;
+  }
   if (!column.childrenId) {
     return column.width || 0;
   }
 
   return column.childrenId.reduce((acc, childId) => acc + _getChildrenWidth(columnStore[childId], columnStore), 0);
-}
+};
 
 export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: number): ColumnStore => {
   const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
@@ -123,7 +143,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
   // Calculate parent widths based on children
   notFinalColumns.forEach((column) => {
     column.width = _getChildrenWidth(column, columnStore);
-  })
+  });
 
   return columnStore;
 };
@@ -138,15 +158,29 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   });
 };
 
-export const getGroupedData = (columns: ColumnStore, data: Data): Data => {
-  return groupDataByColumnDefs(columns, data);
-}
+export const initialize = (
+  columns: ColumnStore,
+  container: HTMLDivElement,
+  data: Data,
+  groupOrder: ColumnId[],
+  tree?: Partial<TreeConstructor>
+): Data => {
+  if (tree) {
+    groupOrder.forEach((id) => {
+      const column = columns[id];
 
-export const initialize = (columns: ColumnStore, container: HTMLDivElement, data: Data): Data => {
-  const finalData = getGroupedData(columns, data);
+      const newColumn = createGroupColumn(column, columns, tree);
+      if (tree && !tree.showOriginal) {
+        toggleHide(column, columns);
+      }
+      newColumn.rowGroup = true;
+    });
+    setColumnsStyleProps(columns, container.offsetWidth);
+  }
+  const aggColumns = Object.values(columns).filter((c) => c.aggregation);
+  const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
 
   return finalData;
 };
-

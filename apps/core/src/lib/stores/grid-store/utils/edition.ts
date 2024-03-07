@@ -1,5 +1,20 @@
 import { ColumnStore, Column, SortType, ColumnId, PinType } from '../../../common';
 
+export const toggleHide = (column: Column, columns: ColumnStore) => {
+  column.hidden = !column.hidden;
+
+  if (column.childrenId) {
+    column.childrenId.forEach((child) => {
+      columns[child].hidden = column.hidden;
+    });
+  }
+  if (column.parent) {
+    const parent = columns[column.parent];
+    const allChildrenHidden = parent.childrenId?.every((child) => columns[child].hidden);
+    parent.hidden = allChildrenHidden;
+  }
+}
+
 const _updateParent = (parent: Column, columns: ColumnStore) => {
   parent.width = 0;
   parent.childrenId?.forEach((id, idx) => {

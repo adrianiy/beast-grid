@@ -25,7 +25,7 @@ const THRESHOLD = 5;
 
 export default function TBody({ rowHeight, headerHeight, config, maxHeight, border, onSortChange, events }: TBodyProps) {
     const gaps = useRef<Record<string, number>>({});
-    const [data, columns, container, scrollElement, sort, filters, setSorting] = useBeastStore((state) => [
+    const [data, columns, container, scrollElement, sort, filters, setSorting, groupOrder] = useBeastStore((state) => [
         state.data,
         state.columns,
         state.container,
@@ -33,6 +33,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         state.sort,
         state.filters,
         state.setSorting,
+        state.groupOrder
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
@@ -168,6 +169,10 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
             } else {
                 collapseRow(row);
             }
+
+            if (row.children) {
+                row.children.forEach((child) => forceRowExpand(child, value));
+            }
         }
     }
 
@@ -217,7 +222,9 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 key={row._id}
                 row={row}
                 columns={lastLevel}
+                columnStore={columns}
                 config={config}
+                groupOrder={groupOrder}
                 idx={idx}
                 border={border}
                 height={rowHeight}
@@ -233,7 +240,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 const child = row.children[i];
                 gap = addRowToSlice(renderArray, child, idx + i + 1, level + 1, gap);
 
-                gap += child._expanded ? (child.children?.length || 0) * rowHeight : 0;
+                gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
             }
         }
 
@@ -250,7 +257,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 gap = addRowToSlice(renderArray, row, idx, 1, gap);
             }
 
-            gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
+            gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
         }
 
         return renderArray.flat();

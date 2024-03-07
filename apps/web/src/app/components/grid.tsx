@@ -29,7 +29,8 @@ const columnDefs: ColumnDef[] = [
     headerName: 'USER',
     children: [
       { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true, column: true } },
-      { headerName: 'AGE', field: 'age', width: 100, sortable: true, menu: { grid: true } },
+      { headerName: 'AGE', field: 'age', width: 100, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true } },
+      { headerName: 'LANGUAGE', field: 'language', width: 100, menu: { grid: true, column: true }}
     ],
   },
   { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
@@ -103,6 +104,10 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         sort: {
           enabled: true,
           multiple: true
+        },
+        tree: {
+          name: 'GROUP',
+          field: 'name'
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },

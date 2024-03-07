@@ -1,33 +1,20 @@
-# Pining columns Example
 
+'use client'
 
-```tsx
 import 'beast-grid/style.css'
 
 import numeral from 'numeral';
-import { AggregationType, BeastGrid, BeastGridConfig, ColumnDef, PinType } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
 import { User, dataToGroup } from './data';
 
 export default function Grid() {
 
   const columnDefs: ColumnDef[] = [
-    {
-      headerName: 'USER', children: [
-        { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
-        { headerName: 'NAME', field: 'username', sortable: false },
-
-      ],
-      pinned: PinType.LEFT 
-    },
+    { headerName: 'COUNTRY', field: 'country', sortable: false, rowGroup: true },
+    { headerName: 'NAME', field: 'username', sortable: false, hidden: true },
+    { headerName: 'LANGUAGE', field: 'language', rowGroup: true },
     {
       headerName: 'AMOUNT',
-      field: 'money',
-      aggregation: AggregationType.SUM,
-      flex: 1,
-      formatter: (value) => numeral(value).format('0,0 $'),
-    },
-    {
-      headerName: 'UNITS',
       field: 'money',
       aggregation: AggregationType.SUM,
       flex: 1,
@@ -47,6 +34,13 @@ export default function Grid() {
     border: true,
     sort: {
       enabled: true
+    },
+    tree: {
+      name: '',
+      field: 'username',
+      menu: {
+        column: true
+      }
     }
   };
 
@@ -56,10 +50,3 @@ export default function Grid() {
     </div>
   );
 }
-```
----
-
-import Example from '../../components/examples/pinning.tsx'
-
-<Example />
-

@@ -5,15 +5,18 @@ import { MIN_COL_WIDTH } from './../../common/globals';
 import {
   addSort,
   getSwappableClone,
+  groupDataByColumnDefs,
   mergeColumns,
   moveColumns,
   removeSort,
   setColumnsStyleProps,
   sortColumns,
   swapPositions,
+  toggleHide,
 } from './utils';
 import { GridStore } from './store';
 import { PinType, SortType } from '../../common';
+import { createGroupColumn } from './utils/group';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
   const { columns } = state;
@@ -35,18 +38,8 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
   const { columns, sortedColumns, container } = state;
   const column = columns[id];
-  column.hidden = !column.hidden;
 
-  if (column.childrenId) {
-    column.childrenId.forEach((child) => {
-      columns[child].hidden = column.hidden;
-    });
-  }
-  if (column.parent) {
-    const parent = columns[column.parent];
-    const allChildrenHidden = parent.childrenId?.every((child) => columns[child].hidden);
-    parent.hidden = allChildrenHidden;
-  }
+  toggleHide(column, columns);
 
   setColumnsStyleProps(columns, container.offsetWidth);
   moveColumns(columns, sortedColumns, column.pinned);
@@ -178,9 +171,62 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
     });
   }
 
-  moveColumns(columns, sortedColumns, PinType.LEFT)
-  moveColumns(columns, sortedColumns, PinType.NONE, 0)
-  moveColumns(columns, sortedColumns, PinType.RIGHT, 0)
+  moveColumns(columns, sortedColumns, PinType.LEFT);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns };
+};
+
+export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
+  const { columns, tree, container, groupOrder, initialData } = state;
+  const aggColumns = Object.values(columns).filter((col) => col.aggregation);
+  const column = columns[id];
+
+  const newColumn = createGroupColumn(column, columns, tree);
+
+  if (tree && !tree.showOriginal) {
+    toggleHide(column, columns);
+    setColumnsStyleProps(columns, container.offsetWidth);
+  }
+
+  newColumn.rowGroup = true;
+  groupOrder.push(id);
+  
+  const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
+
+  const sortedColumns = sortColumns(columns);
+
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+
+  return { columns, groupOrder, data, sortedColumns };
 }
+
+export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
+  const { columns, groupOrder, container, initialData } = state;
+  const aggColumns = Object.values(columns).filter((col) => col.aggregation);
+  const column = columns[id];
+
+  column.rowGroup = false;
+
+  if (column.tree) {
+    groupOrder.forEach((col) => {
+      toggleHide(columns[col], columns);
+    });
+    setColumnsStyleProps(columns, container.offsetWidth);
+    delete columns[column.id];
+  }
+  
+  const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
+
+  const sortedColumns = sortColumns(columns);
+
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+
+  return { columns, groupOrder, data, sortedColumns };
+}
+
