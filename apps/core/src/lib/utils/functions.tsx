@@ -50,20 +50,20 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
       acc[column.field as string] = _calculate(children, column);
       return acc;
     }, {} as Record<string, number | null>);
-    
+
     return { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
   });
-  
+
 }
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-export async function export_data() {
+export async function export_data(data: Data, columns: Column[]) {
   /* dynamically import the SheetJS Wrapper */
-  const XLSX = await import ("./xlsxwrapper.js");
-  console.log(XLSX)
+  const XLSX = await import("./xlsxwrapper.js");
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([["a","b","c"],[1,2,3]]);
+  const ws = XLSX.utils.json_to_sheet(data.map((row) => columns.map((column) => row[column.field as keyof Row])));
+  XLSX.utils.sheet_add_aoa(ws, [columns.map(column => column.headerName)], { origin: "A1" });
   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-  XLSX.writeFileXLSX(wb, "SheetJSDynamicWrapperTest.xlsx");
+  XLSX.writeFileXLSX(wb, `export-${new Date().toISOString()}-delta-chat.xlsx`);
 }

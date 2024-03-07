@@ -4,19 +4,21 @@ import { FormattedMessage } from 'react-intl';
 import { export_data } from '../../utils/functions';
 
 import './toolbar.scss';
+import { useBeastStore } from '../../stores/beast-store';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
 };
 
 export default function Toolbar<T>({ config }: Props<T>) {
+  const [data, columns] = useBeastStore((state) => [state.data, state.sortedColumns]);
+  
   if (!config.toolbar) {
     return null;
   }
 
   const handleDownload = async () => {
-    console.log('download');
-    await export_data()
+    await export_data(data, columns)
   };
 
   const Download = () => {
