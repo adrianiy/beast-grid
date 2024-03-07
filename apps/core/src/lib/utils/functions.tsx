@@ -1,6 +1,5 @@
 import { AggregationType, Column, Data, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
-import XLSX from "xlsx";
 
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
@@ -59,9 +58,10 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
 
 export async function export_data(data: Data, columns: Column[]) {
   /* dynamically import the SheetJS Wrapper */
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data.sort(sortData(columns)).map((row) => columns.map((column) => row[column.field as keyof Row])));
-  XLSX.utils.sheet_add_aoa(ws, [columns.map((column) => column.headerName)], { origin: 'A1' });
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  XLSX.writeFileXLSX(wb, `export-${new Date().toISOString()}-delta-chat.xlsx`);
+  // const wb = XLSX.utils.book_new();
+  // const ws = XLSX.utils.json_to_sheet(data.sort(sortData(columns)).map((row) => columns.map((column) => row[column.field as keyof Row])));
+  // XLSX.utils.sheet_add_aoa(ws, [columns.map((column) => column.headerName)], { origin: 'A1' });
+  // XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  // XLSX.writeFileXLSX(wb, `export-${new Date().toISOString()}-delta-chat.xlsx`);
+  console.log('download')
 }
