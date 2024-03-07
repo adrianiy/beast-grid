@@ -9,6 +9,7 @@ import cn from 'classnames';
 import 'simplebar-react/dist/simplebar.min.css';
 import { useEffect, useRef } from 'react';
 import { useBeastStore } from './stores/beast-store';
+import Toolbar from './components/toolbar/toolbar';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
@@ -31,7 +32,9 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     setTheme(theme);
   }, [theme, setTheme])
   
-  return <SimpleBar
+  return <div className="beast-grid___wrapper">
+    <Toolbar config={config} />
+    <SimpleBar
     style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
     ref={ref}
     className={cn('beast-grid__container', {
@@ -55,4 +58,5 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
       events={config.row?.events}
     />
   </SimpleBar>;
+  </div>
 }
