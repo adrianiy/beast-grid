@@ -9,10 +9,13 @@
   },
   "license": "MIT",
   "dependencies": {
+    "beast-grid": "^0.0.31",
     "next": "^13.0.6",
     "nextra": "latest",
     "nextra-theme-docs": "latest",
-    "numeral": "^2.0.6"
+    "numeral": "^2.0.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "18.11.10",
