@@ -44,4 +44,6 @@ export enum SideBarConfig {
 export enum BusActions {
   EXPAND = '@bg/expandAll',
   COLLAPSE = '@bg/collapseAll',
+  SHOW_MENU = '@bg/showMenu',
+  HIDE_MENU = '@bg/hideMenu',
 }
