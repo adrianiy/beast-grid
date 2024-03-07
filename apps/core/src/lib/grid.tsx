@@ -34,7 +34,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     }, [theme, setTheme]);
 
     return (
-        <div className="beast-grid___wrapper">
+        <div className="beast-grid__wrapper">
             <SimpleBar
                 style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
                 ref={ref}

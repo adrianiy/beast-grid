@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, ToolbarPosition } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -110,7 +110,8 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           field: 'name'
         },
         toolbar: {
-          download: true
+          download: true,
+          grid: true,
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },

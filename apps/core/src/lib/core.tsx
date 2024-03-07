@@ -24,6 +24,7 @@ import cn from 'classnames';
 import './core.scss';
 import 'animate.css';
 import Toolbar from './components/toolbar/toolbar';
+import { ToolbarPosition } from './common';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -69,8 +70,8 @@ export function BeastGrid<T>({
             <LoaderLayer config={config} />
             <MenuLayer />
             <SideBar config={config} />
-            <Toolbar config={config} />
             <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+            <Toolbar config={config} />
           </IntlProvider>
         </BeastGridProvider>
       </DndStoreProvider>
@@ -78,7 +79,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+    <div className={cn('beast-grid', 'default', theme, { row: config?.toolbar?.position === ToolbarPosition.RIGHT})} ref={ref}>
       <GridProvider />
     </div>
   );

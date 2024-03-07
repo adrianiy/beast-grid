@@ -18,8 +18,8 @@ export default function DndLayer<T>({ config }: { config: BeastGridConfig<T>}) {
       <BoxDragPreview
         text={dragItem.text as string}
         isInside={pointer.x > 0 && pointer.y > 0}
-        top={coords?.y}
-        left={coords?.x}
+        top={pointer?.y}
+        left={pointer?.x}
         hide={config?.header?.events?.onDropOutside?.hide}
       />
     );

@@ -9,6 +9,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    max-width: 100%;
     table-layout: fixed;
     background-color: var(--bg-background-color--1);
     transition: scroll-behavior var(--bg-transition--1);
@@ -30,6 +31,11 @@
                 }
             }
         }
+    }
+
+    .beast-grid__wrapper {
+        display: flex;
+        max-width: 100%;
     }
 
     .grid-left-pin {

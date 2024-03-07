@@ -1,23 +1,6 @@
 import { AggregationType, Column, Data, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
-export const sortData =
-  <TData,>(sortColumns: Column[]) =>
-    (a: TData, b: TData) => {
-      for (const column of sortColumns) {
-        const valueA = a[column.field as keyof TData];
-        const valueB = b[column.field as keyof TData];
-
-        if (valueA > valueB) {
-          return column.sort?.order === SortType.ASC ? 1 : -1;
-        }
-        if (valueA < valueB) {
-          return column.sort?.order === SortType.ASC ? -1 : 1;
-        }
-      }
-      return 0;
-    };
-
 const _calculate = <TData,>(data: TData[], column: Column) => {
   switch (column.aggregation) {
     case AggregationType.SUM:
@@ -33,7 +16,7 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
     default:
       return null;
   }
-}
+};
 
 export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
   const groups = data.reduce((acc, row) => {
@@ -53,17 +36,31 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
 
     return { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
   });
-
-}
+};
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
+  for (const column of sortColumns) {
+    const valueA = a[column.field as keyof Row] as number;
+    const valueB = b[column.field as keyof Row] as number;
+
+    if (valueA > valueB) {
+      return column.sort?.order === SortType.ASC ? 1 : -1;
+    }
+    if (valueA < valueB) {
+      return column.sort?.order === SortType.ASC ? -1 : 1;
+    }
+  }
+  return (a._originalIdx as number) - (b._originalIdx as number);
+};
+
 export async function export_data(data: Data, columns: Column[]) {
   /* dynamically import the SheetJS Wrapper */
-  const XLSX = await import("./xlsxwrapper.js");
+  const XLSX = await import('xlsx');
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data.map((row) => columns.map((column) => row[column.field as keyof Row])));
-  XLSX.utils.sheet_add_aoa(ws, [columns.map(column => column.headerName)], { origin: "A1" });
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  const ws = XLSX.utils.json_to_sheet(data.sort(sortData(columns)).map((row) => columns.map((column) => row[column.field as keyof Row])));
+  XLSX.utils.sheet_add_aoa(ws, [columns.map((column) => column.headerName)], { origin: 'A1' });
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
   XLSX.writeFileXLSX(wb, `export-${new Date().toISOString()}-delta-chat.xlsx`);
 }

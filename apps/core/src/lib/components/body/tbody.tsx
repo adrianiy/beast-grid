@@ -8,6 +8,7 @@ import RowContainer from './row';
 import { BusActions, Column, Data, Row, RowConfig, RowEvents, SortType } from '../../common';
 
 import './tbody.scss';
+import { sortData } from '../../utils/functions';
 
 type TBodyProps = {
     rowHeight: number;
@@ -97,21 +98,6 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 .filter((c) => c.sort)
                 .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
 
-            const sortData = (a: Row, b: Row) => {
-                for (const column of sortColumns) {
-                    const valueA = a[column.field as keyof Row] as number;
-                    const valueB = b[column.field as keyof Row] as number;
-
-                    if (valueA > valueB) {
-                        return column.sort?.order === SortType.ASC ? 1 : -1;
-                    }
-                    if (valueA < valueB) {
-                        return column.sort?.order === SortType.ASC ? -1 : 1;
-                    }
-                }
-                return (a._originalIdx as number) - (b._originalIdx as number);
-            };
-
             const asyncSort = async () => {
                 if (onSortChange) {
                     const result = await onSortChange(sortedData, sortColumns);
@@ -127,7 +113,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                     }
                     setTimeout(() => {
                         console.log(sortedData)
-                        sortedData.sort(sortData);
+                        sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 
                         setSortedData(sortedData);

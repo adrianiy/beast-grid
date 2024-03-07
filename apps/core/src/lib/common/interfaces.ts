@@ -1,5 +1,5 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, PinType, SortType } from './enums';
+import { AggregationType, PinType, SortType, ToolbarPosition } from './enums';
 
 export interface Row {
   [key: string]: unknown;
@@ -103,6 +103,7 @@ export interface ToolBar {
   grid: boolean;
   filter: boolean;
   chart: boolean;
+  position: ToolbarPosition
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {

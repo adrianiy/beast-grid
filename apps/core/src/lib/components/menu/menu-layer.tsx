@@ -56,7 +56,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
         return;
       }
 
-      const { left: cLeft, right: cRight, top: cTop } = container.getBoundingClientRect();
+      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
       const { width } = menuRef.current?.getBoundingClientRect() || {
         left: 0,
         top: 0,
@@ -66,8 +66,8 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
       };
       const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      const x = left - cLeft;
-      const y = bottom + 8 - cTop;
+      const x = window.screenX + left;
+      const y = window.screenY + bottom - 28;
 
       setCoords({ x, y });
 
@@ -108,10 +108,12 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef }: Props) =>
     }, 400);
 
     document.addEventListener('click', closeMenu);
+    document.addEventListener('scroll', moveMenu);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
       document.removeEventListener('click', closeMenu);
+      document.removeEventListener('scroll', moveMenu);
       document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
