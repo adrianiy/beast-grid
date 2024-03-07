@@ -10,5 +10,6 @@
   "menu.column.expand": "Expand groups",
   "menu.column.collapse": "Collapse groups",
   "menu.column.group": "Group by {columnName}",
-  "menu.column.ungroup": "Ungroup"
+  "menu.column.ungroup": "Ungroup",
+  "toolbar.download": "Download"
 }

@@ -57,3 +57,13 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
 }
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+export async function export_data() {
+  /* dynamically import the SheetJS Wrapper */
+  const XLSX = await import ("./xlsxwrapper.js");
+  console.log(XLSX)
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([["a","b","c"],[1,2,3]]);
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  XLSX.writeFileXLSX(wb, "SheetJSDynamicWrapperTest.xlsx");
+}

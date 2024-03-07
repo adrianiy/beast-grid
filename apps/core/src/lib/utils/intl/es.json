@@ -10,6 +10,6 @@
   "menu.column.expand": "Expandir grupos",
   "menu.column.collapse": "Colapsar grupos",
   "menu.column.group": "Agrupar por {columnName}",
-  "menu.column.ungroup": "Desagrupar"
-  
+  "menu.column.ungroup": "Desagrupar",
+  "toolbar.download": "Descargar"
 }

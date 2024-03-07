@@ -109,9 +109,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           name: 'GROUP',
           field: 'name'
         },
-        toolbar: {
-          download: true
-        },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
         },

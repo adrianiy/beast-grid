@@ -22,6 +22,7 @@ import cn from 'classnames';
 
 import './core.scss';
 import 'animate.css';
+import Toolbar from './components/toolbar/toolbar';
 
 export const defaultConfig = {
   rowHeight: ROW_HEIGHT,
@@ -66,6 +67,7 @@ export function BeastGrid<T>({
             <DndLayer config={config} />
             <LoaderLayer config={config} />
             <SideBar config={config} />
+            <Toolbar config={config} />
             <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
           </IntlProvider>
         </BeastGridProvider>
