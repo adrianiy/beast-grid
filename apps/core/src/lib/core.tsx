@@ -12,6 +12,7 @@ import { TGridStore, createGridStore } from './stores/grid-store/store';
 import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
+import MenuLayer from './components/menu/menu-layer';
 import DndLayer from './components/dnd/dnd-layer';
 import SideBar from './components/sidebar/sidebar';
 import Grid from './grid';
@@ -54,7 +55,7 @@ export function BeastGrid<T>({
     }
   }, [ref, config, theme]);
 
-  const renderGrid = () => {
+  const GridProvider = () => {
     if (!config || !beastGridStore || !beastDndStore) {
       return <div style={{ height: config?.style?.maxHeight || 300 }}><Loader /></div>
     }
@@ -66,6 +67,7 @@ export function BeastGrid<T>({
             <BeastApi store={api} />
             <DndLayer config={config} />
             <LoaderLayer config={config} />
+            <MenuLayer />
             <SideBar config={config} />
             <Toolbar config={config} />
             <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
@@ -76,8 +78,8 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid bg-flex', 'default', theme)} ref={ref}>
-      {renderGrid()}
+    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+      <GridProvider />
     </div>
   );
 }

@@ -97,10 +97,6 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 .filter((c) => c.sort)
                 .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
 
-            if (sortColumns.length === 0) {
-                return;
-            }
-
             const sortData = (a: Row, b: Row) => {
                 for (const column of sortColumns) {
                     const valueA = a[column.field as keyof Row] as number;
@@ -113,7 +109,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         return column.sort?.order === SortType.ASC ? -1 : 1;
                     }
                 }
-                return 0;
+                return (a._originalIdx as number) - (b._originalIdx as number);
             };
 
             const asyncSort = async () => {
@@ -130,6 +126,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         setSorting(true);
                     }
                     setTimeout(() => {
+                        console.log(sortedData)
                         sortedData.sort(sortData);
                         updateGaps(0, sortedData);
 
