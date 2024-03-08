@@ -10,7 +10,9 @@
     transition: all ease-in-out var(--bg-transition--1);
 
     svg {
-        font-size: var(--bg-size--4);
+        --size: var(--bg-size--4);
+        width: var(--size);
+        height: var(--size);
         &.active {
             transform: rotate(90deg);
         }

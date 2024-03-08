@@ -140,6 +140,11 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (showMenu) {
+      setShowMenu(false);
+      dispatch(BusActions.HIDE_MENU);
+      return;
+    }
     setShowMenu(true);
     dispatch({
       type: BusActions.SHOW_MENU,
