@@ -30,7 +30,7 @@ export default function Toolbar<T>({ config }: Props<T>) {
       <CSVLink className="bg-toolbar__button row middle" data={data} headers={columns.filter((column) => !column.hidden && column.final).map(c => ({ label: c.headerName, key: c.field }) as LabelKeyObject)} filename={`delta-data-${new Date().toISOString()}.csv`}>
         <DownloadIcon />
         <span>
-          <FormattedMessage id="toolbar.download" />
+          <FormattedMessage id="toolbar.download" defaultMessage="Download"/>
         </span>
       </CSVLink>
     );
