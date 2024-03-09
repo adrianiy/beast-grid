@@ -11,5 +11,6 @@
   "menu.column.collapse": "Colapsar grupos",
   "menu.column.group": "Agrupar por {columnName}",
   "menu.column.ungroup": "Desagrupar",
-  "toolbar.download": "Descargar"
+  "toolbar.download": "Descargar",
+  "toolbar.grid": "Columnas"
 }

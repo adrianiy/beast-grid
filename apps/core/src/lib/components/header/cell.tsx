@@ -1,15 +1,15 @@
 import { useRef, useState } from 'react';
-import { dispatch } from 'use-bus';
-
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
-import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
-import { BusActions, MenuHorizontalPosition } from '../../common';
+import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
+
+import MenuLayer from '../menu/menu-layer';
 
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
 import cn from 'classnames';
+import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 
 type Props<T> = {
   levelIdx: number;
@@ -62,7 +62,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     lastX.current = 0;
     lastHitElement.current = null;
     setShowMenu(false);
-    dispatch(BusActions.HIDE_MENU);
   }
 
   function onDirectionChange() {
@@ -140,26 +139,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (showMenu) {
-      setShowMenu(false);
-      dispatch(BusActions.HIDE_MENU);
-      return;
-    }
-    setShowMenu(true);
-    dispatch({
-      type: BusActions.SHOW_MENU,
-      payload: {
-        column,
-        multiSort,
-        theme,
-        horizontal: MenuHorizontalPosition.LEFT,
-        clipRef: () => menuRef.current as SVGSVGElement,
-        onClose: () => {
-          setShowMenu(false);
-          dispatch(BusActions.HIDE_MENU);
-        }
-      },
-    });
+    setShowMenu(state => !state);
   };
 
   const renderSortIcon = (sort: SortState) => {
@@ -214,6 +194,16 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       </div>
 
       <div ref={resize} className="bg-grid-header__resize" />
+      <MenuLayer
+        visible={showMenu}
+        clipRef={() => menuRef.current as SVGSVGElement}
+        column={column}
+        multiSort={multiSort}
+        theme={theme}
+        vertical={MenuVerticalPosition.BOTTOM}
+        horizontal={MenuHorizontalPosition.LEFT}
+        onClose={() => setShowMenu(false)}
+      />
     </div>
   );
 }

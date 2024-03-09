@@ -1,4 +1,6 @@
 .bg-toolbar {
+  position: absolute;
+  width: 100%;
   padding: var(--bg-size--1) 0;
   
   .bg-toolbar__button {

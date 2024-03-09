@@ -20,8 +20,10 @@ import { capitalize } from '../../utils/functions';
 import cn from 'classnames';
 
 import './menu-layer.scss';
+import { createPortal } from 'react-dom';
 
 type Props = {
+  visible: boolean;
   column: Column;
   theme: string;
   multiSort: boolean;
@@ -36,16 +38,18 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] = useBeastStore((state) => [
-    state.scrollElement,
-    state.columns,
-    state.setSort,
-    state.resetColumnConfig,
-    state.pinColumn,
-    state.setSideBarConfig,
-    state.groupByColumn,
-    state.unGroupColumn
-  ]);
+  const [scrollElement, container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] =
+    useBeastStore((state) => [
+      state.scrollElement,
+      state.container,
+      state.columns,
+      state.setSort,
+      state.resetColumnConfig,
+      state.pinColumn,
+      state.setSideBarConfig,
+      state.groupByColumn,
+      state.unGroupColumn,
+    ]);
 
   useEffect(() => {
     const leftPinned = Object.values(columns)
@@ -57,7 +61,8 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         return;
       }
 
-      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
+      const { left: sLeft, right: sRight } = container.getBoundingClientRect();
+      const { left: cLeft, right: cRight } = scrollElement.getBoundingClientRect();
       const { width } = menuRef.current?.getBoundingClientRect() || {
         left: 0,
         top: 0,
@@ -66,10 +71,25 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         width: 0,
       };
       const { left, right, bottom } = clipRef().getBoundingClientRect();
-      
 
-      console.log('left', left, 'cLeft', cLeft, 'right', right, 'bottom', bottom, 'cRight', cRight, window.screenX, window.screenY)
-      const x = left;
+      console.log(
+        container,
+        'left',
+        left,
+        'sLeft',
+        sLeft,
+        'cLeft',
+        cLeft,
+        'right',
+        right,
+        'bottom',
+        bottom,
+        'cRight',
+        cRight,
+        window.screenX,
+        window.screenY
+      );
+      const x = cLeft;
 
       const y = bottom + 12;
 
@@ -331,28 +351,12 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       </div>
     </div>
   );
-}
+};
 
-export default function MenuLayer() {
-  const [props, setProps] = useState<Props | null>();
-  
-  useBus((event) => event.type === BusActions.SHOW_MENU, (event: EventAction) => {
-    setProps(event.payload as Props);
-  }, []);
-
-  useBus(BusActions.HIDE_MENU, () => {
-    setProps(null);
-  }, []);
-
-
-  const renderMenu = () => {
-    if (!props) {
-      return null;
-    }
-    
-    return <HeaderMenu {...props} />
+export default function MenuLayer(props: Props) {
+  if (!props.visible) {
+    return null;
   }
-  
-  return renderMenu();
-}
 
+  return createPortal(<HeaderMenu {...props} />, document.body);
+}
