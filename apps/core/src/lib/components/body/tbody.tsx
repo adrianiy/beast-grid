@@ -112,11 +112,10 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         setSorting(true);
                     }
                     setTimeout(() => {
-                        console.log(sortedData)
                         sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 
-                        setSortedData(sortedData);
+                        setSortedData([...sortedData]);
                         if (data.length > PERFORMANCE_LIMIT) {
                             setTimeout(() => setSorting(false), 100);
                         }

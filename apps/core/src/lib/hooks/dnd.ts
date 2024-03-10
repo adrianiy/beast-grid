@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useDndStore } from '../stores/dnd-store';
 import { Coords, Direction, PinType } from '../common';
-import { DragItem } from '../stores/dnd-store/store';
 import { useBeastStore } from '../stores/beast-store';
 
 export type OnAnimationFrame = (direction: Direction, pointerCoords: Coords) => void;
@@ -11,7 +10,6 @@ export type OnDrag = (e: DragEvent) => void;
 export type OnDragEnd = (e: DragEvent) => void;
 
 export const useDndHook = (
-  item: DragItem,
   options: Partial<{
     autoScrollSpeed: number;
     autoScrollMargin: number;
@@ -27,14 +25,13 @@ export const useDndHook = (
   const ref = useRef<HTMLDivElement>(null);
   const reqAnimFrameNo = useRef<number>(0);
   const coords = useRef({ x: 0, y: 0 });
-  const pointer = useRef({ x: 0, y: 0, pointerX: 0, pointerY: 0 });
+  const pointer = useRef({ x: 0, y: 0 });
   const direction = useRef<Direction>();
   const preview = useRef<HTMLImageElement>(new Image());
   const isDragging = useRef<boolean>(false);
   const leftPinnedWidth = useRef<number>(0);
-  const [addDropTarget, setDragItem, setPointer, setCoords] = useDndStore((state) => [
+  const [addDropTarget, setPointer, setCoords] = useDndStore((state) => [
     state.addDropTarget,
-    state.setDragItem,
     state.setPointer,
     state.setCoords,
   ]);
@@ -126,13 +123,9 @@ export const useDndHook = (
 
     const onDragStart = (e: DragEvent) => {
       e.stopPropagation();
-      setDragItem(item);
       isDragging.current = true;
       coords.current = { x: e.clientX, y: e.clientY };
 
-      if (parent) {
-        parent.style.overflow = 'hidden';
-      }
       reqAnimFrameNo.current = requestAnimationFrame(handleAnimations);
 
       if (e.dataTransfer) {
@@ -166,16 +159,12 @@ export const useDndHook = (
 
     const onDragEnd = (e: DragEvent) => {
       e.stopPropagation();
-      setDragItem(undefined);
       isDragging.current = false;
 
       coords.current = { x: 0, y: 0 };
 
       cancelAnimationFrame(reqAnimFrameNo.current);
 
-      if (parent) {
-        parent.style.overflow = 'scroll';
-      }
       if (options?.onDragEnd) {
         options.onDragEnd(e, pointer.current);
       }
@@ -209,9 +198,6 @@ export const useDndHook = (
 
       return () => {
         cancelAnimationFrame(reqAnimFrameNo.current);
-        if (isDragging.current) {
-          setDragItem(undefined);
-        }
         document.removeEventListener('dragover', cancel, true);
         document.removeEventListener('dragenter', cancel, true);
         dragRef.removeEventListener('dragstart', onDragStart);

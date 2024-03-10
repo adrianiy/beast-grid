@@ -1,5 +1,5 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
-import useBus, { EventAction, dispatch } from 'use-bus';
+import { createPortal } from 'react-dom';
 import { FormattedMessage } from 'react-intl';
 import {
   ArrowDownIcon,
@@ -10,6 +10,7 @@ import {
   StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
+import { dispatch } from 'use-bus';
 
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -20,7 +21,6 @@ import { capitalize } from '../../utils/functions';
 import cn from 'classnames';
 
 import './menu-layer.scss';
-import { createPortal } from 'react-dom';
 
 type Props = {
   visible: boolean;
@@ -32,24 +32,30 @@ type Props = {
   onClose: () => void;
 };
 
-const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) => {
+export default function MenuLayer(props: Props) {
+  if (!props.visible) {
+    return null;
+  }
+
+  return createPortal(<HeaderMenu {...props} />, document.body);
+}
+
+function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [scrollElement, container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] =
-    useBeastStore((state) => [
-      state.scrollElement,
-      state.container,
-      state.columns,
-      state.setSort,
-      state.resetColumnConfig,
-      state.pinColumn,
-      state.setSideBarConfig,
-      state.groupByColumn,
-      state.unGroupColumn,
-    ]);
+  const [container, columns, setSort, resetColumn, pinColumn, setSidebar, groupByColumn, ungroup] = useBeastStore((state) => [
+    state.scrollElement,
+    state.columns,
+    state.setSort,
+    state.resetColumnConfig,
+    state.pinColumn,
+    state.setSideBarConfig,
+    state.groupByColumn,
+    state.unGroupColumn
+  ]);
 
   useEffect(() => {
     const leftPinned = Object.values(columns)
@@ -61,8 +67,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         return;
       }
 
-      const { left: sLeft, right: sRight } = container.getBoundingClientRect();
-      const { left: cLeft, right: cRight } = scrollElement.getBoundingClientRect();
+      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
       const { width } = menuRef.current?.getBoundingClientRect() || {
         left: 0,
         top: 0,
@@ -72,26 +77,8 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       };
       const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      console.log(
-        container,
-        'left',
-        left,
-        'sLeft',
-        sLeft,
-        'cLeft',
-        cLeft,
-        'right',
-        right,
-        'bottom',
-        bottom,
-        'cRight',
-        cRight,
-        window.screenX,
-        window.screenY
-      );
-      const x = cLeft;
-
-      const y = bottom + 12;
+      const x = window.scrollX + left;
+      const y = window.scrollY + bottom + 8;
 
       setCoords({ x, y });
 
@@ -132,12 +119,10 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     }, 400);
 
     document.addEventListener('click', closeMenu);
-    document.addEventListener('scroll', moveMenu);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
       document.removeEventListener('click', closeMenu);
-      document.removeEventListener('scroll', moveMenu);
       document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
@@ -177,6 +162,7 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
     if (!column.sortable) {
       return null;
     }
+ 
     if (!column.sort) {
       return (
         <div className="bg-menu__content column config">
@@ -351,12 +337,4 @@ const HeaderMenu = ({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       </div>
     </div>
   );
-};
-
-export default function MenuLayer(props: Props) {
-  if (!props.visible) {
-    return null;
-  }
-
-  return createPortal(<HeaderMenu {...props} />, document.body);
 }

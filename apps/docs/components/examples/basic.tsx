@@ -1,41 +1,43 @@
 'use client'
+import 'beast-grid/style.css'
 
-import { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import BeastGridWrapper from './bg';
+import numeral from 'numeral';
+import { BeastGrid, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { User, data } from './data';
 
 export default function Grid() {
-  const initialized = useRef(false);
-  const placeholder = useRef(null);
-  const shadowRoot = useRef(null);
 
-  useEffect(() => {
-    const host = placeholder.current;
-    if (host == null || initialized.current) {
-      return;
-    }
-    initialized.current = true;
-    shadowRoot.current = host.parentNode.attachShadow({ mode: "open" });
-    console.log(shadowRoot.current)
-  }, [placeholder])
-
-
-  const attachShadow = (host) => {
-    if (host == null || initialized.current) {
-      return;
-    }
-    initialized.current = true;
-    host.attachShadow({ mode: "open" });
-    host.shadowRoot.innerHTML = host.innerHTML;
-    host.innerHTML = "";
-  }
-
-  return <div>
+  const columnDefs: ColumnDef[] = [
+    { headerName: 'ID', field: 'userId', sortable: false },
+    { headerName: 'NAME', field: 'username', sortable: false },
     {
-      !initialized.current ? <div ref={placeholder} /> : createPortal(
-        <BeastGridWrapper />,
-        shadowRoot.current
-      )
-    }
-  </div>
+      headerName: 'AMOUNT',
+      field: 'money',
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
+      headerName: 'ORDERS',
+      field: 'orders',
+      flex: 1,
+      formatter: (value) => numeral(value).format('0,0'),
+    },
+  ];
+  const config: BeastGridConfig<User[]> = {
+    data,
+    columnDefs,
+    style: {
+      border: true
+    },
+    sort: {
+      enabled: true,
+      multiple: true
+    },
+  };
+
+  return (
+    <div style={{ height: 400, width: '100%' }}>
+      <BeastGrid config={config} />
+    </div>
+  );
 }

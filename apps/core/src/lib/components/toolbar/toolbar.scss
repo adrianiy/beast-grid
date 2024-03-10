@@ -1,7 +1,8 @@
 .bg-toolbar {
-  position: absolute;
+  position: relative;
   width: 100%;
   padding: var(--bg-size--1) 0;
+  user-select: none;
   
   .bg-toolbar__button {
     padding: var(--bg-size--2) var(--bg-size--3);

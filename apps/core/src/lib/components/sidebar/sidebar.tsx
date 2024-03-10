@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import * as Checkbox from '@radix-ui/react-checkbox';
-import { CheckIcon, ChevronDownIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
+import { CheckIcon, ChevronDownIcon, Cross2Icon } from '@radix-ui/react-icons';
 import SimpleBar from 'simplebar-react';
 
-import { BeastGridConfig, Column, SideBarConfig } from '../../common';
+import { BeastGridConfig, Column, HEADER_HEIGHT, SideBarConfig } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
 
 import './sidebar.scss';
+import { FormattedMessage } from 'react-intl';
 
 export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
-  const [sideBarConfig, columns, hideColumn, setSidebar] = useBeastStore((state) => [
+  const [container, sideBarConfig, columns, hideColumn, setSidebar] = useBeastStore((state) => [
+    state.container,
     state.sideBarConfig,
     state.columns,
     state.hideColumn,
@@ -49,6 +51,7 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
   };
 
   const renderOptions = (_columns: Column[], parentMatch?: boolean) => {
+    const withoutChildren = _columns.every((c) => !c.childrenId?.length);
     return _columns?.map((item, idx) => {
       const children = Object.values(columns).filter((c) => item.childrenId?.includes(c.id));
       const matchSearch = !searchValue || item.headerName.toLowerCase().includes(searchValue.toLowerCase());
@@ -80,7 +83,7 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
           >
             <ChevronDownIcon
               id={`bg-sidebar__arrow__${item.id}`}
-              className={cn('trigger', { disabled: !item.childrenId })}
+              className={cn('trigger', { disabled: !item.childrenId, hidden: withoutChildren })}
               onClick={handleExpandRow(item.id, item.childrenId?.length || 0)}
             />
             <div className="bg-sidebar__item__header row middle" onClick={handleGridChange(item)}>
@@ -108,19 +111,27 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
   const GridConfig = () => {
     return (
       <div className={cn('bg-sidebar column', { border: config.style?.border })}>
-        <div className="bg-sidebar__close row middle center" onClick={() => setSidebar(null)}>
-          <DoubleArrowRightIcon />
+        <div
+          className="bg-sidebar__title row middle between"
+          style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
+        >
+          <FormattedMessage id="toolbar.grid" />
+          <Cross2Icon onClick={() => setSidebar(null)} />
         </div>
-
-        <input
-          type="text"
-          autoFocus
-          placeholder="Search..."
-          className="bg-sidebar__search"
-          value={searchValue}
-          onChange={handleSearch}
-        />
-        <div className="bg-sidebar__separator" />
+        <div
+          className="bg-sidebar__input row middle between"
+          style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
+        >
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search..."
+            className="bg-sidebar__search"
+            value={searchValue}
+            onChange={handleSearch}
+          />
+          {searchValue && <Cross2Icon onClick={() => setSearchValue('')} />}
+        </div>
         <SimpleBar className="bg-sidebar__container column">
           {renderOptions(Object.values(columns).filter((column) => column.level === 0))}
         </SimpleBar>
@@ -128,10 +139,28 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
     );
   };
 
-  switch (sideBarConfig) {
-    case SideBarConfig.GRID:
-      return <GridConfig />;
-    default:
-      return null;
+  if (!sideBarConfig) {
+    return null;
+  }
+
+  const SideBarSwitch = () => {
+    switch (sideBarConfig) {
+      case SideBarConfig.GRID:
+        return <GridConfig />;
+      default:
+        return null;
+    }
+  };
+
+  if (container.getBoundingClientRect().height > 300) {
+    return <div className="bg-sidebar__container">
+      <SideBarSwitch />
+    </div>
+  } else {
+    return <div className="bg-sidebar__modal__container">
+      <div className="bg-sidebar__modal">
+        <SideBarSwitch />
+      </div>
+    </div>
   }
 }

@@ -83,10 +83,7 @@ const GridProvider = () => {
       <BeastGridProvider createStore={beastGridStore}>
         <IntlProvider messages={messages[locale]} locale={locale}>
           <BeastApi store={api} />
-          <DndLayer config={config} />
           <LoaderLayer config={config} />
-          <MenuLayer />
-          <SideBar config={config} />
           <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
           <Toolbar config={config} />
         </IntlProvider>

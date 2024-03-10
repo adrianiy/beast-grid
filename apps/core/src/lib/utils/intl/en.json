@@ -2,7 +2,7 @@
   "menu.sort.asc": "Ascending",
   "menu.sort.desc": "Descending",
   "menu.sort.reset": "Reset sort",
-  "menu.pin": "Pin",
+  "menu.pin.pin": "Pin",
   "menu.pin.left": "Pin left",
   "menu.pin.right": "Pin right",
   "menu.grid": "Grid settings",

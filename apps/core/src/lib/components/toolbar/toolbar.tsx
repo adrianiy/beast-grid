@@ -2,26 +2,26 @@ import { CSVLink } from 'react-csv';
 import { DownloadIcon, TableIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig, SideBarConfig } from '../../common';
 import { FormattedMessage } from 'react-intl';
+import { LabelKeyObject } from 'react-csv/lib/core';
 import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
 
 import './toolbar.scss';
-import { LabelKeyObject } from 'react-csv/lib/core';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
 };
 
 export default function Toolbar<T>({ config }: Props<T>) {
-  const [data, columns, setSideBarConfig] = useBeastStore((state) => [state.data, state.sortedColumns, state.setSideBarConfig]);
+  const [data, columns, setSideBarConfig, sidebar] = useBeastStore((state) => [state.data, state.sortedColumns, state.setSideBarConfig, state.sideBarConfig]);
 
   if (!config.toolbar) {
     return null;
   }
 
   const handleGridClick = () => {
-    setSideBarConfig(SideBarConfig.GRID);
+    setSideBarConfig(sidebar === SideBarConfig.GRID ? null : SideBarConfig.GRID);
   }
 
   const Download = () => {

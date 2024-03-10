@@ -11,6 +11,7 @@ import Header from './components/header/header';
 import cn from 'classnames';
 
 import 'simplebar-react/dist/simplebar.min.css';
+import SideBar from './components/sidebar/sidebar';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -34,7 +35,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     }, [theme, setTheme]);
 
     return (
-        <div className="beast-grid__wrapper">
+        <div className="beast-grid__wrapper" style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}>
             <SimpleBar
                 style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
                 ref={ref}
@@ -59,6 +60,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                     events={config.row?.events}
                 />
             </SimpleBar>
+          <SideBar config={config} />
         </div>
     );
 }

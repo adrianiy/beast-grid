@@ -1,7 +1,7 @@
-@import './../../flex.scss';
-
 .bg-menu__container {
-    position: fixed;
+    @import './../../flex.scss';
+    
+    position: absolute;
     user-select: none;
     border: var(--bg-border--3);
     background-color: var(--bg-background-color--1);

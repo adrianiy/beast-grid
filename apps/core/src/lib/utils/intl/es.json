@@ -2,7 +2,7 @@
   "menu.sort.asc": "Ascendente",
   "menu.sort.desc": "Descendente",
   "menu.sort.reset": "Reiniciar orden",
-  "menu.pin": "Fijar",
+  "menu.pin.pin": "Fijar",
   "menu.pin.left": "Fijar a la izquierda",
   "menu.pin.right": "Fijar a la derecha",
   "menu.grid": "Configurar grid",

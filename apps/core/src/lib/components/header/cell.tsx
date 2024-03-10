@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
 
@@ -9,7 +10,7 @@ import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
 import cn from 'classnames';
-import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
+import DndLayer from '../dnd/dnd-layer';
 
 type Props<T> = {
   levelIdx: number;
@@ -27,6 +28,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [columns, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.columns,
     state.theme,
@@ -38,7 +40,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
   const [drag] = useDndHook(
-    { id: column.id, text: column.headerName, isInside: true },
     {
       ...dragOptions,
       isDropTarget: true,
@@ -50,7 +51,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     container
   );
   const [resize] = useDndHook(
-    { id: column.id, hidePreview: true },
     {
       ...dragOptions,
       onAnimationFrame: handleResize,
@@ -62,6 +62,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     lastX.current = 0;
     lastHitElement.current = null;
     setShowMenu(false);
+    setDragging(true);
   }
 
   function onDirectionChange() {
@@ -129,6 +130,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
         events.onDropOutside.callback(column);
       }
     }
+    setDragging(false);
   }
 
   const handleChangeSort = () => {
@@ -200,10 +202,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
         column={column}
         multiSort={multiSort}
         theme={theme}
-        vertical={MenuVerticalPosition.BOTTOM}
         horizontal={MenuHorizontalPosition.LEFT}
         onClose={() => setShowMenu(false)}
       />
+      <DndLayer text={column.headerName} hide={!!events?.onDropOutside?.hide} visible={dragging} theme={theme} />
     </div>
   );
 }

@@ -4,6 +4,8 @@
     --bg-size--3: 12px;
     --bg-size--4: 16px;
     --bg-size--5: 24px;
+    --bg-size--6: 32px;
+
 
     --bg-color--0: #fff;
     --bg-color--1: #000;
@@ -20,8 +22,13 @@
     --bg-background-color--1: var(--bg-color--0);
     --bg-background-color--2: var(--bg-color--3);
     --bg-background-color--3: var(--bg-color--0);
+    --bg-background-color--overlay: rgba(0,0,0, 0.45);
+    
     --bg-hover-color--1: var(--bg-color--6);
     --bg-text-color--1: var(--bg-color--1);
     --bg-text-color--2: var(--bg-color--2);
     --bg-text-color--3: var(--bg-color--3);
+
+
+    --bg-text-color--hover: var(--bg-color--5);
 }

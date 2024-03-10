@@ -4,6 +4,7 @@ import { MIN_COL_WIDTH } from './../../common/globals';
 
 import {
   addSort,
+  changePosition,
   getSwappableClone,
   groupDataByColumnDefs,
   mergeColumns,
@@ -213,6 +214,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   column.rowGroup = false;
 
   if (column.tree) {
+    changePosition(columns, column, [column.id], -1);
     groupOrder.forEach((col) => {
       toggleHide(columns[col], columns);
     });
@@ -224,7 +226,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   }
   
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
-  console.log(data, initialData)
+  console.log(columns)
 
   const sortedColumns = sortColumns(columns);
 

@@ -1,33 +1,49 @@
-@import './../../flex';
+.bg-sidebar__modal__container {
+    @import './../../flex';
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-background-color--overlay);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .bg-sidebar__modal {
+        display: flex;
+        width: 600px;
+        height: 500px;
+
+        .bg-sidebar {
+            width: 100%;
+        }
+    }
+}
+
+.bg-sidebar__container {
+    @import './../../flex';
+
+    .bg-sidebar {
+        position: absolute;
+        right: 0px;
+        top: 0;
+        height: 100%;
+    }
+}
 
 .bg-sidebar {
-    position: absolute;
-    right: 0px;
-    top: 0;
     width: 300px;
-    height: 100%;
     background-color: var(--bg-background-color--1);
     z-index: 200;
-    padding: var(--bg-size--3) 0;
     box-sizing: border-box;
     border-left: var(--bg-border--3);
     animation: slideIn 3000ms cubic-bezier(0.87, 0, 0.13, 1) forwards;
 
-
     &.border {
         border: var(--bg-border--3);
-    }
-
-    .bg-sidebar__close {
-        position: absolute;
-        left: -32px;
-        width: 30px;
-        height: 50px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: var(--bg-border--3);
-        background-color: var(--bg-background-color--1);
-        cursor: pointer;
     }
 
     .bg-sidebar__separator {
@@ -35,9 +51,20 @@
         margin: var(--bg-size--2) 0;
     }
     .bg-sidebar__title {
+        box-sizing: border-box;
         font-size: var(--bg-font-size--3);
-        padding: var(--bg-size--2) var(--bg-size--3);
+        padding: 0 var(--bg-size--3);
         color: var(--bg-text-color--1);
+        border-bottom: var(--bg-border--3);
+
+        svg {
+            cursor: pointer;
+        }
+    }
+    .bg-sidebar__input {
+        box-sizing: border-box;
+        border-bottom: var(--bg-border--3);
+        padding: 0 var(--bg-size--3);
 
         svg {
             cursor: pointer;
@@ -46,11 +73,10 @@
     input[type='text'] {
         outline: none;
         border: none;
+        flex: 1;
         background-color: transparent;
-        line-height: var(--bg-size--5);
         font-size: inherit;
         color: var(--bg-text-color--1);
-        margin: var(--bg-size--3);
     }
     button {
         all: unset;
@@ -71,6 +97,9 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
+    }
+    .hidden {
+        display: none;
     }
 
     label {
@@ -97,25 +126,23 @@
         gap: var(--bg-size--3);
 
         .bg-sidebar__item__header {
-          gap: var(--bg-size--3);
+            gap: var(--bg-size--3);
         }
 
         svg {
-          --size: var(--bg-size--3);
-          width: var(--size);
-          height: var(--size);
-          transition: all linear var(--bg-transition--1);
-          
-          &.rotate {
-            transform: rotate(-90deg);
-          }
+            --size: var(--bg-size--3);
+            width: var(--size);
+            height: var(--size);
+            transition: all linear var(--bg-transition--1);
+
+            &.rotate {
+                transform: rotate(-90deg);
+            }
         }
 
         .disabled {
             opacity: 0;
             pointer-events: none;
         }
-
-        
     }
 }
