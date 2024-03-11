@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { AggregationType, Column, Data, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -56,3 +57,19 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
   return (a._originalIdx as number) - (b._originalIdx as number);
 };
 
+
+export function useTraceUpdate(props) {
+  const prev = useRef(props);
+  useEffect(() => {
+    const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+      if (prev.current[k] !== v) {
+        ps[k] = [prev.current[k], v];
+      }
+      return ps;
+    }, {});
+    if (Object.keys(changedProps).length > 0) {
+      console.log('Changed props:', changedProps);
+    }
+    prev.current = props;
+  });
+}

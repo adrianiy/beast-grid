@@ -112,6 +112,8 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         toolbar: {
           download: true,
           grid: true,
+          filter: true,
+          position: ToolbarPosition.TOP
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },

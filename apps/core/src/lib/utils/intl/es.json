@@ -12,5 +12,6 @@
   "menu.column.group": "Agrupar por {columnName}",
   "menu.column.ungroup": "Desagrupar",
   "toolbar.download": "Descargar",
-  "toolbar.grid": "Columnas"
+  "toolbar.grid": "Columnas",
+  "toolbar.filter": "Filtros"
 }

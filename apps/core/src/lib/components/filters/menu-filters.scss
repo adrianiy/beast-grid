@@ -1,0 +1,53 @@
+.bg-filter {
+    .bg-filter__separator {
+        border-bottom: var(--bg-border--3);
+        margin: var(--bg-size--1) 0;
+    }
+    .bg-filter__container {
+        max-height: 300px;
+        overflow: auto;
+    }
+
+    .bg-filter__item {
+        color: var(--bg-text-color--1);
+        gap: var(--bg-size--3);
+        padding: var(--bg-size--2);
+        margin: 0 var(--bg-size--1);
+        cursor: pointer;
+
+        button {
+            all: unset;
+
+            svg {
+                --size: 100%;
+            }
+        }
+        .bg-checkbox__root {
+            --size: var(--bg-size--3);
+            background-color: white;
+            border: var(--bg-border--3);
+            max-width: var(--size);
+            max-height: var(--size);
+            min-width: var(--size);
+            min-height: var(--size);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        label {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+    input[type='text'] {
+        outline: none;
+        border: none;
+        line-height: 21px;
+        background-color: transparent;
+        padding: var(--bg-size--2);
+        color: var(--bg-text-color--1);
+    }
+}

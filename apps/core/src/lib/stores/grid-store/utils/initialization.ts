@@ -150,7 +150,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (column.menu?.filter && column.field) {
+    if (isNaN(data[0][column.field as string] as number)) {
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;

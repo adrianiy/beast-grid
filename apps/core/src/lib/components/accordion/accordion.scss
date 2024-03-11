@@ -1,0 +1,34 @@
+.bg-accordion__wrapper {
+    overflow: hidden;
+    user-select: none;
+    
+    .bg-accordion__children {
+        transition: height 300ms cubic-bezier(0.87, 0, 0.13, 1);
+        overflow: hidden;
+    }
+    .bg-accordion__item {
+        padding: var(--bg-size--2) var(--bg-size--3);
+        cursor: pointer;
+        gap: var(--bg-size--3);
+
+        .bg-accordion__item__header {
+            gap: var(--bg-size--3);
+        }
+
+        svg {
+            --size: var(--bg-size--3);
+            width: var(--size);
+            height: var(--size);
+            transition: all linear var(--bg-transition--1);
+
+            &.rotate {
+                transform: rotate(-90deg);
+            }
+        }
+
+        .disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+}

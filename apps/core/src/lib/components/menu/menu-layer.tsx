@@ -10,12 +10,12 @@ import {
   StackIcon,
   TableIcon,
 } from '@radix-ui/react-icons';
+import TextFilters from '../filters/text';
 import { dispatch } from 'use-bus';
 
 import { useBeastStore } from '../../stores/beast-store';
 
 import { BusActions, Column, MenuHorizontalPosition, MenuProps, PinType, SideBarConfig, SortType } from '../../common';
-import MenuFilters from './menu-filters';
 import { capitalize } from '../../utils/functions';
 
 import cn from 'classnames';
@@ -264,7 +264,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
         </div>
         <div className="bg-menu__separator" />
         <div className={cn('bg-menu__item__submenu column', horizontalSubmenuPosition)}>
-          <MenuFilters column={column} />
+          <TextFilters column={column} />
         </div>
       </div>
     );
