@@ -1,16 +1,16 @@
 import { useRef, useState } from 'react';
 import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
-import { MenuHorizontalPosition, MenuVerticalPosition } from '../../common';
+import { MenuHorizontalPosition } from '../../common';
 
 import MenuLayer from '../menu/menu-layer';
+import DndLayer from '../dnd/dnd-layer';
 
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
 import cn from 'classnames';
-import DndLayer from '../dnd/dnd-layer';
 
 type Props<T> = {
   levelIdx: number;

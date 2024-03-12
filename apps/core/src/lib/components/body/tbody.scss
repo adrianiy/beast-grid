@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     padding: 0 12px;
-    transition: var(--bg-transition--1);
+    transition: all linear var(--bg-transition--1);
     box-sizing: border-box;
     color: var(--bg-text-color--1);
     background-color: var(--bg-background-color--1);
