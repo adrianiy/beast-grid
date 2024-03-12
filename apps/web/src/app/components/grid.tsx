@@ -109,11 +109,12 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           name: 'GROUP',
           field: 'name'
         },
-        toolbar: {
-          download: true,
+        topToolbar: {
           grid: true,
           filter: true,
-          position: ToolbarPosition.TOP
+        },
+        bottomToolbar: {
+          download: true,
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },

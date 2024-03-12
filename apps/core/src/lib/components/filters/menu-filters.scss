@@ -1,4 +1,5 @@
 .bg-filter {
+    margin-top: var(--bg-size--3);
     .bg-filter__separator {
         border-bottom: var(--bg-border--3);
         margin: var(--bg-size--1) 0;
@@ -14,6 +15,10 @@
         padding: var(--bg-size--2);
         margin: 0 var(--bg-size--1);
         cursor: pointer;
+
+        &.hidden {
+            display: none;
+        }
 
         button {
             all: unset;
@@ -42,12 +47,19 @@
             text-overflow: ellipsis;
         }
     }
-    input[type='text'] {
-        outline: none;
-        border: none;
-        line-height: 21px;
-        background-color: transparent;
-        padding: var(--bg-size--2);
-        color: var(--bg-text-color--1);
+}
+
+.bg-filter__number {
+    .bg-filter__selector__container {
+        gap: var(--bg-size--3);
+
+        input {
+            width: 100%;
+            padding: var(--bg-size--3);
+            border: var(--bg-border--3);
+            outline: none;
+            color: var(--bg-text-color--1);
+            background-color: var(--bg-background-color--1);
+        }
     }
 }

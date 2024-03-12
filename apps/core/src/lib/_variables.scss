@@ -15,6 +15,7 @@
     --bg-color--4: #e0e0e0;
     --bg-color--5: #a9a9a9;
     --bg-color--6: #f0f0f0;
+    --bg-color--7: #f8f8f8;
     --bg-border--1: 1px solid var(--bg-color--3);
     --bg-border--2: 1px solid var(--bg-color--4);
     --bg-border--3: 1px solid var(--bg-color--3);
@@ -32,4 +33,7 @@
 
 
     --bg-text-color--hover: var(--bg-color--5);
+
+
+    --bg-accordion-children-background-color: var(--bg-color--7);
 }

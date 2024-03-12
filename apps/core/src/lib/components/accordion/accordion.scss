@@ -4,7 +4,9 @@
     
     .bg-accordion__children {
         transition: height 300ms cubic-bezier(0.87, 0, 0.13, 1);
+        padding: 0 var(--bg-size--5);
         overflow: hidden;
+        background-color: var(--bg-accordion-children-background-color);
     }
     .bg-accordion__item {
         padding: var(--bg-size--2) var(--bg-size--3);

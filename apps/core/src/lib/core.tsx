@@ -91,7 +91,7 @@ const GridProvider = () => {
 };
 
 return (
-  <div className={cn('beast-grid', 'default', theme, { row: config?.toolbar?.position === ToolbarPosition.RIGHT })} ref={ref}>
+  <div className={cn('beast-grid', 'default', theme)} ref={ref}>
     <GridProvider />
   </div>
 );

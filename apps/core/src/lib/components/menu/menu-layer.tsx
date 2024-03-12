@@ -221,7 +221,7 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
             {column.pinned === PinType.LEFT ? <CheckIcon /> : null}
           </div>
           <div className="bg-menu__separator--transparent" />
-          <div className="bg-menu__item row middle" onClick={handlePinColumn(PinType.RIGHT)}>
+          <div className="bg-menu__item row middle between" onClick={handlePinColumn(PinType.RIGHT)}>
             <FormattedMessage id="menu.pin.right" defaultMessage="Pin right" />
             {column.pinned === PinType.RIGHT ? <CheckIcon /> : null}
           </div>

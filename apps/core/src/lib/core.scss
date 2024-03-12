@@ -34,7 +34,7 @@
         width: 100%;
         overflow: auto;
         &.border {
-            width: calc(100% - 2px);
+            box-sizing: border-box;
             border: var(--bg-border--1);
             &.headerBorder {
                 .bg-grid-header__cell {

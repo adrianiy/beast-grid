@@ -3,6 +3,8 @@ import { PropsWithChildren, useState } from 'react';
 
 import './accordion.scss';
 
+import cn from 'classnames';
+
 type Props = {
   id: string;
   label: React.ReactNode | string;
@@ -16,7 +18,6 @@ export default function Accordion(props: PropsWithChildren<Props>) {
 
   const handleExpandRow = (e: React.MouseEvent<SVGSVGElement>) => {
     e.stopPropagation();
-    console.log(expanded)
     setExpaned(state => !state)
   };
 
@@ -30,15 +31,15 @@ export default function Accordion(props: PropsWithChildren<Props>) {
         <ChevronDownIcon
           id={`bg-accordion__arrow__${id}`}
           style={{ opacity: hideArrow ? 0 : 1 }}
-          className="trigger rotate"
+          className={cn('bg-accordion__arrow', { rotate: !expanded })}
           onClick={handleExpandRow}
         />
         {label}
       </div>
       <div
-        className="bg-accordion__children"
+        className={cn("bg-accordion__children", { hidden: !expanded })}
         id={`bg-accordion__children__${id}`}
-        style={{ height: expanded ? (height || 37 * elements) : 0, padding: '0 var(--bg-size--5)' }}
+        style={{ height: expanded ? (height || 37 * elements) : 0 }}
       >
         {children}
       </div>

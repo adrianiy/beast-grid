@@ -13,5 +13,15 @@
   "menu.column.ungroup": "Desagrupar",
   "toolbar.download": "Descargar",
   "toolbar.grid": "Columnas",
-  "toolbar.filter": "Filtros"
+  "toolbar.filter": "Filtros",
+  "filter.operation": "Operación",
+  "filter.none": "Sin filtro",
+  "filter.equal": "Igual a",
+  "filter.notEqual": "No igual a",
+  "filter.greaterThan": "Mayor que",
+  "filter.greaterThanOrEqual": "Mayor o igual que",
+  "filter.lessThan": "Menor que",
+  "filter.lessThanOrEqual": "Menor o igual que",
+  "filter.between": "Entre"
+  
 }

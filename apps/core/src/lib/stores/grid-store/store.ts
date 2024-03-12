@@ -55,7 +55,7 @@ export interface GridStore extends GridState, InferedState {
   setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) => void;
   setLoading: (loading: boolean) => void;
   setSorting: (sorting: boolean) => void;
-  addFilter: (id: ColumnId, value: IFilter) => void;
+  addFilter: (id: ColumnId, value: IFilter | null) => void;
   selectAllFilters: (id: ColumnId) => void;
   pinColumn: (id: ColumnId, pin: PinType) => void;
   setSideBarConfig: (config: SideBarConfig | null) => void;
@@ -68,8 +68,9 @@ export const createGridStore = <T>(
 ) => {
   const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
   const groupOrder = Object.values(columns).filter((col) => col.rowGroup).map((col) => col.id);
+  const initialData = createVirtualIds(_data as Data);
   
-  const data = initialize(columns, container, createVirtualIds(_data as Data), groupOrder, tree);
+  const data = initialize(columns, container, initialData, groupOrder, tree);
   const sortedColumns = sortColumns(columns);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);
@@ -77,7 +78,7 @@ export const createGridStore = <T>(
 
   const initialState = {
     data,
-    initialData: data,
+    initialData,
     tree,
     groupOrder,
     columns,

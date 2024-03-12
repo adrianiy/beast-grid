@@ -5,10 +5,10 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import RowContainer from './row';
 
-import { BusActions, Column, Data, Row, RowConfig, RowEvents, SortType } from '../../common';
+import { BusActions, Column, Data, Row, RowConfig, RowEvents } from '../../common';
 
 import './tbody.scss';
-import { sortData } from '../../utils/functions';
+import { filterRow, sortData } from '../../utils/functions';
 
 type TBodyProps = {
     rowHeight: number;
@@ -73,20 +73,10 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
+        console.log(data, filters)
         setSortedData(
             someActive
-                ? data.filter((d) => {
-                    let show = true;
-
-                    for (const filterKey of Object.keys(filters)) {
-                        if (filters[filterKey].includes(`${d[columns[filterKey].field as string]}`)) {
-                            show = show && true;
-                        } else {
-                            show = show && false;
-                        }
-                    }
-                    return show;
-                })
+                ? data.filter(filterRow(columns, filters))
                 : data
         );
     }, [data, columns, filters]);
@@ -112,6 +102,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         setSorting(true);
                     }
                     setTimeout(() => {
+                        console.log(sortedData);
                         sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 

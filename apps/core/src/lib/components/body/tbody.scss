@@ -19,6 +19,11 @@
     }
     &.bordered {
         border-bottom: var(--bg-border--2);
+
+        &:last-child {
+            border-bottom: none;
+        }
+        
         .grid-row-cell {
             border-bottom: var(--bg-border--2);
         }

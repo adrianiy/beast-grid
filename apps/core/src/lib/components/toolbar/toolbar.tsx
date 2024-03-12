@@ -5,9 +5,8 @@ import { FormattedMessage } from 'react-intl';
 import { LabelKeyObject } from 'react-csv/lib/core';
 import { useBeastStore } from '../../stores/beast-store';
 
-import cn from 'classnames';
-
 import './toolbar.scss';
+import { useMemo } from 'react';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
@@ -17,20 +16,18 @@ type Props<T> = {
 export default function Toolbar<T>({ config, position }: Props<T>) {
   const [data, columns, setSideBarConfig, sidebar] = useBeastStore((state) => [state.data, state.sortedColumns, state.setSideBarConfig, state.sideBarConfig]);
 
-  if (!config.toolbar) {
+  const toolbar = useMemo(() => position === ToolbarPosition.TOP ? config.topToolbar : config.bottomToolbar, [config, position]);
+
+  if (!toolbar) {
     return null;
   }
   
-  if ((config.toolbar?.position || ToolbarPosition.BOTTOM) !== position) {
-    return null;
-  }
-
   const handleSideBarActivation = (config: SideBarConfig) => () => {
     setSideBarConfig(sidebar === config ? null : config);
   }
 
   const Filter = () => {
-    if (!config.toolbar?.filter) {
+    if (!toolbar?.filter) {
       return null;
     }
 
@@ -43,7 +40,7 @@ export default function Toolbar<T>({ config, position }: Props<T>) {
   }
 
   const Download = () => {
-    if (!config.toolbar?.download) {
+    if (!toolbar?.download) {
       return null;
     }
 
@@ -56,7 +53,7 @@ export default function Toolbar<T>({ config, position }: Props<T>) {
   };
 
   const Grid = () => {
-    if (!config.toolbar?.grid) {
+    if (!toolbar?.grid) {
       return null;
     }
 
@@ -70,7 +67,7 @@ export default function Toolbar<T>({ config, position }: Props<T>) {
 
 
   return (
-    <div className={cn("bg-toolbar row end", config.toolbar?.position)}>
+    <div className="bg-toolbar row end">
       <Filter />
       <Grid />
       <Download />

@@ -1,6 +1,6 @@
 .bg-menu__container {
     @import './../../flex.scss';
-    
+
     position: absolute;
     user-select: none;
     border: var(--bg-border--3);
@@ -98,6 +98,9 @@
                 left: auto;
                 right: 100%;
             }
+            .bg-filter {
+                margin-top: 0;
+            }
         }
 
         &:hover {
@@ -108,6 +111,5 @@
                 display: flex;
             }
         }
-
     }
 }

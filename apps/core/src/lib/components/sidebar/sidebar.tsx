@@ -8,9 +8,9 @@ import { useBeastStore } from '../../stores/beast-store';
 
 import './sidebar.scss';
 
-function SideBarSwitch<T>({ sideBarConfig, config }: { sideBarConfig: SideBarConfig, config: BeastGridConfig<T> }) {
+function SideBarSwitch<T>({ sideBarConfig, config }: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> }) {
   const [columns] = useBeastStore((state) => [state.columns]);
-  
+
   switch (sideBarConfig) {
     case SideBarConfig.GRID:
       return <GridConfig config={config} columns={columns} />;
@@ -22,37 +22,29 @@ function SideBarSwitch<T>({ sideBarConfig, config }: { sideBarConfig: SideBarCon
 }
 
 export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
-  const [container, filters, sideBarConfig, setSidebarConfig] = useBeastStore((state) => [
-    state.scrollElement,
-    state.filters,
+  const [sideBarConfig, setSidebarConfig] = useBeastStore((state) => [
     state.sideBarConfig,
-    state.setSideBarConfig
+    state.setSideBarConfig,
   ]);
-  const [useModal, setUseModal] = useState(false);
+  const [useModal, setUseModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (container) {
-      setTimeout(() => {
-        setUseModal(container.getBoundingClientRect().height < 300);
-      }, 100);
+    if (sideBarConfig === SideBarConfig.FILTERS && config.style?.maxHeight) {
+      setUseModal(true);
+    } else {
+      setUseModal(false);
     }
-  }, [sideBarConfig])
+  }, [sideBarConfig, config.style?.maxHeight]);
 
-  useEffect(() => {
-    if (container && !useModal) {
-      setTimeout(() => {
-        setUseModal(container.getBoundingClientRect().height < 300);
-      }, 100);
-    }
-  }, [container, filters])
 
   const closeSidebar = () => {
     setSidebarConfig(null);
-  }
+    setUseModal(false);
+  };
 
   const stopClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-  }
+  };
 
   if (!sideBarConfig) {
     return null;
@@ -74,4 +66,3 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
     );
   }
 }
-

@@ -34,10 +34,21 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
         setTheme(theme);
     }, [theme, setTheme]);
 
+    const getToolbarHeight = () => {
+        let toolbarHeight = 0;
+        if (config.topToolbar) {
+            toolbarHeight += 45;
+        }
+        if (config.bottomToolbar) {
+            toolbarHeight += 45;
+        }
+        return toolbarHeight;
+    }
+
     return (
         <div
             className="beast-grid__wrapper"
-            style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
+            style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined }}
         >
             <SimpleBar
                 style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}

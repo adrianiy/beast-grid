@@ -1,5 +1,5 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, PinType, SortType, ToolbarPosition } from './enums';
+import { AggregationType, FilterType, OperationType, PinType, SortType, ToolbarPosition } from './enums';
 
 export interface Row {
   [key: string]: unknown;
@@ -31,7 +31,8 @@ export interface MenuProps {
 
 export type ColumnId = string;
 
-export type IFilter = string | number | boolean;
+export type NumberFilter = { op: OperationType, value: number };
+export type IFilter = string | NumberFilter | boolean;
 
 export interface BaseColumnDef {
   headerName: string;
@@ -103,7 +104,6 @@ export interface ToolBar {
   grid: boolean;
   filter: boolean;
   chart: boolean;
-  position: ToolbarPosition
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
@@ -116,7 +116,8 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
   tree?: Partial<TreeConstructor>;
-  toolbar?: Partial<ToolBar>;
+  topToolbar?: Partial<ToolBar>;
+  bottomToolbar?: Partial<ToolBar>;
 }
 
 export interface TableStyles {
@@ -147,6 +148,7 @@ export interface Column extends ColumnDef, Position {
   parent?: ColumnId;
   original?: ColumnId;
   originalParent?: ColumnId;
+  filterType?: FilterType;
   logicDelete?: boolean;
   lastPinned?: boolean;
   tree?: boolean;

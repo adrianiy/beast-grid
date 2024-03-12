@@ -6,11 +6,12 @@ import SimpleBar from 'simplebar-react';
 import { Column, IFilter } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
-import { CheckIcon, DividerHorizontalIcon } from '@radix-ui/react-icons';
+import { CheckIcon, Cross2Icon, DividerHorizontalIcon } from '@radix-ui/react-icons';
 
 import cn from 'classnames';
 
 import './menu-filters.scss';
+import Input from '../input/input';
 
 type Props = {
   column: Column;
@@ -36,7 +37,7 @@ export default function TextFilters(props: Props) {
       setChecked('indeterminate');
     }
   }, [filters, column.filterOptions, column.id, setChecked]);
-  
+
   const handleFilterChange =
     (value: IFilter): MouseEventHandler<HTMLDivElement> =>
       () => {
@@ -54,14 +55,10 @@ export default function TextFilters(props: Props) {
   };
   return (
     <div className="bg-filter bg-filter__text">
-      <input
-        type="text"
-        autoFocus
-        placeholder="Search..."
-        className="bg-filter__search bg-menu__filter__item--big"
-        onChange={handleSearch}
-      />
+      <Input placeholder="Search..." className="bg-filter__search" onChange={handleSearch} />
+      
       <div className="bg-filter__separator" />
+      
       <SimpleBar style={{ maxHeight: 300 }} className="bg-filter__container">
         {column.filterOptions?.map((item, idx) => (
           <div
