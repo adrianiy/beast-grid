@@ -47,6 +47,10 @@
         border: var(--bg-border--1);
     }
 
+    .bg-filter__label {
+        gap: var(--bg-size--3);
+    }
+
     .bg-sidebar__content {
         height: 100%;
         overflow: auto;

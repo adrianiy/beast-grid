@@ -55,7 +55,7 @@ export interface GridStore extends GridState, InferedState {
   setSort: (sort: ColumnId, sortType: SortType, multipleColumnSort: boolean) => void;
   setLoading: (loading: boolean) => void;
   setSorting: (sorting: boolean) => void;
-  addFilter: (id: ColumnId, value: IFilter | null) => void;
+  addFilter: (id: ColumnId, value: IFilter | null, idx?: number) => void;
   selectAllFilters: (id: ColumnId) => void;
   pinColumn: (id: ColumnId, pin: PinType) => void;
   setSideBarConfig: (config: SideBarConfig | null) => void;
@@ -113,7 +113,7 @@ export const createGridStore = <T>(
       set(changeSort(sort, multipleColumnSort, sortType)),
     setLoading: (loading: boolean) => set({ loading }),
     setSorting: (sorting: boolean) => set({ sorting }),
-    addFilter: (id: ColumnId, value: IFilter) => set(addFilter(id, value)),
+    addFilter: (id: ColumnId, value: IFilter | null, idx?: number) => set(addFilter(id, value, idx)),
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
     pinColumn: (id: ColumnId, pin: PinType) => set(pinColumn(id, pin)),
     setSideBarConfig: (config: SideBarConfig | null) => set({ sideBarConfig: config }),

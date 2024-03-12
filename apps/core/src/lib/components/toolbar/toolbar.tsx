@@ -14,7 +14,7 @@ type Props<T> = {
 };
 
 export default function Toolbar<T>({ config, position }: Props<T>) {
-  const [data, columns, setSideBarConfig, sidebar] = useBeastStore((state) => [state.data, state.sortedColumns, state.setSideBarConfig, state.sideBarConfig]);
+  const [data, columns, setSideBarConfig, sidebar] = useBeastStore((state) => [state.initialData, state.sortedColumns, state.setSideBarConfig, state.sideBarConfig]);
 
   const toolbar = useMemo(() => position === ToolbarPosition.TOP ? config.topToolbar : config.bottomToolbar, [config, position]);
 

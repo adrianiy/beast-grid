@@ -31,7 +31,7 @@ export interface MenuProps {
 
 export type ColumnId = string;
 
-export type NumberFilter = { op: OperationType, value: number };
+export type NumberFilter = { op: OperationType | undefined, value: number | undefined };
 export type IFilter = string | NumberFilter | boolean;
 
 export interface BaseColumnDef {

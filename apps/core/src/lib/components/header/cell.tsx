@@ -29,8 +29,9 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const lastHitElement = useRef<HTMLElement | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [columns, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
+  const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.columns,
+    state.filters,
     state.theme,
     state.hideColumn,
     state.swapColumns,
@@ -188,6 +189,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     >
       <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
         <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
+        {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
         {column.sort && renderSortIcon(column.sort)}
       </div>
 

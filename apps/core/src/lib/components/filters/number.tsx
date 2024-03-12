@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
-import { Column, IFilter, NumberFilter, OperationType } from '../../common';
+import { Column, ColumnId, IFilter, NumberFilter, OperationType } from '../../common';
 
 import Select, { Option } from '../select/select';
 
 import { useBeastStore } from '../../stores/beast-store';
 import { useDebounce, useThrottle } from '../../utils/functions';
-
-type Props = {
-  column: Column;
-  filters: Record<string, IFilter[]>;
-  scrollContainer: HTMLDivElement | null;
-};
 
 const options = [
   { value: OperationType.NONE, label: <FormattedMessage id="filter.none" defaultMessage="None" /> },
@@ -33,54 +27,119 @@ const options = [
   },
 ];
 
+const emptyFilter: NumberFilter = {
+  op: undefined,
+  value: undefined,
+};
+
+type Props = {
+  column: Column;
+  filters: Record<string, IFilter[]>;
+  scrollContainer: HTMLDivElement | null;
+};
+
 export default function NumberFilter(props: Props) {
   const { column, filters, scrollContainer } = props;
   const [addFilter] = useBeastStore((state) => [state.addFilter]);
-  const [activeOption, setActiveOption] = useState<Option | undefined>(undefined);
-  const [inputValue, setInputValue] = useState<string | undefined>(undefined);
-  const throttle = useThrottle();
-  const debounce = useDebounce();
 
-  useEffect(() => {
-    if (activeOption && inputValue) {
-      debounce(() => throttle(() => addFilter(column.id, { op: activeOption.value, value: Number(inputValue) }), 300), 300);
+  const handleAddFilter = (idx: number) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addFilter(column.id, emptyFilter, idx);
+  }
+
+  const renderButton = (idx: number) => {
+    if (idx === 0 && filters[column.id]?.length === 1) {
+      return <div className="bg-filter__button" onClick={handleAddFilter(idx + 1)}>
+        AND
+      </div>
     }
-  }, [activeOption, inputValue, throttle]);
-
-  useEffect(() => {
-    if (filters && filters[column.id]?.length) {
-      const { op, value } = (filters[column.id] as NumberFilter[])[0];
-      const option = options.find(opt => opt.value === op);
-      
-      setActiveOption(option);
-      setInputValue(value.toString());
+    if (idx === 0 && filters[column.id]?.length === 2) {
+      return <div className="bg-filter__button">
+        AND
+      </div>
     }
-  }, [filters, column.id]);
 
-  const handleSelectChange = (e: Option) => {
-    if (!e || e.value === OperationType.NONE) {
-      addFilter(column.id, null);
-      setInputValue(undefined);
-    }
-    setActiveOption(e);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
+  }
 
   return (
     <div className="bg-filter bg-filter__number">
-      <div className="bg-filter__selector__container row middle">
-        <Select
-          label={<FormattedMessage id="filter.operation" />}
-          activeOption={activeOption}
-          options={[...options]}
-          container={scrollContainer}
-          onChange={handleSelectChange}
-        />
-        <input type="number" className="bg-filter__input" value={inputValue} onChange={handleInputChange} />
-      </div>
-    </div>
+      {(filters[column.id] || [emptyFilter]).map((filter, idx) => (
+        <Fragment key={`${column.id}-filter-${idx}`}>
+          <FilterLine
+            idx={idx}
+            id={column.id}
+            filter={filter as NumberFilter}
+            scrollContainer={scrollContainer}
+          />
+          {renderButton(idx)}
+    </Fragment>
+  ))
+}
+    </div >
   );
 }
+
+type LineProps = {
+  id: ColumnId;
+  idx: number;
+  filter: NumberFilter;
+  scrollContainer: HTMLDivElement | null;
+};
+
+const FilterLine = ({ id, idx, filter, scrollContainer }: LineProps) => {
+  const [activeOption, setActiveOption] = useState<OperationType | undefined>(filter.op);
+  const [inputValue, setInputValue] = useState<string | undefined>(filter.value?.toString() || '');
+
+  const [addFilter] = useBeastStore((state) => [state.addFilter]);
+
+  const throttle = useThrottle();
+  const debounce = useDebounce();
+
+  const handleSelectChange = (e: Option) => {
+    if (!e || e.value === OperationType.NONE) {
+      addFilter(id, null, idx);
+      setInputValue(undefined);
+      setActiveOption(undefined);
+    } else {
+      setActiveOption(e.value);
+
+      if (inputValue) {
+        addFilter(id, { op: e.value, value: Number(inputValue) }, idx);
+      }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+
+    if (activeOption) {
+      debounce(() => throttle(() => addFilter(id, { op: activeOption, value: Number(value) }, idx), 300), 300);
+    }
+  };
+
+  const stopPropagation = (e: React.MouseEvent | React.UIEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  return (
+    <div className="bg-filter__selector__container row middle">
+      <Select
+        label={<FormattedMessage id="filter.operation" />}
+        activeOption={options.find((option) => option.value === activeOption)}
+        options={options}
+        container={scrollContainer}
+        onChange={handleSelectChange}
+      />
+      <input
+        type="number"
+        className="bg-filter__input"
+        onScroll={stopPropagation}
+        onClick={stopPropagation}
+        value={inputValue || ''}
+        onChange={handleInputChange}
+      />
+    </div>
+  );
+};

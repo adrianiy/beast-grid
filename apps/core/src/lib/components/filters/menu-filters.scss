@@ -50,6 +50,9 @@
 }
 
 .bg-filter__number {
+    margin-top: var(--bg-size--1);
+    padding: var(--bg-size--2);
+    
     .bg-filter__selector__container {
         gap: var(--bg-size--3);
 
@@ -60,6 +63,17 @@
             outline: none;
             color: var(--bg-text-color--1);
             background-color: var(--bg-background-color--1);
+        }
+    }
+    .bg-filter__button {
+        margin: var(--bg-size--3) 0;
+        padding: var(--bg-size--2) var(--bg-size--4);
+        border: var(--bg-border--3);
+        width: min-content;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
         }
     }
 }

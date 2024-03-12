@@ -56,23 +56,7 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
   return (a._originalIdx as number) - (b._originalIdx as number);
 };
 
-export function useTraceUpdate(props) {
-  const prev = useRef(props);
-  useEffect(() => {
-    const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
-      if (prev.current[k] !== v) {
-        ps[k] = [prev.current[k], v];
-      }
-      return ps;
-    }, {});
-    if (Object.keys(changedProps).length > 0) {
-      console.log('Changed props:', changedProps);
-    }
-    prev.current = props;
-  });
-}
-
-export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[]>) => (row: Row) => {
+export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[]>) => (row: Row): boolean => {
   let show = true;
 
   for (const filterKey of Object.keys(filters)) {
@@ -84,28 +68,31 @@ export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[
     } else if (columns[filterKey].filterType === FilterType.NUMBER) {
       const rowValue = row[columns[filterKey].field as string] as number;
       const numberFilter = filters[filterKey] as NumberFilter[];
-      const op = numberFilter[0]?.op;
-      const value = +numberFilter[0]?.value;
+      for (const filter of numberFilter) {
+        const op = filter.op;
+        const value = filter.value || 0;
 
-      if (op === OperationType.EQUAL) {
-        show = show && rowValue === value;
-      } else if (op === OperationType.GREATER_THAN) {
-        show = show && rowValue > value;
-      } else if (op === OperationType.LESS_THAN) {
-        show = show && rowValue < value;
-      } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
-        show = show && rowValue >= value;
-      } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
-        show = show && rowValue <= value;
-      } else if (op === OperationType.NOT_EQUAL) {
-        show = show && rowValue !== value;
+        if (op === OperationType.EQUAL) {
+          show = show && rowValue === value;
+        } else if (op === OperationType.GREATER_THAN) {
+          show = show && rowValue > value;
+        } else if (op === OperationType.LESS_THAN) {
+          show = show && rowValue < value;
+        } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
+          show = show && rowValue >= value;
+        } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
+          show = show && rowValue <= value;
+        } else if (op === OperationType.NOT_EQUAL) {
+          show = show && rowValue !== value;
+        }
       }
     } else {
       show = show && false;
     }
   }
   if (row.children) {
-    show = row.children.some(filterRow(columns, filters));
+    row.children = row.children.filter(filterRow(columns, filters));
+    show = row.children.length > 0;
   }
   return show;
 };

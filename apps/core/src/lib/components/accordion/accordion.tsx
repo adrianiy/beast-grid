@@ -15,10 +15,26 @@ type Props = {
 export default function Accordion(props: PropsWithChildren<Props>) {
   const { label, id, elements, hideArrow, height, children } = props;
   const [expanded, setExpaned] = useState(false);
+  const [childrenHeight, setChildrenHeight] = useState<number | string>(0);
+  const [minHeight, setMinHeight] = useState(0);
 
-  const handleExpandRow = (e: React.MouseEvent<SVGSVGElement>) => {
+  const toggleRow = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    setExpaned(state => !state)
+
+    if (expanded) {
+      setChildrenHeight(0);
+      setMinHeight(0);
+      setExpaned(false);
+    } else {
+      setChildrenHeight(height || 37 * elements);
+      setExpaned(true);
+      
+      setTimeout(() => {
+        setChildrenHeight('min-content');
+        setMinHeight(height || 37 * elements)
+      }, 300)
+    }
+    
   };
 
   return (
@@ -26,20 +42,20 @@ export default function Accordion(props: PropsWithChildren<Props>) {
       key={id}
       id={id}
       className="bg-accordion__wrapper column left"
+      onClick={toggleRow}
     >
       <div className="bg-accordion__item row middle">
         <ChevronDownIcon
           id={`bg-accordion__arrow__${id}`}
           style={{ opacity: hideArrow ? 0 : 1 }}
           className={cn('bg-accordion__arrow', { rotate: !expanded })}
-          onClick={handleExpandRow}
         />
         {label}
       </div>
       <div
         className={cn("bg-accordion__children", { hidden: !expanded })}
         id={`bg-accordion__children__${id}`}
-        style={{ height: expanded ? (height || 37 * elements) : 0 }}
+        style={{ height: childrenHeight, minHeight: minHeight }}
       >
         {children}
       </div>

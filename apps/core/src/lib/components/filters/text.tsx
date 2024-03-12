@@ -53,8 +53,13 @@ export default function TextFilters(props: Props) {
 
     setSearchValue(searchValue);
   };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  }
+  
   return (
-    <div className="bg-filter bg-filter__text">
+    <div className="bg-filter bg-filter__text" onClick={handleClick}>
       <Input placeholder="Search..." className="bg-filter__search" onChange={handleSearch} />
       
       <div className="bg-filter__separator" />
@@ -77,7 +82,7 @@ export default function TextFilters(props: Props) {
                 <CheckIcon />
               </Checkbox.Indicator>
             </Checkbox.Root>
-            <label>{item}</label>
+            <label>{item as string}</label>
           </div>
         ))}
       </SimpleBar>

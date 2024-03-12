@@ -135,7 +135,7 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
   return { columns, sort: columnsWithSort.map((col) => col.id) };
 };
 
-export const addFilter = (id: ColumnId, value: IFilter | null) => (state: GridStore) => {
+export const addFilter = (id: ColumnId, value: IFilter | null, idx = 0) => (state: GridStore) => {
   const { columns, filters } = state;
   const column = columns[id];
 
@@ -147,10 +147,19 @@ export const addFilter = (id: ColumnId, value: IFilter | null) => (state: GridSt
     }
   }
   if (column.filterType === FilterType.NUMBER) {
-    if (!value) {
+    if (!filters[id]) {
       filters[id] = [];
+    }
+    if (!value) {
+      if (!idx) {
+        filters[id] = [];
+      } else {
+        filters[id] = filters[id]?.filter((_, i) => i !== idx);
+      }
+    } else if (filters[id][idx]) {
+      filters[id][idx] = value;
     } else {
-      filters[id] = [value];
+      filters[id][idx] = value;
     }
   }
   if (!filters[id].length) {
