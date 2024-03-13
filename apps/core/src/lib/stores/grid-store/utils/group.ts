@@ -27,7 +27,10 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
       };
       columns[newColumn.id] = newColumn;
       changePosition(columns, newColumn, [newColumn.id], 1);
+    } else {
+      newColumn = treeColumn
     }
+
   }
 
   return newColumn;

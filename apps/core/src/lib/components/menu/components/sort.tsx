@@ -22,6 +22,10 @@ export default function SortSection({ column, multiSort, onMouseEnter }: PropsWi
     e.stopPropagation();
     resetColumn(column.id);
   };
+  
+  if (!column.sortable) {
+    return null;
+  }
 
   if (!column.sort) {
     return (

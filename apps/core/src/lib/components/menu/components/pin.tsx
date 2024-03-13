@@ -23,6 +23,10 @@ export default function PinSection({
 }>) {
   const [pinColumn] = useBeastStore((state) => [state.pinColumn]);
   
+  if (!column.menu?.pin || !column.parent) {
+    return null;
+  }
+  
   const handlePinColumn = (pinType: PinType) => () => {
     pinColumn(column.id, column.pinned === pinType ? PinType.NONE : pinType);
     onClose();
