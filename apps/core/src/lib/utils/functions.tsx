@@ -56,8 +56,9 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
   return (a._originalIdx as number) - (b._originalIdx as number);
 };
 
-export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[]>) => (row: Row): boolean => {
+export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[]>) => (row: Row): Row | undefined => {
   let show = true;
+  let children = row.children;
 
   for (const filterKey of Object.keys(filters)) {
     if (
@@ -91,10 +92,12 @@ export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[
     }
   }
   if (row.children) {
-    row.children = row.children.filter(filterRow(columns, filters));
-    show = row.children.length > 0;
+    children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
+    show = children.length > 0;
   }
-  return show;
+  if (show) {
+    return { ...row, children };
+  }
 };
 
 export const useThrottle = () => {

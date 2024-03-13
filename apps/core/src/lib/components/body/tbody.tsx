@@ -67,7 +67,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
 
         setMaxMin([maxValue, minValue]);
-    }, [lastScroll, expandedRows, data.length]);
+    }, [lastScroll, expandedRows, data.length, filters]);
 
     useEffect(() => {
         const someActive = Object.entries(filters).some(
@@ -75,7 +75,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         );
         setSortedData(
             someActive
-                ? data.filter(filterRow(columns, filters))
+                ? data.map(filterRow(columns, filters)).filter(Boolean) as Row[]
                 : data
         );
     }, [data, columns, filters]);

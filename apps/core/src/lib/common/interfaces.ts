@@ -5,6 +5,7 @@ export interface Row {
   [key: string]: unknown;
   _id?: string;
   _orignalIdx?: number;
+  _hidden?: boolean;
   children?: Row[];
 }
 
