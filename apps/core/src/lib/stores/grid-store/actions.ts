@@ -4,6 +4,7 @@ import { MIN_COL_WIDTH } from './../../common/globals';
 
 import {
   addSort,
+  changePosition,
   getSwappableClone,
   groupDataByColumnDefs,
   mergeColumns,
@@ -15,7 +16,7 @@ import {
   toggleHide,
 } from './utils';
 import { GridStore } from './store';
-import { PinType, SortType } from '../../common';
+import { FilterType, PinType, SortType } from '../../common';
 import { createGroupColumn } from './utils/group';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
@@ -134,13 +135,35 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
   return { columns, sort: columnsWithSort.map((col) => col.id) };
 };
 
-export const addFilter = (id: ColumnId, value: IFilter) => (state: GridStore) => {
+export const addFilter = (id: ColumnId, value: IFilter | null, idx = 0) => (state: GridStore) => {
   const { columns, filters } = state;
+  const column = columns[id];
 
-  if (filters[id]?.includes(value as string)) {
-    filters[id] = filters[id]?.filter((val) => val !== value);
-  } else {
-    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
+  if (column.filterType === FilterType.TEXT) {
+    if (filters[id]?.includes(value as string)) {
+      filters[id] = filters[id]?.filter((val) => val !== value);
+    } else {
+      filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
+    }
+  }
+  if (column.filterType === FilterType.NUMBER) {
+    if (!filters[id]) {
+      filters[id] = [];
+    }
+    if (!value) {
+      if (!idx) {
+        filters[id] = [];
+      } else {
+        filters[id] = filters[id]?.filter((_, i) => i !== idx);
+      }
+    } else if (filters[id][idx]) {
+      filters[id][idx] = value;
+    } else {
+      filters[id][idx] = value;
+    }
+  }
+  if (!filters[id].length) {
+    delete filters[id];
   }
 
   return { columns, filters: { ...filters } };
@@ -192,7 +215,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 
   newColumn.rowGroup = true;
   groupOrder.push(id);
-  
+
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
   const sortedColumns = sortColumns(columns);
@@ -202,7 +225,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns, groupOrder, data, sortedColumns };
-}
+};
 
 export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   const { columns, container, initialData } = state;
@@ -215,6 +238,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   if (column.tree) {
     groupOrder.forEach((col) => {
       toggleHide(columns[col], columns);
+      changePosition(columns, column, [column.id], -1);
     });
     groupOrder = [];
     setColumnsStyleProps(columns, container.offsetWidth);
@@ -222,9 +246,8 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   } else {
     groupOrder = groupOrder.filter((col) => col !== id);
   }
-  
+
   const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
-  console.log(data, initialData)
 
   const sortedColumns = sortColumns(columns);
 
@@ -233,5 +256,4 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns, groupOrder, data, sortedColumns };
-}
-
+};

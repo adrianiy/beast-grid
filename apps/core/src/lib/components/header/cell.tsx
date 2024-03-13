@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
-import { dispatch } from 'use-bus';
-
-import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
-import { BusActions, MenuHorizontalPosition } from '../../common';
+import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
+import { MenuHorizontalPosition } from '../../common';
+
+import MenuLayer from '../menu/menu-layer';
+import DndLayer from '../dnd/dnd-layer';
 
 import { useBeastStore } from './../../stores/beast-store';
 import { useDndStore } from './../../stores/dnd-store';
@@ -27,8 +28,10 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
   const lastHitElement = useRef<HTMLElement | null>(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [columns, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
+  const [dragging, setDragging] = useState(false);
+  const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.columns,
+    state.filters,
     state.theme,
     state.hideColumn,
     state.swapColumns,
@@ -38,7 +41,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
   ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
   const [drag] = useDndHook(
-    { id: column.id, text: column.headerName, isInside: true },
     {
       ...dragOptions,
       isDropTarget: true,
@@ -50,7 +52,6 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     container
   );
   const [resize] = useDndHook(
-    { id: column.id, hidePreview: true },
     {
       ...dragOptions,
       onAnimationFrame: handleResize,
@@ -62,7 +63,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     lastX.current = 0;
     lastHitElement.current = null;
     setShowMenu(false);
-    dispatch(BusActions.HIDE_MENU);
+    setDragging(true);
   }
 
   function onDirectionChange() {
@@ -130,6 +131,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
         events.onDropOutside.callback(column);
       }
     }
+    setDragging(false);
   }
 
   const handleChangeSort = () => {
@@ -140,16 +142,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch({
-      type: BusActions.SHOW_MENU,
-      payload: {
-        column,
-        multiSort,
-        theme,
-        horizontal: MenuHorizontalPosition.LEFT,
-        clipRef: () => menuRef.current as SVGSVGElement,
-      },
-    });
+    setShowMenu(state => !state);
   };
 
   const renderSortIcon = (sort: SortState) => {
@@ -196,6 +189,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
     >
       <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
         <span className="bg-grid-header-drop bg-grid-header__cell__name">{column.headerName}</span>
+        {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
         {column.sort && renderSortIcon(column.sort)}
       </div>
 
@@ -204,6 +198,16 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       </div>
 
       <div ref={resize} className="bg-grid-header__resize" />
+      <MenuLayer
+        visible={showMenu}
+        clipRef={() => menuRef.current as SVGSVGElement}
+        column={column}
+        multiSort={multiSort}
+        theme={theme}
+        horizontal={MenuHorizontalPosition.LEFT}
+        onClose={() => setShowMenu(false)}
+      />
+      <DndLayer text={column.headerName} hide={!!events?.onDropOutside?.hide} visible={dragging} theme={theme} />
     </div>
   );
 }

@@ -6,14 +6,18 @@ import SimpleBar from 'simplebar-react';
 import { Column, IFilter } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
+import { CheckIcon, Cross2Icon, DividerHorizontalIcon } from '@radix-ui/react-icons';
+
 import cn from 'classnames';
-import { CheckIcon, DividerHorizontalIcon } from '@radix-ui/react-icons';
+
+import './menu-filters.scss';
+import Input from '../input/input';
 
 type Props = {
   column: Column;
 };
 
-export default function MenuFilters(props: Props) {
+export default function TextFilters(props: Props) {
   const { column } = props;
   const [searchValue, setSearchValue] = useState('');
   const [checked, setChecked] = useState<'indeterminate' | boolean>(false);
@@ -33,7 +37,7 @@ export default function MenuFilters(props: Props) {
       setChecked('indeterminate');
     }
   }, [filters, column.filterOptions, column.id, setChecked]);
-  
+
   const handleFilterChange =
     (value: IFilter): MouseEventHandler<HTMLDivElement> =>
       () => {
@@ -49,21 +53,22 @@ export default function MenuFilters(props: Props) {
 
     setSearchValue(searchValue);
   };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  }
+  
   return (
-    <>
-      <input
-        type="text"
-        autoFocus
-        placeholder="Search..."
-        className="bg-menu__filter__search bg-menu__filter__item--big"
-        onChange={handleSearch}
-      />
-      <div className="bg-menu__separator" />
-      <SimpleBar style={{ maxHeight: 300 }} className="bg-menu__filter__container">
+    <div className="bg-filter bg-filter__text" onClick={handleClick}>
+      <Input placeholder="Search..." className="bg-filter__search" onChange={handleSearch} />
+      
+      <div className="bg-filter__separator" />
+      
+      <SimpleBar style={{ maxHeight: 300 }} className="bg-filter__container">
         {column.filterOptions?.map((item, idx) => (
           <div
             key={idx}
-            className={cn('bg-menu__filter__item row middle', {
+            className={cn('bg-filter__item row middle', {
               hidden: searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase()),
             })}
             onClick={handleFilterChange(item)}
@@ -77,12 +82,12 @@ export default function MenuFilters(props: Props) {
                 <CheckIcon />
               </Checkbox.Indicator>
             </Checkbox.Root>
-            <label>{item}</label>
+            <label>{item as string}</label>
           </div>
         ))}
       </SimpleBar>
-      <div className="bg-menu__separator" />
-      <div className="bg-menu__filter__item bg-menu__filter__item--big row middle" onClick={handleSelectAll}>
+      <div className="bg-filter__separator" />
+      <div className="bg-filter__item bg-menu__filter__item--big row middle" onClick={handleSelectAll}>
         <Checkbox.Root
           className="bg-checkbox__root"
           checked={checked}
@@ -96,6 +101,6 @@ export default function MenuFilters(props: Props) {
         </Checkbox.Root>
         <label>Select all</label>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,10 +1,11 @@
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, PinType, SortType } from './enums';
+import { AggregationType, FilterType, OperationType, PinType, SortType, ToolbarPosition } from './enums';
 
 export interface Row {
   [key: string]: unknown;
   _id?: string;
   _orignalIdx?: number;
+  _hidden?: boolean;
   children?: Row[];
 }
 
@@ -31,7 +32,8 @@ export interface MenuProps {
 
 export type ColumnId = string;
 
-export type IFilter = string | number | boolean;
+export type NumberFilter = { op: OperationType | undefined, value: number | undefined };
+export type IFilter = string | NumberFilter | boolean;
 
 export interface BaseColumnDef {
   headerName: string;
@@ -98,6 +100,13 @@ export interface TreeConstructor {
   menu: Partial<MenuProps>;
 }
 
+export interface ToolBar {
+  download: boolean;
+  grid: boolean;
+  filter: boolean;
+  chart: boolean;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: Partial<ColumnDef>;
@@ -108,6 +117,8 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   style?: Partial<StyleConfig>;
   dragOptions?: Partial<dragOptions>;
   tree?: Partial<TreeConstructor>;
+  topToolbar?: Partial<ToolBar>;
+  bottomToolbar?: Partial<ToolBar>;
 }
 
 export interface TableStyles {
@@ -138,6 +149,7 @@ export interface Column extends ColumnDef, Position {
   parent?: ColumnId;
   original?: ColumnId;
   originalParent?: ColumnId;
+  filterType?: FilterType;
   logicDelete?: boolean;
   lastPinned?: boolean;
   tree?: boolean;

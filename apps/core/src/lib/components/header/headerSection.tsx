@@ -28,7 +28,7 @@ export default function HeaderSection<T>({
     return (
       <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
         {level.map((column, idx) => {
-          if (column.pinned !== pinType) {
+          if (column.pinned !== pinType || column.hidden) {
             return null;
           }
           return (

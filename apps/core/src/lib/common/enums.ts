@@ -36,6 +36,11 @@ export enum MenuHorizontalPosition {
   RIGHT = 'right',
 }
 
+export enum ToolbarPosition {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+}
+
 export enum SideBarConfig {
   GRID = 'grid',
   FILTERS = 'filters'
@@ -44,6 +49,21 @@ export enum SideBarConfig {
 export enum BusActions {
   EXPAND = '@bg/expandAll',
   COLLAPSE = '@bg/collapseAll',
-  SHOW_MENU = '@bg/showMenu',
-  HIDE_MENU = '@bg/hideMenu',
+}
+
+export enum FilterType {
+  TEXT = 'text',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
+}
+
+export enum OperationType {
+  NONE = 'none',
+  EQUAL = 'eq',
+  NOT_EQUAL = 'neq',
+  GREATER_THAN = 'gt',
+  GREATER_THAN_OR_EQUAL = 'gte',
+  LESS_THAN = 'lt',
+  LESS_THAN_OR_EQUAL = 'lte',
+  BETWEEN = 'between',
 }

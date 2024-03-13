@@ -1,7 +1,6 @@
-@import './../../flex.scss';
-@import './../../variables';
-
 .bg-menu__container {
+    @import './../../flex.scss';
+
     position: absolute;
     user-select: none;
     border: var(--bg-border--3);
@@ -14,6 +13,14 @@
     overflow: hidden;
     box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
         rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
+        
+    .bg-dot--active {
+        --size: var(--bg-size--2);
+        background-color: var(--bg-background-color--active);
+        height: var(--size);
+        width: var(--size);
+        border-radius: 50%;
+    }
 
     svg {
         --size: var(--bg-size--4);
@@ -42,6 +49,16 @@
         }
     }
     .bg-menu__content {
+        border-bottom: var(--bg-border--3);
+        margin-bottom: var(--bg-size--1);
+        padding-bottom: var(--bg-size--1);
+
+        &:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
         .bg-menu__item {
             flex: 1;
             color: var(--bg-text-color--1);
@@ -72,19 +89,7 @@
             }
         }
 
-        &:last-child {
-            .bg-menu__separator {
-                display: none;
-            }
-            .bg-menu__item__submenu {
-                .bg-menu__separator {
-                    display: block;
-                }
-            }
-        }
-
         .bg-menu__item__submenu {
-            display: none;
             position: absolute;
             margin-top: calc(calc(var(--bg-size--1) * -1) - 1px);
             padding: var(--bg-size--1) 0;
@@ -99,6 +104,9 @@
                 left: auto;
                 right: 100%;
             }
+            .bg-filter {
+                margin-top: 0;
+            }
         }
 
         &:hover {
@@ -108,68 +116,6 @@
             .bg-menu__item__submenu {
                 display: flex;
             }
-        }
-
-        .bg-menu__filter__container {
-            max-height: 300px;
-            overflow: auto;
-        }
-        .bg-menu__filter__item,
-        .bg-menu__grid__item {
-            color: var(--bg-text-color--1);
-            gap: var(--bg-size--3);
-            padding: var(--bg-size--2);
-            margin: 0 var(--bg-size--1);
-            cursor: pointer;
-
-            button {
-                all: unset;
-
-                svg {
-                    --size: 100%;
-                }
-            }
-            .bg-checkbox__root {
-                --size: var(--bg-size--3);
-                background-color: white;
-                border: var(--bg-border--3);
-                max-width: var(--size);
-                max-height: var(--size);
-                min-width: var(--size);
-                min-height: var(--size);
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-            }
-
-            label {
-                width: 100%;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            &--big {
-                padding: var(--bg-size--2);
-                gap: var(--bg-size--3);
-            }
-
-            &.hidden {
-                display: none;
-            }
-
-            &.active {
-                color: var(--bg-text-color--1);
-            }
-        }
-
-        input[type='text'] {
-            outline: none;
-            border: none;
-            line-height: 21px;
-            background-color: transparent;
-            color: var(--bg-text-color--1);
         }
     }
 }

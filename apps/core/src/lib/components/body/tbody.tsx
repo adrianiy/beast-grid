@@ -5,9 +5,10 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import RowContainer from './row';
 
-import { BusActions, Column, Data, Row, RowConfig, RowEvents, SortType } from '../../common';
+import { BusActions, Column, Data, Row, RowConfig, RowEvents } from '../../common';
 
 import './tbody.scss';
+import { filterRow, sortData } from '../../utils/functions';
 
 type TBodyProps = {
     rowHeight: number;
@@ -66,7 +67,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
 
         setMaxMin([maxValue, minValue]);
-    }, [lastScroll, expandedRows, data.length]);
+    }, [lastScroll, expandedRows, data.length, filters]);
 
     useEffect(() => {
         const someActive = Object.entries(filters).some(
@@ -74,18 +75,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         );
         setSortedData(
             someActive
-                ? data.filter((d) => {
-                    let show = true;
-
-                    for (const filterKey of Object.keys(filters)) {
-                        if (filters[filterKey].includes(`${d[columns[filterKey].field as string]}`)) {
-                            show = show && true;
-                        } else {
-                            show = show && false;
-                        }
-                    }
-                    return show;
-                })
+                ? data.map(filterRow(columns, filters)).filter(Boolean) as Row[]
                 : data
         );
     }, [data, columns, filters]);
@@ -96,21 +86,6 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
             const sortColumns = Object.values(columns)
                 .filter((c) => c.sort)
                 .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
-
-            const sortData = (a: Row, b: Row) => {
-                for (const column of sortColumns) {
-                    const valueA = a[column.field as keyof Row] as number;
-                    const valueB = b[column.field as keyof Row] as number;
-
-                    if (valueA > valueB) {
-                        return column.sort?.order === SortType.ASC ? 1 : -1;
-                    }
-                    if (valueA < valueB) {
-                        return column.sort?.order === SortType.ASC ? -1 : 1;
-                    }
-                }
-                return (a._originalIdx as number) - (b._originalIdx as number);
-            };
 
             const asyncSort = async () => {
                 if (onSortChange) {
@@ -126,11 +101,10 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                         setSorting(true);
                     }
                     setTimeout(() => {
-                        console.log(sortedData)
-                        sortedData.sort(sortData);
+                        sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 
-                        setSortedData(sortedData);
+                        setSortedData([...sortedData]);
                         if (data.length > PERFORMANCE_LIMIT) {
                             setTimeout(() => setSorting(false), 100);
                         }

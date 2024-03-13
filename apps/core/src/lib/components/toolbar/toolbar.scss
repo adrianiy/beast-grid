@@ -1,0 +1,30 @@
+.bg-toolbar {
+  position: relative;
+  width: 100%;
+  padding: var(--bg-size--1) 0;
+  user-select: none;
+  
+  .bg-toolbar__button {
+    padding: var(--bg-size--2) var(--bg-size--3);
+    cursor: pointer;
+    gap: var(--bg-size--3);
+
+
+    &:hover {
+      background-color: var(--bg-hover-color--1);
+    }
+
+    &.right {
+      label {
+        position: absolute;
+        display: none;
+      }
+
+      &:hover {
+        label {
+          display: block;
+        }
+      }
+    }
+  }
+}

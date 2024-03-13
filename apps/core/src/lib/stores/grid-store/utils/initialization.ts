@@ -9,6 +9,7 @@ import {
   PinType,
   ColumnId,
   TreeConstructor,
+  FilterType,
 } from '../../../common';
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
@@ -64,7 +65,7 @@ export const getColumnsFromDefs = (
 };
 
 export const createVirtualIds = (data: Data): Data => {
-  return data.map((row, idx) => {
+  const newData = data.map((row, idx) => {
     return {
       ...row,
       _id: uuidv4(),
@@ -72,6 +73,8 @@ export const createVirtualIds = (data: Data): Data => {
       children: row.children ? createVirtualIds(row.children) : undefined,
     };
   });
+
+  return [...newData]
 };
 
 export const groupDataByColumnDefs = (
@@ -150,10 +153,20 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (column.menu?.filter && column.field) {
+    if (typeof (data[0][column.field as string]) === 'boolean') {
+      column.filterType = FilterType.BOOLEAN;
+      return
+    }
+    if (typeof (data[0][column.field as string]) === 'string') {
+      column.filterType = FilterType.TEXT;
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;
+      return
+    }
+    if (typeof (data[0][column.field as string]) === 'number') {
+      column.filterType = FilterType.NUMBER;
+      return
     }
   });
 };

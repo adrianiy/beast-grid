@@ -49,6 +49,7 @@
     cursor: pointer;
     user-select: none;
     position: absolute;
+    gap: var(--bg-size--3);
     padding: 0 var(--bg-size--4);
     transition: all linear var(--bg-transition--1);
     box-sizing: border-box;
@@ -59,6 +60,7 @@
     &__left {
         width: 100%;
         overflow: hidden;
+        gap: var(--bg-size--3);
     }
 
     .bg-grid-header__cell__name {

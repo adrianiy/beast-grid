@@ -1,0 +1,79 @@
+.bg-filter {
+    margin-top: var(--bg-size--3);
+    .bg-filter__separator {
+        border-bottom: var(--bg-border--3);
+        margin: var(--bg-size--1) 0;
+    }
+    .bg-filter__container {
+        max-height: 300px;
+        overflow: auto;
+    }
+
+    .bg-filter__item {
+        color: var(--bg-text-color--1);
+        gap: var(--bg-size--3);
+        padding: var(--bg-size--2);
+        margin: 0 var(--bg-size--1);
+        cursor: pointer;
+
+        &.hidden {
+            display: none;
+        }
+
+        button {
+            all: unset;
+
+            svg {
+                --size: 100%;
+            }
+        }
+        .bg-checkbox__root {
+            --size: var(--bg-size--3);
+            background-color: white;
+            border: var(--bg-border--3);
+            max-width: var(--size);
+            max-height: var(--size);
+            min-width: var(--size);
+            min-height: var(--size);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        label {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+.bg-filter__number {
+    margin-top: var(--bg-size--1);
+    padding: var(--bg-size--2);
+    
+    .bg-filter__selector__container {
+        gap: var(--bg-size--3);
+
+        input {
+            width: 100%;
+            padding: var(--bg-size--3);
+            border: var(--bg-border--3);
+            outline: none;
+            color: var(--bg-text-color--1);
+            background-color: var(--bg-background-color--1);
+        }
+    }
+    .bg-filter__button {
+        margin: var(--bg-size--3) 0;
+        padding: var(--bg-size--2) var(--bg-size--4);
+        border: var(--bg-border--3);
+        width: min-content;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}

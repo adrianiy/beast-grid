@@ -1,0 +1,29 @@
+.bg-select__container {
+    border: var(--bg-border--3);
+    padding: var(--bg-size--3);
+    background-color: var(--bg-background-color--1);
+    line-height: 1;
+    gap: var(--bg-size--3);
+
+    label {
+        white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.bg-select__options {
+    position: absolute;
+    background-color: var(--bg-background-color--1);
+    z-index: 2000;
+    border: var(--bg-border--3);
+    padding: var(--bg-size--2);
+
+    .bg-select__option {
+        padding: var(--bg-size--2);
+        cursor: pointer;
+        gap: var(--bg-size--3);
+        min-width: 100px;
+    }
+}

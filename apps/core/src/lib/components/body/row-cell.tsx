@@ -1,5 +1,5 @@
-import { ChevronRight } from '@mui/icons-material';
 import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
+import { ChevronRightIcon } from '@radix-ui/react-icons';
 
 import cn from 'classnames';
 import { LEVEL_PADDING } from '../../common';
@@ -36,7 +36,7 @@ export function RowCell({ height, row, columnDef, config, level, groupOrder, col
       return null;
     }
 
-    return <ChevronRight className={cn(!!row._expanded && 'active')} />
+    return <ChevronRightIcon className={cn(!!row._expanded && 'active')} />
   }
 
   return (

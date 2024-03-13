@@ -2,7 +2,7 @@
   "menu.sort.asc": "Ascendente",
   "menu.sort.desc": "Descendente",
   "menu.sort.reset": "Reiniciar orden",
-  "menu.pin": "Fijar",
+  "menu.pin.pin": "Fijar",
   "menu.pin.left": "Fijar a la izquierda",
   "menu.pin.right": "Fijar a la derecha",
   "menu.grid": "Configurar grid",
@@ -10,6 +10,18 @@
   "menu.column.expand": "Expandir grupos",
   "menu.column.collapse": "Colapsar grupos",
   "menu.column.group": "Agrupar por {columnName}",
-  "menu.column.ungroup": "Desagrupar"
+  "menu.column.ungroup": "Desagrupar",
+  "toolbar.download": "Descargar",
+  "toolbar.grid": "Columnas",
+  "toolbar.filter": "Filtros",
+  "filter.operation": "Operación",
+  "filter.none": "Sin filtro",
+  "filter.equal": "Igual a",
+  "filter.notEqual": "No igual a",
+  "filter.greaterThan": "Mayor que",
+  "filter.greaterThanOrEqual": "Mayor o igual que",
+  "filter.lessThan": "Menor que",
+  "filter.lessThanOrEqual": "Menor o igual que",
+  "filter.between": "Entre"
   
 }

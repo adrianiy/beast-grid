@@ -1,51 +1,56 @@
 import { useDndStore } from './../../stores/dnd-store';
 import { EyeNoneIcon, MoveIcon } from '@radix-ui/react-icons';
-import { BeastGridConfig } from '../../common';
+
+import { createPortal } from 'react-dom';
+
+import cn from 'classnames';
 
 import './dnd-layer.scss';
 
-export default function DndLayer<T>({ config }: { config: BeastGridConfig<T>}) {
-  const [dragItem, coords, pointer] = useDndStore((state) => [
-    state.dragItem,
-    state.coords,
-    state.pointer,
-  ]);
+type Props = {
+  hide: boolean;
+  text: string; 
+  theme: string;
+  visible: boolean
+}
 
-  const renderItem = () => {
-    if (!dragItem || !coords || dragItem.hidePreview) return null;
-    
-    return (
-      <BoxDragPreview
-        text={dragItem.text as string}
-        isInside={pointer.x > 0 && pointer.y > 0}
-        top={coords?.y}
-        left={coords?.x}
-        hide={config?.header?.events?.onDropOutside?.hide}
-      />
-    );
-  };
+export default function DndLayer(props: Props) {
 
-  return <div className="dnd-layer">{renderItem()}</div>;
+  if (!props.visible) return null;
+  
+  return createPortal(
+    <BoxDragPreview
+      {...props}
+    />,
+    document.body
+  );
+
+
 }
 
 interface BoxDragPreviewProps {
   text: string;
-  isInside: boolean;
-  top?: number;
-  left?: number;
-  hide?: boolean;
+  hide: boolean;
+  theme: string;
 }
 
-const BoxDragPreview = ({ text, isInside, top, left, hide }: BoxDragPreviewProps) => {
+const BoxDragPreview = ({ text, hide, theme }: BoxDragPreviewProps) => {
+  const [coords, pointer] = useDndStore((state) => [
+    state.coords,
+    state.pointer,
+  ]);
+
+  if (!coords) return null;
+  
   return (
     <div
-      className="dnd-drag-preview"
+      className={cn("dnd-drag-preview", theme)}
       style={{
-        top,
-        left,
+        top: window.scrollY + coords?.y + 12,
+        left: window.scrollX + coords?.x + 12,
       }}
     >
-      {isInside || !hide ? (
+      {(pointer.x > 0 && pointer.y > 0) || !hide ? (
         <MoveIcon />
       ) : (
         <EyeNoneIcon />

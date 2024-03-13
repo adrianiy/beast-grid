@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, ToolbarPosition } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -29,7 +29,7 @@ const columnDefs: ColumnDef[] = [
     headerName: 'USER',
     children: [
       { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true, column: true } },
-      { headerName: 'AGE', field: 'age', width: 100, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true } },
+      { headerName: 'AGE', field: 'age', width: 100, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true, filter: true } },
       { headerName: 'LANGUAGE', field: 'language', width: 100, menu: { grid: true, column: true }}
     ],
   },
@@ -41,6 +41,9 @@ const columnDefs: ColumnDef[] = [
         (month): ColumnDef => ({
           headerName: month.toUpperCase(),
           field: month,
+          menu: {
+            filter: true
+          },
           aggregation: AggregationType.SUM,
           sortable: true,
           flex: 1,
@@ -109,6 +112,13 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           name: 'GROUP',
           field: 'name'
         },
+        topToolbar: {
+          grid: true,
+          filter: true,
+        },
+        bottomToolbar: {
+          download: true,
+        },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
         },
@@ -135,7 +145,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           Error fetching data :(
         </Alert>
       </Snackbar>
-      <BeastGrid config={config} api={beastApi} theme={theme} />
+      <BeastGrid config={config} api={beastApi} theme={theme} locale="es" />
     </>
   );
 }
