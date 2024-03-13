@@ -16,12 +16,11 @@ type Props = {
   options: Option[];
   activeOption?: Option;
   container: HTMLDivElement | null;
-  parent?: HTMLDivElement;
   onChange: (e: Option) => void;
 };
 export default function Select(props: PropsWithChildren<Props>) {
   const ref = useRef<HTMLDivElement>(null);
-  const { options, activeOption, label, container, parent } = props;
+  const { options, activeOption, label, container } = props;
 
   const [open, setOpen] = useState(false);
 
@@ -45,7 +44,6 @@ export default function Select(props: PropsWithChildren<Props>) {
         open={open}
         inputRef={ref.current}
         container={container}
-        parent={parent}
         onClose={() => setOpen(false)}
         onClick={handleClick}
       />
