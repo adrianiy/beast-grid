@@ -63,10 +63,6 @@
             outline: none;
             color: var(--bg-text-color--1);
             background-color: var(--bg-background-color--1);
-
-            &::placeholder {
-                font-size: var(--bg-font-size--1);
-            }
         }
     }
     .bg-filter__button {
