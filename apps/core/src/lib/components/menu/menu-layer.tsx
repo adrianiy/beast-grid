@@ -109,21 +109,15 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
 
     moveMenu();
 
-    const closeMenu = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
     setTimeout(() => {
       menuRef.current?.style.setProperty('overflow', 'visible');
     }, 400);
 
-    document.addEventListener('click', closeMenu);
+    document.addEventListener('click', onClose);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
-      document.removeEventListener('click', closeMenu);
+      document.removeEventListener('click', onClose);
       document.removeEventListener('scroll', moveMenu);
       container.removeEventListener('scroll', moveMenu);
     };
