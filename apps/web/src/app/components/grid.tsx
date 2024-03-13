@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, ToolbarPosition } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Row, ToolbarPosition } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -33,7 +33,7 @@ const columnDefs: ColumnDef[] = [
       { headerName: 'LANGUAGE', field: 'language', width: 100, menu: { grid: true, column: true }}
     ],
   },
-  { headerName: 'USERS', field: 'id', aggregation: AggregationType.COUNT, flex: 1 },
+  { headerName: 'USERS', field: 'id', aggregation: (row: Row) => `${row.children?.length || 0} users`, flex: 1 },
   {
     headerName: 'MONTHS',
     children: [
@@ -107,10 +107,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         sort: {
           enabled: true,
           multiple: true
-        },
-        tree: {
-          name: 'GROUP',
-          field: 'name'
         },
         topToolbar: {
           grid: true,

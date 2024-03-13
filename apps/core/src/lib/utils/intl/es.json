@@ -14,6 +14,8 @@
   "toolbar.download": "Descargar",
   "toolbar.grid": "Columnas",
   "toolbar.filter": "Filtros",
+  "filter.selectAll": "Seleccionar todo",
+  "filter.placeholder": "Buscar...",
   "filter.operation": "Operación",
   "filter.none": "Sin filtro",
   "filter.equal": "Igual a",

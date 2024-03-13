@@ -17,6 +17,7 @@
     background-color: var(--bg-background-color--1);
     transition: scroll-behavior var(--bg-transition--1);
     color: var(--bg-text-color--1);
+    font-size: var(--bg-font-size--1);
     
     .bg-dot--active {
         --size: var(--bg-size--2);

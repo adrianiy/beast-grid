@@ -14,6 +14,8 @@
   "toolbar.download": "Download",
   "toolbar.grid": "Columns",
   "toolbar.filter": "Filters",
+  "filter.selectAll": "Select all",
+  "filter.placeholder": "Search...",
   "filter.operation": "Operation",
   "filter.none": "None",
   "filter.equal": "Equal to",
