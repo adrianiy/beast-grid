@@ -24,7 +24,15 @@ type TBodyProps = {
 const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 5;
 
-export default function TBody({ rowHeight, headerHeight, config, maxHeight, border, onSortChange, events }: TBodyProps) {
+export default function TBody({
+    rowHeight,
+    headerHeight,
+    config,
+    maxHeight,
+    border,
+    onSortChange,
+    events,
+}: TBodyProps) {
     const gaps = useRef<Record<string, number>>({});
     const [data, columns, container, scrollElement, sort, filters, setSorting, groupOrder] = useBeastStore((state) => [
         state.data,
@@ -34,7 +42,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         state.sort,
         state.filters,
         state.setSorting,
-        state.groupOrder
+        state.groupOrder,
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
@@ -59,7 +67,8 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
     }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
 
     useEffect(() => {
-        const containerHeight = (maxHeight ? maxHeight : container.getBoundingClientRect().height) - headerHeight * levels.length;
+        const containerHeight =
+            (maxHeight ? maxHeight : container.getBoundingClientRect().height) - headerHeight * levels.length;
         const visibleRows = Math.floor(containerHeight / rowHeight);
         const topRow = Math.floor(lastScroll / rowHeight);
         const bottomRow = topRow + visibleRows;
@@ -73,11 +82,11 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
-        setSortedData(
-            someActive
-                ? data.map(filterRow(columns, filters)).filter(Boolean) as Row[]
-                : data
-        );
+        const newSortedData = someActive ? (data.map(filterRow(columns, filters)).filter(Boolean) as Row[]) : data;
+
+        setSortedData(newSortedData);
+        const [, expanded] = updateGaps(0, newSortedData);
+        setExpandedRows(expanded);
     }, [data, columns, filters]);
 
     useEffect(() => {
@@ -116,17 +125,9 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         }
     }, [sort]);
 
-    useBus(
-        BusActions.EXPAND,
-        () => sortedData.forEach((row) => forceRowExpand(row, true)),
-        [sortedData]
-    )
+    useBus(BusActions.EXPAND, () => sortedData.forEach((row) => forceRowExpand(row, true)), [sortedData]);
 
-    useBus(
-        BusActions.COLLAPSE,
-        () => sortedData.forEach((row) => forceRowExpand(row, false)),
-        [sortedData]
-    )
+    useBus(BusActions.COLLAPSE, () => sortedData.forEach((row) => forceRowExpand(row, false)), [sortedData]);
 
     const lastLevel = Object.values(columns).filter((c) => c.final);
 
@@ -145,37 +146,37 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 row.children.forEach((child) => forceRowExpand(child, value));
             }
         }
-    }
+    };
 
-    const updateGaps = (gap = 0, gapData = sortedData): number => {
+    const updateGaps = (gap = 0, gapData = sortedData, expanded = 0): [number, number] => {
         for (let idx = 0; idx < gapData.length; idx++) {
             const row = gapData[idx];
             if (row) {
                 gaps.current[row._id as string] = gap;
                 if (row.children && row._expanded) {
-                    gap = updateGaps(gap, row.children);
+                    expanded += row.children.length;
+                    [gap, expanded] = updateGaps(gap, row.children, expanded);
                 }
                 gap += row._expanded ? (row.children?.length || 0) * rowHeight : 0;
-
             }
         }
 
-        return gap;
-    }
+        return [gap, expanded];
+    };
 
     const expandRow = (row: Row) => {
         row._expanded = true;
-        setExpandedRows((state) => state + (row.children?.length || 0));
-        updateGaps();
-    }
+        const [, expanded] = updateGaps();
+        setExpandedRows(expanded);
+    };
 
     const collapseRow = (row: Row) => {
         row._expanded = false;
-        setExpandedRows((state) => state - (row.children?.length || 0));
-        updateGaps();
-    }
+        const [, expanded] = updateGaps();
+        setExpandedRows(expanded);
+    };
 
-    const handleRowExpand = (row: Row) => () =>  {
+    const handleRowExpand = (row: Row) => () => {
         if (row._expanded) {
             collapseRow(row);
         } else {
@@ -204,7 +205,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
                 events={events}
                 gap={gaps.current[row._id as string] || 0}
             />
-        )
+        );
 
         if (row.children && row._expanded) {
             for (let i = 0; i < row.children.length; i++) {
@@ -216,7 +217,7 @@ export default function TBody({ rowHeight, headerHeight, config, maxHeight, bord
         }
 
         return gap;
-    }
+    };
 
     const createDataSlice = () => {
         const renderArray: ReactNode[][] = [];

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { AggregationType, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
+import { useRef } from 'react';
+import { AggregationFunction, AggregationType, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
@@ -29,13 +29,24 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
     return acc;
   }, {} as Record<string, Row[]>);
 
+  const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
+  const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
+
   return Object.entries(groups).map(([key, children]) => {
-    const calculatedFields = calculatedColumns.reduce((acc, column) => {
+    const calculatedFields = aggTypeColumns.reduce((acc, column) => {
       acc[column.field as string] = _calculate(children, column);
       return acc;
     }, {} as Record<string, number | null>);
 
-    return { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
+    const newRow =  { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
+
+    const computedFields = aggFuncColumns.reduce((acc, column) => {
+      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
+      return acc;
+    }, {} as Record<string, number | string | null>);
+
+    return { ...newRow, ...computedFields };
+    
   });
 };
 
