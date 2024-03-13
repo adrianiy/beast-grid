@@ -1,18 +1,22 @@
 .bg-input__container {
     padding: var(--bg-size--2);
-    
+
     input[type='text'] {
         outline: none;
         border: none;
-        line-height: 19px;
+        line-height: 16px;
         background-color: transparent;
         color: var(--bg-text-color--1);
+
+        &::placeholder {
+            font-size: var(--bg-font-size--1);
+        }
     }
 
     svg {
-      --size: var(--bg-size--3);
-      cursor: pointer;
-      height: var(--size);
-      width: var(--size);
+        --size: var(--bg-size--3);
+        cursor: pointer;
+        height: var(--size);
+        width: var(--size);
     }
 }

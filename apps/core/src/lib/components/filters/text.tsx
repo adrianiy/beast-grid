@@ -1,4 +1,6 @@
 import { MouseEventHandler, useEffect, useState } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
+
 import * as Checkbox from '@radix-ui/react-checkbox';
 
 import SimpleBar from 'simplebar-react';
@@ -6,12 +8,13 @@ import SimpleBar from 'simplebar-react';
 import { Column, IFilter } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
-import { CheckIcon, Cross2Icon, DividerHorizontalIcon } from '@radix-ui/react-icons';
+import { CheckIcon, DividerHorizontalIcon } from '@radix-ui/react-icons';
+
+import Input from '../input/input';
 
 import cn from 'classnames';
 
 import './menu-filters.scss';
-import Input from '../input/input';
 
 type Props = {
   column: Column;
@@ -19,6 +22,7 @@ type Props = {
 
 export default function TextFilters(props: Props) {
   const { column } = props;
+  const intl = useIntl();
   const [searchValue, setSearchValue] = useState('');
   const [checked, setChecked] = useState<'indeterminate' | boolean>(false);
 
@@ -60,7 +64,7 @@ export default function TextFilters(props: Props) {
   
   return (
     <div className="bg-filter bg-filter__text" onClick={handleClick}>
-      <Input placeholder="Search..." className="bg-filter__search" onChange={handleSearch} />
+      <Input placeholder={intl.formatMessage({ id: 'filter.placeholder' })} className="bg-filter__search" onChange={handleSearch} />
       
       <div className="bg-filter__separator" />
       
@@ -99,7 +103,7 @@ export default function TextFilters(props: Props) {
             {checked === true && <CheckIcon />}
           </Checkbox.Indicator>
         </Checkbox.Root>
-        <label>Select all</label>
+        <label><FormattedMessage id="filter.selectAll"/></label>
       </div>
     </div>
   );
