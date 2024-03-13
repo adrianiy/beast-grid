@@ -1,5 +1,5 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
-import { IntlProvider } from 'react-intl'
+import { IntlProvider } from 'react-intl';
 
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
@@ -47,8 +47,22 @@ export function BeastGrid<T>({
   const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
 
   useEffect(() => {
-    if (!injectStyles) return
+    const cancel = (e: DragEvent) => {
+      e.preventDefault();
+      return false;
+    };
+    document.addEventListener('dragover', cancel, true);
+    document.addEventListener('dragenter', cancel, true);
 
+    return () => {
+      document.removeEventListener('dragover', cancel, true);
+      document.removeEventListener('dragenter', cancel, true);
+    };
+  }, [])
+
+  useEffect(() => {
+    if (!injectStyles) return;
+    
     // inject style.css in head
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -58,41 +72,45 @@ export function BeastGrid<T>({
 
     return () => {
       document.head.removeChild(link);
-    };
-  }, [injectStyles])
+    }
+  }, [injectStyles]);
 
-useEffect(() => {
-  if (ref.current && config?.columnDefs) {
-    const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme);
-    const dndStore = () => createDndStore();
+  useEffect(() => {
+    if (ref.current && config?.columnDefs) {
+      const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme);
+      const dndStore = () => createDndStore();
 
-    setStores([gridStore, dndStore]);
-  }
-}, [ref, config, theme]);
+      setStores([gridStore, dndStore]);
+    }
+  }, [ref, config, theme]);
 
-const GridProvider = () => {
-  if (!config || !beastGridStore || !beastDndStore) {
-    return <div style={{ height: config?.style?.maxHeight || 300 }}><Loader /></div>
-  }
+  const GridProvider = () => {
+    if (!config || !beastGridStore || !beastDndStore) {
+      return (
+        <div style={{ height: config?.style?.maxHeight || 300 }}>
+          <Loader />
+        </div>
+      );
+    }
+
+    return (
+      <DndStoreProvider createStore={beastDndStore}>
+        <BeastGridProvider createStore={beastGridStore}>
+          <IntlProvider messages={messages[locale]} locale={locale}>
+            <BeastApi store={api} />
+            <LoaderLayer config={config} />
+            <Toolbar config={config} position={ToolbarPosition.TOP} />
+            <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+            <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
+          </IntlProvider>
+        </BeastGridProvider>
+      </DndStoreProvider>
+    );
+  };
 
   return (
-    <DndStoreProvider createStore={beastDndStore}>
-      <BeastGridProvider createStore={beastGridStore}>
-        <IntlProvider messages={messages[locale]} locale={locale}>
-          <BeastApi store={api} />
-          <LoaderLayer config={config} />
-          <Toolbar config={config} position={ToolbarPosition.TOP} />
-          <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
-          <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
-        </IntlProvider>
-      </BeastGridProvider>
-    </DndStoreProvider>
+    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+      <GridProvider />
+    </div>
   );
-};
-
-return (
-  <div className={cn('beast-grid', 'default', theme)} ref={ref}>
-    <GridProvider />
-  </div>
-);
 }

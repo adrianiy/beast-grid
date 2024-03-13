@@ -23,7 +23,7 @@ export default function PinSection({
 }>) {
   const [pinColumn] = useBeastStore((state) => [state.pinColumn]);
   
-  if (!column.menu?.pin || !column.parent) {
+  if (!column.menu?.pin || column.parent) {
     return null;
   }
   

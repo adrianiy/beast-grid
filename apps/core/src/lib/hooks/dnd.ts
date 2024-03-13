@@ -159,24 +159,21 @@ export const useDndHook = (
 
     const onDragEnd = (e: DragEvent) => {
       e.stopPropagation();
-      isDragging.current = false;
-
-      coords.current = { x: 0, y: 0 };
-
-      cancelAnimationFrame(reqAnimFrameNo.current);
 
       if (options?.onDragEnd) {
         options.onDragEnd(e, pointer.current);
       }
+
+      setTimeout(() => {
+        cancelAnimationFrame(reqAnimFrameNo.current);
+        isDragging.current = false;
+        coords.current = { x: 0, y: 0 };
+      }, 300);
+
       return false;
     };
 
-    const cancel = (e: DragEvent) => {
-      e.preventDefault();
-      return false;
-    };
-    
-    if (ref.current && scrollElement) { 
+    if (ref.current && scrollElement) {
       const dragRef = ref.current;
       preview.current.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 
@@ -193,13 +190,9 @@ export const useDndHook = (
       dragRef.addEventListener('drag', onDrag);
 
       dragRef.addEventListener('dragend', onDragEnd);
-      document.addEventListener('dragover', cancel, true);
-      document.addEventListener('dragenter', cancel, true);
 
       return () => {
         cancelAnimationFrame(reqAnimFrameNo.current);
-        document.removeEventListener('dragover', cancel, true);
-        document.removeEventListener('dragenter', cancel, true);
         dragRef.removeEventListener('dragstart', onDragStart);
         dragRef.removeEventListener('drag', onDrag);
         dragRef.removeEventListener('dragend', onDragEnd);

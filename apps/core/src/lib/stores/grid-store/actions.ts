@@ -236,9 +236,9 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   column.rowGroup = false;
 
   if (column.tree) {
-    changePosition(columns, column, [column.id], -1);
     groupOrder.forEach((col) => {
       toggleHide(columns[col], columns);
+      changePosition(columns, column, [column.id], -1);
     });
     groupOrder = [];
     setColumnsStyleProps(columns, container.offsetWidth);
