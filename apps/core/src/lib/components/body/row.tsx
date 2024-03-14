@@ -27,9 +27,11 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
     const renderRow = (pinType: PinType | undefined) => {
         return columns
             .filter((column) => column.pinned === pinType)
-            .map((column, idx) => (
+            .map((column, cidx) => (
                 <RowCell
-                    key={idx}
+                    key={cidx}
+                    idx={idx}
+                    columnIdx={cidx}
                     height={height}
                     row={row}
                     columns={columnStore}

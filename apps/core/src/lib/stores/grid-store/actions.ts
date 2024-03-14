@@ -16,7 +16,7 @@ import {
   toggleHide,
 } from './utils';
 import { GridStore } from './store';
-import { FilterType, PinType, SortType } from '../../common';
+import { Coords, FilterType, PinType, SelectedCells, SortType } from '../../common';
 import { createGroupColumn } from './utils/group';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
@@ -257,3 +257,32 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
 
   return { columns, groupOrder, data, sortedColumns };
 };
+
+export const updateSelectedCells = (selectedCells: SelectedCells | null) => () => {
+  return { selectedCells };
+}
+
+export const setSelectedStart = (coords: Coords) => (state: GridStore) => {
+  const { selectedCells } = state;
+
+  if (selectedCells && selectedCells.init.x === coords.x && selectedCells.init.y === coords.y) {
+    return { selectedCells: null };
+  }
+  return { selectedCells: { start: coords, end: coords, init: coords } };
+}
+
+export const setSelectedEnd = (coords: Coords) => (state: GridStore) => {
+  const { selectedCells } = state;
+  
+  if (!selectedCells) {
+    return state;
+  }
+
+  return {
+    selectedCells: {
+      init: selectedCells.init,
+      start: { x: Math.min(selectedCells.init.x, coords.x), y: Math.min(selectedCells.init.y, coords.y) },
+      end: { x: Math.max(selectedCells.init.x, coords.x), y: Math.max(selectedCells.init.y, coords.y) },
+    },
+  };
+}

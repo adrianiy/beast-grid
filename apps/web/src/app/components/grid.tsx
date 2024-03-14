@@ -108,6 +108,10 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           enabled: true,
           multiple: true
         },
+        tree: {
+          name: 'GROUP',
+          field: 'name'
+        },
         topToolbar: {
           grid: true,
           filter: true,

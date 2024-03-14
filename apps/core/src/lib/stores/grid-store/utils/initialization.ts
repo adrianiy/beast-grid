@@ -74,7 +74,7 @@ export const createVirtualIds = (data: Data): Data => {
     };
   });
 
-  return [...newData]
+  return [...newData];
 };
 
 export const groupDataByColumnDefs = (
@@ -153,21 +153,37 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (typeof (data[0][column.field as string]) === 'boolean') {
+    if (typeof data[0][column.field as string] === 'boolean') {
       column.filterType = FilterType.BOOLEAN;
-      return
+      return;
     }
-    if (typeof (data[0][column.field as string]) === 'string') {
+    if (typeof data[0][column.field as string] === 'string') {
       column.filterType = FilterType.TEXT;
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;
-      return
+      return;
     }
-    if (typeof (data[0][column.field as string]) === 'number') {
+    if (typeof data[0][column.field as string] === 'number') {
       column.filterType = FilterType.NUMBER;
-      return
+      return;
     }
+  });
+};
+
+const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
+
+export const setColumnPositions = (columns: ColumnStore) => {
+  const sortedColumns = Object.values(columns).sort(
+    (a, b) =>
+      PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
+      a.level - b.level ||
+      columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
+      a.position - b.position ||
+      a.left - b.left
+  );
+  sortedColumns.forEach((column, idx) => {
+    column.position = idx;
   });
 };
 
@@ -194,6 +210,7 @@ export const initialize = (
   const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
+  setColumnPositions(columns)
 
   return finalData;
 };

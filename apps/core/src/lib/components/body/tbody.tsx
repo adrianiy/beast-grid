@@ -5,10 +5,11 @@ import { useBeastStore } from './../../stores/beast-store';
 
 import RowContainer from './row';
 
-import { BusActions, Column, Data, Row, RowConfig, RowEvents } from '../../common';
+import { BusActions, Column, Coords, Data, Row, RowConfig, RowEvents } from '../../common';
 
 import './tbody.scss';
 import { filterRow, sortData } from '../../utils/functions';
+import ContextMenu from '../contextMenu/context-menu';
 
 type TBodyProps = {
     rowHeight: number;
@@ -34,20 +35,36 @@ export default function TBody({
     events,
 }: TBodyProps) {
     const gaps = useRef<Record<string, number>>({});
-    const [data, columns, container, scrollElement, sort, filters, setSorting, groupOrder] = useBeastStore((state) => [
+    const [
+        data,
+        columns,
+        theme,
+        container,
+        scrollElement,
+        sort,
+        filters,
+        setSorting,
+        groupOrder,
+        setSelecting,
+        selectedCells,
+    ] = useBeastStore((state) => [
         state.data,
         state.columns,
+        state.theme,
         state.container,
         state.scrollElement,
         state.sort,
         state.filters,
         state.setSorting,
         state.groupOrder,
+        state.setSelecting,
+        state.selectedCells,
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
     const [[max, min], setMaxMin] = useState([0, 0]);
     const [sortedData, setSortedData] = useState<Data>([]);
+    const [contextMenu, setContextMenu] = useState<Coords | null>(null);
 
     const levels = Object.values(columns).reduce((acc, column) => {
         const level = column.level || 0;
@@ -184,6 +201,65 @@ export default function TBody({
         }
     };
 
+    const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY });
+        setSelecting(false);
+    };
+
+    const getCsv = (withHeaders: boolean) => {
+        if (!selectedCells) {
+            return;
+        }
+
+        let headers = '';
+
+        if (withHeaders) {
+            headers =
+                lastLevel
+                    .slice(selectedCells.start.x, selectedCells.end.x + 1)
+                    .map((column) => column.headerName)
+                    .join('\t') + '\n';
+        }
+
+        const dataToCopy = sortedData
+            .slice(selectedCells.start.y, selectedCells.end.y + 1)
+            .map((row) => {
+                return lastLevel
+                    .slice(selectedCells.start.x, selectedCells.end.x + 1)
+                    .map((column) => {
+                        return row[column.field as string];
+                    })
+                    .join('\t');
+            })
+            .join('\n');
+
+        return headers + dataToCopy;
+    };
+
+    const handleCopy = (withHeaders: boolean) => {
+        const csv = getCsv(withHeaders);
+        
+        if (!csv) {
+            return;
+        }
+        
+        navigator.clipboard.writeText(csv);
+    };
+
+    const handleExport = () => {
+        const csv = getCsv(true);
+        const csvContent = "data:text/csv;charset=utf-8,";
+
+        const encodedUri = encodeURI(csvContent + csv);
+
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `data-${new Date().toISOString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+    };
+
     const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, level: number, gap: number): number => {
         if (!renderArray[level]) {
             renderArray[level] = [];
@@ -244,8 +320,17 @@ export default function TBody({
     const dataSlice = createDataSlice();
 
     return (
-        <div className="grid-body" style={getStyleProps()}>
+        <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
             {dataSlice}
+            <ContextMenu
+                x={contextMenu?.x || 0}
+                y={contextMenu?.y || 0}
+                visible={!!contextMenu}
+                theme={theme}
+                onClose={() => setContextMenu(null)}
+                onCopy={handleCopy}
+                onExport={handleExport}
+            />
         </div>
     );
 }

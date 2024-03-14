@@ -23,7 +23,7 @@
         &:last-child {
             border-bottom: none;
         }
-        
+
         .grid-row-cell {
             border-bottom: var(--bg-border--2);
         }
@@ -35,6 +35,10 @@
         &:hover {
             .grid-row-cell {
                 background-color: var(--bg-hover-color--1);
+
+                &.selected {
+                   background-color: var(--bg-hover-color--2); 
+                }
             }
         }
     }
@@ -51,6 +55,25 @@
     box-sizing: border-box;
     color: var(--bg-text-color--1);
     background-color: var(--bg-background-color--1);
+    user-select: none;
+
+    &.selected {
+        border-color: var(--bg-color--8);
+        background-color: var(--bg-background-color--selected);
+        
+        &.borderTop {
+            border-top: var(--bg-border--4);
+        }
+        &.borderBottom {
+            border-bottom: var(--bg-border--4);
+        }
+        &.borderLeft {
+            border-left: var(--bg-border--4);
+        }
+        &.borderRight {
+            border-right: var(--bg-border--4);
+        }
+    }
 
     .grid-row-value {
         display: block;
@@ -58,6 +81,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-align: left;
     }
 
     svg {
