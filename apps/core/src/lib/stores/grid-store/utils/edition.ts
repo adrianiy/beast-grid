@@ -35,7 +35,7 @@ const _mergeTo = (parent: Column, column: Column, columns: ColumnStore) => {
 
 export const changePosition = (columns: ColumnStore, pivot: Column, ignoreIds: ColumnId[], increase: number) => {
   Object.values(columns).forEach((column) => {
-    if (column.position >= pivot.position && column.level === pivot.level && !ignoreIds.includes(column.id)) {
+    if (column.position >= pivot.position && !ignoreIds.includes(column.id)) {
       column.position += increase;
     }
   });
@@ -100,8 +100,24 @@ export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinTy
 
 const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
 
+export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, finalPosition = 0) => {
+  columnIds.forEach((columnId) => {
+    const column = columns[columnId];
+    
+    if (column.childrenId) {
+      finalPosition = setFinalPosition(column.childrenId as ColumnId[], columns, finalPosition);
+    } else {
+      column.finalPosition = finalPosition;
+    }
+
+    finalPosition++;
+  });
+
+  return finalPosition;
+}
+
 export const sortColumns = (columns: ColumnStore) => {
-  return Object.values(columns).sort(
+  const sortedColumns = Object.values(columns).sort(
     (a, b) =>
       PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
       a.level - b.level ||
@@ -109,6 +125,10 @@ export const sortColumns = (columns: ColumnStore) => {
       a.position - b.position ||
       a.left - b.left
   );
+
+  setFinalPosition(sortedColumns.filter(c => c.level === 0).map(c => c.id), columns);
+
+  return sortedColumns;
 }
 
 export const addSort = (

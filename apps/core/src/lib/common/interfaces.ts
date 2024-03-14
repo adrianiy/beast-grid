@@ -146,6 +146,7 @@ export interface Column extends ColumnDef, Position {
   final: boolean;
   width: number;
   pinned: PinType;
+  finalPosition: number;
   childrenId?: ColumnId[];
   sort?: SortState;
   parent?: ColumnId;

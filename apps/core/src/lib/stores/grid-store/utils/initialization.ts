@@ -41,6 +41,7 @@ export const getColumnsFromDefs = (
       ...deepmerge(defaultColumnDef || {}, columnDef),
       width: columnDef.width || 0,
       position: idx,
+      finalPosition: idx,
       pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
       top: 0,
       left: 0,
@@ -171,21 +172,6 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   });
 };
 
-const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
-
-export const setColumnPositions = (columns: ColumnStore) => {
-  const sortedColumns = Object.values(columns).sort(
-    (a, b) =>
-      PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
-      a.level - b.level ||
-      columns[a.parent as string]?.position - columns[b.parent as string]?.position ||
-      a.position - b.position ||
-      a.left - b.left
-  );
-  sortedColumns.forEach((column, idx) => {
-    column.position = idx;
-  });
-};
 
 export const initialize = (
   columns: ColumnStore,
@@ -210,7 +196,6 @@ export const initialize = (
   const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
   setColumnsStyleProps(columns, container.offsetWidth);
   setColumnFilters(columns, data);
-  setColumnPositions(columns)
 
   return finalData;
 };

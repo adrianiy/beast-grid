@@ -28,16 +28,16 @@ function getProperty<Type, Key extends keyof Type>(
 
 type Props = {
   idx: number;
-  columnIdx: number;
   height: number;
   row: Row;
+  border?: boolean;
   columnDef: Column;
   config?: Partial<RowConfig>;
   level: number;
   groupOrder: ColumnId[];
   columns: ColumnStore;
 };
-export function RowCell({ height, row, idx, columnIdx, columnDef, config, level, groupOrder, columns }: Props) {
+export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns }: Props) {
   const [selectedCells, setSelectedStart, setSelectedEnd, selecting, setSelecting] = useBeastStore((state) => [
     state.selectedCells,
     state.setSelectedStart,
@@ -46,12 +46,12 @@ export function RowCell({ height, row, idx, columnIdx, columnDef, config, level,
     state.setSelecting
   ]);
   const inY = selectedCells && idx >= selectedCells.start.y && idx <= selectedCells.end.y;
-  const inX = selectedCells && columnDef.position >= selectedCells.start.x && columnDef.position <= selectedCells.end.x;
+  const inX = selectedCells && columnDef.finalPosition >= selectedCells.start.x && columnDef.finalPosition <= selectedCells.end.x;
   const selected = inY && inX;
   const borderTop = idx === selectedCells?.start.y;
-  const borderLeft = columnDef.position === selectedCells?.start.x;
+  const borderLeft = columnDef.finalPosition === selectedCells?.start.x;
   const borderBottom = idx === selectedCells?.end.y;
-  const borderRight = columnDef.position === selectedCells?.end.x;
+  const borderRight = columnDef.finalPosition === selectedCells?.end.x;
   const value = getProperty(row, level, columnDef, columns, groupOrder);
 
   if (columnDef.hidden) {
@@ -67,13 +67,13 @@ export function RowCell({ height, row, idx, columnIdx, columnDef, config, level,
       e.stopPropagation()
       return;
     }
-    setSelectedStart({ x: columnDef.position, y: idx });
+    setSelectedStart({ x: columnDef.finalPosition, y: idx });
     setSelecting(true);
   };
 
   const handleMouseEnter = () => {
     if (selecting) {
-      setSelectedEnd({ x: columnDef.position, y: idx });
+      setSelectedEnd({ x: columnDef.finalPosition, y: idx });
     }
   };
 
@@ -82,7 +82,7 @@ export function RowCell({ height, row, idx, columnIdx, columnDef, config, level,
   };
 
   const handleMouseClick = (e: React.MouseEvent) => {
-    const coords = { x: columnDef.position, y: idx };
+    const coords = { x: columnDef.finalPosition, y: idx };
     if (e.shiftKey) {
       setSelectedEnd(coords);
     }
@@ -106,6 +106,7 @@ export function RowCell({ height, row, idx, columnIdx, columnDef, config, level,
       className={cn('grid-row-cell', {
         lastPinned: columnDef.lastPinned,
         expandable: row.children || columnDef.rowGroup,
+        bordered: border,
         selected,
         borderTop,
         borderLeft,

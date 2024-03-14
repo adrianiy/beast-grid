@@ -211,12 +211,13 @@ export default function TBody({
         if (!selectedCells) {
             return;
         }
+        const finalColumns = lastLevel.sort((a, b) => a.finalPosition - b.finalPosition);
 
         let headers = '';
 
         if (withHeaders) {
             headers =
-                lastLevel
+                finalColumns
                     .slice(selectedCells.start.x, selectedCells.end.x + 1)
                     .map((column) => column.headerName)
                     .join('\t') + '\n';
@@ -225,7 +226,7 @@ export default function TBody({
         const dataToCopy = sortedData
             .slice(selectedCells.start.y, selectedCells.end.y + 1)
             .map((row) => {
-                return lastLevel
+                return finalColumns
                     .slice(selectedCells.start.x, selectedCells.end.x + 1)
                     .map((column) => {
                         return row[column.field as string];

@@ -78,7 +78,7 @@ export const createGridStore = <T>(
   const initialData = createVirtualIds(_data as Data);
   
   const data = initialize(columns, container, initialData, groupOrder, tree);
-  const sortedColumns = Object.values(columns).sort((a, b) => a.position - b.position);
+  const sortedColumns = sortColumns(columns);
   
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);
