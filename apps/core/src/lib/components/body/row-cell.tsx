@@ -4,6 +4,7 @@ import { ChevronRightIcon } from '@radix-ui/react-icons';
 import cn from 'classnames';
 import { LEVEL_PADDING } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
+import React from 'react';
 
 function getProperty<Type, Key extends keyof Type>(
   obj: Type,
@@ -36,17 +37,21 @@ type Props = {
   level: number;
   groupOrder: ColumnId[];
   columns: ColumnStore;
+  onClick?: () => void;
 };
-export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns }: Props) {
+export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
   const [selectedCells, setSelectedStart, setSelectedEnd, selecting, setSelecting] = useBeastStore((state) => [
     state.selectedCells,
     state.setSelectedStart,
     state.setSelectedEnd,
     state.selecting,
-    state.setSelecting
+    state.setSelecting,
   ]);
   const inY = selectedCells && idx >= selectedCells.start.y && idx <= selectedCells.end.y;
-  const inX = selectedCells && columnDef.finalPosition >= selectedCells.start.x && columnDef.finalPosition <= selectedCells.end.x;
+  const inX =
+    selectedCells &&
+    columnDef.finalPosition >= selectedCells.start.x &&
+    columnDef.finalPosition <= selectedCells.end.x;
   const selected = inY && inX;
   const borderTop = idx === selectedCells?.start.y;
   const borderLeft = columnDef.finalPosition === selectedCells?.start.x;
@@ -64,7 +69,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     }
     if (e.button === 2 && selected) {
       e.preventDefault();
-      e.stopPropagation()
+      e.stopPropagation();
       return;
     }
     setSelectedStart({ x: columnDef.finalPosition, y: idx });
@@ -86,18 +91,13 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     if (e.shiftKey) {
       setSelectedEnd(coords);
     }
-  }
-  
-  const Chevron = () => {
-    if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree)) {
-      return null;
-    }
+  };
 
-    if (level === groupOrder.length && row.children?.length === 1) {
-      return null;
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
     }
-
-    return <ChevronRightIcon className={cn(!!row._expanded && 'active')} />;
   };
 
   return (
@@ -126,9 +126,14 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseEnter={handleMouseEnter}
-      
     >
-      <Chevron />
+      <Chevron
+        onClick={handleExpandClick}
+        row={row}
+        columnDef={columnDef}
+        groupOrder={groupOrder}
+        level={level}
+      />
       <div
         className="grid-row-value"
         style={{
@@ -143,3 +148,27 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     </div>
   );
 }
+
+const Chevron = ({
+  onClick,
+  row,
+  columnDef,
+  groupOrder,
+  level,
+}: {
+  onClick: (e: React.MouseEvent) => void;
+  row: Row;
+  columnDef: Column;
+  groupOrder: ColumnId[];
+  level: number;
+}) => {
+  if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree)) {
+    return null;
+  }
+
+  if (level === groupOrder.length && row.children?.length === 1) {
+    return null;
+  }
+
+  return <ChevronRightIcon className={cn(!!row._expanded && 'active')} onMouseDown={onClick} />;
+};

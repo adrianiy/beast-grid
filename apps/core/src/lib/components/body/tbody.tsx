@@ -261,7 +261,7 @@ export default function TBody({
         link.click();
     };
 
-    const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, level: number, gap: number): number => {
+    const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, y: number, level: number, gap: number): number => {
         if (!renderArray[level]) {
             renderArray[level] = [];
         }
@@ -275,6 +275,7 @@ export default function TBody({
                 config={config}
                 groupOrder={groupOrder}
                 idx={idx}
+                y={y}
                 border={border}
                 height={rowHeight}
                 level={level}
@@ -287,7 +288,7 @@ export default function TBody({
         if (row.children && row._expanded) {
             for (let i = 0; i < row.children.length; i++) {
                 const child = row.children[i];
-                gap = addRowToSlice(renderArray, child, idx + i + 1, level + 1, gap);
+                gap = addRowToSlice(renderArray, child, idx + i + 1, y + i + 1, level + 1, gap);
 
                 gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
             }
@@ -299,14 +300,20 @@ export default function TBody({
     const createDataSlice = () => {
         const renderArray: ReactNode[][] = [];
         let gap = 0;
+        let y = 0;
         for (let idx = min; idx < max; idx++) {
             const row = sortedData[idx];
 
             if (row) {
-                gap = addRowToSlice(renderArray, row, idx, 0, gap);
+                gap = addRowToSlice(renderArray, row, idx, y, 0, gap);
+
+                if (row._expanded) {
+                    y += row.children?.length || 0;
+                }
             }
 
             gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
+            y++;
         }
 
         return renderArray.flat();

@@ -19,7 +19,7 @@
     }
     &:last-child {
         .grid-row-cell {
-            &.bordered {
+            &.bordered:not(.selected) {
                 border-bottom: none;
             }
         }
