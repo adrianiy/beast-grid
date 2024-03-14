@@ -84,8 +84,11 @@ export default function Example() {
             <ToggleButton style={buttonStyle} value="minimal-theme">
               Custom Theme
             </ToggleButton>
-            <ToggleButton style={buttonStyle} value="default">
+            <ToggleButton style={buttonStyle} value="default-theme">
               Default Theme
+            </ToggleButton>
+            <ToggleButton style={buttonStyle} value="corpo-theme">
+              Corpo Theme
             </ToggleButton>
             <ToggleButton style={buttonStyle} value="dark-theme">
               Dark Theme

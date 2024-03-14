@@ -1,5 +1,6 @@
 .bg-menu__container {
-    @import './../../flex.scss';
+    @import './../../flex';
+    @import './../../themes';
 
     position: absolute;
     user-select: none;
