@@ -9,6 +9,7 @@ import MenuSections from './components/sections';
 import cn from 'classnames';
 
 import './menu-layer.scss';
+import useOnClickOutside from '../../hooks/clickOutside';
 
 export enum SectionsEnum {
   SORT = 'sort',
@@ -43,6 +44,8 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
   const [container, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
+
+  useOnClickOutside(menuRef, onClose, ['.bg-select__options']);
 
   const sections = [SectionsEnum.SORT, SectionsEnum.PIN, SectionsEnum.FILTER, SectionsEnum.GRID, SectionsEnum.COLUMN];
 
@@ -101,14 +104,9 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       menuRef.current?.style.setProperty('overflow', 'visible');
     }, 400);
 
-    const body = document.querySelector('body');
-    console.log(body)
-
-    body?.addEventListener('click', onClose);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
-      body?.removeEventListener('click', onClose);
       container.removeEventListener('scroll', moveMenu);
     };
   }, []);

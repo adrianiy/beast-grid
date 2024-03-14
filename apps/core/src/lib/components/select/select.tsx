@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { OperationType } from '../../common';
 
 import './select.scss';
+import useOnClickOutside from '../../hooks/clickOutside';
 
 export type Option = {
   value: OperationType;
@@ -51,15 +52,7 @@ export default function Select(props: PropsWithChildren<Props>) {
   );
 }
 
-const Options = ({
-  options,
-  activeOption,
-  open,
-  inputRef,
-  container,
-  onClose,
-  onClick,
-}: {
+type OptionProps = {
   options: Option[];
   activeOption?: Option;
   open: boolean;
@@ -67,8 +60,25 @@ const Options = ({
   container: HTMLDivElement | null;
   onClose: () => void;
   onClick: (e: Option) => void;
-}) => {
+}
+
+const Options = (props: OptionProps) => {
+  return createPortal(<OptionsPortal {...props} />, document.body);
+}
+
+const OptionsPortal = ({
+  options,
+  activeOption,
+  open,
+  inputRef,
+  container,
+  onClose,
+  onClick,
+}: OptionProps) => {
+  const ref = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
+
+  useOnClickOutside(ref, onClose);
 
   useEffect(() => {
     const getCoords = () => {
@@ -87,25 +97,17 @@ const Options = ({
 
       setCoords({ x, y });
     };
-    const closeMenu = (e: MouseEvent) => {
-      if (inputRef && !inputRef.contains(e.target as Node)) {
-        onClose();
-      }
-    };
 
     getCoords();
 
     if (container) {
       container.addEventListener('scroll', getCoords);
     }
-    const body = document.querySelector('body');
-    body?.addEventListener('click', closeMenu);
 
     return () => {
       if (container) {
         container.removeEventListener('scroll', getCoords);
       }
-      body?.removeEventListener('click', closeMenu);
     };
   }, [inputRef, container, onClose]);
 
@@ -118,15 +120,14 @@ const Options = ({
     return null;
   }
 
-  return createPortal(
-    <div className="bg-select__options column" style={{ top: coords?.y, left: coords?.x }}>
+  return (
+    <div ref={ref} onClick={e => e.stopPropagation()} className="bg-select__options column" style={{ top: coords?.y, left: coords?.x }}>
       {options.map((option, idx) => (
         <div key={idx} className="bg-select__option row middle between" onClick={handleClick(option)}>
           {option.label}
           {option.value === activeOption?.value && <CheckIcon />}
         </div>
       ))}
-    </div>,
-    document.body
+    </div>
   );
 };
