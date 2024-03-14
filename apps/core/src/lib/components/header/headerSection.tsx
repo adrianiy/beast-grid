@@ -34,10 +34,11 @@ export default function HeaderSection<T>({
           return (
             <HeaderCell
               key={idx}
-              levelIdx={0}
+              levelIdx={levelIdx}
               idx={idx}
               multiSort={!!multiSort}
-              height={height + (!column.children ? height * (headers.length - levelIdx - 1) : 0)}
+              height={height}
+              headers={headers}
               column={column}
               dragOptions={dragOptions}
               events={events}

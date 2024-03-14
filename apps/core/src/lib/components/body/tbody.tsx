@@ -2,14 +2,14 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
+import { filterRow, sortData } from '../../utils/functions';
 
 import RowContainer from './row';
+import ContextMenu from '../contextMenu/context-menu';
 
 import { BusActions, Column, Coords, Data, Row, RowConfig, RowEvents } from '../../common';
 
 import './tbody.scss';
-import { filterRow, sortData } from '../../utils/functions';
-import ContextMenu from '../contextMenu/context-menu';
 
 type TBodyProps = {
     rowHeight: number;

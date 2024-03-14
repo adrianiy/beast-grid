@@ -1,19 +1,22 @@
 .dnd-drag-preview {
-  position: absolute;
-  z-index: 1000;
-  background: var(--bg-background-color--1);
-  border: 1px solid var(--bg-color--3);
-  font-size: var(--bg-font-size--1);
-  padding: 12px;
-  width: fit-content;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+    @import './../../flex';
+    @import './../../themes';
+    
+    position: absolute;
+    z-index: 1000;
+    background: var(--bg-background-color--1);
+    border: 1px solid var(--bg-color--3);
+    font-size: var(--bg-font-size--1);
+    padding: 12px;
+    width: fit-content;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-  svg {
-    --size: var(--bg-size--3);
-    width: var(--size);
-    height: var(--size);
-  }
+    svg {
+        --size: var(--bg-size--3);
+        width: var(--size);
+        height: var(--size);
+    }
 }
