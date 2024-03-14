@@ -1,0 +1,46 @@
+.bg-grid__context-menu {
+    @import './../../flex.scss';
+
+    position: absolute;
+    user-select: none;
+    border: var(--bg-border--3);
+    background-color: var(--bg-background-color--1);
+    color: var(--bg-text-color--1);
+    padding: var(--bg-size--1) 0;
+    transition: transform ease-in-out var(--bg-transition--1);
+    font-size: var(--bg-font-size--1);
+    width: 250px;
+    z-index: 1999;
+    overflow: hidden;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
+        rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
+
+    .bg-grid__context-menu__section {
+      border-bottom: var(--bg-border--3);
+      margin-bottom: var(--bg-size--1);
+      padding-bottom: var(--bg-size--1);
+
+      &:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .bg-grid__context-menu__item {
+        padding: var(--bg-size--2);
+        margin: 0 var(--bg-size--1);
+        gap: var(--bg-size--3);
+        cursor: pointer;
+
+        &:hover {
+          background-color: var(--bg-hover-color--1);
+        }
+
+        .bg-grid__context-menu__icon {
+          --size: var(--bg-size--4);
+          width: var(--size);
+          height: var(--size);
+        }
+      }
+    }
+}

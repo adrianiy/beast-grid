@@ -36,27 +36,15 @@ export default function MenuLayer(props: Props) {
   return createPortal(<HeaderMenu {...props} />, document.body);
 }
 
-
 function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
   const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns] = useBeastStore(
-    (state) => [
-      state.scrollElement,
-      state.columns,
-    ]
-  );
+  const [container, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
 
-  const sections = [
-    SectionsEnum.SORT,
-    SectionsEnum.PIN,
-    SectionsEnum.FILTER,
-    SectionsEnum.GRID,
-    SectionsEnum.COLUMN,
-  ];
+  const sections = [SectionsEnum.SORT, SectionsEnum.PIN, SectionsEnum.FILTER, SectionsEnum.GRID, SectionsEnum.COLUMN];
 
   useEffect(() => {
     const leftPinned = Object.values(columns)
@@ -113,12 +101,14 @@ function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: 
       menuRef.current?.style.setProperty('overflow', 'visible');
     }, 400);
 
-    document.addEventListener('click', onClose);
+    const body = document.querySelector('body');
+    console.log(body)
+
+    body?.addEventListener('click', onClose);
     container.addEventListener('scroll', moveMenu);
 
     return () => {
-      document.removeEventListener('click', onClose);
-      document.removeEventListener('scroll', moveMenu);
+      body?.removeEventListener('click', onClose);
       container.removeEventListener('scroll', moveMenu);
     };
   }, []);

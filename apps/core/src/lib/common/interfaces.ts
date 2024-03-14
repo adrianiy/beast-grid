@@ -89,7 +89,7 @@ export interface HeaderConfig {
   border: boolean;
   events: Partial<HeaderEvents>;
 }
-export interface dragOptions {
+export interface DragOptions {
   autoScrollSpeed: number;
   autoScrollMargin: number;
 }
@@ -117,7 +117,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   row?: Partial<RowConfig>;
   header?: Partial<HeaderConfig>;
   style?: Partial<StyleConfig>;
-  dragOptions?: Partial<dragOptions>;
+  dragOptions?: Partial<DragOptions>;
   tree?: Partial<TreeConstructor>;
   topToolbar?: Partial<ToolBar>;
   bottomToolbar?: Partial<ToolBar>;
@@ -146,6 +146,7 @@ export interface Column extends ColumnDef, Position {
   final: boolean;
   width: number;
   pinned: PinType;
+  finalPosition: number;
   childrenId?: ColumnId[];
   sort?: SortState;
   parent?: ColumnId;
@@ -174,4 +175,10 @@ export interface BeastGridApi {
 export interface Coords {
   x: number;
   y: number;
+}
+
+export interface SelectedCells {
+  init: Coords;
+  start: Coords;
+  end: Coords;
 }

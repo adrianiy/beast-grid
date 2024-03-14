@@ -41,6 +41,7 @@ export const getColumnsFromDefs = (
       ...deepmerge(defaultColumnDef || {}, columnDef),
       width: columnDef.width || 0,
       position: idx,
+      finalPosition: idx,
       pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
       top: 0,
       left: 0,
@@ -74,7 +75,7 @@ export const createVirtualIds = (data: Data): Data => {
     };
   });
 
-  return [...newData]
+  return [...newData];
 };
 
 export const groupDataByColumnDefs = (
@@ -153,23 +154,24 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containeWidth: nu
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
   Object.values(columns).forEach((column) => {
-    if (typeof (data[0][column.field as string]) === 'boolean') {
+    if (typeof data[0][column.field as string] === 'boolean') {
       column.filterType = FilterType.BOOLEAN;
-      return
+      return;
     }
-    if (typeof (data[0][column.field as string]) === 'string') {
+    if (typeof data[0][column.field as string] === 'string') {
       column.filterType = FilterType.TEXT;
       const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
 
       column.filterOptions = values;
-      return
+      return;
     }
-    if (typeof (data[0][column.field as string]) === 'number') {
+    if (typeof data[0][column.field as string] === 'number') {
       column.filterType = FilterType.NUMBER;
-      return
+      return;
     }
   });
 };
+
 
 export const initialize = (
   columns: ColumnStore,

@@ -35,6 +35,7 @@
     "react-dom": "18.2.0",
     "react-intl": "^6.6.2",
     "react-loader-spinner": "^6.1.6",
+    "react-shadow-root": "^6.2.0",
     "simplebar-react": "^3.2.4",
     "thin-backend": "^0.12.1",
     "tslib": "^2.3.0",

@@ -24,6 +24,8 @@
   "filter.greaterThanOrEqual": "Mayor o igual que",
   "filter.lessThan": "Menor que",
   "filter.lessThanOrEqual": "Menor o igual que",
-  "filter.between": "Entre"
-  
+  "filter.between": "Entre",
+  "menu.copy": "Copiar",
+  "menu.copyWithHeaders": "Copiar con encabezados",
+  "menu.export": "Exportar selección"
 }

@@ -27,11 +27,13 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
     const renderRow = (pinType: PinType | undefined) => {
         return columns
             .filter((column) => column.pinned === pinType)
-            .map((column, idx) => (
+            .map((column, cidx) => (
                 <RowCell
-                    key={idx}
+                    key={cidx}
+                    idx={idx}
                     height={height}
                     row={row}
+                    border={border}
                     columns={columnStore}
                     groupOrder={groupOrder}
                     level={level}
@@ -56,7 +58,6 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
             key={idx}
             className={cn('grid-row', level > 0 && 'animate__animated animate__faster animate__fadeIn', {
                 child: level > 0,
-                bordered: border,
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
             })}

@@ -10,11 +10,14 @@ import {
   resizeColumn,
   selectAllFilters,
   setColumn,
+  setSelectedEnd,
+  setSelectedStart,
   swapColumns,
   unGroupColumn,
+  updateSelectedCells,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, PinType, SideBarConfig, SortType, TreeConstructor } from '../../common';
+import { BeastGridConfig, Coords, PinType, SelectedCells, SideBarConfig, SortType, TreeConstructor } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
@@ -24,9 +27,6 @@ interface GridState {
   container: HTMLDivElement;
   allowMultipleColumnSort: boolean;
   sort: ColumnId[];
-}
-
-interface InferedState {
   tree: Partial<TreeConstructor> | undefined;
   groupOrder: ColumnId[];
   initialData: Data;
@@ -36,9 +36,12 @@ interface InferedState {
   scrollElement: HTMLDivElement;
   filters: Record<ColumnId, IFilter[]>;
   sideBarConfig: SideBarConfig | null;
+  selectedCells: SelectedCells | null;
+  selecting: boolean;
 }
 
-export interface GridStore extends GridState, InferedState {
+
+export interface GridStore extends GridState {
   setData: (data: Data) => void;
   setColumns: (columns: ColumnStore) => void;
   setTheme: (theme: string) => void;
@@ -59,6 +62,10 @@ export interface GridStore extends GridState, InferedState {
   selectAllFilters: (id: ColumnId) => void;
   pinColumn: (id: ColumnId, pin: PinType) => void;
   setSideBarConfig: (config: SideBarConfig | null) => void;
+  updateSelectedCells: (selected: SelectedCells | null) => void;
+  setSelectedStart: (selected: Coords) => void;
+  setSelectedEnd: (selected: Coords) => void;
+  setSelecting: (selecting: boolean) => void;
 }
 
 export const createGridStore = <T>(
@@ -87,6 +94,7 @@ export const createGridStore = <T>(
     container,
     theme,
     sort: [],
+    selectedCells: null,
   };
   
   return create<GridStore>((set) => ({
@@ -96,6 +104,7 @@ export const createGridStore = <T>(
     sorting: false,
     scrollElement: null as unknown as HTMLDivElement,
     sideBarConfig: null,
+    selecting: false,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
     setTheme: (theme: string) => set({ theme }),
@@ -117,6 +126,10 @@ export const createGridStore = <T>(
     selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
     pinColumn: (id: ColumnId, pin: PinType) => set(pinColumn(id, pin)),
     setSideBarConfig: (config: SideBarConfig | null) => set({ sideBarConfig: config }),
+    updateSelectedCells: (selected: SelectedCells | null) => set(updateSelectedCells(selected)),
+    setSelectedStart: (selected: Coords) => set(setSelectedStart(selected)),
+    setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
+    setSelecting: (selecting: boolean) => set({ selecting }),
   }));
 };
 

@@ -98,13 +98,14 @@ const Options = ({
     if (container) {
       container.addEventListener('scroll', getCoords);
     }
-    document.addEventListener('click', closeMenu);
+    const body = document.querySelector('body');
+    body?.addEventListener('click', closeMenu);
 
     return () => {
       if (container) {
         container.removeEventListener('scroll', getCoords);
       }
-      document.removeEventListener('click', closeMenu);
+      body?.removeEventListener('click', closeMenu);
     };
   }, [inputRef, container, onClose]);
 

@@ -17,15 +17,11 @@
             transform: rotate(90deg);
         }
     }
-    &.bordered {
-        border-bottom: var(--bg-border--2);
-
-        &:last-child {
-            border-bottom: none;
-        }
-        
+    &:last-child {
         .grid-row-cell {
-            border-bottom: var(--bg-border--2);
+            &.bordered {
+                border-bottom: none;
+            }
         }
     }
     &.expandable {
@@ -35,6 +31,10 @@
         &:hover {
             .grid-row-cell {
                 background-color: var(--bg-hover-color--1);
+
+                &.selected {
+                    background-color: var(--bg-hover-color--2);
+                }
             }
         }
     }
@@ -51,6 +51,33 @@
     box-sizing: border-box;
     color: var(--bg-text-color--1);
     background-color: var(--bg-background-color--1);
+    user-select: none;
+
+    &.bordered {
+        border-bottom: var(--bg-border--2);
+    }
+
+    &.selected {
+        border-color: var(--bg-color--8);
+        background-color: var(--bg-background-color--selected);
+
+        &.bordered {
+            border-bottom: var(--bg-border--5);
+        }
+
+        &.borderTop {
+            border-top: var(--bg-border--4);
+        }
+        &.borderBottom {
+            border-bottom: var(--bg-border--4);
+        }
+        &.borderLeft {
+            border-left: var(--bg-border--4);
+        }
+        &.borderRight {
+            border-right: var(--bg-border--4);
+        }
+    }
 
     .grid-row-value {
         display: block;
@@ -58,6 +85,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-align: left;
     }
 
     svg {

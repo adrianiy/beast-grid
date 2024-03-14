@@ -7,11 +7,13 @@ import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 import { PropsWithMouseEnter } from './sections';
 
-export default function SortSection({ column, multiSort, onMouseEnter }: PropsWithMouseEnter<{ column: Column, multiSort: boolean }>) {
-  const [setSort, resetColumn] = useBeastStore((state) => [
-    state.setSort,
-    state.resetColumnConfig,
-  ]);
+export default function SortSection({
+  column,
+  multiSort,
+  onMouseEnter,
+}: PropsWithMouseEnter<{ column: Column; multiSort: boolean }>) {
+  const [setSort, resetColumn] = useBeastStore((state) => [state.setSort, state.resetColumnConfig]);
+
   const handleSetSort =
     (sort: SortType): MouseEventHandler<HTMLDivElement> =>
       () => {
@@ -22,7 +24,7 @@ export default function SortSection({ column, multiSort, onMouseEnter }: PropsWi
     e.stopPropagation();
     resetColumn(column.id);
   };
-  
+
   if (!column.sortable) {
     return null;
   }
