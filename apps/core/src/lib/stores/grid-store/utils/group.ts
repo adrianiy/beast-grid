@@ -17,6 +17,7 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
         top: 0,
         left: 0,
         position: 0,
+        finalPosition: 0,
         level: 0,
         final: true,
         menu: {

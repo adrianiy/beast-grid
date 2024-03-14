@@ -37,6 +37,7 @@ export const changePosition = (columns: ColumnStore, pivot: Column, ignoreIds: C
   Object.values(columns).forEach((column) => {
     if (column.position >= pivot.position && !ignoreIds.includes(column.id)) {
       column.position += increase;
+      column.finalPosition += increase;
     }
   });
 };
