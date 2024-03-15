@@ -265,7 +265,9 @@ export const updateSelectedCells = (selectedCells: SelectedCells | null) => () =
 export const setSelectedStart = (coords: Coords) => (state: GridStore) => {
   const { selectedCells } = state;
 
-  if (selectedCells && selectedCells.init.x === coords.x && selectedCells.init.y === coords.y) {
+  const sameCoords = selectedCells && selectedCells.init.x === coords.x && selectedCells.init.y === coords.y;
+
+  if (sameCoords ) {
     return { selectedCells: null };
   }
   return { selectedCells: { start: coords, end: coords, init: coords } };

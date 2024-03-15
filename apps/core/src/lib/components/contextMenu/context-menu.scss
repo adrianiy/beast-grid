@@ -1,5 +1,6 @@
 .bg-grid__context-menu {
-    @import './../../flex.scss';
+    @import './../../flex';
+    @import './../../themes';
 
     position: absolute;
     user-select: none;

@@ -8,6 +8,7 @@ type Props = {
     columns: Column[];
     columnStore: ColumnStore;
     groupOrder: ColumnId[];
+    y: number;
     idx: number;
     config?: Partial<RowConfig>;
     border?: boolean;
@@ -18,31 +19,12 @@ type Props = {
     onClick?: () => void;
 };
 
-export default function RowContainer({ row, columns, columnStore, groupOrder, config, idx, border, height, gap, level, onClick, events }: Props) {
+export default function RowContainer({ row, columns, columnStore, groupOrder, config, idx, y, border, height, gap, level, onClick, events }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
     const rightWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
-
-    const renderRow = (pinType: PinType | undefined) => {
-        return columns
-            .filter((column) => column.pinned === pinType)
-            .map((column, cidx) => (
-                <RowCell
-                    key={cidx}
-                    idx={idx}
-                    height={height}
-                    row={row}
-                    border={border}
-                    columns={columnStore}
-                    groupOrder={groupOrder}
-                    level={level}
-                    config={config}
-                    columnDef={column}
-                />
-            ));
-    };
-
+    
     const handleClick = () => {
         if (events?.onClick?.callback) {
             events.onClick.callback(row, idx);
@@ -51,6 +33,26 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
         if (onClick) {
             onClick();
         }
+    };
+
+    const renderRow = (pinType: PinType | undefined) => {
+        return columns
+            .filter((column) => column.pinned === pinType)
+            .map((column, cidx) => (
+                <RowCell
+                    key={cidx}
+                    idx={y}
+                    height={height}
+                    row={row}
+                    border={border}
+                    columns={columnStore}
+                    groupOrder={groupOrder}
+                    level={level}
+                    config={config}
+                    columnDef={column}
+                    onClick={handleClick}
+                />
+            ));
     };
 
     return (
@@ -62,7 +64,6 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, co
                 withHighlight: events?.onHover?.highlight,
             })}
             style={{ top: height * idx + gap, height, width: totalWidth }}
-            onClick={handleClick}
         >
             {leftWidth > 0 && (
                 <div className="grid-left-pin" style={{ minWidth: leftWidth }}>

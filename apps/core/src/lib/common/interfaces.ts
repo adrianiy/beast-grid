@@ -6,6 +6,7 @@ export interface Row {
   _id?: string;
   _orignalIdx?: number;
   _hidden?: boolean;
+  _level?: number;
   children?: Row[];
 }
 

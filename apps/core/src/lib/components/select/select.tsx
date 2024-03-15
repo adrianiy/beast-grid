@@ -3,8 +3,11 @@ import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { OperationType } from '../../common';
 
-import './select.scss';
 import useOnClickOutside from '../../hooks/clickOutside';
+
+import cn from 'classnames';
+
+import './select.scss';
 
 export type Option = {
   value: OperationType;
@@ -16,12 +19,13 @@ type Props = {
   label: JSX.Element;
   options: Option[];
   activeOption?: Option;
+  theme: string;
   container: HTMLDivElement | null;
   onChange: (e: Option) => void;
 };
 export default function Select(props: PropsWithChildren<Props>) {
   const ref = useRef<HTMLDivElement>(null);
-  const { options, activeOption, label, container } = props;
+  const { options, activeOption, label, container, theme } = props;
 
   const [open, setOpen] = useState(false);
 
@@ -43,6 +47,7 @@ export default function Select(props: PropsWithChildren<Props>) {
         options={options}
         activeOption={activeOption}
         open={open}
+        theme={theme}
         inputRef={ref.current}
         container={container}
         onClose={() => setOpen(false)}
@@ -56,6 +61,7 @@ type OptionProps = {
   options: Option[];
   activeOption?: Option;
   open: boolean;
+  theme: string;
   inputRef: HTMLDivElement | null;
   container: HTMLDivElement | null;
   onClose: () => void;
@@ -70,6 +76,7 @@ const OptionsPortal = ({
   options,
   activeOption,
   open,
+  theme,
   inputRef,
   container,
   onClose,
@@ -121,7 +128,7 @@ const OptionsPortal = ({
   }
 
   return (
-    <div ref={ref} onClick={e => e.stopPropagation()} className="bg-select__options column" style={{ top: coords?.y, left: coords?.x }}>
+    <div ref={ref} onClick={e => e.stopPropagation()} className={cn('bg-select__options column', theme)} style={{ top: coords?.y, left: coords?.x }}>
       {options.map((option, idx) => (
         <div key={idx} className="bg-select__option row middle between" onClick={handleClick(option)}>
           {option.label}

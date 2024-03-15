@@ -19,7 +19,7 @@
     }
     &:last-child {
         .grid-row-cell {
-            &.bordered {
+            &.bordered:not(.selected) {
                 border-bottom: none;
             }
         }
@@ -33,7 +33,7 @@
                 background-color: var(--bg-hover-color--1);
 
                 &.selected {
-                    background-color: var(--bg-hover-color--2);
+                    background-color: var(--bg-hover-color--selected);
                 }
             }
         }
@@ -66,16 +66,16 @@
         }
 
         &.borderTop {
-            border-top: var(--bg-border--4);
+            border-top: var(--bg-border--selected);
         }
         &.borderBottom {
-            border-bottom: var(--bg-border--4);
+            border-bottom: var(--bg-border--selected);
         }
         &.borderLeft {
-            border-left: var(--bg-border--4);
+            border-left: var(--bg-border--selected);
         }
         &.borderRight {
-            border-right: var(--bg-border--4);
+            border-right: var(--bg-border--selected);
         }
     }
 

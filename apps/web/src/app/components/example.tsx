@@ -21,7 +21,7 @@ const buttonStyle: CSSProperties = {
 };
 
 export default function Example() {
-  const [theme, setTheme] = useState('minimal-theme');
+  const [theme, setTheme] = useState('corpo-theme');
   const [count, setCount] = useState(100);
   const [view, setView] = useState('grid');
 
@@ -84,8 +84,11 @@ export default function Example() {
             <ToggleButton style={buttonStyle} value="minimal-theme">
               Custom Theme
             </ToggleButton>
-            <ToggleButton style={buttonStyle} value="default">
+            <ToggleButton style={buttonStyle} value="default-theme">
               Default Theme
+            </ToggleButton>
+            <ToggleButton style={buttonStyle} value="corpo-theme">
+              Corpo Theme
             </ToggleButton>
             <ToggleButton style={buttonStyle} value="dark-theme">
               Dark Theme

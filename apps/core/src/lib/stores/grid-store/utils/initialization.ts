@@ -95,6 +95,9 @@ export const groupDataByColumnDefs = (
 
   finalData.forEach((row) => {
     row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
+    row.children.forEach((child) => {
+      child._level = level + 1;
+    });
   });
 
   return finalData;

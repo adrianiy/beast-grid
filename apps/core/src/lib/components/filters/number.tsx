@@ -90,7 +90,7 @@ const FilterLine = ({ id, idx, filter, scrollContainer }: LineProps) => {
   const [activeOption, setActiveOption] = useState<OperationType | undefined>(filter.op);
   const [inputValue, setInputValue] = useState<string | undefined>(filter.value?.toString() || '');
 
-  const [addFilter] = useBeastStore((state) => [state.addFilter]);
+  const [addFilter, theme] = useBeastStore((state) => [state.addFilter, state.theme]);
 
   const throttle = useThrottle();
   const debounce = useDebounce();
@@ -129,6 +129,7 @@ const FilterLine = ({ id, idx, filter, scrollContainer }: LineProps) => {
         label={<FormattedMessage id="filter.operation" />}
         activeOption={options.find((option) => option.value === activeOption)}
         options={options}
+        theme={theme}
         container={scrollContainer}
         onChange={handleSelectChange}
       />

@@ -38,7 +38,7 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
       return acc;
     }, {} as Record<string, number | null>);
 
-    const newRow =  { [column.field as string]: key, _id: uuidv4(), children: children, ...calculatedFields };
+    const newRow =  { [column.field as string]: key, _id: uuidv4(), children, ...calculatedFields };
 
     const computedFields = aggFuncColumns.reduce((acc, column) => {
       acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)

@@ -30,7 +30,7 @@ export const defaultConfig = {
 
 export function BeastGrid<T>({
   config,
-  theme = 'default',
+  theme = 'corpo-theme',
   locale = 'en',
   injectStyles = false,
   api,
@@ -109,7 +109,7 @@ export function BeastGrid<T>({
   };
 
   return (
-    <div className={cn('beast-grid', 'default', theme)} ref={ref}>
+    <div className={cn('beast-grid', theme)} ref={ref}>
       <GridProvider />
     </div>
   );

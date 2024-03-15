@@ -1,0 +1,58 @@
+&.default-theme {
+    --bg-border--1: 1px solid var(--bg-color--3);
+    --bg-border--2: 1px solid var(--bg-color--4);
+    --bg-border--3: 1px solid var(--bg-color--3);
+    --bg-border--4: 1px solid var(--bg-color--8);
+    --bg-border--5: 1px solid var(--bg-color--10);
+
+    --bg-border--selected: 1px solid var(--bg-color--8);
+    
+    --bg-background-color--1: var(--bg-color--0);
+    --bg-background-color--2: var(--bg-color--3);
+    --bg-background-color--3: var(--bg-color--0);
+    
+    --bg-background-color--resize: var(--bg-color--3);
+    --bg-background-color--active: var(--bg-color--8);
+    --bg-background-color--overlay: rgba(0,0,0, 0.45);
+    --bg-background-color--selected: var(--bg-color--9);
+    
+    --bg-hover-color--1: var(--bg-color--6);
+    --bg-hover-color--2: var(--bg-color--10);
+    --bg-hover-color--resize: var(--bg-color--3);
+
+    --bg-hover-color--selected: var(--bg-color--10);
+
+    --bg-hover-color--cell: var(--bg-color--0);
+    
+    --bg-text-color--1: var(--bg-color--1);
+    --bg-text-color--2: var(--bg-color--2);
+    --bg-text-color--3: var(--bg-color--3);
+    
+    --bg-text-color--hover: var(--bg-color--5);
+    
+    --bg-accordion-children-background-color: var(--bg-color--7);
+}
+&.corpo-theme {
+    --bg-border--1: 0.01em solid var(--bg-color--1);
+    --bg-border--2: 1px solid var(--bg-color--4);
+    --bg-border--3: 1px solid var(--bg-color--3);
+    
+    --bg-border--selected: 1px solid var(--bg-color--8);
+    
+    --bg-background-color--resize: transparent;
+    --bg-background-color--active: var(--bg-color--8);
+    --bg-background-color--overlay: rgba(0,0,0, 0.45);
+    --bg-background-color--selected: var(--bg-color--9);
+    --bg-background-color--1: var(--bg-color--0);
+    
+    --bg-hover-color--1: var(--bg-color--6);
+    --bg-hover-color--selected: var(--bg-color--10);
+    --bg-hover-color--resize: var(--bg-color--3);
+    
+    --bg-hover-color--cell: var(--bg-color--0);
+    
+    --bg-text-color--1: var(--bg-color--1);
+    --bg-text-color--hover: var(--bg-color--5);
+    
+    --bg-accordion-children-background-color: var(--bg-color--7);
+}

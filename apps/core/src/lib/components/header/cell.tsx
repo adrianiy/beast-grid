@@ -17,12 +17,13 @@ type Props<T> = {
   idx: number;
   height: number;
   column: Column;
+  headers: Column[][];
   multiSort: boolean;
   dragOptions?: BeastGridConfig<T>['dragOptions'];
   events?: Partial<HeaderEvents>;
 };
 
-export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptions, multiSort, events }: Props<T>) {
+export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, dragOptions, multiSort, events }: Props<T>) {
   const menuRef = useRef<SVGSVGElement>(null);
   const lastX = useRef<number>(0);
   const pointerPosition = useRef<Coords>({ x: 0, y: 0 });
@@ -177,6 +178,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, column, dragOptio
       className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
       key={`${levelIdx}-${idx}-${column.id}`}
       style={{
+        marginTop: !column.children && levelIdx === 0 ? height * (headers.length - 1) : 0,
         height,
         width: column.width,
         left: column.left,

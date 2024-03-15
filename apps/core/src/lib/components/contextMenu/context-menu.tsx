@@ -18,8 +18,20 @@ type Props = {
 }
 
 export default function ContextMenu(props: Props) {
-  const { x, y, theme, visible, onClose, onCopy, onExport } = props;
+  if (!props.visible) {
+    return null;
+  }
+  
+  return createPortal(
+    <MenuPortal {...props} />,
+    document.body
+  );
+  
+}
 
+const MenuPortal = (props: Props) => {
+  const { x, y, theme, onClose, onCopy, onExport } = props;
+  
   useEffect(() => {
     const body = document.body;
 
@@ -28,11 +40,11 @@ export default function ContextMenu(props: Props) {
     return () => {
       body.removeEventListener('click', onClose);
     }
-  })
-
+  }, [])
+  
   const left = window.scrollX + x;
   const top = window.scrollY + y;
-
+  
   const handleCopy = (withHeaders: boolean) => (e: React.MouseEvent) => {
     e.stopPropagation();
     onCopy(withHeaders);
@@ -42,12 +54,7 @@ export default function ContextMenu(props: Props) {
     e.stopPropagation();
     onExport();
   }
-
-  if (!visible) {
-    return null;
-  }
-  
-  return createPortal(
+  return (
     <div className={cn("bg-grid__context-menu", theme)} style={{ left, top }}>
       <div className="bg-grid__context-menu__section">
         <div className="bg-grid__context-menu__item row middle" onClick={handleCopy(false)}>
@@ -65,8 +72,6 @@ export default function ContextMenu(props: Props) {
           <FormattedMessage id="menu.export" />
         </div>
       </div>
-    </div>,
-    document.body
-  );
-  
+    </div>
+  )
 }
