@@ -116,6 +116,12 @@
             background-color: var(--bg-background-color--resize);
             transform: translateY(-50%);
         }
+
+        &.resizing {
+            &::after {
+                background-color: var(--bg-hover-color--resize);
+            }
+        }
     }
 
     .bg-sort-icon {
