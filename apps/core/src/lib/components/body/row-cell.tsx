@@ -40,7 +40,8 @@ type Props = {
   onClick?: () => void;
 };
 export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
-  const [selectedCells, setSelectedStart, setSelectedEnd, selecting, setSelecting] = useBeastStore((state) => [
+  const [scrollElement, selectedCells, setSelectedStart, setSelectedEnd, selecting, setSelecting] = useBeastStore((state) => [
+    state.scrollElement,
     state.selectedCells,
     state.setSelectedStart,
     state.setSelectedEnd,
@@ -63,8 +64,11 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     return null;
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.shiftKey) {
+  const handleMouseDown = (e:React.MouseEvent) => {
+    const clickOnYScrollbar = e.clientY > scrollElement?.getBoundingClientRect().bottom - 11;
+    const clickOnXScrollbar = e.clientX > scrollElement?.getBoundingClientRect().right - 11;
+    
+    if (e.shiftKey || clickOnYScrollbar || clickOnXScrollbar) {
       return;
     }
     if (e.button === 2 && selected) {

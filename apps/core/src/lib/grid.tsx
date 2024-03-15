@@ -48,10 +48,14 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     return (
         <div
             className="beast-grid__wrapper"
-            style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined }}
+            style={{ 
+                maxHeight: config.style?.maxHeight, 
+                height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined ,
+                width: '100%'
+            }}
         >
             <SimpleBar
-                style={{ maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
+                style={{ width: '100%', maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
                 ref={ref}
                 className={cn('beast-grid__container', {
                     border: config?.style?.border,
