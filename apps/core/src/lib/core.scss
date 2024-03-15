@@ -3,7 +3,7 @@
 .beast-grid {
     @import 'flex';
     @import 'themes';
-    
+
     position: relative;
     width: 100%;
     height: 100%;
@@ -19,7 +19,7 @@
     transition: scroll-behavior var(--bg-transition--1);
     color: var(--bg-text-color--1);
     font-size: var(--bg-font-size--1);
-    
+
     .bg-dot--active {
         --size: var(--bg-size--2);
         background-color: var(--bg-background-color--active);
@@ -41,8 +41,6 @@
     }
 
     &__container {
-        width: 100%;
-        overflow: auto;
         &.border {
             box-sizing: border-box;
             border: var(--bg-border--1);
@@ -56,8 +54,8 @@
 
     .beast-grid__wrapper {
         display: flex;
-        overflow: hidden;
         max-width: 100%;
+        overflow: hidden;
         position: relative;
     }
 

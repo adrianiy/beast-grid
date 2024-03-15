@@ -30,6 +30,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
   const lastHitElement = useRef<HTMLElement | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [resizing, setResizing] = useState(false);
   const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
     state.columns,
     state.filters,
@@ -55,8 +56,12 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
   const [resize] = useDndHook(
     {
       ...dragOptions,
+      onDragStart: () => setResizing(true),
       onAnimationFrame: handleResize,
-      onDragEnd: () => (lastX.current = 0),
+      onDragEnd: () => {
+        lastX.current = 0;
+        setResizing(false);
+      }
     }
   );
 
@@ -199,7 +204,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
         <RightSide />
       </div>
 
-      <div ref={resize} className="bg-grid-header__resize" />
+      <div ref={resize} className={cn("bg-grid-header__resize", { resizing })} />
       <MenuLayer
         visible={showMenu}
         clipRef={() => menuRef.current as SVGSVGElement}

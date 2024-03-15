@@ -6,12 +6,14 @@
   
   .bg-toolbar__button {
     padding: var(--bg-size--2) var(--bg-size--3);
+    border: var(--bg-border--1);
+    border-color: transparent;
     cursor: pointer;
     gap: var(--bg-size--3);
 
 
     &:hover {
-      background-color: var(--bg-hover-color--1);
+      border: var(--bg-border--1)
     }
 
     &.right {

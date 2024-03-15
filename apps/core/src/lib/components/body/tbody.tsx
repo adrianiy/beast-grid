@@ -38,6 +38,7 @@ export default function TBody({
     const [
         data,
         columns,
+        sortedColumns,
         theme,
         container,
         scrollElement,
@@ -47,9 +48,11 @@ export default function TBody({
         groupOrder,
         setSelecting,
         selectedCells,
+        updateSelected
     ] = useBeastStore((state) => [
         state.data,
         state.columns,
+        state.sortedColumns,
         state.theme,
         state.container,
         state.scrollElement,
@@ -59,6 +62,7 @@ export default function TBody({
         state.groupOrder,
         state.setSelecting,
         state.selectedCells,
+        state.updateSelectedCells
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
@@ -72,6 +76,10 @@ export default function TBody({
         acc[level].push(column);
         return acc;
     }, [] as Column[][]);
+
+    useEffect(() => {
+        updateSelected(null)
+    }, [sortedColumns, updateSelected])
 
     useEffect(() => {
         if (scrollElement && container) {
@@ -102,8 +110,12 @@ export default function TBody({
         const newSortedData = someActive ? (data.map(filterRow(columns, filters)).filter(Boolean) as Row[]) : data;
 
         setSortedData(newSortedData);
+        
         const [, expanded] = updateGaps(0, newSortedData);
+        
         setExpandedRows(expanded);
+        
+        updateSelected(null);
     }, [data, columns, filters]);
 
     useEffect(() => {
@@ -139,6 +151,7 @@ export default function TBody({
             };
 
             asyncSort();
+            updateSelected(null);
         }
     }, [sort]);
 
@@ -194,6 +207,7 @@ export default function TBody({
     };
 
     const handleRowExpand = (row: Row) => () => {
+        updateSelected(null)
         if (row._expanded) {
             collapseRow(row);
         } else {
