@@ -17,13 +17,6 @@
             transform: rotate(90deg);
         }
     }
-    &:last-child {
-        .grid-row-cell {
-            &.bordered:not(.selected) {
-                border-bottom: none;
-            }
-        }
-    }
     &.expandable {
         cursor: pointer;
     }
