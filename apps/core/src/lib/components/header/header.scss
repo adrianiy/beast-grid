@@ -31,8 +31,6 @@
     box-sizing: border-box;
 
     &.border {
-        border-bottom: var(--bg-border--1);
-
         .bg-grid-header__cell {
             border-bottom: var(--bg-border--1);
             border-top: var(--bg-border--1);
@@ -60,6 +58,12 @@
 
     &:hover {
         background-color: var(--bg-hover-color--cell);
+        .bg-grid-header__menu {
+            opacity: 1;
+        }
+        .bg-grid-header__resize:hover::after {
+            background-color: var(--bg-hover-color--resize);
+        }
     }
 
     &__left {
@@ -92,16 +96,11 @@
             opacity: 1;
         }
     }
-    &:hover {
-        .bg-grid-header__menu {
-            opacity: 1;
-        }
-    }
 
     .bg-grid-header__resize {
         position: absolute;
         display: flex;
-        right: -4px;
+        right: -2px;
         width: 16px;
         height: 100%;
         cursor: ew-resize;

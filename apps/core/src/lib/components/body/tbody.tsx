@@ -207,6 +207,29 @@ export default function TBody({
         setSelecting(false);
     };
 
+    const getActionData = (_data, limit = 0) => {
+        let y = 0;
+        const actionData = [];
+        while (y < limit - 1) {
+            const row = _data[y];
+
+            if (!row) {
+                break;
+            }
+            actionData.push(row);
+
+            if (row._expanded) {
+                actionData.push(...getActionData(row.children, row.children.length));
+
+                y += row.children.length;
+            } else {
+                y++;
+            }
+        }
+
+        return actionData;
+    };
+
     const getCsv = (withHeaders: boolean) => {
         if (!selectedCells) {
             return;
@@ -219,12 +242,14 @@ export default function TBody({
             headers =
                 finalColumns
                     .slice(selectedCells.start.x, selectedCells.end.x + 1)
-                    .map((column) => column.headerName)
-                    .join('\t') + '\n';
+                    .map((column) => column.headerName).join('\t') + '\n';
         }
 
-        const dataToCopy = sortedData
-            .slice(selectedCells.start.y, selectedCells.end.y + 1)
+
+        const actionData = getActionData(sortedData, selectedCells.end.y + 1);
+        console.log(actionData)
+
+        const csvData = actionData
             .map((row) => {
                 return finalColumns
                     .slice(selectedCells.start.x, selectedCells.end.x + 1)
@@ -235,33 +260,42 @@ export default function TBody({
             })
             .join('\n');
 
-        return headers + dataToCopy;
+        console.log(csvData)
+
+        return headers + csvData;
     };
 
     const handleCopy = (withHeaders: boolean) => {
         const csv = getCsv(withHeaders);
-        
+
         if (!csv) {
             return;
         }
-        
+
         navigator.clipboard.writeText(csv);
     };
 
     const handleExport = () => {
         const csv = getCsv(true);
-        const csvContent = "data:text/csv;charset=utf-8,";
+        const csvContent = 'data:text/csv;charset=utf-8,';
 
         const encodedUri = encodeURI(csvContent + csv);
 
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `data-${new Date().toISOString()}.csv`);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `data-${new Date().toISOString()}.csv`);
         document.body.appendChild(link);
         link.click();
     };
 
-    const addRowToSlice = (renderArray: ReactNode[][], row: Row, idx: number, y: number, level: number, gap: number): number => {
+    const addRowToSlice = (
+        renderArray: ReactNode[][],
+        row: Row,
+        idx: number,
+        y: number,
+        level: number,
+        gap: number
+    ): number => {
         if (!renderArray[level]) {
             renderArray[level] = [];
         }
@@ -297,48 +331,48 @@ export default function TBody({
         return gap;
     };
 
-    const createDataSlice = () => {
-        const renderArray: ReactNode[][] = [];
-        let gap = 0;
-        let y = 0;
-        for (let idx = min; idx < max; idx++) {
-            const row = sortedData[idx];
+        const createDataSlice = () => {
+            const renderArray: ReactNode[][] = [];
+            let gap = 0;
+            let y = 0;
+            for (let idx = min; idx < max; idx++) {
+                const row = sortedData[idx];
 
-            if (row) {
-                gap = addRowToSlice(renderArray, row, idx, y, 0, gap);
+                if (row) {
+                    gap = addRowToSlice(renderArray, row, idx, y, 0, gap);
 
-                if (row._expanded) {
-                    y += row.children?.length || 0;
+                    if (row._expanded) {
+                        y += row.children?.length || 0;
+                    }
                 }
+
+                gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
+                y++;
             }
 
-            gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
-            y++;
-        }
-
-        return renderArray.flat();
-    };
-
-    const getStyleProps = () => {
-        return {
-            height: (sortedData.length + expandedRows) * rowHeight,
+            return renderArray.flat();
         };
-    };
 
-    const dataSlice = createDataSlice();
+        const getStyleProps = () => {
+            return {
+                height: (sortedData.length + expandedRows) * rowHeight,
+            };
+        };
 
-    return (
-        <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
-            {dataSlice}
-            <ContextMenu
-                x={contextMenu?.x || 0}
-                y={contextMenu?.y || 0}
-                visible={!!contextMenu}
-                theme={theme}
-                onClose={() => setContextMenu(null)}
-                onCopy={handleCopy}
-                onExport={handleExport}
-            />
-        </div>
-    );
-}
+        const dataSlice = createDataSlice();
+
+        return (
+            <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
+                {dataSlice}
+                <ContextMenu
+                    x={contextMenu?.x || 0}
+                    y={contextMenu?.y || 0}
+                    visible={!!contextMenu}
+                    theme={theme}
+                    onClose={() => setContextMenu(null)}
+                    onCopy={handleCopy}
+                    onExport={handleExport}
+                />
+            </div>
+        );
+    }

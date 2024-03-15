@@ -21,7 +21,7 @@ const buttonStyle: CSSProperties = {
 };
 
 export default function Example() {
-  const [theme, setTheme] = useState('minimal-theme');
+  const [theme, setTheme] = useState('corpo-theme');
   const [count, setCount] = useState(100);
   const [view, setView] = useState('grid');
 
