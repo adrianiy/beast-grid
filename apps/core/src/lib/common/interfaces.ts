@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
 import { AggregationType, FilterType, OperationType, PinType, SortType } from './enums';
 
@@ -44,7 +45,8 @@ export interface BaseColumnDef {
   field?: string;
   sortable?: boolean;
   children?: ColumnDef[];
-  formatter?: (value: string & number) => string;
+  formatter?: <T>(value: string & number, row?: T) => string;
+  styleFormatter?: <T>(value: string & number, row?: T) => CSSProperties;
   menu?: Partial<MenuProps>;
   rowGroup?: boolean;
   aggregation?: AggregationType | AggregationFunction;

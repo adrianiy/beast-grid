@@ -21,7 +21,7 @@ function getProperty<Type, Key extends keyof Type>(
   const value = obj[field as Key];
 
   if (columnDef.formatter) {
-    return columnDef.formatter(value as number & string);
+    return columnDef.formatter(value as number & string, obj);
   }
 
   return value as string;
@@ -125,6 +125,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
           (columnDef.tree ? LEVEL_PADDING * level : 0) +
           (columnDef.tree && !row.children ? LEVEL_PADDING : 0),
         width: columnDef.width,
+        ...columnDef.styleFormatter?.(row[columnDef.field], row),
       }}
       onClick={handleMouseClick}
       onMouseDown={handleMouseDown}
