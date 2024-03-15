@@ -207,7 +207,7 @@ export default function TBody({
         setSelecting(false);
     };
 
-    const getActionData = (_data, limit = 0) => {
+    const getActionData = (_data: Row[], limit = 0): Row[] => {
         let y = 0;
         const actionData = [];
         while (y < limit - 1) {
@@ -218,7 +218,7 @@ export default function TBody({
             }
             actionData.push(row);
 
-            if (row._expanded) {
+            if (row._expanded && row.children) {
                 actionData.push(...getActionData(row.children, row.children.length));
 
                 y += row.children.length;
@@ -247,7 +247,6 @@ export default function TBody({
 
 
         const actionData = getActionData(sortedData, selectedCells.end.y + 1);
-        console.log(actionData)
 
         const csvData = actionData
             .map((row) => {
@@ -260,7 +259,6 @@ export default function TBody({
             })
             .join('\n');
 
-        console.log(csvData)
 
         return headers + csvData;
     };
