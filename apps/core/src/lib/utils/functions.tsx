@@ -19,6 +19,28 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
   }
 };
 
+const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedColumns: Column[]): Row[] => {
+  const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
+  const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
+
+  return Object.entries(groups).map(([key, children]) => {
+    const calculatedFields = aggTypeColumns.reduce((acc, column) => {
+      acc[column.field as string] = _calculate(children, column);
+      return acc;
+    }, {} as Record<string, number | null>);
+
+    const newRow =  { [field]: key, _id: uuidv4(), children, ...calculatedFields };
+
+    const computedFields = aggFuncColumns.reduce((acc, column) => {
+      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
+      return acc;
+    }, {} as Record<string, number | string | null>);
+
+    return { ...newRow, ...computedFields };
+    
+  });
+}
+
 export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
   const groups = data.reduce((acc, row) => {
     const key = `${row[column.field as keyof Row]}`;
@@ -29,25 +51,22 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
     return acc;
   }, {} as Record<string, Row[]>);
 
-  const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
-  const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
+  return getGroupRows(groups, column.field as string, calculatedColumns);
 
-  return Object.entries(groups).map(([key, children]) => {
-    const calculatedFields = aggTypeColumns.reduce((acc, column) => {
-      acc[column.field as string] = _calculate(children, column);
-      return acc;
-    }, {} as Record<string, number | null>);
+};
 
-    const newRow =  { [column.field as string]: key, _id: uuidv4(), children, ...calculatedFields };
+export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns: Column[]): Row[] => {
+  const groups = data.reduce((acc, row) => {
+    const key = columns.map((column) => `${row[column.field as keyof Row]}`).join('_');
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(row);
+    return acc;
+  }, {} as Record<string, Row[]>);
+  console.log(groups)
 
-    const computedFields = aggFuncColumns.reduce((acc, column) => {
-      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
-      return acc;
-    }, {} as Record<string, number | string | null>);
-
-    return { ...newRow, ...computedFields };
-    
-  });
+  return getGroupRows(groups, columns.map(c => c.headerName).join('_'), calculatedColumns);
 };
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -147,3 +166,18 @@ export const useDebounce = () => {
   // a debounce function is returned
   return debounceFunction.current;
 };
+
+export const getCategories = (columns: Column[], data: Data) => {
+  const rowZero = data[0];
+  const stringCategories = columns.filter((column) => typeof rowZero[column.field as keyof Row] === 'string');
+
+  return stringCategories;
+}
+
+export const getSeries = (columns: Column[], data: Data) => {
+  const rowZero = data[0];
+  const numberSeries = columns.filter((column) =>  !isNaN(+(rowZero[column.field as keyof Row] as number)));
+
+  return numberSeries;
+}
+

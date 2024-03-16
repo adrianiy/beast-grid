@@ -109,7 +109,7 @@ export interface ToolBar {
   download: boolean;
   grid: boolean;
   filter: boolean;
-  chart: boolean;
+  mode: boolean;
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {

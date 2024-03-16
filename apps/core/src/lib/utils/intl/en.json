@@ -11,6 +11,8 @@
   "menu.column.collapse": "Collapse groups",
   "menu.column.group": "Group by {columnName}",
   "menu.column.ungroup": "Ungroup",
+  "toolbar.mode.grid": "Table",
+  "toolbar.mode.chart": "Chart",
   "toolbar.download": "Download",
   "toolbar.grid": "Columns",
   "toolbar.filter": "Filters",

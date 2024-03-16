@@ -67,3 +67,8 @@ export enum OperationType {
   LESS_THAN_OR_EQUAL = 'lte',
   BETWEEN = 'between',
 }
+
+export enum BeastMode {
+  GRID = 'grid',
+  CHART = 'chart',
+}

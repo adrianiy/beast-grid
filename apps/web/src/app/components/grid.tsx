@@ -119,6 +119,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
           field: 'name'
         },
         topToolbar: {
+          mode: true,
           grid: true,
           filter: true,
         },

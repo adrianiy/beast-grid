@@ -82,12 +82,19 @@ export default function TBody({
     }, [sortedColumns, updateSelected])
 
     useEffect(() => {
+        const updateLastScroll = () => {
+            if (scrollElement) {
+                setLastScroll(scrollElement.scrollTop);
+            }
+        };
         if (scrollElement && container) {
-            scrollElement.addEventListener('scroll', () => {
-                if (scrollElement.scrollTop !== lastScroll) {
-                    setLastScroll(scrollElement.scrollTop);
-                }
-            });
+            scrollElement.addEventListener('scroll', updateLastScroll);
+        }
+
+        return () => {
+            if (scrollElement) {
+                scrollElement.removeEventListener('scroll',updateLastScroll);
+            }
         }
     }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
 

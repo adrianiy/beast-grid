@@ -17,7 +17,7 @@ import {
   updateSelectedCells,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
-import { BeastGridConfig, Coords, PinType, SelectedCells, SideBarConfig, SortType, TreeConstructor } from '../../common';
+import { BeastGridConfig, BeastMode, Coords, PinType, SelectedCells, SideBarConfig, SortType, TreeConstructor } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 
 interface GridState {
@@ -38,6 +38,7 @@ interface GridState {
   sideBarConfig: SideBarConfig | null;
   selectedCells: SelectedCells | null;
   selecting: boolean;
+  mode: BeastMode;
 }
 
 
@@ -66,6 +67,7 @@ export interface GridStore extends GridState {
   setSelectedStart: (selected: Coords) => void;
   setSelectedEnd: (selected: Coords) => void;
   setSelecting: (selecting: boolean) => void;
+  setMode: (mode: BeastMode) => void;
 }
 
 export const createGridStore = <T>(
@@ -95,6 +97,7 @@ export const createGridStore = <T>(
     theme,
     sort: [],
     selectedCells: null,
+    mode: BeastMode.GRID
   };
   
   return create<GridStore>((set) => ({
@@ -130,6 +133,7 @@ export const createGridStore = <T>(
     setSelectedStart: (selected: Coords) => set(setSelectedStart(selected)),
     setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
     setSelecting: (selecting: boolean) => set({ selecting }),
+    setMode: (mode: BeastMode) => set({ mode }),
   }));
 };
 

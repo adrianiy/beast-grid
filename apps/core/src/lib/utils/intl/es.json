@@ -11,6 +11,8 @@
   "menu.column.collapse": "Colapsar grupos",
   "menu.column.group": "Agrupar por {columnName}",
   "menu.column.ungroup": "Desagrupar",
+  "toolbar.mode.grid": "Tabla",
+  "toolbar.mode.chart": "Gráfico",
   "toolbar.download": "Descargar",
   "toolbar.grid": "Columnas",
   "toolbar.filter": "Filtros",
