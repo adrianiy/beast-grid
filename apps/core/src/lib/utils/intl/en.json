@@ -7,6 +7,7 @@
   "menu.pin.right": "Pin right",
   "menu.grid": "Grid settings",
   "menu.filter": "Filter",
+  "menu.chart": "Generate chart",
   "menu.column.expand": "Expand groups",
   "menu.column.collapse": "Collapse groups",
   "menu.column.group": "Group by {columnName}",

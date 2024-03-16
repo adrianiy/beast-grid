@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { CopyIcon, DownloadIcon } from '@radix-ui/react-icons';
+import { BarChartIcon, CopyIcon, DownloadIcon } from '@radix-ui/react-icons';
 import { FormattedMessage } from 'react-intl';
 
 import cn from 'classnames';
@@ -40,7 +40,7 @@ const MenuPortal = (props: Props) => {
     return () => {
       body.removeEventListener('click', onClose);
     }
-  }, [])
+  }, [onClose])
   
   const left = window.scrollX + x;
   const top = window.scrollY + y;
@@ -54,6 +54,12 @@ const MenuPortal = (props: Props) => {
     e.stopPropagation();
     onExport();
   }
+
+  const handleChart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('chart');
+  }
+  
   return (
     <div className={cn("bg-grid__context-menu", theme)} style={{ left, top }}>
       <div className="bg-grid__context-menu__section">
@@ -64,6 +70,12 @@ const MenuPortal = (props: Props) => {
         <div className="bg-grid__context-menu__item row middle" onClick={handleCopy(true)}>
           <CopyIcon />
           <FormattedMessage id="menu.copyWithHeaders" />
+        </div>
+      </div>
+      <div className="bg-grid__context-menu__section" onClick={handleChart}>
+        <div className="bg-grid__context-menu__item row middle">
+          <BarChartIcon />
+          <FormattedMessage id="menu.chart" />
         </div>
       </div>
       <div className="bg-grid__context-menu__section" onClick={handleExport}>
