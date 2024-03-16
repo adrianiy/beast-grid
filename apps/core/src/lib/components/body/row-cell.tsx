@@ -2,9 +2,9 @@ import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/in
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 
 import cn from 'classnames';
-import { LEVEL_PADDING } from '../../common';
+import { LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
-import React from 'react';
+import React, { useRef } from 'react';
 
 function getProperty<Type, Key extends keyof Type>(
   obj: Type,
@@ -40,14 +40,17 @@ type Props = {
   onClick?: () => void;
 };
 export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
-  const [scrollElement, selectedCells, setSelectedStart, setSelectedEnd, selecting, setSelecting] = useBeastStore((state) => [
-    state.scrollElement,
-    state.selectedCells,
-    state.setSelectedStart,
-    state.setSelectedEnd,
-    state.selecting,
-    state.setSelecting,
-  ]);
+  const lastSelected = useRef<SelectedCells | null>(null);
+  const [scrollElement, selectedCells, setSelectedStart, setSelectedEnd, updateSelected, selecting, setSelecting] =
+    useBeastStore((state) => [
+      state.scrollElement,
+      state.selectedCells,
+      state.setSelectedStart,
+      state.setSelectedEnd,
+      state.updateSelectedCells,
+      state.selecting,
+      state.setSelecting,
+    ]);
   const inY = selectedCells && idx >= selectedCells.start.y && idx <= selectedCells.end.y;
   const inX =
     selectedCells &&
@@ -64,10 +67,10 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     return null;
   }
 
-  const handleMouseDown = (e:React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     const clickOnYScrollbar = e.clientY > scrollElement?.getBoundingClientRect().bottom - 11;
     const clickOnXScrollbar = e.clientX > scrollElement?.getBoundingClientRect().right - 11;
-    
+
     if (e.shiftKey || clickOnYScrollbar || clickOnXScrollbar) {
       return;
     }
@@ -87,6 +90,19 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
   };
 
   const handleMouseUp = () => {
+    if (!lastSelected.current) {
+      lastSelected.current = selectedCells;
+    } else {
+      const oneCell =
+        lastSelected.current &&
+        lastSelected.current.start.x === lastSelected.current.end.x &&
+        lastSelected.current.start.y === lastSelected.current.end.y;
+      
+      if (oneCell) {
+        updateSelected(null);
+        lastSelected.current = null;
+      }
+    }
     setSelecting(false);
   };
 

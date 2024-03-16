@@ -78,6 +78,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-weight: var(--bg-font-weight--header)
     }
     .bg-grid-header__cell__menu {
         position: relative;
