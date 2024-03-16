@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { AggregationFunction, AggregationType, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
+import { AggregationFunction, AggregationType, Chart, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
@@ -167,14 +167,22 @@ export const useDebounce = () => {
   return debounceFunction.current;
 };
 
-export const getCategories = (columns: Column[], data: Data) => {
+export const getCategories = (columns: Column[], data: Data, chartConfig?: Partial<Chart>) => {
+  if (chartConfig?.defaultValues?.categoryColumns) {
+    return columns.filter((column) => chartConfig.defaultValues?.categoryColumns?.includes(column.field as string));
+  }
+  
   const rowZero = data[0];
   const stringCategories = columns.filter((column) => typeof rowZero[column.field as keyof Row] === 'string');
 
   return stringCategories;
 }
 
-export const getSeries = (columns: Column[], data: Data) => {
+export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<Chart>) => {
+  if (chartConfig?.defaultValues?.dataColumns) {
+    return columns.filter((column) => chartConfig.defaultValues?.dataColumns?.includes(column.field as string));
+  }
+  
   const rowZero = data[0];
   const numberSeries = columns.filter((column) =>  !isNaN(+(rowZero[column.field as keyof Row] as number)));
 

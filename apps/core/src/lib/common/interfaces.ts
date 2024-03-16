@@ -1,6 +1,7 @@
 import { CSSProperties } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
 import { AggregationType, FilterType, OperationType, PinType, SortType } from './enums';
+import { EChartsCoreOption } from 'echarts';
 
 export interface Row {
   [key: string]: unknown;
@@ -112,6 +113,15 @@ export interface ToolBar {
   mode: boolean;
 }
 
+export interface Chart {
+  defaultValues: Partial<{
+    dataColumns: string[];
+    categoryColumns: string[];
+    chartType: 'line' | 'bar';
+  }>;
+  config: Partial<EChartsCoreOption>;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
   columnDefs: ColumnDef[];
   defaultColumnDef?: Partial<ColumnDef>;
@@ -124,6 +134,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   tree?: Partial<TreeConstructor>;
   topToolbar?: Partial<ToolBar>;
   bottomToolbar?: Partial<ToolBar>;
+  chart?: Partial<Chart>;
 }
 
 export interface TableStyles {

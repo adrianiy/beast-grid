@@ -129,6 +129,11 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         defaultColumnDef: {
           menu: { pin: true, grid: true },
         },
+        chart: {
+          defaultValues: {
+            dataColumns: ['january', 'february'],
+          }
+        },
         ..._customConfig,
       });
     }
