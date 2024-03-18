@@ -120,7 +120,7 @@ const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => 
     return 0;
   }
   if (!column.childrenId) {
-    return column.width || 0;
+    return column.width || MIN_COL_WIDTH;
   }
 
   return column.childrenId.reduce((acc, childId) => acc + _getChildrenWidth(columnStore[childId], columnStore), 0);

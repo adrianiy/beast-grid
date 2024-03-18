@@ -6,7 +6,7 @@ import { LineChart, BarChart, PieChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import { GridComponent, TooltipComponent, TitleComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
 import { useBeastStore } from './stores/beast-store';
-import { getCategories, getSeries, groupByMultiple } from './utils/functions';
+import { filterRow, getCategories, getSeries, groupByMultiple } from './utils/functions';
 import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './common';
 import deepmerge from 'deepmerge';
 import { EChartsCoreOption } from 'echarts';
@@ -16,9 +16,10 @@ import { createPortal } from 'react-dom';
 
 import cn from 'classnames';
 
-import './chart.scss';
-import { MixerHorizontalIcon } from '@radix-ui/react-icons';
+import { Cross2Icon, MixerHorizontalIcon } from '@radix-ui/react-icons';
 import { FormattedMessage } from 'react-intl';
+
+import './chart.scss';
 
 echarts.use([
   LineChart,
@@ -43,9 +44,11 @@ type Props<T> = {
 };
 
 export default function Chart<T>(props: Props<T>) {
-  const [columns, data, theme, setSidebar] = useBeastStore((state) => [
+  const [columns, sortedColumns, data, filters, theme, setSidebar] = useBeastStore((state) => [
+    state.columns,
     state.sortedColumns,
     state.data,
+    state.filters,
     state.theme,
     state.setSideBarConfig,
   ]);
@@ -62,18 +65,34 @@ export default function Chart<T>(props: Props<T>) {
             <div className="bg-chart__title">
               <FormattedMessage id="chart.title" />
             </div>
-            <div className="bg-chart__modal__button row middle" onClick={() => setSidebar(SideBarConfig.CHART)}>
-              <MixerHorizontalIcon />
-              <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
+            <div className="bg-chart__title__actions row middle">
+              <div
+                className="bg-chart__modal__button row middle"
+                onClick={() => setSidebar(SideBarConfig.CHART)}
+              >
+                <MixerHorizontalIcon />
+                <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
+              </div>
+              <Cross2Icon className="close" onClick={props.onClose} />
             </div>
           </div>
-          <ChartWrapper config={props.config} columns={props.columns ?? columns} activeColumns={props.activeColumns} data={props.data ?? data} />
+          <ChartWrapper
+            config={props.config}
+            columns={props.columns ?? sortedColumns}
+            activeColumns={props.activeColumns}
+            data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+          />
         </div>
       </div>,
       document.body
     )
   ) : (
-    <ChartWrapper config={props.config} columns={props.columns ?? columns} activeColumns={props.activeColumns} data={props.data ?? data} />
+    <ChartWrapper
+      config={props.config}
+      columns={props.columns ?? sortedColumns}
+      activeColumns={props.activeColumns}
+      data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+    />
   );
 }
 
@@ -89,13 +108,19 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
   const configurableCategories = getCategories(columns, data);
   const configurableSeries = getSeries(columns, data);
-  
-  const dataColumns = columns.filter((col) => props.config.chart?.defaultValues?.dataColumns?.includes(col.field as string));
-  const categoryColumns = columns.filter((col) => props.config.chart?.defaultValues?.categoryColumns?.includes(col.field as string));
+
+  const dataColumns = columns.filter((col) =>
+    props.config.chart?.defaultValues?.dataColumns?.includes(col.field as string)
+  );
+  const categoryColumns = columns.filter((col) =>
+    props.config.chart?.defaultValues?.categoryColumns?.includes(col.field as string)
+  );
 
   const activeColumns = getSeries(props.activeColumns || (dataColumns.length ? dataColumns : columns), data);
 
-  const [categories, setCategories] = useState<Column[]>(props.activeColumns || (categoryColumns.length ? categoryColumns : configurableCategories));
+  const [categories, setCategories] = useState<Column[]>(
+    props.activeColumns || (categoryColumns.length ? categoryColumns : configurableCategories)
+  );
   const [series, setSeries] = useState<Column[]>(activeColumns);
   const [chartType, setChartType] = useState<ChartType>(
     (props.config.chart?.defaultValues?.chartType ?? ChartType.BAR) as ChartType
@@ -110,24 +135,28 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     const categoryData = groupedData.map((row) => row[field] as string);
 
     const getSeriesData = (column: Column) => {
-      if (chartType === ChartType.PIE) { return groupedData.reduce((acc, curr) => acc.concat({ value: curr[column.field as string] as number, name: curr[field] as string }), [] as { value: number; name: string }[]);
+      if (chartType === ChartType.PIE) {
+        return groupedData.reduce(
+          (acc, curr) =>
+            acc.concat({ value: curr[column.field as string] as number, name: curr[field] as string }),
+          [] as { value: number; name: string }[]
+        );
       } else {
         return groupedData.map((row) => row[column.field as string]);
-
       }
-    }
+    };
 
     const isPie = chartType === ChartType.PIE;
 
     const _lineBarOptions = {
-        xAxis: {
-          type: 'category',
-          data: categoryData,
-        },
-        yAxis: {
-          type: 'value',
-        },
-    }
+      xAxis: {
+        type: 'category',
+        data: categoryData,
+      },
+      yAxis: {
+        type: 'value',
+      },
+    };
 
     const _options: EChartsCoreOption = deepmerge(
       {
@@ -155,10 +184,10 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
           padding: 16,
           extraCssText: 'border: var(--bg-border--1); border-radius: 0; box-shadow: none',
         },
-        ...isPie ? {} : _lineBarOptions,
+        ...(isPie ? {} : _lineBarOptions),
         series: series.map((column, idx) => ({
           name: column?.headerName,
-          radius: isPie && [`${80 - (idx * 20)}%`, `${80 - (idx * 20) + 10}%`],
+          radius: isPie && [`${80 - idx * 20}%`, `${80 - idx * 20 + 10}%`],
           label: {
             show: false,
           },

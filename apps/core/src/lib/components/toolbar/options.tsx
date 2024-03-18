@@ -103,7 +103,6 @@ export const ChartConfig = ({ toolbar }: Props) => {
 export const Restore = ({ toolbar }: Props) => {
   const [edited, restore] = useBeastStore((state) => [state.edited, state.restore]);
 
-  console.log(edited)
   if (!edited || !toolbar.restore) {
     return null;
   }

@@ -29,8 +29,8 @@ const columnDefs: ColumnDef[] = [
     headerName: 'USER',
     children: [
       { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true, column: true } },
-      { headerName: 'AGE', field: 'age', width: 100, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true, filter: true } },
-      { headerName: 'LANGUAGE', field: 'language', width: 100, menu: { grid: true, column: true }}
+      { headerName: 'AGE', field: 'age', width: 200, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true, filter: true } },
+      { headerName: 'LANGUAGE', field: 'language', width: 200, menu: { grid: true, column: true }}
     ],
   },
   { headerName: 'USERS', field: 'id', aggregation: (row: Row) => `${row.children?.length || 0} users`, flex: 1 },
