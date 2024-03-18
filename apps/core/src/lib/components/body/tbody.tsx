@@ -6,14 +6,16 @@ import { filterRow, sortData } from '../../utils/functions';
 
 import RowContainer from './row';
 import ContextMenu from '../contextMenu/context-menu';
+import Chart from '../../chart';
 
-import { BusActions, Column, Coords, Data, Row, RowConfig, RowEvents } from '../../common';
+import { BeastGridConfig, BusActions, Column, Coords, Data, Row, RowConfig, RowEvents } from '../../common';
 
 import './tbody.scss';
 
-type TBodyProps = {
+type TBodyProps<T> = {
     rowHeight: number;
     headerHeight: number;
+    beastConfig: BeastGridConfig<T>;
     config?: Partial<RowConfig>;
     maxHeight?: number;
     border?: boolean;
@@ -25,15 +27,16 @@ type TBodyProps = {
 const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 5;
 
-export default function TBody({
+export default function TBody<T>({
     rowHeight,
     headerHeight,
     config,
+    beastConfig,
     maxHeight,
     border,
     onSortChange,
     events,
-}: TBodyProps) {
+}: TBodyProps<T>) {
     const gaps = useRef<Record<string, number>>({});
     const [
         data,
@@ -69,6 +72,9 @@ export default function TBody({
     const [[max, min], setMaxMin] = useState([0, 0]);
     const [sortedData, setSortedData] = useState<Data>([]);
     const [contextMenu, setContextMenu] = useState<Coords | null>(null);
+    const [chartColumns, setChartColumns] = useState<Column[]>([]);
+    const [chartData, setChartData] = useState<Data>([]);
+    const [chartVisible, setChartVisible] = useState<boolean>(false);
 
     const levels = Object.values(columns).reduce((acc, column) => {
         const level = column.level || 0;
@@ -307,6 +313,27 @@ export default function TBody({
         link.click();
     };
 
+    const handleChartOpen = () => {
+        if (!selectedCells) {
+            return;
+        }
+        const finalColumns = lastLevel.sort((a, b) => a.finalPosition - b.finalPosition);
+        console.log(finalColumns, selectedCells)
+
+
+        const chartColumns =
+            finalColumns
+                .slice(selectedCells?.start.x, selectedCells.end.x + 1)
+
+        const actionData = getActionData(sortedData, selectedCells.end.y + 1);
+
+        console.log(chartColumns, actionData);
+        setChartColumns(chartColumns);
+        setChartData(actionData);
+        setChartVisible(true);
+        setContextMenu(null);
+    }
+
     const addRowToSlice = (
         renderArray: ReactNode[][],
         row: Row,
@@ -391,7 +418,9 @@ export default function TBody({
                     onClose={() => setContextMenu(null)}
                     onCopy={handleCopy}
                     onExport={handleExport}
+                    onChartOpen={handleChartOpen}
                 />
+                <Chart modal visible={chartVisible} data={chartData} columns={chartColumns} config={beastConfig} onClose={() => setChartVisible(false)} />
             </div>
         );
     }

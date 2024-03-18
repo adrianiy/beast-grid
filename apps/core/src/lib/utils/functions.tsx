@@ -64,7 +64,6 @@ export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns
     acc[key].push(row);
     return acc;
   }, {} as Record<string, Row[]>);
-  console.log(groups)
 
   return getGroupRows(groups, columns.map(c => c.headerName).join('_'), calculatedColumns);
 };
@@ -167,11 +166,7 @@ export const useDebounce = () => {
   return debounceFunction.current;
 };
 
-export const getCategories = (columns: Column[], data: Data, chartConfig?: Partial<Chart>) => {
-  if (chartConfig?.defaultValues?.categoryColumns) {
-    return columns.filter((column) => chartConfig.defaultValues?.categoryColumns?.includes(column.field as string));
-  }
-  
+export const getCategories = (columns: Column[], data: Data) => {
   const rowZero = data[0];
   const stringCategories = columns.filter((column) => typeof rowZero[column.field as keyof Row] === 'string');
 

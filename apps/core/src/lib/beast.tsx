@@ -16,7 +16,7 @@ export default function Beast<T>(props: Props<T>) {
   if (mode === BeastMode.GRID) {
     return <Grid {...props} />;
   } else if (mode === BeastMode.CHART) {
-    return <Chart {...props}/>;
+    return <Chart visible {...props}/>;
   } else {
     return null;
   }

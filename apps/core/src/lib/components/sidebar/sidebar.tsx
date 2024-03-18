@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
-import { BeastGridConfig, SideBarConfig } from '../../common';
+import { BeastGridConfig, ChartType, Column, SideBarConfig } from '../../common';
 
 import GridConfig from './components/grid';
+import ChartConfig from './components/chart';
 import Filters from './components/filters';
 
 import { useBeastStore } from '../../stores/beast-store';
 
 import './sidebar.scss';
 
-function SideBarSwitch<T>({ sideBarConfig, config }: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> }) {
+type ChartProps = {
+  categories: Column[];
+  series: Column[];
+  activeCategory: string;
+  activeSeries: Column[];
+  activeChartType: ChartType;
+  setActiveCategory: (column: Column) => void;  
+  setActiveSerie: (column: Column) => void;
+  setActiveChartType: (chartType: ChartType) => void;
+}
+
+function SideBarSwitch<T>({ sideBarConfig, config, ...chartProps }: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> } & Partial<ChartProps>) {
   const [columns] = useBeastStore((state) => [state.columns]);
 
   switch (sideBarConfig) {
@@ -16,12 +28,14 @@ function SideBarSwitch<T>({ sideBarConfig, config }: { sideBarConfig: SideBarCon
       return <GridConfig config={config} columns={columns} />;
     case SideBarConfig.FILTERS:
       return <Filters config={config} />;
+    case SideBarConfig.CHART:
+      return chartProps?.series && <ChartConfig config={config} {...chartProps} />;
     default:
       return null;
   }
 }
 
-export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
+export default function SideBar<T>({ config, ...chartProps }: { config: BeastGridConfig<T> } & Partial<ChartProps>) {
   const [sideBarConfig, setSidebarConfig] = useBeastStore((state) => [
     state.sideBarConfig,
     state.setSideBarConfig,
@@ -54,14 +68,14 @@ export default function SideBar<T>({ config }: { config: BeastGridConfig<T> }) {
     return (
       <div className="bg-sidebar__modal__container" onClick={closeSidebar}>
         <div className="bg-sidebar__modal" onClick={stopClick}>
-          <SideBarSwitch sideBarConfig={sideBarConfig} config={config} />
+          <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
         </div>
       </div>
     );
   } else {
     return (
       <div className="bg-sidebar__container">
-        <SideBarSwitch sideBarConfig={sideBarConfig} config={config} />
+        <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
       </div>
     );
   }

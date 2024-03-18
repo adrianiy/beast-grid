@@ -15,6 +15,7 @@ type Props = {
   onClose: () => void;
   onCopy: (withHeaders: boolean) => void;
   onExport: () => void;
+  onChartOpen: () => void;
 }
 
 export default function ContextMenu(props: Props) {
@@ -30,7 +31,7 @@ export default function ContextMenu(props: Props) {
 }
 
 const MenuPortal = (props: Props) => {
-  const { x, y, theme, onClose, onCopy, onExport } = props;
+  const { x, y, theme, onClose, onCopy, onExport, onChartOpen } = props;
   
   useEffect(() => {
     const body = document.body;
@@ -57,7 +58,7 @@ const MenuPortal = (props: Props) => {
 
   const handleChart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('chart');
+    onChartOpen();
   }
   
   return (

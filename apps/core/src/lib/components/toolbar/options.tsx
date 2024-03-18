@@ -47,9 +47,9 @@ export const Download = ({ toolbar }: Props) => {
 };
 
 export const Grid = ({ toolbar }: Props) => {
-  const [setSidebarConfig] = useBeastStore((state) => [state.setSideBarConfig]);
+  const [setSidebarConfig, mode] = useBeastStore((state) => [state.setSideBarConfig, state.mode]);
 
-  if (!toolbar.grid) {
+  if (!toolbar.grid || mode !== BeastMode.GRID) {
     return null;
   }
 
@@ -81,6 +81,21 @@ export const Mode = ({ toolbar }: Props) => {
     >
       {mode === BeastMode.CHART ? <TableIcon /> : <BarChartIcon />}
       <FormattedMessage id={`toolbar.mode.${opositeMode}`} defaultMessage="Mode" />
+    </div>
+  );
+}
+
+export const ChartConfig = ({ toolbar }: Props) => {
+  const [mode, setSidebarConfig] = useBeastStore((state) => [state.mode, state.setSideBarConfig]);
+
+  if (!toolbar.mode || mode === BeastMode.GRID) {
+    return null;
+  }
+
+  return (
+    <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.CHART)}>
+      <MixerHorizontalIcon />
+      <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
     </div>
   );
 }

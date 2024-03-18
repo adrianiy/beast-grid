@@ -116,7 +116,7 @@ export interface ToolBar {
 export interface Chart {
   defaultValues: Partial<{
     dataColumns: string[];
-    categoryColumns: string[];
+    categoryColumn: string;
     chartType: 'line' | 'bar';
   }>;
   config: Partial<EChartsCoreOption>;

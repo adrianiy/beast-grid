@@ -1,0 +1,37 @@
+.bg-chart__container {
+    position: relative;
+    width: 100%;
+}
+.bg-chart__modal__container {
+    @import './flex';
+    @import './themes';
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-background-color--overlay);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .bg-chart__modal {
+        display: flex;
+        background-color: var(--bg-background-color--1);
+        width: 1000px;
+        padding: var(--bg-size--6);
+    }
+
+    .bg-chart__title {
+        font-size: var(--bg-size--5);
+        font-weight: 500;
+        margin-bottom: var(--bg-size--3);
+    }
+
+    .bg-chart__modal__button {
+      cursor: pointer;
+      gap: var(--bg-size--3);
+    }
+}

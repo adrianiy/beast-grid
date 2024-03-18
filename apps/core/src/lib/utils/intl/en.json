@@ -14,6 +14,7 @@
   "menu.column.ungroup": "Ungroup",
   "toolbar.mode.grid": "Table",
   "toolbar.mode.chart": "Chart",
+  "toolbar.chartConfig": "Chart settings",
   "toolbar.download": "Download",
   "toolbar.grid": "Columns",
   "toolbar.filter": "Filters",
@@ -30,5 +31,9 @@
   "filter.between": "Between",
   "menu.copy": "Copy",
   "menu.copyWithHeaders": "Copy with headers",
-  "menu.export": "Export selection"
+  "menu.export": "Export selection",
+  "chart.title": "Chart",
+  "chart.categories": "Categories",
+  "chart.series": "Values",
+  "chart.type": "Chart type"
 }

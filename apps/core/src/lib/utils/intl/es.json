@@ -14,6 +14,7 @@
   "menu.column.ungroup": "Desagrupar",
   "toolbar.mode.grid": "Tabla",
   "toolbar.mode.chart": "Gráfico",
+  "toolbar.chartConfig": "Configurar gráfico",
   "toolbar.download": "Descargar",
   "toolbar.grid": "Columnas",
   "toolbar.filter": "Filtros",
@@ -30,5 +31,9 @@
   "filter.between": "Entre",
   "menu.copy": "Copiar",
   "menu.copyWithHeaders": "Copiar con encabezados",
-  "menu.export": "Exportar selección"
+  "menu.export": "Exportar selección",
+  "chart.title": "Gráfico",
+  "chart.categories": "Categorías",
+  "chart.series": "Series",
+  "chart.type": "Tipo de gráfico"
 }

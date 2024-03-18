@@ -109,9 +109,8 @@ export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, fi
       finalPosition = setFinalPosition(column.childrenId as ColumnId[], columns, finalPosition);
     } else {
       column.finalPosition = finalPosition;
+      finalPosition++;
     }
-
-    finalPosition++;
   });
 
   return finalPosition;
