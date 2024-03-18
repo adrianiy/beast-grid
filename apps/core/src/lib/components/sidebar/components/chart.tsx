@@ -19,7 +19,7 @@ type Props<T> = {
 } & Partial<{
   categories: Column[];
   series: Column[];
-  activeCategory: string;
+  activeCategories: Column[];
   activeSeries: Column[];
   activeChartType: ChartType;
   setActiveCategory: (column: Column) => void;  
@@ -30,10 +30,10 @@ type Props<T> = {
 const chartTypes = [
   { id: ChartType.LINE, label: 'Line' },
   { id: ChartType.BAR, label: 'Bar' },
-  // { id: 'pie', label: 'Pie' },
+  { id: ChartType.PIE, label: 'Pie' },
 ];
 
-export default function ChartConfig<T>({ config, categories, series, activeCategory, activeChartType, activeSeries, setActiveCategory, setActiveSerie, setActiveChartType }: Props<T>) {
+export default function ChartConfig<T>({ config, categories, series, activeCategories, activeChartType, activeSeries, setActiveCategory, setActiveSerie, setActiveChartType }: Props<T>) {
   const ref = useRef<SimpleBarCore>(null);
   const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
 
@@ -71,7 +71,7 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
           {chartTypes?.map((chartType) => (
             <div key={`category-${chartType.id}`} className="row middle bg-sidebar__chart__item" onClick={handleChartTypeChange(chartType.id as ChartType)}>
               <input readOnly type="radio" id={chartType.id} name="type" checked={activeChartType === chartType.id} />
-              <label>{chartType.label}</label>
+              <label><FormattedMessage id={`chart.${chartType.id}`}/></label>
             </div>
           ))}
         </Accordion>
@@ -83,7 +83,15 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
         >
           {categories?.map((category) => (
             <div key={`category-${category.id}`} className="row middle bg-sidebar__chart__item" onClick={handleCategoryChange(category)}>
-              <input readOnly type="radio" id={category.id} name="category" checked={activeCategory === category.id} />
+              <Checkbox.Root
+                className="bg-checkbox__root row middle"
+                checked={!!activeCategories?.find(c => c.id === category.id)}
+                id={category.id}
+              >
+                <Checkbox.Indicator className="bg-checbox__indicator row middle center">
+                  <CheckIcon />
+                </Checkbox.Indicator>
+              </Checkbox.Root>
               <label>{category.headerName}</label>
             </div>
           ))}
@@ -98,7 +106,7 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
             <div key={serie.id} className="row middle bg-sidebar__chart__item" onClick={handleSerieChange(serie)}>
               <Checkbox.Root
                 className="bg-checkbox__root row middle"
-                checked={activeSeries?.includes(serie)}
+                checked={!!activeSeries?.find(s => s.id === serie.id)}
                 id={serie.id}
               >
                 <Checkbox.Indicator className="bg-checbox__indicator row middle center">

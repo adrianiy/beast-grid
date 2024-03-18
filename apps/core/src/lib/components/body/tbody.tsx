@@ -229,6 +229,9 @@ export default function TBody<T>({
     };
 
     const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (chartVisible) {
+            return;
+        }
         e.preventDefault();
         setContextMenu({ x: e.clientX, y: e.clientY });
         setSelecting(false);
@@ -237,7 +240,7 @@ export default function TBody<T>({
     const getActionData = (_data: Row[], limit = 0): Row[] => {
         let y = 0;
         const actionData = [];
-        while (y < limit - 1) {
+        while (y < limit) {
             const row = _data[y];
 
             if (!row) {
@@ -318,7 +321,6 @@ export default function TBody<T>({
             return;
         }
         const finalColumns = lastLevel.sort((a, b) => a.finalPosition - b.finalPosition);
-        console.log(finalColumns, selectedCells)
 
 
         const chartColumns =
@@ -327,7 +329,6 @@ export default function TBody<T>({
 
         const actionData = getActionData(sortedData, selectedCells.end.y + 1);
 
-        console.log(chartColumns, actionData);
         setChartColumns(chartColumns);
         setChartData(actionData);
         setChartVisible(true);
@@ -420,7 +421,7 @@ export default function TBody<T>({
                     onExport={handleExport}
                     onChartOpen={handleChartOpen}
                 />
-                <Chart modal visible={chartVisible} data={chartData} columns={chartColumns} config={beastConfig} onClose={() => setChartVisible(false)} />
+                <Chart modal visible={chartVisible} data={chartData} activeColumns={chartColumns} config={beastConfig} onClose={() => setChartVisible(false)} />
             </div>
         );
     }

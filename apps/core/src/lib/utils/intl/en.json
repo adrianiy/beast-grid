@@ -35,5 +35,8 @@
   "chart.title": "Chart",
   "chart.categories": "Categories",
   "chart.series": "Values",
-  "chart.type": "Chart type"
+  "chart.type": "Chart type",
+  "chart.line": "Line",
+  "chart.bar": "Bar",
+  "chart.pie": "Pie"
 }

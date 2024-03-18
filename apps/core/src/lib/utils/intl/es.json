@@ -35,5 +35,8 @@
   "chart.title": "Gráfico",
   "chart.categories": "Categorías",
   "chart.series": "Series",
-  "chart.type": "Tipo de gráfico"
+  "chart.type": "Tipo de gráfico",
+  "chart.line": "Línea",
+  "chart.bar": "Barras",
+  "chart.pie": "Circular"
 }

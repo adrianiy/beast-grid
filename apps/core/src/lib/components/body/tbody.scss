@@ -55,7 +55,7 @@
         background-color: var(--bg-background-color--selected);
 
         &.bordered {
-            border-bottom: var(--bg-border--5);
+            border-bottom: var(--bg-border--selected--row);
         }
 
         &.borderTop {

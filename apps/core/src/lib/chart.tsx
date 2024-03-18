@@ -2,10 +2,9 @@ import ReactEChartsCore from 'echarts-for-react/lib/core';
 // Import the echarts core module, which provides the necessary interfaces for using echarts.
 import * as echarts from 'echarts/core';
 
-import { LineChart, BarChart } from 'echarts/charts';
+import { LineChart, BarChart, PieChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import { GridComponent, TooltipComponent, TitleComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
-
 import { useBeastStore } from './stores/beast-store';
 import { getCategories, getSeries, groupByMultiple } from './utils/functions';
 import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './common';
@@ -24,6 +23,7 @@ import { FormattedMessage } from 'react-intl';
 echarts.use([
   LineChart,
   BarChart,
+  PieChart,
   CanvasRenderer,
   GridComponent,
   TooltipComponent,
@@ -38,6 +38,7 @@ type Props<T> = {
   visible?: boolean;
   data?: Data;
   columns?: Column[];
+  activeColumns?: Column[];
   onClose?: () => void;
 };
 
@@ -66,43 +67,34 @@ export default function Chart<T>(props: Props<T>) {
               <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
             </div>
           </div>
-          <ChartWrapper config={props.config} columns={props.columns ?? columns} data={props.data ?? data} />
+          <ChartWrapper config={props.config} columns={props.columns ?? columns} activeColumns={props.activeColumns} data={props.data ?? data} />
         </div>
       </div>,
       document.body
     )
   ) : (
-    <ChartWrapper config={props.config} columns={props.columns ?? columns} data={props.data ?? data} />
+    <ChartWrapper config={props.config} columns={props.columns ?? columns} activeColumns={props.activeColumns} data={props.data ?? data} />
   );
 }
 
 type WrapperProps<T> = {
   config: BeastGridConfig<T>;
   columns: Column[];
+  activeColumns?: Column[];
   data: Data;
 };
-
-const CUSTOM_CATEGORY = { id: 'custom_column', headerName: 'Custom Column', field: 'custom_column' } as Column;
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
   const { columns, data } = props;
 
   const categoryColumns = getCategories(columns, data);
 
-  const userCategory = props.config.chart?.defaultValues?.categoryColumn
-    ? categoryColumns.find((c) => c.id === props.config.chart?.defaultValues?.categoryColumn)
-    : undefined;
-
-  if (!userCategory) {
-    categoryColumns.push(CUSTOM_CATEGORY);
-  }
-
   const configurableSeries = getSeries(columns, data);
 
-  const [category, setCategory] = useState<Column>(userCategory || CUSTOM_CATEGORY);
-  const [series, setSeries] = useState<Column[]>(
-    columns.filter((c) => props.config.chart?.defaultValues?.dataColumns?.includes(c.field as string))
-  );
+  const activeColumns = getSeries(props.activeColumns || props.config.chart?.defaultValues?.dataColumns || columns, data);
+
+  const [categories, setCategories] = useState<Column[]>(props.activeCategories || props.config.chart?.defaultValues?.categoryColumns || categoryColumns);
+  const [series, setSeries] = useState<Column[]>(activeColumns);
   const [chartType, setChartType] = useState<ChartType>(
     (props.config.chart?.defaultValues?.chartType ?? ChartType.BAR) as ChartType
   );
@@ -111,19 +103,29 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
   useEffect(() => {
     const aggColumns = columns.filter((col) => col.aggregation);
-    const groupedData =
-      !category || category.id === 'custom_column'
-        ? groupByMultiple(data, categoryColumns.slice(0, -1), aggColumns)
-        : data;
-    const field =
-      !category || category.id === 'custom_column'
-        ? categoryColumns
-          .slice(0, -1)
-          .map((col) => col.headerName)
-          .join('_')
-        : (category.field as string);
-    const categories = groupedData.map((row) => row[field] as string);
-    const _series = series.length === 0 ? configurableSeries.slice(0, 1) : series;
+    const groupedData = groupByMultiple(data, categories, aggColumns);
+    const field = categories.map((c) => c.headerName).join('_');
+    const categoryData = groupedData.map((row) => row[field] as string);
+
+    const getSeriesData = (column: Column) => {
+      if (chartType === ChartType.PIE) { return groupedData.reduce((acc, curr) => acc.concat({ value: curr[column.field as string], name: curr[field] }), []);
+      } else {
+        return groupedData.map((row) => row[column.field as string]);
+
+      }
+    }
+
+    const isPie = chartType === ChartType.PIE;
+
+    const _lineBarOptions = {
+        xAxis: {
+          type: 'category',
+          data: categoryData,
+        },
+        yAxis: {
+          type: 'value',
+        },
+    }
 
     const _options: EChartsCoreOption = deepmerge(
       {
@@ -146,21 +148,22 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
           bottom: 0,
         },
         tooltip: {
-          trigger: 'axis',
+          trigger: isPie ? 'item' : 'axis',
           valueFormatter: series[0]?.formatter,
           padding: 16,
           extraCssText: 'border: var(--bg-border--1); border-radius: 0; box-shadow: none',
         },
-        xAxis: {
-          type: 'category',
-          data: categories,
-        },
-        yAxis: {
-          type: 'value',
-        },
-        series: _series.map((column) => ({
+        ...isPie ? {} : _lineBarOptions,
+        series: series.map((column, idx) => ({
           name: column?.headerName,
-          data: groupedData.map((row) => row[column?.field as string]),
+          radius: isPie && [`${80 - (idx * 20)}%`, `${80 - (idx * 20) + 10}%`],
+          label: {
+            show: false,
+          },
+          labelLine: {
+            show: false,
+          },
+          data: getSeriesData(column),
           type: chartType,
           smooth: true,
         })),
@@ -169,10 +172,15 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     );
 
     setOptions(_options);
-  }, [props, category, series, chartType]);
+  }, [props, categories, series, chartType]);
 
   const changeCategory = (column: Column) => {
-    setCategory(column);
+    const match = categories.find((c) => c.id === column.id);
+    if (match) {
+      setCategories(categories.filter((c) => c.id !== column.id));
+    } else {
+      setCategories([...categories, column]);
+    }
   };
 
   const changeSeries = (column: Column) => {
@@ -205,7 +213,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         config={props.config}
         categories={categoryColumns}
         series={configurableSeries}
-        activeCategory={category?.id}
+        activeCategories={categories}
         activeSeries={series}
         activeChartType={chartType}
         setActiveCategory={changeCategory}
