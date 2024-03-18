@@ -14,7 +14,7 @@ import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
 import Toolbar from './components/toolbar/toolbar';
-import Grid from './grid';
+import Beast from './beast';
 
 import messages from './utils/intl';
 
@@ -100,7 +100,7 @@ export function BeastGrid<T>({
             <BeastApi store={api} />
             <LoaderLayer config={config} />
             <Toolbar config={config} position={ToolbarPosition.TOP} />
-            <Grid config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+            <Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
             <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
           </IntlProvider>
         </BeastGridProvider>

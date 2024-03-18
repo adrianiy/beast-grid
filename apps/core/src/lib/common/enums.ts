@@ -43,7 +43,8 @@ export enum ToolbarPosition {
 
 export enum SideBarConfig {
   GRID = 'grid',
-  FILTERS = 'filters'
+  FILTERS = 'filters',
+  CHART = 'chart',
 }
 
 export enum BusActions {
@@ -66,4 +67,15 @@ export enum OperationType {
   LESS_THAN = 'lt',
   LESS_THAN_OR_EQUAL = 'lte',
   BETWEEN = 'between',
+}
+
+export enum BeastMode {
+  GRID = 'grid',
+  CHART = 'chart',
+}
+
+export enum ChartType {
+  BAR = 'bar',
+  LINE = 'line',
+  PIE = 'pie'
 }

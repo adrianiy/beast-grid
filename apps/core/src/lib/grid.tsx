@@ -76,6 +76,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                     border={config.row?.border}
                     onSortChange={onSortChange}
                     events={config.row?.events}
+                    beastConfig={config}
                 />
             </SimpleBar>
             <SideBar config={config} />
