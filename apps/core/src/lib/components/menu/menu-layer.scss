@@ -21,6 +21,7 @@
         background-color: var(--bg-background-color--active);
         height: var(--size);
         width: var(--size);
+        min-width: var(--size);
         border-radius: 50%;
     }
 

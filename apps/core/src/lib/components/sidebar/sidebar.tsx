@@ -12,7 +12,7 @@ import './sidebar.scss';
 type ChartProps = {
   categories: Column[];
   series: Column[];
-  activeCategory: string;
+  activeCategories: Column[];
   activeSeries: Column[];
   activeChartType: ChartType;
   setActiveCategory: (column: Column) => void;  

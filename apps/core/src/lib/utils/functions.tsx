@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
 import { AggregationFunction, AggregationType, Chart, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -184,3 +185,5 @@ export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<C
   return numberSeries;
 }
 
+
+export function clone<T>(obj: T): T { return cloneDeep(obj) }

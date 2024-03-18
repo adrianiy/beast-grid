@@ -18,12 +18,13 @@ import {
 import { GridStore } from './store';
 import { Coords, FilterType, PinType, SelectedCells, SortType } from '../../common';
 import { createGroupColumn } from './utils/group';
+import { clone } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
   const { columns } = state;
   columns[id] = column;
 
-  return { columns };
+  return { columns, edited: true };
 };
 
 export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
@@ -33,7 +34,7 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 
   const columnsWithSort = Object.values(columns).filter((col) => col.sort?.priority);
 
-  return { columns, sort: columnsWithSort.map((col) => col.id) };
+  return { columns, sort: columnsWithSort.map((col) => col.id), edited: true };
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
@@ -45,7 +46,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
   setColumnsStyleProps(columns, container.offsetWidth);
   moveColumns(columns, sortedColumns, column.pinned);
 
-  return { columns };
+  return { columns, edited: true };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -70,7 +71,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
 
   moveColumns(columns, sortedColumns, column1.pinned, 0);
 
-  return { columns, sortedColumns };
+  return { columns, sortedColumns, edited: true };
 };
 
 export const deleteEmptyParents = () => (state: GridStore) => {
@@ -82,7 +83,7 @@ export const deleteEmptyParents = () => (state: GridStore) => {
     }
   });
 
-  return { columns };
+  return { columns, edited: true };
 };
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
@@ -108,7 +109,7 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);
 
-  return { columns };
+  return { columns, edited: true };
 };
 
 // Changes the sort tye of a column
@@ -132,7 +133,7 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
   columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
 
-  return { columns, sort: columnsWithSort.map((col) => col.id) };
+  return { columns, sort: columnsWithSort.map((col) => col.id), edited: true };
 };
 
 export const addFilter = (id: ColumnId, value: IFilter | null, idx = 0) => (state: GridStore) => {
@@ -166,7 +167,7 @@ export const addFilter = (id: ColumnId, value: IFilter | null, idx = 0) => (stat
     delete filters[id];
   }
 
-  return { columns, filters: { ...filters } };
+  return { columns, filters: { ...filters }, edited: true };
 };
 
 export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
@@ -179,7 +180,7 @@ export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
     filters[id] = column.filterOptions as string[];
   }
 
-  return { columns, filters: { ...filters } };
+  return { columns, filters: { ...filters }, edited: true };
 };
 
 export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
@@ -198,7 +199,7 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.NONE, 0);
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
-  return { columns };
+  return { columns, edited: true };
 };
 
 export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
@@ -224,7 +225,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.NONE, 0);
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
-  return { columns, groupOrder, data, sortedColumns };
+  return { columns, groupOrder, data, sortedColumns, edited: true };
 };
 
 export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
@@ -255,7 +256,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.NONE, 0);
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
-  return { columns, groupOrder, data, sortedColumns };
+  return { columns, groupOrder, data, sortedColumns, edited: true };
 };
 
 export const updateSelectedCells = (selectedCells: SelectedCells | null) => () => {
@@ -280,4 +281,12 @@ export const setSelectedEnd = (coords: Coords) => (state: GridStore) => {
       end: { x: Math.max(selectedCells.init.x, coords.x), y: Math.max(selectedCells.init.y, coords.y) },
     },
   };
+}
+
+export const restore = () => (state: GridStore) => {
+  const { initialColumns, initialData } = state;
+
+  const sortedColumns = sortColumns(initialColumns);
+
+  return { columns: clone(initialColumns), data: clone(initialData), sortedColumns, filters: {}, sort: [], edited: false };
 }

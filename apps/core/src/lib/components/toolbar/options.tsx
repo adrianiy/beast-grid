@@ -1,4 +1,4 @@
-import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, TableIcon } from '@radix-ui/react-icons';
+import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, TableIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { BeastMode, SideBarConfig, ToolBar } from '../../common';
 import { FormattedMessage } from 'react-intl';
 import { useBeastStore } from '../../stores/beast-store';
@@ -96,6 +96,25 @@ export const ChartConfig = ({ toolbar }: Props) => {
     <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.CHART)}>
       <MixerHorizontalIcon />
       <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
+    </div>
+  );
+}
+
+export const Restore = ({ toolbar }: Props) => {
+  const [edited, restore] = useBeastStore((state) => [state.edited, state.restore]);
+
+  if (!edited || !toolbar.restore) {
+    return null;
+  }
+
+  const restoreChanges = () => {
+    restore();
+  }
+
+  return (
+    <div className="bg-toolbar__button row middle" onClick={restoreChanges}>
+      <UpdateIcon />
+      <FormattedMessage id="toolbar.restore" defaultMessage="Restore" />
     </div>
   );
 }

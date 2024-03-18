@@ -24,10 +24,24 @@
         padding: var(--bg-size--6);
     }
 
+    .bg-chart__modal__header {
+        margin-bottom: var(--bg-size--5);
+    }
+
     .bg-chart__title {
         font-size: var(--bg-size--5);
         font-weight: 500;
-        margin-bottom: var(--bg-size--3);
+    }
+
+    .bg-chart__title__actions {
+        gap: var(--bg-size--3);
+
+        .close {
+            cursor: pointer;
+            --size: var(--bg-size--5);
+            width: var(--size);
+            height: var(--size);
+        }
     }
 
     .bg-chart__modal__button {

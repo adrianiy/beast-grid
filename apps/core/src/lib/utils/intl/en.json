@@ -16,6 +16,7 @@
   "toolbar.mode.chart": "Chart",
   "toolbar.chartConfig": "Chart settings",
   "toolbar.download": "Download",
+  "toolbar.restore": "Restore",
   "toolbar.grid": "Columns",
   "toolbar.filter": "Filters",
   "filter.selectAll": "Select all",
@@ -35,5 +36,8 @@
   "chart.title": "Chart",
   "chart.categories": "Categories",
   "chart.series": "Values",
-  "chart.type": "Chart type"
+  "chart.type": "Chart type",
+  "chart.line": "Line",
+  "chart.bar": "Bar",
+  "chart.pie": "Pie"
 }
