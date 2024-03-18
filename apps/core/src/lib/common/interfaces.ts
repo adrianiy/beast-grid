@@ -111,12 +111,13 @@ export interface ToolBar {
   grid: boolean;
   filter: boolean;
   mode: boolean;
+  restore: boolean;
 }
 
 export interface Chart {
   defaultValues: Partial<{
     dataColumns: string[];
-    categoryColumn: string;
+    categoryColumns: string[];
     chartType: 'line' | 'bar';
   }>;
   config: Partial<EChartsCoreOption>;

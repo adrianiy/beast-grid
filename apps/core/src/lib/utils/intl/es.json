@@ -18,6 +18,7 @@
   "toolbar.download": "Descargar",
   "toolbar.grid": "Columnas",
   "toolbar.filter": "Filtros",
+  "toolbar.restore": "Restaurar",
   "filter.selectAll": "Seleccionar todo",
   "filter.placeholder": "Buscar...",
   "filter.operation": "Operación",

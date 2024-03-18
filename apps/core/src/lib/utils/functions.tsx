@@ -184,3 +184,5 @@ export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<C
   return numberSeries;
 }
 
+
+export function clone<T>(obj: T): T {return JSON.parse(JSON.stringify(obj)) }

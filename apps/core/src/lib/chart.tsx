@@ -87,13 +87,15 @@ type WrapperProps<T> = {
 function ChartWrapper<T>(props: WrapperProps<T>) {
   const { columns, data } = props;
 
-  const categoryColumns = getCategories(columns, data);
-
+  const configurableCategories = getCategories(columns, data);
   const configurableSeries = getSeries(columns, data);
+  
+  const dataColumns = columns.filter((col) => props.config.chart?.defaultValues?.dataColumns?.includes(col.field as string));
+  const categoryColumns = columns.filter((col) => props.config.chart?.defaultValues?.categoryColumns?.includes(col.field as string));
 
-  const activeColumns = getSeries(props.activeColumns || props.config.chart?.defaultValues?.dataColumns || columns, data);
+  const activeColumns = getSeries(props.activeColumns || (dataColumns.length ? dataColumns : columns), data);
 
-  const [categories, setCategories] = useState<Column[]>(props.activeCategories || props.config.chart?.defaultValues?.categoryColumns || categoryColumns);
+  const [categories, setCategories] = useState<Column[]>(props.activeColumns || (categoryColumns.length ? categoryColumns : configurableCategories));
   const [series, setSeries] = useState<Column[]>(activeColumns);
   const [chartType, setChartType] = useState<ChartType>(
     (props.config.chart?.defaultValues?.chartType ?? ChartType.BAR) as ChartType
@@ -108,7 +110,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     const categoryData = groupedData.map((row) => row[field] as string);
 
     const getSeriesData = (column: Column) => {
-      if (chartType === ChartType.PIE) { return groupedData.reduce((acc, curr) => acc.concat({ value: curr[column.field as string], name: curr[field] }), []);
+      if (chartType === ChartType.PIE) { return groupedData.reduce((acc, curr) => acc.concat({ value: curr[column.field as string] as number, name: curr[field] as string }), [] as { value: number; name: string }[]);
       } else {
         return groupedData.map((row) => row[column.field as string]);
 
@@ -211,7 +213,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
       />
       <SideBar
         config={props.config}
-        categories={categoryColumns}
+        categories={configurableCategories}
         series={configurableSeries}
         activeCategories={categories}
         activeSeries={series}

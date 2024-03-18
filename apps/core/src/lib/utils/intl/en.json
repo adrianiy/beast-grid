@@ -16,6 +16,7 @@
   "toolbar.mode.chart": "Chart",
   "toolbar.chartConfig": "Chart settings",
   "toolbar.download": "Download",
+  "toolbar.restore": "Restore",
   "toolbar.grid": "Columns",
   "toolbar.filter": "Filters",
   "filter.selectAll": "Select all",

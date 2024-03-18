@@ -125,6 +125,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         },
         bottomToolbar: {
           download: true,
+          restore: true
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
