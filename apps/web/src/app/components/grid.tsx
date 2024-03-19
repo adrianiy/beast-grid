@@ -17,7 +17,7 @@ const columnDefs: ColumnDef[] = [
   {
     headerName: 'COUNTRY',
     field: 'country',
-    flex: 1,
+    width: 200,
     sortable: true,
     menu: {
       pin: true,
@@ -31,6 +31,31 @@ const columnDefs: ColumnDef[] = [
       { headerName: 'NAME AND SURNAME', field: 'name', width: 200, sortable: true, menu: { grid: true, column: true } },
       { headerName: 'AGE', field: 'age', width: 200, sortable: true, aggregation: AggregationType.AVG, menu: { grid: true, filter: true } },
       { headerName: 'LANGUAGE', field: 'language', width: 200, menu: { grid: true, column: true }}
+    ],
+  },
+  { headerName: 'USERS', field: 'id', aggregation: (row: Row) => row.children?.length || 0, flex: 1, formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}` },
+  {
+    headerName: 'MONTHS',
+    children: [
+      ...months.map(
+        (month): ColumnDef => ({
+          headerName: month.toUpperCase(),
+          field: month,
+          menu: {
+            filter: true
+          },
+          styleFormatter: (value: number) => {
+            if (value < 10000) {
+              return { color: 'red' };
+            }
+            return {};
+          },
+          aggregation: AggregationType.SUM,
+          sortable: true,
+          flex: 1,
+          formatter: (value: number) => numeral(value).format('0,0 $'),
+        })
+      ),
     ],
   },
 ];
@@ -104,11 +129,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
-        },
-        chart: {
-          defaultValues: {
-            dataColumns: ['january', 'february'],
-          }
         },
         ..._customConfig,
       });

@@ -11,7 +11,7 @@ import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './commo
 import deepmerge from 'deepmerge';
 import { EChartsCoreOption } from 'echarts';
 import SideBar from './components/sidebar/sidebar';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import cn from 'classnames';
@@ -87,12 +87,14 @@ export default function Chart<T>(props: Props<T>) {
       document.body
     )
   ) : (
-    <ChartWrapper
-      config={props.config}
-      columns={props.columns ?? sortedColumns}
-      activeColumns={props.activeColumns}
-      data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
-    />
+    <div className="bg-chart__container">
+      <ChartWrapper
+        config={props.config}
+        columns={props.columns ?? sortedColumns}
+        activeColumns={props.activeColumns}
+        data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+      />
+    </div>
   );
 }
 
@@ -155,12 +157,16 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
       },
       yAxis: {
         type: 'value',
+        axisLabel: {
+          inside: true,
+          verticalAlign: 'bottom',
+        },
       },
     };
 
     const _options: EChartsCoreOption = deepmerge(
       {
-        grid: { right: 8 },
+        grid: { left: 8, right: 8 },
         toolbox: {
           show: true,
           feature: {
@@ -180,14 +186,17 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         },
         tooltip: {
           trigger: isPie ? 'item' : 'axis',
-          valueFormatter: series[0]?.formatter,
           padding: 16,
-          extraCssText: 'border: var(--bg-border--1); border-radius: 0; box-shadow: none',
+          appendToBody: true,
+          extraCssText: 'border: 0.001em solid black; border-radius: 0; box-shadow: none',
         },
         ...(isPie ? {} : _lineBarOptions),
         series: series.map((column, idx) => ({
           name: column?.headerName,
           radius: isPie && [`${80 - idx * 20}%`, `${80 - idx * 20 + 10}%`],
+          tooltip: {
+            valueFormatter: column.formatter,
+          },
           label: {
             show: false,
           },
@@ -232,7 +241,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   }
 
   return (
-    <div className="bg-chart__container">
+    <Fragment>
       <ReactEChartsCore
         echarts={echarts}
         option={options}
@@ -251,6 +260,6 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         setActiveSerie={changeSeries}
         setActiveChartType={changeChartType}
       />
-    </div>
+    </Fragment>
   );
 }

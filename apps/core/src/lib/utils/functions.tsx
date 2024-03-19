@@ -16,7 +16,7 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
     case AggregationType.MAX:
       return Math.max(...data.map((row) => row[column.field as keyof TData] as number));
     default:
-      return null;
+      return data.length > 1 ? null : data[0][column.field as keyof TData];
   }
 };
 
@@ -33,7 +33,7 @@ const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedCo
     const newRow =  { [field]: key, _id: uuidv4(), children, ...calculatedFields };
 
     const computedFields = aggFuncColumns.reduce((acc, column) => {
-      acc[column.field as string] = children.length > 1 ? (column.aggregation as AggregationFunction)(newRow) : children[0]?.[column.field as string];
+      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
       return acc;
     }, {} as Record<string, number | string | null>);
 

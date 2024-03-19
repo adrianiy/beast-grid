@@ -301,3 +301,14 @@ export const autoSizeColumns = () => (state: GridStore) => {
 
   return { columns };
 }
+
+export const setSideBarConfig = (config: unknown) => (state: GridStore) => {
+  const { sideBarConfig } = state;
+
+  if (sideBarConfig === config) {
+    return { sideBarConfig: null };
+  }
+
+  return { sideBarConfig: config };
+}
+

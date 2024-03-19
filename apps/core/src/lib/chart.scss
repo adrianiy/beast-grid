@@ -16,10 +16,12 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    font-size: var(--bg-font-size--1);
 
     .bg-chart__modal {
         display: flex;
         background-color: var(--bg-background-color--1);
+        position: relative;
         width: 1000px;
         padding: var(--bg-size--6);
     }
@@ -44,7 +46,7 @@
 
         .close {
             cursor: pointer;
-            --size: var(--bg-size--5);
+            --size: var(--bg-size--4);
             width: var(--size);
             height: var(--size);
         }

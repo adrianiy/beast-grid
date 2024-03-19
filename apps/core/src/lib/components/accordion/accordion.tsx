@@ -26,12 +26,12 @@ export default function Accordion(props: PropsWithChildren<Props>) {
       setMinHeight(0);
       setExpaned(false);
     } else {
-      setChildrenHeight(height || 37 * elements);
+      setChildrenHeight((height || 37 * elements) + 16);
       setExpaned(true);
       
       setTimeout(() => {
         setChildrenHeight('min-content');
-        setMinHeight(height || 37 * elements)
+        setMinHeight((height || 37 * elements) + 16)
       }, 300)
     }
     
