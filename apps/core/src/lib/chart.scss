@@ -34,7 +34,13 @@
     }
 
     .bg-chart__title__actions {
-        gap: var(--bg-size--3);
+        gap: var(--bg-size--5);
+
+        svg {
+            --size: var(--bg-size--3);
+            width: var(--size);
+            height: var(--size);
+        }
 
         .close {
             cursor: pointer;

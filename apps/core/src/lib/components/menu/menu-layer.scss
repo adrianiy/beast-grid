@@ -65,6 +65,7 @@
         .bg-menu__item {
             flex: 1;
             color: var(--bg-text-color--1);
+            width: calc(100% - var(--bg-size--2));
             gap: var(--bg-size--3);
             padding: var(--bg-size--2);
             margin: 0 var(--bg-size--1);

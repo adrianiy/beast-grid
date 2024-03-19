@@ -33,7 +33,7 @@ const columnDefs: ColumnDef[] = [
       { headerName: 'LANGUAGE', field: 'language', width: 200, menu: { grid: true, column: true }}
     ],
   },
-  { headerName: 'USERS', field: 'id', aggregation: (row: Row) => `${row.children?.length || 0} users`, flex: 1 },
+  { headerName: 'USERS', field: 'id', aggregation: (row: Row) => row.children?.length || 0, flex: 1, formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}` },
   {
     headerName: 'MONTHS',
     children: [
