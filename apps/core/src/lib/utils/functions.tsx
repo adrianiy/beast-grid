@@ -33,7 +33,7 @@ const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedCo
     const newRow =  { [field]: key, _id: uuidv4(), children, ...calculatedFields };
 
     const computedFields = aggFuncColumns.reduce((acc, column) => {
-      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
+      acc[column.field as string] = children.length > 1 ? (column.aggregation as AggregationFunction)(newRow) : children[0]?.[column.field as string];
       return acc;
     }, {} as Record<string, number | string | null>);
 

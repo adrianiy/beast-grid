@@ -1,6 +1,7 @@
 import { StoreApi, create } from 'zustand';
 import {
   addFilter,
+  autoSizeColumns,
   changeSort,
   deleteEmptyParents,
   groupByColumn,
@@ -73,6 +74,7 @@ export interface GridStore extends GridState {
   setSelecting: (selecting: boolean) => void;
   setMode: (mode: BeastMode) => void;
   restore: () => void;
+  autoSizeColumns: () => void;
 }
 
 export const createGridStore = <T>(
@@ -141,7 +143,8 @@ export const createGridStore = <T>(
     setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
     setSelecting: (selecting: boolean) => set({ selecting }),
     setMode: (mode: BeastMode) => set({ mode }),
-    restore: () => set(restore())
+    restore: () => set(restore()),
+    autoSizeColumns: () => set(autoSizeColumns())
   }));
 };
 

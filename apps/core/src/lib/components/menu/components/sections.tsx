@@ -20,12 +20,17 @@ export type PropsWithMouseEnter<T> = {
 } & T;
 
 export default function MenuSections(props: Props) {
-  const { column, horizontal, multiSort, onClose } = props;
+  const { column, horizontal, multiSort, onClose: _onClose } = props;
   const [activeSection, setActiveSection] = useState<SectionsEnum | undefined>(undefined);
 
   const handleMouseEnter = (section: SectionsEnum) => () => {
     setActiveSection(section);
   };
+
+  const onClose = () => {
+    _onClose();
+    setActiveSection(undefined);
+  }
 
   const renderSection = (section: SectionsEnum) => {
     switch (section) {

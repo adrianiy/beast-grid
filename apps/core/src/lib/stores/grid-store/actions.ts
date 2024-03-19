@@ -290,3 +290,14 @@ export const restore = () => (state: GridStore) => {
 
   return { columns: clone(initialColumns), data: clone(initialData), sortedColumns, filters: {}, sort: [], edited: false };
 }
+
+export const autoSizeColumns = () => (state: GridStore) => {
+  const { columns, container, sortedColumns } = state;
+
+  setColumnsStyleProps(columns, container.offsetWidth);
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+
+  return { columns };
+}

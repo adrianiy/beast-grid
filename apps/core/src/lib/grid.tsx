@@ -21,8 +21,26 @@ type Props<T> = {
 };
 
 export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
-    const [setScrollElement, setTheme] = useBeastStore((state) => [state.setScrollElement, state.setTheme]);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [setScrollElement, setTheme, autoSize] = useBeastStore((state) => [state.setScrollElement, state.setTheme, state.autoSizeColumns]);
     const ref = useRef<SimpleBarCore>(null);
+
+    useEffect(() => {
+        // resize observer
+        const resizeObserver = new ResizeObserver(() => {
+            if (containerRef.current) {
+                autoSize();
+            }
+        });
+
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, []);
 
     useEffect(() => {
         if (ref.current) {
@@ -48,9 +66,10 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     return (
         <div
             className="beast-grid__wrapper"
-            style={{ 
-                maxHeight: config.style?.maxHeight, 
-                height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined ,
+            ref={containerRef}
+            style={{
+                maxHeight: config.style?.maxHeight,
+                height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined,
                 width: '100%'
             }}
         >
