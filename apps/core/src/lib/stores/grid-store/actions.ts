@@ -288,7 +288,7 @@ export const restore = () => (state: GridStore) => {
 
   const sortedColumns = sortColumns(initialColumns);
 
-  return { columns: clone(initialColumns), data: clone(initialData), sortedColumns, filters: {}, sort: [], edited: false };
+  return { columns: clone(initialColumns), data: clone(initialData), sortedColumns, filters: {}, sort: [], edited: false, groupOrder: [] };
 }
 
 export const autoSizeColumns = () => (state: GridStore) => {

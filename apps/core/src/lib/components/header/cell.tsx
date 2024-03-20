@@ -31,7 +31,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
   const [showMenu, setShowMenu] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
-  const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, changeSort] = useBeastStore((state) => [
+  const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort] = useBeastStore((state) => [
     state.columns,
     state.filters,
     state.theme,
@@ -39,6 +39,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
     state.swapColumns,
     state.resizeColumn,
     state.container,
+    state.scrollElement,
     state.changeSort,
   ]);
   const [dropTargets] = useDndStore((state) => [state.dropTargets]);
@@ -78,6 +79,8 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
 
   function hitTest(_: DragEvent, pointer: Coords) {
     pointerPosition.current = pointer;
+    const { left: containerLeft } = container.getBoundingClientRect();
+    const scrollLeft = scrollContainer.scrollLeft;
     for (const element of dropTargets) {
       const elementColumn = columns[element?.id];
       if (
@@ -93,7 +96,7 @@ export default function HeaderCell<T>({ levelIdx, idx, height, headers, column, 
       )
         continue;
 
-      const { left } = element.getBoundingClientRect();
+      const left = columns[element.id].left + containerLeft - scrollLeft;
       const width = columns[element.id].width;
       const right = left + width;
       const { x } = pointer;

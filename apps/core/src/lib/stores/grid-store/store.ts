@@ -89,7 +89,7 @@ export const createGridStore = <T>(
   
   const data = initialize(columns, container, initialData, groupOrder, tree);
   const sortedColumns = sortColumns(columns);
-  
+
   moveColumns(columns, sortedColumns, PinType.LEFT);
   moveColumns(columns, sortedColumns, PinType.NONE);
 

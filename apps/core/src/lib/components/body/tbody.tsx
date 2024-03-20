@@ -122,7 +122,7 @@ export default function TBody<T>({
         );
         const newSortedData = someActive ? (data.map(filterRow(columns, filters)).filter(Boolean) as Row[]) : data;
 
-        setSortedData(newSortedData);
+        setSortedData([...newSortedData]);
         
         const [, expanded] = updateGaps(0, newSortedData);
         
@@ -155,7 +155,7 @@ export default function TBody<T>({
                         sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 
-                        setSortedData([...sortedData]);
+                        // setSortedData([...sortedData]);
                         if (data.length > PERFORMANCE_LIMIT) {
                             setTimeout(() => setSorting(false), 100);
                         }

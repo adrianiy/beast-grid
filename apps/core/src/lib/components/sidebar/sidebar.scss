@@ -27,7 +27,7 @@
 .bg-sidebar__container {
     @import './../../flex';
     @import './../../themes';
-    height: 100%;
+    flex: 1;
 
     .bg-sidebar {
         position: absolute;

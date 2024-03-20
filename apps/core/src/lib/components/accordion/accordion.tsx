@@ -25,7 +25,7 @@ export default function Accordion(props: PropsWithChildren<Props>) {
       setChildrenHeight(0);
       setMinHeight(0);
       setExpaned(false);
-    } else {
+    } else if (height || elements) {
       setChildrenHeight((height || 37 * elements) + 16);
       setExpaned(true);
       

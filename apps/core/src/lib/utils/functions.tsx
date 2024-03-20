@@ -16,7 +16,7 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
     case AggregationType.MAX:
       return Math.max(...data.map((row) => row[column.field as keyof TData] as number));
     default:
-      return data.length > 1 ? null : data[0][column.field as keyof TData];
+      return null;
   }
 };
 

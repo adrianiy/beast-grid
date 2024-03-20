@@ -54,12 +54,14 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
 
     const getToolbarHeight = () => {
         let toolbarHeight = 0;
+
         if (config.topToolbar) {
             toolbarHeight += 45;
         }
         if (config.bottomToolbar) {
             toolbarHeight += 45;
         }
+
         return toolbarHeight;
     }
 

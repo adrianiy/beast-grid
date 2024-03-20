@@ -46,8 +46,8 @@ export interface BaseColumnDef {
   field?: string;
   sortable?: boolean;
   children?: ColumnDef[];
-  formatter?: <T>(value: string & number, row?: T) => string;
-  styleFormatter?: <T>(value: string & number, row?: T) => CSSProperties;
+  formatter?: <T>(value: string & number, row: T) => string;
+  styleFormatter?: <T>(value: string & number, row: T) => CSSProperties;
   menu?: Partial<MenuProps>;
   rowGroup?: boolean;
   aggregation?: AggregationType | AggregationFunction;

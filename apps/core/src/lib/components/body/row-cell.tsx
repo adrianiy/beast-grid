@@ -85,6 +85,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
 
   const handleMouseEnter = () => {
     if (selecting) {
+      console.log(idx)
       setSelectedEnd({ x: columnDef.finalPosition, y: idx });
     }
   };

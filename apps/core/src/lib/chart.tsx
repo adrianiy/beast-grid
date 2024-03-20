@@ -20,6 +20,7 @@ import { Cross2Icon, MixerHorizontalIcon } from '@radix-ui/react-icons';
 import { FormattedMessage } from 'react-intl';
 
 import './chart.scss';
+import numeral from 'numeral';
 
 echarts.use([
   LineChart,
@@ -121,7 +122,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   const activeColumns = getSeries(props.activeColumns || (dataColumns.length ? dataColumns : columns), data);
 
   const [categories, setCategories] = useState<Column[]>(
-    props.activeColumns || (categoryColumns.length ? categoryColumns : configurableCategories)
+    props.activeColumns?.filter(ac => configurableCategories.find(cc => cc.id === ac.id)) || (categoryColumns.length ? categoryColumns : configurableCategories)
   );
   const [series, setSeries] = useState<Column[]>(activeColumns);
   const [chartType, setChartType] = useState<ChartType>(
@@ -158,15 +159,14 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
       yAxis: {
         type: 'value',
         axisLabel: {
-          inside: true,
-          verticalAlign: 'bottom',
+          formatter: (value: number) => value >= 1000 ? numeral(value).format('0,0 a') : value,
         },
       },
     };
 
     const _options: EChartsCoreOption = deepmerge(
       {
-        grid: { left: 8, right: 8 },
+        grid: { left: 50, right: 8 },
         toolbox: {
           show: true,
           feature: {
