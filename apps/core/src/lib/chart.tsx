@@ -193,7 +193,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         ...(isPie ? {} : _lineBarOptions),
         series: series.map((column, idx) => ({
           name: column?.headerName,
-          radius: isPie && [`${80 - idx * 20}%`, `${80 - idx * 20 + 10}%`],
+          radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
           tooltip: {
             valueFormatter: column.formatter,
           },

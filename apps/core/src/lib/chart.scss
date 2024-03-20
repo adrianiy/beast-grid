@@ -18,6 +18,11 @@
     justify-content: center;
     font-size: var(--bg-font-size--1);
 
+    .bg-sidebar {
+        border-top: none;
+        border-bottom: none;
+    }
+
     .bg-chart__modal {
         display: flex;
         background-color: var(--bg-background-color--1);
