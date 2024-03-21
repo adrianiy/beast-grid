@@ -237,27 +237,30 @@ export default function TBody<T>({
         setSelecting(false);
     };
 
-    const getActionData = (_data: Row[], limit = 0): Row[] => {
-        let y = 0;
+    const getActionData = (_data: Row[], start = 0, end = 0, y = 0): [Row[], number] => {
         const actionData = [];
-        while (y < limit) {
-            const row = _data[y];
-
-            if (!row) {
+        for (let i = 0; i < _data.length; i++) {
+            const row = _data[i];
+            if (y > end) {
                 break;
             }
-            actionData.push(row);
+            if (y >= start) {
+                actionData.push(row);
+            }
 
             if (row._expanded && row.children) {
-                actionData.push(...getActionData(row.children, row.children.length));
+                const [children, nextY] = getActionData(row.children, start, end, y+1);
 
-                y += row.children.length;
+                if (children.length) {
+                    actionData.push(...children);
+                }
+
+                y = nextY;
             } else {
                 y++;
             }
         }
-
-        return actionData;
+        return [actionData, y];
     };
 
     const getCsv = (withHeaders: boolean) => {
@@ -276,7 +279,7 @@ export default function TBody<T>({
         }
 
 
-        const actionData = getActionData(sortedData, selectedCells.end.y + 1);
+        const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
 
         const csvData = actionData
             .map((row) => {
@@ -327,7 +330,7 @@ export default function TBody<T>({
             finalColumns
                 .slice(selectedCells?.start.x, selectedCells.end.x + 1)
 
-        const actionData = getActionData(sortedData, selectedCells.end.y + 1);
+        const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
 
         setChartColumns(chartColumns);
         setChartData(actionData);
@@ -342,7 +345,7 @@ export default function TBody<T>({
         y: number,
         level: number,
         gap: number
-    ): number => {
+    ): [number, number] => {
         if (!renderArray[level]) {
             renderArray[level] = [];
         }
@@ -369,28 +372,27 @@ export default function TBody<T>({
         if (row.children && row._expanded) {
             for (let i = 0; i < row.children.length; i++) {
                 const child = row.children[i];
-                gap = addRowToSlice(renderArray, child, idx + i + 1, y + i + 1, level + 1, gap);
+                [gap, y] = addRowToSlice(renderArray, child, idx + i + 1, y + i + 1, level + 1, gap);
 
                 gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
             }
         }
+        if (row._expanded) {
+            y += row.children?.length || 0;
+        }
 
-        return gap;
+        return [gap, y];
     };
 
         const createDataSlice = () => {
             const renderArray: ReactNode[][] = [];
             let gap = 0;
-            let y = 0;
+            let y = min;
             for (let idx = min; idx < max; idx++) {
                 const row = sortedData[idx];
 
                 if (row) {
-                    gap = addRowToSlice(renderArray, row, idx, y, 0, gap);
-
-                    if (row._expanded) {
-                        y += row.children?.length || 0;
-                    }
+                    [gap, y] = addRowToSlice(renderArray, row, idx, y, 0, gap);
                 }
 
                 gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;

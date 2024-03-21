@@ -85,7 +85,6 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
 
   const handleMouseEnter = () => {
     if (selecting) {
-      console.log(idx)
       setSelectedEnd({ x: columnDef.finalPosition, y: idx });
     }
   };
@@ -142,7 +141,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
           (columnDef.tree ? LEVEL_PADDING * level : 0) +
           (columnDef.tree && !row.children ? LEVEL_PADDING : 0),
         width: columnDef.width,
-        ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row),
+        ...columnDef.styleFormatter?.(row[columnDef.field as string], row),
       }}
       onClick={handleMouseClick}
       onMouseDown={handleMouseDown}
