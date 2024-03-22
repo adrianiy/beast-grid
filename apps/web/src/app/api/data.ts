@@ -25,6 +25,12 @@ export const getData = async (count: number): Promise<User[]> => {
   return data;
 };
 
+export const getDateData = async (count: number): Promise<User[]> => {
+  const response = await fetch(`/api/mock-date?count=${count}`);
+  const data = await response.json();
+  return data;
+};
+
 export const sortData = async (data: User[], columns: Column[]) => {
   const response = await fetch('/api/sort', {
     method: 'POST',

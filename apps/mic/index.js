@@ -1,5 +1,6 @@
 const express = require('express');
 const { faker } = require('@faker-js/faker');
+const dayjs = require('dayjs');
 
 const app = express();
 
@@ -29,8 +30,32 @@ function createRandomUser(id) {
   };
 }
 
+function createRandomDate(id) {
+  return {
+    id,
+    date: dayjs(faker.date.recent()).format('YYYY-MM-DD'),
+    country: faker.location.country(),
+    language: faker.lorem.word(),
+    orders: faker.number.int({ min: 0, max: 100000 }),
+    units: faker.number.int({ min: 0, max: 100000 }),
+  };
+}
+
 const createData = (count) => {
   return Array.from({ length: count }, (_,idx) => createRandomUser(idx));
+};
+
+const createDateData = (count) => {
+  return [
+    { id: 0, date: '2021-01-01', country: 'USA', language: 'English', orders: 100, units: 1000 },
+    { id: 1, date: '2021-01-01', country: 'Spain', language: 'Spanish', orders: 200, units: 2000 },
+    { id: 1, date: '2021-01-02', country: 'USA', language: 'English', orders: 200, units: 2000 },
+    { id: 1, date: '2021-01-02', country: 'Spain', language: 'Spanish', orders: 200, units: 2000},
+    { id: 2, date: '2021-01-03', country: 'USA', language: 'English', orders: 300, units: 3000 },
+    { id: 2, date: '2021-01-03', country: 'Spain', language: 'Spanish', orders: 300, units: 3000 },
+    { id: 3, date: '2021-01-04', country: 'USA', language: 'English', orders: 400, units: 4000 },
+  ]
+  return Array.from({ length: count }, (_,idx) => createRandomDate(idx));
 };
 
 const sortData = (sortColumns) => (a, b) => {
@@ -53,6 +78,12 @@ app.get('/api/mock-data', (req, res) => {
 
   res.json(data);
 });
+
+app.get('/api/mock-date', (req, res) => {
+  const data = createDateData(req.query.count || 25);
+
+  res.json(data);
+})
 
 app.post('/api/sort', (req, res) => {
   const body = req.body;

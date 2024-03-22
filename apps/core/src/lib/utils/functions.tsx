@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import { AggregationFunction, AggregationType, Chart, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
 import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
   switch (column.aggregation) {
@@ -183,6 +184,11 @@ export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<C
   const numberSeries = columns.filter((column) =>  !isNaN(+(rowZero[column.field as keyof Row] as number)));
 
   return numberSeries;
+}
+
+export const getDates = (columns: Column[], data: Data) => {
+  const rowZero = data[0];
+  return columns.filter((column) => dayjs(rowZero[column.field as keyof Row] as string).isValid());
 }
 
 

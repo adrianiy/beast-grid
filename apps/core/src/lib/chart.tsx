@@ -4,9 +4,16 @@ import * as echarts from 'echarts/core';
 
 import { LineChart, BarChart, PieChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
-import { GridComponent, TooltipComponent, TitleComponent, LegendComponent, ToolboxComponent } from 'echarts/components';
+import {
+  GridComponent,
+  TooltipComponent,
+  TitleComponent,
+  LegendComponent,
+  ToolboxComponent,
+  DatasetComponent,
+} from 'echarts/components';
 import { useBeastStore } from './stores/beast-store';
-import { filterRow, getCategories, getSeries, groupByMultiple } from './utils/functions';
+import { filterRow, getCategories, getDates, getSeries, groupBy, groupByMultiple } from './utils/functions';
 import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './common';
 import deepmerge from 'deepmerge';
 import { EChartsCoreOption } from 'echarts';
@@ -21,6 +28,7 @@ import { FormattedMessage } from 'react-intl';
 
 import './chart.scss';
 import numeral from 'numeral';
+import { getBaseSeriesConfig, getDateSeriesConfig } from './utils/chart';
 
 echarts.use([
   LineChart,
@@ -32,6 +40,7 @@ echarts.use([
   TitleComponent,
   LegendComponent,
   ToolboxComponent,
+  DatasetComponent,
 ]);
 
 type Props<T> = {
@@ -111,6 +120,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
   const configurableCategories = getCategories(columns, data);
   const configurableSeries = getSeries(columns, data);
+  const dateColumns = getDates(configurableCategories, data);
 
   const dataColumns = columns.filter((col) =>
     props.config.chart?.defaultValues?.dataColumns?.includes(col.field as string)
@@ -120,52 +130,74 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   );
 
   const activeColumns = getSeries(props.activeColumns || (dataColumns.length ? dataColumns : columns), data);
+  const activeCategories =
+    props.activeColumns?.filter((ac) => configurableCategories.find((cc) => cc.id === ac.id)) ||
+    (categoryColumns.length ? categoryColumns : configurableCategories);
+  const includeDate = activeCategories.find((c) => dateColumns.find((dc) => dc.id === c.id));
 
-  const [categories, setCategories] = useState<Column[]>(
-    props.activeColumns?.filter(ac => configurableCategories.find(cc => cc.id === ac.id)) || (categoryColumns.length ? categoryColumns : configurableCategories)
-  );
+  const [categories, setCategories] = useState<Column[]>(activeCategories);
   const [series, setSeries] = useState<Column[]>(activeColumns);
   const [chartType, setChartType] = useState<ChartType>(
-    (props.config.chart?.defaultValues?.chartType ?? ChartType.BAR) as ChartType
+    (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
   );
 
   const [options, setOptions] = useState<EChartsCoreOption>();
 
   useEffect(() => {
+    const includeDate = categories.find((c) => dateColumns.find((dc) => dc.id === c.id));
     const aggColumns = columns.filter((col) => col.aggregation);
-    const groupedData = groupByMultiple(data, categories, aggColumns);
-    const field = categories.map((c) => c.headerName).join('_');
-    const categoryData = groupedData.map((row) => row[field] as string);
+    const categoriesWoDates = categories.filter((c) => !dateColumns.find((dc) => dc.id === c.id));
+    const dateColumn = categories.find((c) => dateColumns.find((dc) => dc.id === c.id));
+    const field = categoriesWoDates.map((c) => c.headerName).join('_');
 
-    const getSeriesData = (column: Column) => {
-      if (chartType === ChartType.PIE) {
-        return groupedData.reduce(
-          (acc, curr) =>
-            acc.concat({ value: curr[column.field as string] as number, name: curr[field] as string }),
-          [] as { value: number; name: string }[]
-        );
-      } else {
-        return groupedData.map((row) => row[column.field as string]);
-      }
-    };
+    const source =
+      includeDate && dateColumn
+        ? groupBy(data, dateColumn, aggColumns)
+        : groupByMultiple(data, categories, aggColumns);
+
+    const dateSeries: Record<string, Column> = {};
+
+    if (includeDate) {
+      source.forEach((row) => {
+        const children = groupByMultiple(row.children || [], categoriesWoDates, aggColumns);
+
+        children.forEach((child) => {
+          series.forEach((column) => {
+            const key = child[field] ? `${column.field} - ${child[field]}` : (column.field as string);
+            dateSeries[key] = { ...column, field: key };
+            row[key] = child[column.field as string];
+          });
+        });
+      });
+    }
 
     const isPie = chartType === ChartType.PIE;
+    const isLine = chartType === ChartType.LINE;
 
     const _lineBarOptions = {
       xAxis: {
         type: 'category',
-        data: categoryData,
+        ...!isLine && {
+          axisPointer: {
+            type: 'shadow',
+          },
+        },
+        data: includeDate && source.map((row) => row[dateColumn?.field as string])
       },
       yAxis: {
         type: 'value',
         axisLabel: {
-          formatter: (value: number) => value >= 1000 ? numeral(value).format('0,0 a') : value,
+          formatter: (value: number) => (value >= 1000 ? numeral(value).format('0,0 a') : value),
         },
       },
     };
 
     const _options: EChartsCoreOption = deepmerge(
       {
+        dataset: !includeDate && {
+          dimensions: [field, ...series.map((s) => s.field as string)],
+          source,
+        },
         grid: { left: 50, right: 8 },
         toolbox: {
           show: true,
@@ -191,22 +223,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
           extraCssText: 'border: 0.001em solid black; border-radius: 0; box-shadow: none',
         },
         ...(isPie ? {} : _lineBarOptions),
-        series: series.map((column, idx) => ({
-          name: column?.headerName,
-          radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
-          tooltip: {
-            valueFormatter: column.formatter,
-          },
-          label: {
-            show: false,
-          },
-          labelLine: {
-            show: false,
-          },
-          data: getSeriesData(column),
-          type: chartType,
-          smooth: true,
-        })),
+        series: includeDate ? getDateSeriesConfig(Object.values(dateSeries), source, chartType) : getBaseSeriesConfig(series, isPie, chartType)
       },
       props.config.chart?.config ?? {}
     );

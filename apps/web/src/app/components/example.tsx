@@ -1,9 +1,4 @@
-import {
-  Button,
-  Divider,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
+import { Button, Divider, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import { BeastGridConfig } from 'beast-grid';
 import { User, codeBlock } from '../api/data';
@@ -14,6 +9,7 @@ import { Code as CodeIcon, GridView } from '@mui/icons-material';
 import Code from './code';
 
 import cn from 'classnames';
+import DateGrid from './date-grid';
 
 const buttonStyle: CSSProperties = {
   color: '#1976d2',
@@ -24,24 +20,24 @@ export default function Example() {
   const [theme, setTheme] = useState('corpo-theme');
   const [count, setCount] = useState(100);
   const [view, setView] = useState('grid');
+  const [dataType, setDataType] = useState('users');
 
-  const handleThemeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newTheme: string
-  ) => {
+  const handleThemeChange = (_: React.MouseEvent<HTMLElement>, newTheme: string) => {
     setTheme(newTheme);
   };
 
-  const handleSizeChange = (
-    _: React.MouseEvent<HTMLElement>,
-    newSize: number
-  ) => {
+  const handleSizeChange = (_: React.MouseEvent<HTMLElement>, newSize: number) => {
     setCount(count + newSize);
+  };
+  
+  const handleDataTypeChange = (_: React.MouseEvent<HTMLElement>, dataType: 'users' | 'orders') => {
+    setDataType(dataType);
   };
 
   const handleViewChange = (view: 'grid' | 'code') => () => {
     setView(view);
   };
+
 
   const config: Partial<BeastGridConfig<User[]>> = {
     header: {
@@ -94,47 +90,44 @@ export default function Example() {
               Dark Theme
             </ToggleButton>
           </ToggleButtonGroup>
-          <Divider
-            orientation="vertical"
-            flexItem
-            style={{ borderColor: '#193b5c' }}
-          />
+          <Divider orientation="vertical" flexItem style={{ borderColor: '#193b5c' }} />
           <ToggleButtonGroup
             color="primary"
             size="small"
+            value={dataType}
             exclusive
-            onChange={handleSizeChange}
-            aria-label="theme"
+            onChange={handleDataTypeChange}
+            aria-label="data-type"
           >
-            <ToggleButton style={buttonStyle} value={10000}>
-              +10k Rows
+            <ToggleButton style={buttonStyle} value={'users'}>
+              USERS
             </ToggleButton>
-            <ToggleButton style={buttonStyle} value={100000}>
-              +100k Rows
-            </ToggleButton>
-            <ToggleButton style={buttonStyle} value={500000}>
-              +500k Rows
+            <ToggleButton style={buttonStyle} value={'orders'}>
+              DATES
             </ToggleButton>
           </ToggleButtonGroup>
         </div>
       </div>
       {view === 'code' && (
-        <Code
-          code={codeBlock}
-          language="ts"
-          showLineNumbers
-          canCopy
-          style={{ marginTop: 24 }}
-        />
+        <Code code={codeBlock} language="ts" showLineNumbers canCopy style={{ marginTop: 24 }} />
       )}
       {view === 'grid' && (
-        <div className={cn("demo-container", theme)}>
-          <Grid
-            key="example"
-            qty={count}
-            config={theme === 'minimal-theme' ? config : undefined}
-            theme={theme}
-          />
+        <div className={cn('demo-container', theme)}>
+          {dataType === 'users' ? (
+            <Grid
+              key="example"
+              qty={count}
+              config={theme === 'minimal-theme' ? config : undefined}
+              theme={theme}
+            />
+          ) : (
+            <DateGrid
+              key="example"
+              qty={count}
+              config={theme === 'minimal-theme' ? config : undefined}
+              theme={theme}
+            />
+          )}
         </div>
       )}
     </section>

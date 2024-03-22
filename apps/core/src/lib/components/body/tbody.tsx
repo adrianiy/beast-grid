@@ -155,7 +155,7 @@ export default function TBody<T>({
                         sortedData.sort(sortData(sortColumns));
                         updateGaps(0, sortedData);
 
-                        // setSortedData([...sortedData]);
+                        setSortedData([...sortedData]);
                         if (data.length > PERFORMANCE_LIMIT) {
                             setTimeout(() => setSorting(false), 100);
                         }
