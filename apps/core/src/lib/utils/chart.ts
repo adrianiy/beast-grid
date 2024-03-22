@@ -5,16 +5,13 @@ export const getDateSeriesConfig = (chartSeries: Column[], source: Data, chartTy
   const isPie = chartType === ChartType.PIE;
 
   
-  return chartSeries.map((column, idx) => {
-    const sourceSeries = source.filter((row) => row[column.field as string]);
-
-    return {
+  return chartSeries.map((column, idx) => ({
       name: column.field,
-      data: sourceSeries.map((row, idx) => ({
-        value: row[column.field as string],
+      data: source.map((row, idx) => ({
+        value: row[column.field as string] || null,
         name: row.date,
         itemStyle: isLine && {
-          opacity: idx === sourceSeries.length - 1 ? 1 : 0,
+          opacity: source[idx + 1]?.[column.field as string] ? 0 : 1,
         },
       })),
       radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
@@ -32,8 +29,7 @@ export const getDateSeriesConfig = (chartSeries: Column[], source: Data, chartTy
       },
       type: chartType,
       smooth: true,
-    };
-  });
+  }));
 };
 
 export const getBaseSeriesConfig = (series: Column[], isPie: boolean, chartType: ChartType) => {
