@@ -19,7 +19,7 @@ type Props<T> = {
 } & Partial<{
   categories: Column[];
   series: Column[];
-  activeCategories: Column[];
+  activeCategory: Column;
   activeSeries: Column[];
   activeChartType: ChartType;
   setActiveCategory: (column: Column) => void;  
@@ -33,7 +33,7 @@ const chartTypes = [
   { id: ChartType.PIE, label: 'Pie' },
 ];
 
-export default function ChartConfig<T>({ config, categories, series, activeCategories, activeChartType, activeSeries, setActiveCategory, setActiveSerie, setActiveChartType }: Props<T>) {
+export default function ChartConfig<T>({ config, categories, series, activeCategory, activeChartType, activeSeries, setActiveCategory, setActiveSerie, setActiveChartType }: Props<T>) {
   const ref = useRef<SimpleBarCore>(null);
   const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
 
@@ -85,7 +85,7 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
             <div key={`category-${category.id}`} className="row middle bg-sidebar__chart__item" onClick={handleCategoryChange(category)}>
               <Checkbox.Root
                 className="bg-checkbox__root row middle"
-                checked={!!activeCategories?.find(c => c.id === category.id)}
+                checked={activeCategory?.id === category.id}
                 id={category.id}
               >
                 <Checkbox.Indicator className="bg-checbox__indicator row middle center">

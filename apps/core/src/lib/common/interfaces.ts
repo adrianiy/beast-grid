@@ -106,6 +106,12 @@ export interface TreeConstructor {
   menu: Partial<MenuProps>;
 }
 
+export interface ContextualMenuProps {
+  copy: boolean;
+  export: boolean;
+  chart: boolean;
+}
+
 export interface ToolBar {
   download: boolean;
   grid: boolean;
@@ -136,6 +142,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   topToolbar?: Partial<ToolBar>;
   bottomToolbar?: Partial<ToolBar>;
   chart?: Partial<Chart>;
+  contextualMenu?: Partial<ContextualMenuProps>
 }
 
 export interface TableStyles {

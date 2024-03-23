@@ -416,6 +416,7 @@ export default function TBody<T>({
                 <ContextMenu
                     x={contextMenu?.x || 0}
                     y={contextMenu?.y || 0}
+                    config={beastConfig}
                     visible={!!contextMenu}
                     theme={theme}
                     onClose={() => setContextMenu(null)}

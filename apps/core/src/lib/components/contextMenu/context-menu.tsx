@@ -1,13 +1,15 @@
 import { createPortal } from 'react-dom';
+import { useEffect } from 'react';
+import { BeastGridConfig } from '../../common';
 import { BarChartIcon, CopyIcon, DownloadIcon } from '@radix-ui/react-icons';
 import { FormattedMessage } from 'react-intl';
 
 import cn from 'classnames';
 
 import './context-menu.scss';
-import { useEffect } from 'react';
 
-type Props = {
+type Props<T> = {
+  config: BeastGridConfig<T>
   x: number;
   y: number;
   theme: string;
@@ -18,8 +20,8 @@ type Props = {
   onChartOpen: () => void;
 }
 
-export default function ContextMenu(props: Props) {
-  if (!props.visible) {
+export default function ContextMenu<T>(props: Props<T>) {
+  if (!props.visible || !props.config.contextualMenu) {
     return null;
   }
   
@@ -30,7 +32,7 @@ export default function ContextMenu(props: Props) {
   
 }
 
-const MenuPortal = (props: Props) => {
+function MenuPortal<T>(props: Props<T>) {
   const { x, y, theme, onClose, onCopy, onExport, onChartOpen } = props;
   
   useEffect(() => {
@@ -63,27 +65,54 @@ const MenuPortal = (props: Props) => {
   
   return (
     <div className={cn("bg-grid__context-menu", theme)} style={{ left, top }}>
-      <div className="bg-grid__context-menu__section">
-        <div className="bg-grid__context-menu__item row middle" onClick={handleCopy(false)}>
-          <CopyIcon />
-          <FormattedMessage id="menu.copy" />
-        </div>
-        <div className="bg-grid__context-menu__item row middle" onClick={handleCopy(true)}>
-          <CopyIcon />
-          <FormattedMessage id="menu.copyWithHeaders" />
-        </div>
+      <CopySection enabled={props.config.contextualMenu?.copy ?? true} onCopy={handleCopy} />
+      <ChartSection enabled={props.config.contextualMenu?.chart ?? false} onChart={handleChart} />
+      <ExportSection enabled={props.config.contextualMenu?.export ?? false} onExport={handleExport} />
+    </div>
+  )
+}
+
+const CopySection = ({ enabled, onCopy }: { enabled: boolean; onCopy: (withHeaders: boolean) => (e: React.MouseEvent) => void }) => {
+  if (!enabled) {
+    return null;
+  }
+  return (
+    <div className="bg-grid__context-menu__section">
+      <div className="bg-grid__context-menu__item row middle" onClick={onCopy(false)}>
+        <CopyIcon />
+        <FormattedMessage id="menu.copy" />
       </div>
-      <div className="bg-grid__context-menu__section" onClick={handleChart}>
-        <div className="bg-grid__context-menu__item row middle">
-          <BarChartIcon />
-          <FormattedMessage id="menu.chart" />
-        </div>
+      <div className="bg-grid__context-menu__item row middle" onClick={onCopy(true)}>
+        <CopyIcon />
+        <FormattedMessage id="menu.copyWithHeaders" />
       </div>
-      <div className="bg-grid__context-menu__section" onClick={handleExport}>
-        <div className="bg-grid__context-menu__item row middle">
-          <DownloadIcon />
-          <FormattedMessage id="menu.export" />
-        </div>
+    </div>
+  )
+}
+
+const ChartSection = ({ enabled, onChart }: { enabled: boolean; onChart: (e: React.MouseEvent) => void }) => {
+  if (!enabled) {
+    return null;
+  }
+  return (
+    <div className="bg-grid__context-menu__section" onClick={onChart}>
+      <div className="bg-grid__context-menu__item row middle">
+        <BarChartIcon />
+        <FormattedMessage id="menu.chart" />
+      </div>
+    </div>
+  )
+}
+
+const ExportSection = ({ enabled, onExport }: { enabled: boolean; onExport: (e: React.MouseEvent) => void }) => {
+  if (!enabled) {
+    return null;
+  }
+  return (
+    <div className="bg-grid__context-menu__section" onClick={onExport}>
+      <div className="bg-grid__context-menu__item row middle">
+        <DownloadIcon />
+        <FormattedMessage id="menu.export" />
       </div>
     </div>
   )

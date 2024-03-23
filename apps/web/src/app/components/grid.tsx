@@ -124,6 +124,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             dataColumns: ['january', 'february']
           }
         },
+        contextualMenu: {
+          chart: true
+        },
         bottomToolbar: {
           download: true,
           restore: true
