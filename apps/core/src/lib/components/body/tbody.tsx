@@ -358,6 +358,7 @@ export default function TBody<T>({
                 columnStore={columns}
                 config={config}
                 groupOrder={groupOrder}
+                selectable={!!beastConfig.contextualMenu}
                 idx={idx}
                 y={y}
                 border={border}
