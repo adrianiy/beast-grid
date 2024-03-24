@@ -99,6 +99,10 @@
             height: var(--size);
         }
     }
+    .disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
     .bg-checkbox__root {
         --size: var(--bg-size--3);
         background-color: white;

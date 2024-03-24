@@ -126,6 +126,7 @@ export interface Chart {
     categoryColumns: string[];
     chartType: 'line' | 'bar';
   }>;
+  groupData: boolean;
   config: Partial<EChartsCoreOption>;
 }
 

@@ -94,6 +94,9 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
           download: true,
           restore: true
         },
+        contextualMenu: {
+          chart: true
+        },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
         },

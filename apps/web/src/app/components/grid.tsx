@@ -121,8 +121,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         },
         chart: {
           defaultValues: {
-            dataColumns: ['january', 'february']
-          }
+            dataColumns: ['january', 'february'],
+          },
+          groupData: false
         },
         contextualMenu: {
           chart: true
