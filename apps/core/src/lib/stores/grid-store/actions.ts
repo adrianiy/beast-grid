@@ -296,8 +296,18 @@ export const autoSizeColumns = () => (state: GridStore) => {
   return { columns };
 };
 
-export const restore = (initialState: Partial<GridState>) => () => {
-  return { ...clone(initialState), edited: false };
+export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
+  const { columns } = state;
+  Object.values(initialState.columns || {}).forEach(column => {
+    columns[column.id] = clone(column);
+  });
+  const sortedColumns = sortColumns(columns);
+  const groupOrder = Object.values(columns).filter((col) => col.rowGroup).map((col) => col.id);
+  moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+  moveColumns(columns, sortedColumns, PinType.NONE, 0);
+  moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+  
+  return { ...clone(initialState), columns, groupOrder, edited: false };
 };
 
 export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridStore) => {
