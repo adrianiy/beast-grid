@@ -245,6 +245,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
           padding: 16,
           appendToBody: true,
           extraCssText: 'border: 0.001em solid black; border-radius: 0; box-shadow: none',
+          className: 'bg-chart-tooltip'
         },
         ...(isPie ? {} : _lineBarOptions),
         series,
