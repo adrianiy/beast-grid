@@ -108,7 +108,7 @@ export function BeastGrid<T>({
             <BeastApi store={api} />
             <LoaderLayer config={config} />
             <Toolbar config={config} position={ToolbarPosition.TOP} />
-            {}<Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+            <Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
             <Toolbar config={config} position={ToolbarPosition.BOTTOM} onRestore={handleRestore} />
           </IntlProvider>
         </BeastGridProvider>
