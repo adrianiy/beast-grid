@@ -8,9 +8,10 @@ import './toolbar.scss';
 type Props<T> = {
   config: BeastGridConfig<T>;
   position: ToolbarPosition
+  onRestore?: () => void;
 };
 
-export default function Toolbar<T>({ config, position }: Props<T>) {
+export default function Toolbar<T>({ config, position, onRestore }: Props<T>) {
   const toolbar = useMemo(() => position === ToolbarPosition.TOP ? config.topToolbar : config.bottomToolbar, [config, position]);
 
   if (!toolbar) {
@@ -23,7 +24,7 @@ export default function Toolbar<T>({ config, position }: Props<T>) {
       <Mode toolbar={toolbar} />
       <Filter toolbar={toolbar} />
       <Grid toolbar={toolbar} />
-      <Restore toolbar={toolbar} />
+      <Restore toolbar={toolbar} callback={onRestore} />
       <Download toolbar={toolbar} />
       <ChartConfig toolbar={toolbar} />
     </div>

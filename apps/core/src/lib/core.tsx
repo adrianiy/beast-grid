@@ -45,6 +45,7 @@ export function BeastGrid<T>({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     const cancel = (e: DragEvent) => {
@@ -84,6 +85,13 @@ export function BeastGrid<T>({
     }
   }, [ref, config, theme]);
 
+  const handleRestore = () => {
+    setRestoring(true);
+    setTimeout(() => {
+      setRestoring(false);
+    }, 1);
+  }
+
   const GridProvider = () => {
     if (!config || !beastGridStore || !beastDndStore) {
       return (
@@ -93,15 +101,15 @@ export function BeastGrid<T>({
       );
     }
 
-    return (
+    return !restoring && (
       <DndStoreProvider createStore={beastDndStore}>
         <BeastGridProvider createStore={beastGridStore}>
           <IntlProvider messages={messages[locale]} locale={locale}>
             <BeastApi store={api} />
             <LoaderLayer config={config} />
             <Toolbar config={config} position={ToolbarPosition.TOP} />
-            <Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
-            <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
+            {}<Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+            <Toolbar config={config} position={ToolbarPosition.BOTTOM} onRestore={handleRestore} />
           </IntlProvider>
         </BeastGridProvider>
       </DndStoreProvider>

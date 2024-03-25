@@ -15,8 +15,8 @@ import {
   swapPositions,
   toggleHide,
 } from './utils';
-import { GridStore } from './store';
-import { Coords, FilterType, PinType, SelectedCells, SortType } from '../../common';
+import { GridState, GridStore } from './store';
+import { ColumnStore, Coords, FilterType, PinType, SelectedCells, SideBarConfig, SortType } from '../../common';
 import { createGroupColumn } from './utils/group';
 import { clone } from '../../utils/functions';
 
@@ -136,39 +136,41 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
   return { columns, sort: columnsWithSort.map((col) => col.id), edited: true };
 };
 
-export const addFilter = (id: ColumnId, value: IFilter | null, idx = 0) => (state: GridStore) => {
-  const { columns, filters } = state;
-  const column = columns[id];
+export const addFilter =
+  (id: ColumnId, value: IFilter | null, idx = 0) =>
+    (state: GridStore) => {
+      const { columns, filters } = state;
+      const column = columns[id];
 
-  if (column.filterType === FilterType.TEXT) {
-    if (filters[id]?.includes(value as string)) {
-      filters[id] = filters[id]?.filter((val) => val !== value);
-    } else {
-      filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-    }
-  }
-  if (column.filterType === FilterType.NUMBER) {
-    if (!filters[id]) {
-      filters[id] = [];
-    }
-    if (!value) {
-      if (!idx) {
-        filters[id] = [];
-      } else {
-        filters[id] = filters[id]?.filter((_, i) => i !== idx);
+      if (column.filterType === FilterType.TEXT) {
+        if (filters[id]?.includes(value as string)) {
+          filters[id] = filters[id]?.filter((val) => val !== value);
+        } else {
+          filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
+        }
       }
-    } else if (filters[id][idx]) {
-      filters[id][idx] = value;
-    } else {
-      filters[id][idx] = value;
-    }
-  }
-  if (!filters[id].length) {
-    delete filters[id];
-  }
+      if (column.filterType === FilterType.NUMBER) {
+        if (!filters[id]) {
+          filters[id] = [];
+        }
+        if (!value) {
+          if (!idx) {
+            filters[id] = [];
+          } else {
+            filters[id] = filters[id]?.filter((_, i) => i !== idx);
+          }
+        } else if (filters[id][idx]) {
+          filters[id][idx] = value;
+        } else {
+          filters[id][idx] = value;
+        }
+      }
+      if (!filters[id].length) {
+        delete filters[id];
+      }
 
-  return { columns, filters: { ...filters }, edited: true };
-};
+      return { columns, filters: { ...filters }, edited: true };
+    };
 
 export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
   const { columns, filters } = state;
@@ -261,15 +263,15 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
 
 export const updateSelectedCells = (selectedCells: SelectedCells | null) => () => {
   return { selectedCells };
-}
+};
 
 export const setSelectedStart = (coords: Coords) => () => {
   return { selectedCells: { start: coords, end: coords, init: coords } };
-}
+};
 
 export const setSelectedEnd = (coords: Coords) => (state: GridStore) => {
   const { selectedCells } = state;
-  
+
   if (!selectedCells) {
     return state;
   }
@@ -281,15 +283,7 @@ export const setSelectedEnd = (coords: Coords) => (state: GridStore) => {
       end: { x: Math.max(selectedCells.init.x, coords.x), y: Math.max(selectedCells.init.y, coords.y) },
     },
   };
-}
-
-export const restore = () => (state: GridStore) => {
-  const { initialColumns, initialData } = state;
-
-  const sortedColumns = sortColumns(initialColumns);
-
-  return { columns: clone(initialColumns), data: clone(initialData), sortedColumns, filters: {}, sort: [], edited: false, groupOrder: [] };
-}
+};
 
 export const autoSizeColumns = () => (state: GridStore) => {
   const { columns, container, sortedColumns } = state;
@@ -300,9 +294,13 @@ export const autoSizeColumns = () => (state: GridStore) => {
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
   return { columns };
-}
+};
 
-export const setSideBarConfig = (config: unknown) => (state: GridStore) => {
+export const restore = (initialState: Partial<GridState>) => () => {
+  return { ...clone(initialState), edited: false };
+};
+
+export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridStore) => {
   const { sideBarConfig } = state;
 
   if (sideBarConfig === config) {
@@ -310,5 +308,4 @@ export const setSideBarConfig = (config: unknown) => (state: GridStore) => {
   }
 
   return { sideBarConfig: config };
-}
-
+};

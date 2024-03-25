@@ -24,7 +24,7 @@ import { BeastGridConfig, BeastMode, Coords, PinType, SelectedCells, SideBarConf
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 import { clone } from '../../utils/functions';
 
-interface GridState {
+export interface GridState {
   edited: boolean;
   data: Data;
   columns: ColumnStore;
@@ -35,7 +35,6 @@ interface GridState {
   tree: Partial<TreeConstructor> | undefined;
   groupOrder: ColumnId[];
   initialData: Data;
-  initialColumns: ColumnStore;
   sortedColumns: Column[];
   loading: boolean;
   sorting: boolean;
@@ -96,28 +95,27 @@ export const createGridStore = <T>(
   const initialState = {
     edited: false,
     data,
-    initialData: clone(initialData),
-    initialColumns: clone(columns),
+    initialData: clone(data),
     tree,
     groupOrder,
     columns,
     sortedColumns,
     allowMultipleColumnSort: !!sort?.multiple,
-    container,
     theme,
     sort: [],
     selectedCells: null,
-    mode: BeastMode.GRID
-  };
-  
-  return create<GridStore>((set) => ({
-    ...initialState,
     filters: {},
     loading: false,
     sorting: false,
+    selecting: false,
+  };
+  
+  return create<GridStore>((set) => ({
+    ...clone(initialState),
+    container,
+    mode: BeastMode.GRID,
     scrollElement: null as unknown as HTMLDivElement,
     sideBarConfig: null,
-    selecting: false,
     setData: (data: Data) => set({ data }),
     setColumns: (columns: ColumnStore) => set({ columns }),
     setTheme: (theme: string) => set({ theme }),
@@ -144,7 +142,7 @@ export const createGridStore = <T>(
     setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
     setSelecting: (selecting: boolean) => set({ selecting }),
     setMode: (mode: BeastMode) => set({ mode }),
-    restore: () => set(restore()),
+    restore: () => set(restore(initialState)),
     autoSizeColumns: () => set(autoSizeColumns())
   }));
 };
