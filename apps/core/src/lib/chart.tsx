@@ -145,13 +145,13 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
   useEffect(() => {
     const aggColumns = columns.filter((col) => col.aggregation);
-    const groupedData = groupBy(data, category, aggColumns);
-    const categories = groupedData.map((row) => row[category.field as string]);
-    const validGroups = groups.filter(group => category.id !== group.id);
+    const groupedData = category ? groupBy(data, category, aggColumns) : data;
+    const categories = category ? groupedData.map((row) => row[category.field as string]) : new Array(data.length).fill(0).map((_, idx) => idx);
+    const validGroups = groups.filter(group => category?.id !== group.id);
     const seriesRecord: Record<string, { data: number[]; column: Column; }> = {};
 
     groupedData.forEach((row, idx) => {
-      const childGroups = groupByMultiple(row.children || [], validGroups, aggColumns);
+      const childGroups = validGroups.length ? groupByMultiple(row.children || [], validGroups, aggColumns) : [row];
       const field = validGroups.map((g) => g.headerName).join('_');
 
       childGroups.forEach((group) => {
@@ -275,7 +275,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   };
 
   const changeGroups = (column: Column) => {
-    if (column.id === category.id) {
+    if (column.id === category?.id) {
       return;
     }
     const match = groups.find((s) => s.id === column.id);
