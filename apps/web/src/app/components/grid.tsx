@@ -44,8 +44,8 @@ const columnDefs: ColumnDef[] = [
           menu: {
             filter: true
           },
-          styleFormatter: (value: number) => {
-            if (value < 10000) {
+          styleFormatter: (value) => {
+            if (+value < 10000) {
               return { color: 'red' };
             }
             return {};
@@ -53,7 +53,7 @@ const columnDefs: ColumnDef[] = [
           aggregation: AggregationType.SUM,
           sortable: true,
           flex: 1,
-          formatter: (value: number) => numeral(value).format('0,0 $'),
+          formatter: (value) => numeral(value).format('0,0 $'),
         })
       ),
     ],

@@ -6,8 +6,8 @@ import { LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 import React, { useRef } from 'react';
 
-function getProperty<Type, Key extends keyof Type>(
-  obj: Type,
+function getProperty<Key extends keyof Row>(
+  obj: Row,
   level: number,
   columnDef: Column,
   columns: ColumnStore,
@@ -145,7 +145,7 @@ export function RowCell({ height, row, idx, selectable, columnDef, border, confi
           (columnDef.tree ? LEVEL_PADDING * level : 0) +
           (columnDef.tree && !row.children ? LEVEL_PADDING : 0),
         width: columnDef.width,
-        ...columnDef.styleFormatter?.(row[columnDef.field as string], row),
+        ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row)
       }}
       onClick={handleMouseClick}
       onMouseDown={handleMouseDown}
