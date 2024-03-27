@@ -13,17 +13,21 @@ import SimpleBarCore from 'simplebar-core';
 
 import cn from 'classnames';
 import Accordion from '../../accordion/accordion';
+import useOnClickOutside from '../../../hooks/clickOutside';
 
 type Props<T> = {
   config: BeastGridConfig<T>;
 } & Partial<{
   categories: Column[];
-  series: Column[];
-  activeCategories: Column[];
-  activeSeries: Column[];
+  values: Column[];
+  groups: Column[];
+  activeCategory: Column;
+  activeValues: Column[];
+  activeGroups: Column[];
   activeChartType: ChartType;
-  setActiveCategory: (column: Column) => void;  
-  setActiveSerie: (column: Column) => void;
+  setActiveCategory: (column: Column) => void;
+  setActiveValue: (column: Column) => void;
+  setActiveGroup: (column: Column) => void;
   setActiveChartType: (chartType: ChartType) => void;
 }>;
 
@@ -33,27 +37,48 @@ const chartTypes = [
   { id: ChartType.PIE, label: 'Pie' },
 ];
 
-export default function ChartConfig<T>({ config, categories, series, activeCategories, activeChartType, activeSeries, setActiveCategory, setActiveSerie, setActiveChartType }: Props<T>) {
+export default function ChartConfig<T>({
+  config,
+  categories,
+  values,
+  groups,
+  activeCategory,
+  activeChartType,
+  activeGroups,
+  activeValues,
+  setActiveCategory,
+  setActiveValue,
+  setActiveGroup,
+  setActiveChartType,
+}: Props<T>) {
+  const sideBarRef = useRef<HTMLDivElement>(null);
   const ref = useRef<SimpleBarCore>(null);
   const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
+  
+  useOnClickOutside(sideBarRef, () => setSidebar(null));
 
   const handleCategoryChange = (category: Column) => (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveCategory?.(category);
-  }
+  };
 
-  const handleSerieChange = (serie: Column) => (e: React.MouseEvent) => {
+  const handleValueChange = (value: Column) => (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveSerie?.(serie);
+    setActiveValue?.(value);
+  };
+
+  const handleGroupChange = (group: Column) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveGroup?.(group);
   }
 
   const handleChartTypeChange = (chartType: ChartType) => (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveChartType?.(chartType);
-  }
+  };
 
   return (
-    <div className={cn('bg-sidebar column', { border: config.style?.border })}>
+    <div ref={sideBarRef} onClick={e => e.stopPropagation()} className={cn('bg-sidebar column', { border: config.style?.border })}>
       <div
         className="bg-sidebar__title row middle between"
         style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
@@ -69,9 +94,21 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
           elements={3}
         >
           {chartTypes?.map((chartType) => (
-            <div key={`category-${chartType.id}`} className="row middle bg-sidebar__chart__item" onClick={handleChartTypeChange(chartType.id as ChartType)}>
-              <input readOnly type="radio" id={chartType.id} name="type" checked={activeChartType === chartType.id} />
-              <label><FormattedMessage id={`chart.${chartType.id}`}/></label>
+            <div
+              key={`category-${chartType.id}`}
+              className="row middle bg-sidebar__chart__item"
+              onClick={handleChartTypeChange(chartType.id as ChartType)}
+            >
+              <input
+                readOnly
+                type="radio"
+                id={chartType.id}
+                name="type"
+                checked={activeChartType === chartType.id}
+              />
+              <label>
+                <FormattedMessage id={`chart.${chartType.id}`} />
+              </label>
             </div>
           ))}
         </Accordion>
@@ -82,38 +119,70 @@ export default function ChartConfig<T>({ config, categories, series, activeCateg
           elements={categories?.length || 0}
         >
           {categories?.map((category) => (
-            <div key={`category-${category.id}`} className="row middle bg-sidebar__chart__item" onClick={handleCategoryChange(category)}>
-              <Checkbox.Root
-                className="bg-checkbox__root row middle"
-                checked={!!activeCategories?.find(c => c.id === category.id)}
+            <div
+              key={`category-${category.id}`}
+              className="row middle bg-sidebar__chart__item"
+              onClick={handleCategoryChange(category)}
+            >
+              <input
+                readOnly
+                type="radio"
                 id={category.id}
-              >
-                <Checkbox.Indicator className="bg-checbox__indicator row middle center">
-                  <CheckIcon />
-                </Checkbox.Indicator>
-              </Checkbox.Root>
+                name="category"
+                checked={activeCategory?.id === category.id}
+              />
               <label>{category.headerName}</label>
             </div>
           ))}
         </Accordion>
         <Accordion
-          key={`sidebar_chart_series`}
-          id={`sidebar_chart_series`}
-          label={<FormattedMessage id="chart.series" />}
-          elements={series?.length || 0}
+          key={`sidebar_chart_groups`}
+          id={`sidebar_chart_groups`}
+          label={<FormattedMessage id="chart.groups" />}
+          elements={groups?.length || 0}
         >
-          {series?.map((serie) => (
-            <div key={serie.id} className="row middle bg-sidebar__chart__item" onClick={handleSerieChange(serie)}>
+          {groups?.map((group) => (
+            <div
+              key={group.id}
+              className={cn('row middle bg-sidebar__chart__item', { disabled: activeCategory?.id === group.id })}
+              onClick={handleGroupChange(group)}
+            >
               <Checkbox.Root
                 className="bg-checkbox__root row middle"
-                checked={!!activeSeries?.find(s => s.id === serie.id)}
-                id={serie.id}
+                disabled={activeCategory?.id === group.id}
+                checked={!!activeGroups?.find((s) => s.id === group.id)}
+                id={group.id}
               >
                 <Checkbox.Indicator className="bg-checbox__indicator row middle center">
                   <CheckIcon />
                 </Checkbox.Indicator>
               </Checkbox.Root>
-              <label>{serie.headerName}</label>
+              <label>{group.headerName}</label>
+            </div>
+          ))}
+        </Accordion>
+        <Accordion
+          key={`sidebar_chart_values`}
+          id={`sidebar_chart_values`}
+          label={<FormattedMessage id="chart.values" />}
+          elements={values?.length || 0}
+        >
+          {values?.map((value) => (
+            <div
+              key={value.id}
+              className="row middle bg-sidebar__chart__item"
+              onClick={handleValueChange(value)}
+            >
+              <Checkbox.Root
+                className="bg-checkbox__root row middle"
+                checked={!!activeValues?.find((s) => s.id === value.id)}
+                id={value.id}
+              >
+                <Checkbox.Indicator className="bg-checbox__indicator row middle center">
+                  <CheckIcon />
+                </Checkbox.Indicator>
+              </Checkbox.Root>
+              <label>{value.headerName}</label>
             </div>
           ))}
         </Accordion>

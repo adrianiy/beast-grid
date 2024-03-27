@@ -6,8 +6,8 @@ import { LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 import React, { useRef } from 'react';
 
-function getProperty<Type, Key extends keyof Type>(
-  obj: Type,
+function getProperty<Key extends keyof Row>(
+  obj: Row,
   level: number,
   columnDef: Column,
   columns: ColumnStore,
@@ -33,13 +33,14 @@ type Props = {
   row: Row;
   border?: boolean;
   columnDef: Column;
+  selectable: boolean;
   config?: Partial<RowConfig>;
   level: number;
   groupOrder: ColumnId[];
   columns: ColumnStore;
   onClick?: () => void;
 };
-export function RowCell({ height, row, idx, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
+export function RowCell({ height, row, idx, selectable, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
   const lastSelected = useRef<SelectedCells | null>(null);
   const [scrollElement, selectedCells, setSelectedStart, setSelectedEnd, updateSelected, selecting, setSelecting] =
     useBeastStore((state) => [
@@ -71,7 +72,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
     const clickOnYScrollbar = e.clientY > scrollElement?.getBoundingClientRect().bottom - 11;
     const clickOnXScrollbar = e.clientX > scrollElement?.getBoundingClientRect().right - 11;
 
-    if (e.shiftKey || clickOnYScrollbar || clickOnXScrollbar) {
+    if (e.shiftKey || clickOnYScrollbar || clickOnXScrollbar || !selectable) {
       return;
     }
     if (e.button === 2 && selected) {
@@ -90,6 +91,9 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
   };
 
   const handleMouseUp = () => {
+    if (!selectable) {
+      return;
+    }
     if (!lastSelected.current) {
       lastSelected.current = selectedCells;
     } else {
@@ -108,7 +112,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
 
   const handleMouseClick = (e: React.MouseEvent) => {
     const coords = { x: columnDef.finalPosition, y: idx };
-    if (e.shiftKey) {
+    if (e.shiftKey && selectable) {
       setSelectedEnd(coords);
     }
   };
@@ -141,7 +145,7 @@ export function RowCell({ height, row, idx, columnDef, border, config, level, gr
           (columnDef.tree ? LEVEL_PADDING * level : 0) +
           (columnDef.tree && !row.children ? LEVEL_PADDING : 0),
         width: columnDef.width,
-        ...columnDef.styleFormatter?.(row[columnDef.field as string], row),
+        ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row)
       }}
       onClick={handleMouseClick}
       onMouseDown={handleMouseDown}

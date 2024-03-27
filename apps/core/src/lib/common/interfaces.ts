@@ -46,8 +46,8 @@ export interface BaseColumnDef {
   field?: string;
   sortable?: boolean;
   children?: ColumnDef[];
-  formatter?: <T>(value: string & number, row: T) => string;
-  styleFormatter?: <T>(value: string & number, row: T) => CSSProperties;
+  formatter?: (value: string & number, row: Row) => string;
+  styleFormatter?: (value: string & number, row: Row) => CSSProperties;
   menu?: Partial<MenuProps>;
   rowGroup?: boolean;
   aggregation?: AggregationType | AggregationFunction;
@@ -106,6 +106,12 @@ export interface TreeConstructor {
   menu: Partial<MenuProps>;
 }
 
+export interface ContextualMenuProps {
+  copy: boolean;
+  export: boolean;
+  chart: boolean;
+}
+
 export interface ToolBar {
   download: boolean;
   grid: boolean;
@@ -120,6 +126,7 @@ export interface Chart {
     categoryColumns: string[];
     chartType: 'line' | 'bar';
   }>;
+  groupData: boolean;
   config: Partial<EChartsCoreOption>;
 }
 
@@ -136,6 +143,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
   topToolbar?: Partial<ToolBar>;
   bottomToolbar?: Partial<ToolBar>;
   chart?: Partial<Chart>;
+  contextualMenu?: Partial<ContextualMenuProps>
 }
 
 export interface TableStyles {

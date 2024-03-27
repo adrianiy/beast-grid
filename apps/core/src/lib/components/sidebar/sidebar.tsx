@@ -11,12 +11,15 @@ import './sidebar.scss';
 
 type ChartProps = {
   categories: Column[];
-  series: Column[];
-  activeCategories: Column[];
-  activeSeries: Column[];
+  values: Column[];
+  groups: Column[];
+  activeCategory: Column;
+  activeValues: Column[];
+  activeGroups: Column[];
   activeChartType: ChartType;
   setActiveCategory: (column: Column) => void;  
-  setActiveSerie: (column: Column) => void;
+  setActiveValue: (column: Column) => void;
+  setActiveGroup: (column: Column) => void;
   setActiveChartType: (chartType: ChartType) => void;
 }
 
@@ -29,7 +32,7 @@ function SideBarSwitch<T>({ sideBarConfig, config, ...chartProps }: { sideBarCon
     case SideBarConfig.FILTERS:
       return <Filters config={config} />;
     case SideBarConfig.CHART:
-      return chartProps?.series && <ChartConfig config={config} {...chartProps} />;
+      return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
     default:
       return null;
   }
@@ -43,7 +46,8 @@ export default function SideBar<T>({ config, ...chartProps }: { config: BeastGri
   const [useModal, setUseModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (sideBarConfig === SideBarConfig.FILTERS && config.style?.maxHeight) {
+    const isModableSidebar = sideBarConfig && [SideBarConfig.FILTERS, SideBarConfig.GRID].includes(sideBarConfig);
+    if (isModableSidebar && config.style?.maxHeight) {
       setUseModal(true);
     } else {
       setUseModal(false);
@@ -66,7 +70,7 @@ export default function SideBar<T>({ config, ...chartProps }: { config: BeastGri
 
   if (useModal) {
     return (
-      <div className="bg-sidebar__modal__container" onClick={closeSidebar}>
+      <div className="bg-sidebar__modal__container animate__animated animate__faster animate__fadeIn" onClick={closeSidebar}>
         <div className="bg-sidebar__modal" onClick={stopClick}>
           <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
         </div>

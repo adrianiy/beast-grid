@@ -7,6 +7,7 @@ import { LabelKeyObject } from 'react-csv/lib/core';
 
 type Props = {
   toolbar: Partial<ToolBar>;
+  callback?: () => void
 };
 
 export const Filter = ({ toolbar }: Props) => {
@@ -100,7 +101,7 @@ export const ChartConfig = ({ toolbar }: Props) => {
   );
 }
 
-export const Restore = ({ toolbar }: Props) => {
+export const Restore = ({ toolbar, callback }: Props) => {
   const [edited, restore] = useBeastStore((state) => [state.edited, state.restore]);
 
   if (!edited || !toolbar.restore) {
@@ -108,6 +109,7 @@ export const Restore = ({ toolbar }: Props) => {
   }
 
   const restoreChanges = () => {
+    callback?.();
     restore();
   }
 

@@ -28,7 +28,6 @@ import { FormattedMessage } from 'react-intl';
 
 import './chart.scss';
 import numeral from 'numeral';
-import { getBaseSeriesConfig, getDateSeriesConfig } from './utils/chart';
 
 echarts.use([
   LineChart,
@@ -119,7 +118,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   const { columns, data } = props;
 
   const configurableCategories = getCategories(columns, data);
-  const configurableSeries = getSeries(columns, data);
+  const configurableValues = getSeries(columns, data);
   const dateColumns = getDates(configurableCategories, data);
 
   const dataColumns = columns.filter((col) =>
@@ -135,8 +134,9 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     (categoryColumns.length ? categoryColumns : configurableCategories);
   const includeDate = activeCategories.find((c) => dateColumns.find((dc) => dc.id === c.id));
 
-  const [categories, setCategories] = useState<Column[]>(activeCategories);
-  const [series, setSeries] = useState<Column[]>(activeColumns);
+  const [category, setCategory] = useState<Column>(activeCategories[0]);
+  const [values, setValues] = useState<Column[]>(activeColumns);
+  const [groups, setGroups] = useState<Column[]>(props.config.chart?.groupData === false ? [] : activeCategories.slice(1));
   const [chartType, setChartType] = useState<ChartType>(
     (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
   );
@@ -144,45 +144,73 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   const [options, setOptions] = useState<EChartsCoreOption>();
 
   useEffect(() => {
-    const includeDate = categories.find((c) => dateColumns.find((dc) => dc.id === c.id));
     const aggColumns = columns.filter((col) => col.aggregation);
-    const categoriesWoDates = categories.filter((c) => !dateColumns.find((dc) => dc.id === c.id));
-    const dateColumn = categories.find((c) => dateColumns.find((dc) => dc.id === c.id));
-    const field = categoriesWoDates.map((c) => c.headerName).join('_');
+    const groupedData = category ? groupBy(data, category, aggColumns) : data;
+    const categories = category ? groupedData.map((row) => row[category.field as string]) : new Array(data.length).fill(0).map((_, idx) => idx);
+    const validGroups = groups.filter(group => category?.id !== group.id);
+    const seriesRecord: Record<string, { data: number[]; column: Column; }> = {};
 
-    const source =
-      includeDate && dateColumn
-        ? groupBy(data, dateColumn, aggColumns)
-        : groupByMultiple(data, categories, aggColumns);
+    groupedData.forEach((row, idx) => {
+      const childGroups = validGroups.length ? groupByMultiple(row.children || [], validGroups, aggColumns) : [row];
+      const field = validGroups.map((g) => g.headerName).join('_');
 
-    const dateSeries: Record<string, Column> = {};
+      childGroups.forEach((group) => {
+        const groupName = group[field];
+        values.forEach((value) => {
+          const name = groupName ? `${value.headerName} - ${groupName}` : value.headerName;
 
-    if (includeDate) {
-      source.forEach((row) => {
-        const children = groupByMultiple(row.children || [], categoriesWoDates, aggColumns);
+          if (!seriesRecord[name]) {
+            seriesRecord[name] = {
+              data: new Array(categories.length).fill(null),
+              column: value,
+            };
+          }
 
-        children.forEach((child) => {
-          series.forEach((column) => {
-            const key = child[field] ? `${column.field} - ${child[field]}` : (column.field as string);
-            dateSeries[key] = { ...column, field: key };
-            row[key] = child[column.field as string];
-          });
+          seriesRecord[name].data[idx] = group[value.field as string] as number;
         });
       });
-    }
-
+    });
+    
     const isPie = chartType === ChartType.PIE;
     const isLine = chartType === ChartType.LINE;
+
+    const series = Object.entries(seriesRecord).map(([name, data], idx) => {
+      return {
+        name,
+        type: chartType,
+        radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
+        tooltip: {
+          valueFormatter: data.column.formatter,
+        },
+        emphasis: {
+          focus: 'series',
+        },
+        label: {
+          show: false,
+        },
+        labelLine: {
+          show: false,
+        },
+        smooth: true,
+        data: data.data.map((d, idx) => ({
+          value: d,
+          name: categories[idx],
+          itemStyle: isLine && {
+            opacity: !data.data[idx + 1] ? 1 : 0
+          },
+        })),
+      };
+    });
 
     const _lineBarOptions = {
       xAxis: {
         type: 'category',
-        ...!isLine && {
+        ...(!isLine && {
           axisPointer: {
             type: 'shadow',
           },
-        },
-        data: includeDate && source.map((row) => row[dateColumn?.field as string])
+        }),
+        data: categories,
       },
       yAxis: {
         type: 'value',
@@ -194,10 +222,6 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
     const _options: EChartsCoreOption = deepmerge(
       {
-        dataset: !includeDate && {
-          dimensions: [field, ...series.map((s) => s.field as string)],
-          source,
-        },
         grid: { left: 50, right: 8 },
         toolbox: {
           show: true,
@@ -221,37 +245,46 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
           padding: 16,
           appendToBody: true,
           extraCssText: 'border: 0.001em solid black; border-radius: 0; box-shadow: none',
+          className: 'bg-chart-tooltip'
         },
         ...(isPie ? {} : _lineBarOptions),
-        series: includeDate ? getDateSeriesConfig(Object.values(dateSeries), source, chartType) : getBaseSeriesConfig(series, isPie, chartType)
+        series,
       },
       props.config.chart?.config ?? {}
     );
 
     setOptions(_options);
-  }, [props, categories, series, chartType]);
+  }, [props, category, values, groups, chartType]);
 
   const changeCategory = (column: Column) => {
-    const match = categories.find((c) => c.id === column.id);
-    if (match) {
-      setCategories(categories.filter((c) => c.id !== column.id));
-    } else {
-      setCategories([...categories, column]);
-    }
+    setCategory(column);
+    setGroups(groups.filter((g) => g.id !== column.id));
   };
 
-  const changeSeries = (column: Column) => {
-    const match = series.find((s) => s.id === column.id);
+  const changeValues = (column: Column) => {
+    const match = values.find((s) => s.id === column.id);
     if (match) {
-      setSeries(series.filter((s) => s.id !== column.id));
+      setValues(values.filter((s) => s.id !== column.id));
     } else {
-      setSeries([...series, column]);
+      setValues([...values, column]);
     }
   };
 
   const changeChartType = (chartType: ChartType) => {
     setChartType(chartType);
   };
+
+  const changeGroups = (column: Column) => {
+    if (column.id === category?.id) {
+      return;
+    }
+    const match = groups.find((s) => s.id === column.id);
+    if (match) {
+      setGroups(groups.filter((s) => s.id !== column.id));
+    } else {
+      setGroups([...groups, column]);
+    }
+  }
 
   if (!options) {
     return null;
@@ -269,12 +302,15 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
       <SideBar
         config={props.config}
         categories={configurableCategories}
-        series={configurableSeries}
-        activeCategories={categories}
-        activeSeries={series}
+        values={configurableValues}
+        groups={configurableCategories}
+        activeCategory={category}
+        activeValues={values}
+        activeGroups={groups}
         activeChartType={chartType}
         setActiveCategory={changeCategory}
-        setActiveSerie={changeSeries}
+        setActiveValue={changeValues}
+        setActiveGroup={changeGroups}
         setActiveChartType={changeChartType}
       />
     </Fragment>

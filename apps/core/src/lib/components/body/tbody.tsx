@@ -51,7 +51,7 @@ export default function TBody<T>({
         groupOrder,
         setSelecting,
         selectedCells,
-        updateSelected
+        updateSelected,
     ] = useBeastStore((state) => [
         state.data,
         state.columns,
@@ -65,7 +65,7 @@ export default function TBody<T>({
         state.groupOrder,
         state.setSelecting,
         state.selectedCells,
-        state.updateSelectedCells
+        state.updateSelectedCells,
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
     const [lastScroll, setLastScroll] = useState<number>(0);
@@ -84,8 +84,8 @@ export default function TBody<T>({
     }, [] as Column[][]);
 
     useEffect(() => {
-        updateSelected(null)
-    }, [sortedColumns, updateSelected])
+        updateSelected(null);
+    }, [sortedColumns, updateSelected]);
 
     useEffect(() => {
         const updateLastScroll = () => {
@@ -99,9 +99,9 @@ export default function TBody<T>({
 
         return () => {
             if (scrollElement) {
-                scrollElement.removeEventListener('scroll',updateLastScroll);
+                scrollElement.removeEventListener('scroll', updateLastScroll);
             }
-        }
+        };
     }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
 
     useEffect(() => {
@@ -117,56 +117,55 @@ export default function TBody<T>({
     }, [lastScroll, expandedRows, data.length, filters]);
 
     useEffect(() => {
+        gaps.current = {};
+        
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
         const newSortedData = someActive ? (data.map(filterRow(columns, filters)).filter(Boolean) as Row[]) : data;
 
-        setSortedData([...newSortedData]);
-        
-        const [, expanded] = updateGaps(0, newSortedData);
-        
-        setExpandedRows(expanded);
-        
-        updateSelected(null);
-    }, [data, columns, filters]);
+        const sortColumns = Object.values(columns)
+            .filter((c) => c.sort)
+            .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
 
-    useEffect(() => {
-        gaps.current = {};
-        if (sortedData.length > 0) {
-            const sortColumns = Object.values(columns)
-                .filter((c) => c.sort)
-                .sort((a, b) => (a.sort?.priority || 0) - (b.sort?.priority || 0));
+        const asyncSort = async () => {
+            if (onSortChange) {
+                const result = await onSortChange(newSortedData, sortColumns);
 
-            const asyncSort = async () => {
-                if (onSortChange) {
-                    const result = await onSortChange(sortedData, sortColumns);
+                updateGaps(0, result);
 
-                    updateGaps(0, result);
-
-                    if (result) {
-                        setSortedData(result);
-                    }
-                } else {
-                    if (sortedData.length > PERFORMANCE_LIMIT) {
-                        setSorting(true);
-                    }
-                    setTimeout(() => {
-                        sortedData.sort(sortData(sortColumns));
-                        updateGaps(0, sortedData);
-
-                        setSortedData([...sortedData]);
-                        if (data.length > PERFORMANCE_LIMIT) {
-                            setTimeout(() => setSorting(false), 100);
-                        }
-                    }, 0);
+                if (result) {
+                    setSortedData(result);
                 }
-            };
+            } else {
+                if (newSortedData.length > PERFORMANCE_LIMIT) {
+                    setSorting(true);
+                }
+                setTimeout(() => {
+                    newSortedData.sort(sortData(sortColumns));
+                    updateGaps(0, sortedData);
 
+                    setSortedData([...newSortedData]);
+                    if (data.length > PERFORMANCE_LIMIT) {
+                        setTimeout(() => setSorting(false), 100);
+                    }
+                }, 0);
+            }
+        };
+
+        if (!sort) {
+            setSortedData(newSortedData);
+        } else {
             asyncSort();
-            updateSelected(null);
         }
-    }, [sort]);
+        updateSelected(null);
+
+        const [, expanded] = updateGaps(0, newSortedData);
+
+        setExpandedRows(expanded);
+
+        updateSelected(null);
+    }, [data, filters, sort]);
 
     useBus(BusActions.EXPAND, () => sortedData.forEach((row) => forceRowExpand(row, true)), [sortedData]);
 
@@ -220,7 +219,7 @@ export default function TBody<T>({
     };
 
     const handleRowExpand = (row: Row) => () => {
-        updateSelected(null)
+        updateSelected(null);
         if (row._expanded) {
             collapseRow(row);
         } else {
@@ -249,7 +248,7 @@ export default function TBody<T>({
             }
 
             if (row._expanded && row.children) {
-                const [children, nextY] = getActionData(row.children, start, end, y+1);
+                const [children, nextY] = getActionData(row.children, start, end, y + 1);
 
                 if (children.length) {
                     actionData.push(...children);
@@ -275,9 +274,9 @@ export default function TBody<T>({
             headers =
                 finalColumns
                     .slice(selectedCells.start.x, selectedCells.end.x + 1)
-                    .map((column) => column.headerName).join('\t') + '\n';
+                    .map((column) => column.headerName)
+                    .join('\t') + '\n';
         }
-
 
         const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
 
@@ -291,7 +290,6 @@ export default function TBody<T>({
                     .join('\t');
             })
             .join('\n');
-
 
         return headers + csvData;
     };
@@ -325,10 +323,7 @@ export default function TBody<T>({
         }
         const finalColumns = lastLevel.sort((a, b) => a.finalPosition - b.finalPosition);
 
-
-        const chartColumns =
-            finalColumns
-                .slice(selectedCells?.start.x, selectedCells.end.x + 1)
+        const chartColumns = finalColumns.slice(selectedCells?.start.x, selectedCells.end.x + 1);
 
         const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
 
@@ -336,7 +331,7 @@ export default function TBody<T>({
         setChartData(actionData);
         setChartVisible(true);
         setContextMenu(null);
-    }
+    };
 
     const addRowToSlice = (
         renderArray: ReactNode[][],
@@ -358,6 +353,7 @@ export default function TBody<T>({
                 columnStore={columns}
                 config={config}
                 groupOrder={groupOrder}
+                selectable={!!beastConfig.contextualMenu}
                 idx={idx}
                 y={y}
                 border={border}
@@ -384,46 +380,54 @@ export default function TBody<T>({
         return [gap, y];
     };
 
-        const createDataSlice = () => {
-            const renderArray: ReactNode[][] = [];
-            let gap = 0;
-            let y = min;
-            for (let idx = min; idx < max; idx++) {
-                const row = sortedData[idx];
+    const createDataSlice = () => {
+        const renderArray: ReactNode[][] = [];
+        let gap = 0;
+        let y = min;
+        for (let idx = min; idx < max; idx++) {
+            const row = sortedData[idx];
 
-                if (row) {
-                    [gap, y] = addRowToSlice(renderArray, row, idx, y, 0, gap);
-                }
-
-                gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
-                y++;
+            if (row) {
+                [gap, y] = addRowToSlice(renderArray, row, idx, y, 0, gap);
             }
 
-            return renderArray.flat();
+            gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;
+            y++;
+        }
+
+        return renderArray.flat();
+    };
+
+    const getStyleProps = () => {
+        return {
+            height: (sortedData.length + expandedRows) * rowHeight,
         };
+    };
 
-        const getStyleProps = () => {
-            return {
-                height: (sortedData.length + expandedRows) * rowHeight,
-            };
-        };
+    const dataSlice = createDataSlice();
 
-        const dataSlice = createDataSlice();
-
-        return (
-            <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
-                {dataSlice}
-                <ContextMenu
-                    x={contextMenu?.x || 0}
-                    y={contextMenu?.y || 0}
-                    visible={!!contextMenu}
-                    theme={theme}
-                    onClose={() => setContextMenu(null)}
-                    onCopy={handleCopy}
-                    onExport={handleExport}
-                    onChartOpen={handleChartOpen}
-                />
-                <Chart modal visible={chartVisible} data={chartData} activeColumns={chartColumns} config={beastConfig} onClose={() => setChartVisible(false)} />
-            </div>
-        );
-    }
+    return (
+        <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
+            {dataSlice}
+            <ContextMenu
+                x={contextMenu?.x || 0}
+                y={contextMenu?.y || 0}
+                config={beastConfig}
+                visible={!!contextMenu}
+                theme={theme}
+                onClose={() => setContextMenu(null)}
+                onCopy={handleCopy}
+                onExport={handleExport}
+                onChartOpen={handleChartOpen}
+            />
+            <Chart
+                modal
+                visible={chartVisible}
+                data={chartData}
+                activeColumns={chartColumns}
+                config={beastConfig}
+                onClose={() => setChartVisible(false)}
+            />
+        </div>
+    );
+}

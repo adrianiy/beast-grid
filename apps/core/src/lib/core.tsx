@@ -84,6 +84,7 @@ export function BeastGrid<T>({
     }
   }, [ref, config, theme]);
 
+
   const GridProvider = () => {
     if (!config || !beastGridStore || !beastDndStore) {
       return (

@@ -1,9 +1,9 @@
 'use client';
 
 import numeral from 'numeral';
-import { User, getData, getDateData, months } from '../api/data';
+import { User, getDateData } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Row } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -28,7 +28,7 @@ const columnDefs: ColumnDef[] = [
   { headerName: 'COUNTRY', field: 'country', width: 200, sortable: true, menu: { grid: true, column: true } },
   { headerName: 'LANGUAGE', field: 'language', width: 200, sortable: true, menu: { grid: true, column: true } },
   { headerName: 'ORDERS', field: 'orders', width: 200, sortable: true, menu: { grid: true, column: true }, aggregation: AggregationType.SUM, flex: 1 },
-  { headerName: 'UNITS', field: 'units', width: 200, sortable: true, menu: { grid: true, column: true }, aggregation: AggregationType.SUM, formatter: (value: number) => numeral(value).format('0,0'), flex: 1 },
+  { headerName: 'UNITS', field: 'units', width: 200, sortable: true, menu: { grid: true, column: true }, aggregation: AggregationType.SUM, formatter: (value) => numeral(value).format('0,0'), flex: 1 },
 ];
 
 function SlideTransition(props: SlideProps) {
@@ -93,6 +93,9 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
         bottomToolbar: {
           download: true,
           restore: true
+        },
+        contextualMenu: {
+          chart: true
         },
         defaultColumnDef: {
           menu: { pin: true, grid: true },
