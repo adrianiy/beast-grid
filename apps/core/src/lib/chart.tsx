@@ -116,11 +116,7 @@ type WrapperProps<T> = {
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
   const { columns, data } = props;
-
-  if (!data.length) {
-    return null;
-  }
-
+  
   const configurableCategories = getCategories(columns, data);
   const configurableValues = getSeries(columns, data);
   const dateColumns = getDates(configurableCategories, data);
@@ -146,7 +142,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
   );
 
   const [options, setOptions] = useState<EChartsCoreOption>();
-
+  
   useEffect(() => {
     const aggColumns = columns.filter((col) => col.aggregation);
     const groupedData = category ? groupBy(data, category, aggColumns) : data;
@@ -259,6 +255,10 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
     setOptions(_options);
   }, [props, category, values, groups, chartType]);
+  
+  if (!data.length) {
+    return null;
+  }
 
   const changeCategory = (column: Column) => {
     setCategory(column);
