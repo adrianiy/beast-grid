@@ -1,6 +1,18 @@
 .row {
     display: flex;
 
+    &.fl-1 {
+        flex: 1;
+    }
+
+    &.h-full {
+        height: 100%;
+    }
+
+    &.overflow-hidden {
+        overflow: hidden;
+    }
+
     &.center {
         justify-content: center;
     }
@@ -33,7 +45,18 @@
 .column {
     display: flex;
     flex-direction: column;
-
+    
+    &.fl-1 {
+        flex: 1;
+    }
+    &.h-full {
+        height: 100%;
+    }
+    
+    &.overflow-hidden {
+        overflow: hidden;
+    }
+    
     &.center {
         justify-content: center;
     }

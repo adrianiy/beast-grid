@@ -19,18 +19,15 @@ function getProperty<Key extends keyof Row>(
     field = columns[groupOrder[level]]?.field || field;
   }
 
-  if (row._singleChild && groupOrder.indexOf(columnDef.id) >= level) {
-    return row[field as Key] as string;
-  }
+  let value = row[field as Key];
 
-  if (columnDef.rowGroup) {
-    if (groupOrder[level] === columnDef.id) {
-      return row[field as Key] as string;
-    }
+  const columnIdx = groupOrder.indexOf(columnDef.id);
+
+  if (columnIdx >= level) {
+    value = row[field as Key] as string;
+  } else if (columnIdx > -1) {
     return null;
   }
-
-  const value = row[field as Key];
 
   if (columnDef.formatter) {
     return columnDef.formatter(value as number & string, row);
@@ -210,13 +207,23 @@ const Chevron = ({
   if (!enabled) {
     return null;
   }
-  if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree) || row.children.length === 1) {
+  if (
+    !row.children ||
+    !columnDef.rowGroup ||
+    (groupOrder[level] !== columnDef.id && !columnDef.tree) ||
+    row.children.length === 1
+  ) {
     return null;
   }
-  
+
   if (level === groupOrder.length && row.children?.length === 1) {
     return null;
   }
 
-  return <ChevronRightIcon className={cn(!!row._expanded && 'active', { single: row._singleChild })} onMouseDown={onClick} />;
+  return (
+    <ChevronRightIcon
+      className={cn(!!row._expanded && 'active', { single: row._singleChild })}
+      onMouseDown={onClick}
+    />
+  );
 };
