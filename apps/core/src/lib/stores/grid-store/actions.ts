@@ -297,12 +297,16 @@ export const autoSizeColumns = () => (state: GridStore) => {
 };
 
 export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
-  const { columns } = state;
+  const { columns, container } = state;
+  
   Object.values(initialState.columns || {}).forEach(column => {
     columns[column.id] = clone(column);
   });
+  
   const sortedColumns = sortColumns(columns);
   const groupOrder = Object.values(columns).filter((col) => col.rowGroup).map((col) => col.id);
+  
+  setColumnsStyleProps(columns, container.offsetWidth)
   moveColumns(columns, sortedColumns, PinType.LEFT, 0);
   moveColumns(columns, sortedColumns, PinType.NONE, 0);
   moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
