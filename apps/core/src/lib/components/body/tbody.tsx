@@ -118,7 +118,7 @@ export default function TBody<T>({
 
     useEffect(() => {
         gaps.current = {};
-        
+
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
@@ -326,6 +326,7 @@ export default function TBody<T>({
         const chartColumns = finalColumns.slice(selectedCells?.start.x, selectedCells.end.x + 1);
 
         const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
+        console.log(selectedCells, actionData)
 
         setChartColumns(chartColumns);
         setChartData(actionData);
@@ -339,7 +340,8 @@ export default function TBody<T>({
         idx: number,
         y: number,
         level: number,
-        gap: number
+        gap: number,
+        expandableSibling: boolean
     ): [number, number] => {
         if (!renderArray[level]) {
             renderArray[level] = [];
@@ -362,13 +364,23 @@ export default function TBody<T>({
                 onClick={handleRowExpand(row)}
                 events={events}
                 gap={gaps.current[row._id as string] || 0}
+                expandableSibling={expandableSibling}
             />
         );
 
         if (row.children && row._expanded) {
+            y++;
             for (let i = 0; i < row.children.length; i++) {
                 const child = row.children[i];
-                [gap, y] = addRowToSlice(renderArray, child, idx + i + 1, y + i + 1, level + 1, gap);
+                [gap, y] = addRowToSlice(
+                    renderArray,
+                    child,
+                    idx + i + 1,
+                    y + i,
+                    level + 1,
+                    gap,
+                    row.children.some((r) => (r.children?.length || 0) > 1)
+                );
 
                 gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
             }
@@ -382,13 +394,15 @@ export default function TBody<T>({
 
     const createDataSlice = () => {
         const renderArray: ReactNode[][] = [];
+        const expandableSibling = sortedData.some((row) => (row.children?.length || 0) > 1);
+
         let gap = 0;
         let y = min;
         for (let idx = min; idx < max; idx++) {
             const row = sortedData[idx];
 
             if (row) {
-                [gap, y] = addRowToSlice(renderArray, row, idx, y, 0, gap);
+                [gap, y] = addRowToSlice(renderArray, row, idx, y, 0, gap, expandableSibling);
             }
 
             gap += row?._expanded ? (row.children?.length || 0) * rowHeight : 0;

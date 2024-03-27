@@ -81,7 +81,13 @@
         text-align: left;
     }
 
+
     svg {
         margin-right: var(--bg-size--1);
+
+        &.single {
+            pointer-events: none;
+            opacity: 0;
+        }
     }
 }

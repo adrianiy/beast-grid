@@ -7,21 +7,33 @@ import { useBeastStore } from '../../stores/beast-store';
 import React, { useRef } from 'react';
 
 function getProperty<Key extends keyof Row>(
-  obj: Row,
+  row: Row,
   level: number,
   columnDef: Column,
   columns: ColumnStore,
   groupOrder: ColumnId[]
-): string {
+): string | null {
   let field = columnDef.field;
 
   if (columnDef.tree) {
     field = columns[groupOrder[level]]?.field || field;
   }
-  const value = obj[field as Key];
+
+  if (row._singleChild && groupOrder.indexOf(columnDef.id) >= level) {
+    return row[field as Key] as string;
+  }
+
+  if (columnDef.rowGroup) {
+    if (groupOrder[level] === columnDef.id) {
+      return row[field as Key] as string;
+    }
+    return null;
+  }
+
+  const value = row[field as Key];
 
   if (columnDef.formatter) {
-    return columnDef.formatter(value as number & string, obj);
+    return columnDef.formatter(value as number & string, row);
   }
 
   return value as string;
@@ -31,16 +43,31 @@ type Props = {
   idx: number;
   height: number;
   row: Row;
+  parent?: Row;
   border?: boolean;
   columnDef: Column;
   selectable: boolean;
   config?: Partial<RowConfig>;
+  expandableSibling?: boolean;
   level: number;
   groupOrder: ColumnId[];
   columns: ColumnStore;
   onClick?: () => void;
 };
-export function RowCell({ height, row, idx, selectable, columnDef, border, config, level, groupOrder, columns, onClick }: Props) {
+export function RowCell({
+  height,
+  row,
+  idx,
+  selectable,
+  columnDef,
+  border,
+  expandableSibling,
+  config,
+  level,
+  groupOrder,
+  columns,
+  onClick,
+}: Props) {
   const lastSelected = useRef<SelectedCells | null>(null);
   const [scrollElement, selectedCells, setSelectedStart, setSelectedEnd, updateSelected, selecting, setSelecting] =
     useBeastStore((state) => [
@@ -101,7 +128,7 @@ export function RowCell({ height, row, idx, selectable, columnDef, border, confi
         lastSelected.current &&
         lastSelected.current.start.x === lastSelected.current.end.x &&
         lastSelected.current.start.y === lastSelected.current.end.y;
-      
+
       if (oneCell) {
         updateSelected(null);
         lastSelected.current = null;
@@ -145,7 +172,7 @@ export function RowCell({ height, row, idx, selectable, columnDef, border, confi
           (columnDef.tree ? LEVEL_PADDING * level : 0) +
           (columnDef.tree && !row.children ? LEVEL_PADDING : 0),
         width: columnDef.width,
-        ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row)
+        ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row),
       }}
       onClick={handleMouseClick}
       onMouseDown={handleMouseDown}
@@ -157,19 +184,10 @@ export function RowCell({ height, row, idx, selectable, columnDef, border, confi
         row={row}
         columnDef={columnDef}
         groupOrder={groupOrder}
+        enabled={expandableSibling}
         level={level}
       />
-      <div
-        className="grid-row-value"
-        style={{
-          display:
-            config?.groups?.showChildName || !columnDef.rowGroup || row.children?.length || columnDef.tree
-              ? 'flex'
-              : 'none',
-        }}
-      >
-        {value}
-      </div>
+      <div className="grid-row-value">{value}</div>
     </div>
   );
 }
@@ -179,21 +197,26 @@ const Chevron = ({
   row,
   columnDef,
   groupOrder,
+  enabled,
   level,
 }: {
   onClick: (e: React.MouseEvent) => void;
   row: Row;
   columnDef: Column;
   groupOrder: ColumnId[];
+  enabled?: boolean;
   level: number;
 }) => {
-  if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree)) {
+  if (!enabled) {
     return null;
   }
-
+  if (!row.children || !columnDef.rowGroup || (groupOrder[level] !== columnDef.id && !columnDef.tree) || row.children.length === 1) {
+    return null;
+  }
+  
   if (level === groupOrder.length && row.children?.length === 1) {
     return null;
   }
 
-  return <ChevronRightIcon className={cn(!!row._expanded && 'active')} onMouseDown={onClick} />;
+  return <ChevronRightIcon className={cn(!!row._expanded && 'active', { single: row._singleChild })} onMouseDown={onClick} />;
 };

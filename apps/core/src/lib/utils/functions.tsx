@@ -1,6 +1,19 @@
 import { useRef } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
-import { AggregationFunction, AggregationType, Chart, Column, ColumnStore, Data, FilterType, IFilter, NumberFilter, OperationType, Row, SortType } from '../common';
+import {
+  AggregationFunction,
+  AggregationType,
+  Chart,
+  Column,
+  ColumnStore,
+  Data,
+  FilterType,
+  IFilter,
+  NumberFilter,
+  OperationType,
+  Row,
+  SortType,
+} from '../common';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 
@@ -26,22 +39,25 @@ const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedCo
   const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
 
   return Object.entries(groups).map(([key, children]) => {
-    const calculatedFields = aggTypeColumns.reduce((acc, column) => {
+    const calculatedFields = children.length > 1 ? aggTypeColumns.reduce((acc, column) => {
       acc[column.field as string] = _calculate(children, column);
       return acc;
-    }, {} as Record<string, number | null>);
+    }, {} as Record<string, number | null>) : children[0];
+    
 
-    const newRow =  { [field]: key, _id: uuidv4(), children, ...calculatedFields };
+    const newRow = { [field]: key, _id: uuidv4(), _singleChild: children.length === 1, children, ...calculatedFields };
 
+    if (children.length <= 1) {
+      return newRow;
+    }
     const computedFields = aggFuncColumns.reduce((acc, column) => {
-      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow)
+      acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow);
       return acc;
     }, {} as Record<string, number | string | null>);
 
     return { ...newRow, ...computedFields };
-    
   });
-}
+};
 
 export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
   const groups = data.reduce((acc, row) => {
@@ -54,7 +70,6 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
   }, {} as Record<string, Row[]>);
 
   return getGroupRows(groups, column.field as string, calculatedColumns);
-
 };
 
 export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns: Column[]): Row[] => {
@@ -67,7 +82,7 @@ export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns
     return acc;
   }, {} as Record<string, Row[]>);
 
-  return getGroupRows(groups, columns.map(c => c.headerName).join('_'), calculatedColumns);
+  return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns);
 };
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -87,54 +102,56 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
   return (a._originalIdx as number) - (b._originalIdx as number);
 };
 
-export const filterRow = (columns: ColumnStore, filters: Record<string, IFilter[]>) => (row: Row): Row | undefined => {
-  let show = true;
-  let children = row.children;
+export const filterRow =
+  (columns: ColumnStore, filters: Record<string, IFilter[]>) =>
+    (row: Row): Row | undefined => {
+      let show = true;
+      let children = row.children;
 
-  for (const filterKey of Object.keys(filters)) {
-    if (
-      columns[filterKey].filterType === FilterType.TEXT &&
-      filters[filterKey].includes(`${row[columns[filterKey].field as string]}`)
-    ) {
-      show = show && true;
-    } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-      const rowValue = row[columns[filterKey].field as string] as number;
-      const numberFilter = filters[filterKey] as NumberFilter[];
-      for (const filter of numberFilter) {
-        const op = filter.op;
-        const value = filter.value || 0;
+      for (const filterKey of Object.keys(filters)) {
+        if (
+          columns[filterKey].filterType === FilterType.TEXT &&
+          filters[filterKey].includes(`${row[columns[filterKey].field as string]}`)
+        ) {
+          show = show && true;
+        } else if (columns[filterKey].filterType === FilterType.NUMBER) {
+          const rowValue = row[columns[filterKey].field as string] as number;
+          const numberFilter = filters[filterKey] as NumberFilter[];
+          for (const filter of numberFilter) {
+            const op = filter.op;
+            const value = filter.value || 0;
 
-        if (op === OperationType.EQUAL) {
-          show = show && rowValue === value;
-        } else if (op === OperationType.GREATER_THAN) {
-          show = show && rowValue > value;
-        } else if (op === OperationType.LESS_THAN) {
-          show = show && rowValue < value;
-        } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
-          show = show && rowValue >= value;
-        } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
-          show = show && rowValue <= value;
-        } else if (op === OperationType.NOT_EQUAL) {
-          show = show && rowValue !== value;
+            if (op === OperationType.EQUAL) {
+              show = show && rowValue === value;
+            } else if (op === OperationType.GREATER_THAN) {
+              show = show && rowValue > value;
+            } else if (op === OperationType.LESS_THAN) {
+              show = show && rowValue < value;
+            } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
+              show = show && rowValue >= value;
+            } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
+              show = show && rowValue <= value;
+            } else if (op === OperationType.NOT_EQUAL) {
+              show = show && rowValue !== value;
+            }
+          }
+        } else {
+          show = show && false;
         }
       }
-    } else {
-      show = show && false;
-    }
-  }
-  if (row.children) {
-    children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
-    show = children.length > 0;
-  }
-  if (show) {
-    return { ...row, children };
-  }
-};
+      if (row.children && !row._singleChild) {
+        children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
+        show = children.length > 0;
+      }
+      if (show) {
+        return { ...row, children };
+      }
+    };
 
 export const useThrottle = () => {
   const throttleSeed = useRef<NodeJS.Timeout | null>(null);
 
-  const throttleFunction = useRef((func: () => void, delay=200) => {
+  const throttleFunction = useRef((func: () => void, delay = 200) => {
     if (!throttleSeed.current) {
       // Call the callback immediately for the first time
       func();
@@ -154,12 +171,12 @@ export const useDebounce = () => {
   // takes a function and a delay (in milliseconds) as an argument
   // which has a defalut value set to 200 , can be specified as per need
   const debounceFunction = useRef((func: () => void, timeout = 200) => {
-   // checks if previosus timeout is present then it will clrear it
+    // checks if previosus timeout is present then it will clrear it
     if (debounceSeed.current) {
       clearTimeout(debounceSeed.current);
       debounceSeed.current = null;
     }
-   // creates a timeout function witht he new fucntion call
+    // creates a timeout function witht he new fucntion call
     debounceSeed.current = setTimeout(() => {
       func();
     }, timeout);
@@ -169,27 +186,29 @@ export const useDebounce = () => {
 };
 
 export const getCategories = (columns: Column[], data: Data) => {
+  console.log(data[0])
   const rowZero = data[0];
   const stringCategories = columns.filter((column) => typeof rowZero[column.field as keyof Row] === 'string');
 
   return stringCategories;
-}
+};
 
 export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<Chart>) => {
   if (chartConfig?.defaultValues?.dataColumns) {
     return columns.filter((column) => chartConfig.defaultValues?.dataColumns?.includes(column.field as string));
   }
-  
+
   const rowZero = data[0];
-  const numberSeries = columns.filter((column) =>  !isNaN(+(rowZero[column.field as keyof Row] as number)));
+  const numberSeries = columns.filter((column) => !isNaN(+(rowZero[column.field as keyof Row] as number)));
 
   return numberSeries;
-}
+};
 
 export const getDates = (columns: Column[], data: Data) => {
   const rowZero = data[0];
   return columns.filter((column) => dayjs(rowZero[column.field as keyof Row] as string).isValid());
+};
+
+export function clone<T>(obj: T): T {
+  return cloneDeep(obj);
 }
-
-
-export function clone<T>(obj: T): T { return cloneDeep(obj) }

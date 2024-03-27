@@ -9,6 +9,7 @@ export interface Row {
   _orignalIdx?: number;
   _hidden?: boolean;
   _level?: number;
+  _singleChild?: boolean;
   children?: Row[];
 }
 

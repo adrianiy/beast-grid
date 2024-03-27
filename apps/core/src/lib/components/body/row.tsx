@@ -17,10 +17,11 @@ type Props = {
     gap: number;
     level: number;
     events?: Partial<RowEvents>;
+    expandableSibling?: boolean;
     onClick?: () => void;
 };
 
-export default function RowContainer({ row, columns, columnStore, groupOrder, selectable, config, idx, y, border, height, gap, level, onClick, events }: Props) {
+export default function RowContainer({ row, columns, columnStore, groupOrder, selectable, config, idx, y, border, height, gap, level, onClick, events, expandableSibling }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
@@ -52,6 +53,7 @@ export default function RowContainer({ row, columns, columnStore, groupOrder, se
                     level={level}
                     config={config}
                     columnDef={column}
+                    expandableSibling={expandableSibling}
                     onClick={handleClick}
                 />
             ));
