@@ -78,7 +78,7 @@ export default function ChartConfig<T>({
   };
 
   return (
-    <div ref={sideBarRef} className={cn('bg-sidebar column', { border: config.style?.border })}>
+    <div ref={sideBarRef} onClick={e => e.stopPropagation()} className={cn('bg-sidebar column', { border: config.style?.border })}>
       <div
         className="bg-sidebar__title row middle between"
         style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}

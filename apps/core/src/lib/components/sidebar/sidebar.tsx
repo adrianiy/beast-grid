@@ -46,7 +46,8 @@ export default function SideBar<T>({ config, ...chartProps }: { config: BeastGri
   const [useModal, setUseModal] = useState<boolean>(false);
 
   useEffect(() => {
-    if (sideBarConfig === SideBarConfig.FILTERS && config.style?.maxHeight) {
+    const isModableSidebar = sideBarConfig && [SideBarConfig.FILTERS, SideBarConfig.GRID].includes(sideBarConfig);
+    if (isModableSidebar && config.style?.maxHeight) {
       setUseModal(true);
     } else {
       setUseModal(false);
@@ -69,7 +70,7 @@ export default function SideBar<T>({ config, ...chartProps }: { config: BeastGri
 
   if (useModal) {
     return (
-      <div className="bg-sidebar__modal__container" onClick={closeSidebar}>
+      <div className="bg-sidebar__modal__container animate__animated animate__faster animate__fadeIn" onClick={closeSidebar}>
         <div className="bg-sidebar__modal" onClick={stopClick}>
           <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
         </div>
