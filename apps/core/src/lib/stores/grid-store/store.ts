@@ -24,6 +24,14 @@ import { BeastGridConfig, BeastMode, Coords, PinType, SelectedCells, SideBarConf
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 import { clone } from '../../utils/functions';
 
+export interface PivotState {
+  columns: Column[];
+  rows: Column[];
+  values: Column[];
+  data: Data;
+  enabled: boolean;
+}
+
 export interface GridState {
   edited: boolean;
   data: Data;
@@ -44,6 +52,7 @@ export interface GridState {
   selectedCells: SelectedCells | null;
   selecting: boolean;
   mode: BeastMode;
+  pivot: Partial<PivotState> | null;
 }
 
 
@@ -73,6 +82,7 @@ export interface GridStore extends GridState {
   setSelectedEnd: (selected: Coords) => void;
   setSelecting: (selecting: boolean) => void;
   setMode: (mode: BeastMode) => void;
+  setPivot: (pivot: Partial<PivotState> | null) => void;
   restore: () => void;
   autoSizeColumns: () => void;
 }
@@ -95,7 +105,7 @@ export const createGridStore = <T>(
   const initialState = {
     edited: false,
     data,
-    initialData: clone(data),
+    initialData: clone(initialData),
     tree,
     groupOrder,
     columns,
@@ -108,6 +118,7 @@ export const createGridStore = <T>(
     loading: false,
     sorting: false,
     selecting: false,
+    pivot: null
   };
   
   return create<GridStore>((set) => ({
@@ -142,6 +153,7 @@ export const createGridStore = <T>(
     setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
     setSelecting: (selecting: boolean) => set({ selecting }),
     setMode: (mode: BeastMode) => set({ mode }),
+    setPivot: (pivot: Partial<PivotState> | null) => set({ pivot }),
     restore: () => set(restore(initialState)),
     autoSizeColumns: () => set(autoSizeColumns())
   }));

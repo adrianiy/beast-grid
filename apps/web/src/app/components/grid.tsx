@@ -24,6 +24,7 @@ const columnDefs: ColumnDef[] = [
       filter: true,
       column: true
     },
+    rowGroup: true
   },
   {
     headerName: 'USER',

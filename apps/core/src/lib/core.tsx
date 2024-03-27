@@ -1,5 +1,7 @@
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { IntlProvider } from 'react-intl';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
@@ -62,7 +64,7 @@ export function BeastGrid<T>({
 
   useEffect(() => {
     if (!injectStyles) return;
-    
+
     // inject style.css in head
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -96,15 +98,17 @@ export function BeastGrid<T>({
 
     return (
       <DndStoreProvider createStore={beastDndStore}>
-        <BeastGridProvider createStore={beastGridStore}>
-          <IntlProvider messages={messages[locale]} locale={locale}>
-            <BeastApi store={api} />
-            <LoaderLayer config={config} />
-            <Toolbar config={config} position={ToolbarPosition.TOP} />
-            <Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
-            <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
-          </IntlProvider>
-        </BeastGridProvider>
+        <DndProvider backend={HTML5Backend}>
+          <BeastGridProvider createStore={beastGridStore}>
+            <IntlProvider messages={messages[locale]} locale={locale}>
+              <BeastApi store={api} />
+              <LoaderLayer config={config} />
+              <Toolbar config={config} position={ToolbarPosition.TOP} />
+              <Beast config={config} defaultConfig={defaultConfig} theme={theme} onSortChange={onSortChange} />
+              <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
+            </IntlProvider>
+          </BeastGridProvider>
+        </DndProvider>
       </DndStoreProvider>
     );
   };

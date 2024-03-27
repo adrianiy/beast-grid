@@ -15,7 +15,7 @@
 
     .bg-sidebar__modal {
         display: flex;
-        width: 600px;
+        min-width: 600px;
         height: 500px;
 
         .bg-sidebar {
@@ -27,7 +27,7 @@
 .bg-sidebar__container {
     @import './../../flex';
     @import './../../themes';
-    height: calc(100% - 96px);
+    height: 100%;
 
     .bg-sidebar {
         position: absolute;
@@ -70,6 +70,10 @@
         border-bottom: var(--bg-border--3);
 
         svg {
+            cursor: pointer;
+        }
+
+        .pivot {
             cursor: pointer;
         }
     }
@@ -123,6 +127,10 @@
         text-overflow: ellipsis;
     }
 
+    .bg-option__container {
+        gap: var(--bg-size--3);
+    }
+
     .bg-sidebar__chart__item {
         padding: var(--bg-size--3);
         cursor: pointer;
@@ -137,6 +145,28 @@
         }
         label {
             cursor: pointer;
+        }
+    }
+
+    .bg-sidebar__pivot__container {
+        border-left: var(--bg-border--3);
+        min-width: 300px;
+        height: 100%;
+
+        .bg-box {
+            padding: var(--bg-size--3);
+            margin: var(--bg-size--3);
+            border: var(--bg-border--3);
+            min-height: 100px;
+            cursor: pointer;
+
+            .bg-chip {
+                margin: var(--bg-size--1);
+                padding: var(--bg-size--2) var(--bg-size--3);
+                background-color: var(--bg-background-color--chip);
+                width: min-content;
+                gap: var(--bg-size--3);
+            }
         }
     }
 }
