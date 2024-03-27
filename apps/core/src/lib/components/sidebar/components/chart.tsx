@@ -55,8 +55,6 @@ export default function ChartConfig<T>({
   const ref = useRef<SimpleBarCore>(null);
   const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
   
-  useOnClickOutside(sideBarRef, () => setSidebar(null));
-
   const handleCategoryChange = (category: Column) => (e: React.MouseEvent) => {
     e.stopPropagation();
     setActiveCategory?.(category);
@@ -78,7 +76,7 @@ export default function ChartConfig<T>({
   };
 
   return (
-    <div ref={sideBarRef} onClick={e => e.stopPropagation()} className={cn('bg-sidebar column', { border: config.style?.border })}>
+    <div ref={sideBarRef} className={cn('bg-sidebar column', { border: config.style?.border })}>
       <div
         className="bg-sidebar__title row middle between"
         style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
