@@ -65,7 +65,7 @@ export default function Chart<T>(props: Props<T>) {
   if (!props.visible) {
     return null;
   }
-
+  
   return props.modal ? (
     createPortal(
       <div className={cn('bg-chart__modal__container', theme)} onClick={props.onClose}>
@@ -116,6 +116,10 @@ type WrapperProps<T> = {
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
   const { columns, data } = props;
+
+  if (!data.length) {
+    return null;
+  }
 
   const configurableCategories = getCategories(columns, data);
   const configurableValues = getSeries(columns, data);
