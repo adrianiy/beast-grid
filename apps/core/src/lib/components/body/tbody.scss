@@ -2,6 +2,7 @@
     position: relative;
     width: 100%;
 }
+
 .grid-row {
     position: absolute;
     box-sizing: border-box;
@@ -13,13 +14,16 @@
         --size: var(--bg-size--4);
         width: var(--size);
         height: var(--size);
+
         &.active {
             transform: rotate(90deg);
         }
     }
+
     &.expandable {
         cursor: pointer;
     }
+
     &.withHighlight {
         &:hover {
             .grid-row-cell {
@@ -32,9 +36,11 @@
         }
     }
 }
+
 .grid-row-content {
     position: relative;
 }
+
 .grid-row-cell {
     position: absolute;
     display: flex;
@@ -61,12 +67,15 @@
         &.borderTop {
             border-top: var(--bg-border--selected);
         }
+
         &.borderBottom {
             border-bottom: var(--bg-border--selected);
         }
+
         &.borderLeft {
             border-left: var(--bg-border--selected);
         }
+
         &.borderRight {
             border-right: var(--bg-border--selected);
         }
@@ -80,7 +89,6 @@
         text-overflow: ellipsis;
         text-align: left;
     }
-
 
     svg {
         margin-right: var(--bg-size--1);

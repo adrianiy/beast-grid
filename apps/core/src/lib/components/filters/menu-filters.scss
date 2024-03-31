@@ -1,9 +1,11 @@
 .bg-filter {
     margin-top: var(--bg-size--3);
+
     .bg-filter__separator {
         border-bottom: var(--bg-border--3);
         margin: var(--bg-size--1) 0;
     }
+
     .bg-filter__container {
         max-height: 300px;
         overflow: auto;
@@ -27,6 +29,7 @@
                 --size: 100%;
             }
         }
+
         .bg-checkbox__root {
             --size: var(--bg-size--3);
             background-color: white;
@@ -40,6 +43,7 @@
             align-items: center;
             justify-content: center;
         }
+
         label {
             width: 100%;
             white-space: nowrap;
@@ -52,7 +56,7 @@
 .bg-filter__number {
     margin-top: var(--bg-size--1);
     padding: var(--bg-size--2);
-    
+
     .bg-filter__selector__container {
         gap: var(--bg-size--3);
 
@@ -65,6 +69,7 @@
             background-color: var(--bg-background-color--1);
         }
     }
+
     .bg-filter__button {
         margin: var(--bg-size--3) 0;
         padding: var(--bg-size--2) var(--bg-size--4);

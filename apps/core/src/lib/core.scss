@@ -44,6 +44,7 @@
         &.border {
             box-sizing: border-box;
             border: var(--bg-border--1);
+
             &.headerBorder {
                 .bg-grid-header__cell {
                     border-top: none;
@@ -67,19 +68,21 @@
 
         .grid-header-row {
             background-color: var(--bg-background-color--1);
+
             .bg-grid-header__cell:last-child {
                 .bg-grid-header__resize {
                     opacity: 0;
                 }
             }
         }
+
         .grid-row {
             .grid-row-cell:last-child {
                 border-right: var(--bg-border--1);
             }
         }
-            
     }
+
     .grid-right-pin {
         position: sticky;
         float: right;

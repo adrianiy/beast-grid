@@ -1,4 +1,4 @@
-.bg-select__container { 
+.bg-select__container {
     border: var(--bg-border--3);
     padding: var(--bg-size--3);
     background-color: var(--bg-background-color--1);
@@ -16,7 +16,7 @@
 .bg-select__options {
     @import './../../flex';
     @import './../../themes';
-    
+
     position: absolute;
     background-color: var(--bg-background-color--1);
     z-index: 2000;

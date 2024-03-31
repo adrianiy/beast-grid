@@ -1,32 +1,31 @@
 .bg-toolbar {
-  position: relative;
-  width: 100%;
-  padding: var(--bg-size--1) 0;
-  user-select: none;
-  
-  .bg-toolbar__button {
-    padding: var(--bg-size--2) var(--bg-size--3);
-    border: var(--bg-border--1);
-    border-color: transparent;
-    cursor: pointer;
-    gap: var(--bg-size--3);
+    position: relative;
+    width: 100%;
+    padding: var(--bg-size--1) 0;
+    user-select: none;
 
+    .bg-toolbar__button {
+        padding: var(--bg-size--2) var(--bg-size--3);
+        border: var(--bg-border--1);
+        border-color: transparent;
+        cursor: pointer;
+        gap: var(--bg-size--3);
 
-    &:hover {
-      border: var(--bg-border--1)
-    }
-
-    &.right {
-      label {
-        position: absolute;
-        display: none;
-      }
-
-      &:hover {
-        label {
-          display: block;
+        &:hover {
+            border: var(--bg-border--1);
         }
-      }
+
+        &.right {
+            label {
+                position: absolute;
+                display: none;
+            }
+
+            &:hover {
+                label {
+                    display: block;
+                }
+            }
+        }
     }
-  }
 }

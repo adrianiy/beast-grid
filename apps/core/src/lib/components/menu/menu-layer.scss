@@ -15,7 +15,7 @@
     overflow: hidden;
     box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
         rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
-        
+
     .bg-dot--active {
         --size: var(--bg-size--2);
         background-color: var(--bg-background-color--active);
@@ -46,11 +46,13 @@
         &--light {
             border-bottom: var(--bg-border--2);
         }
+
         &--transparent {
             border-bottom: var(--bg-border--3);
             opacity: 0;
         }
     }
+
     .bg-menu__content {
         border-bottom: var(--bg-border--3);
         margin-bottom: var(--bg-size--1);
@@ -108,6 +110,7 @@
                 left: auto;
                 right: 100%;
             }
+
             .bg-filter {
                 width: 100%;
                 margin-top: 0;
@@ -118,6 +121,7 @@
             .bg-menu__item--with-submenu {
                 background-color: var(--bg-hover-color--1);
             }
+
             .bg-menu__item__submenu {
                 display: flex;
             }

@@ -20,6 +20,7 @@
     &.left {
         left: 0;
     }
+
     &.right {
         right: 0;
     }
@@ -36,6 +37,7 @@
             border-top: var(--bg-border--1);
         }
     }
+
     &:not(:first-child) {
         .bg-grid-header__cell {
             border-top: none;
@@ -55,12 +57,13 @@
     resize: horizontal;
     z-index: 1;
 
-
     &:hover {
         background-color: var(--bg-hover-color--cell);
+
         .bg-grid-header__menu {
             opacity: 1;
         }
+
         .bg-grid-header__resize:hover::after {
             background-color: var(--bg-hover-color--resize);
         }
@@ -78,10 +81,12 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-weight: var(--bg-font-weight--header)
+        font-weight: var(--bg-font-weight--header);
     }
+
     .bg-grid-header__cell__menu {
         position: relative;
+
         svg {
             --size: var(--bg-size--4);
             width: var(--size);

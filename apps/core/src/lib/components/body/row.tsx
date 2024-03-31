@@ -21,12 +21,28 @@ type Props = {
     onClick?: () => void;
 };
 
-export default function RowContainer({ row, columns, columnStore, groupOrder, selectable, config, idx, y, border, height, gap, level, onClick, events, expandableSibling }: Props) {
+export default function RowContainer({
+    row,
+    columns,
+    columnStore,
+    groupOrder,
+    selectable,
+    config,
+    idx,
+    y,
+    border,
+    height,
+    gap,
+    level,
+    onClick,
+    events,
+    expandableSibling,
+}: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
     const rightWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
-    
+
     const handleClick = () => {
         if (events?.onClick?.callback) {
             events.onClick.callback(row, idx);

@@ -17,31 +17,31 @@
         rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
 
     .bg-grid__context-menu__section {
-      border-bottom: var(--bg-border--3);
-      margin-bottom: var(--bg-size--1);
-      padding-bottom: var(--bg-size--1);
+        border-bottom: var(--bg-border--3);
+        margin-bottom: var(--bg-size--1);
+        padding-bottom: var(--bg-size--1);
 
-      &:last-of-type {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
-
-      .bg-grid__context-menu__item {
-        padding: var(--bg-size--2);
-        margin: 0 var(--bg-size--1);
-        gap: var(--bg-size--3);
-        cursor: pointer;
-
-        &:hover {
-          background-color: var(--bg-hover-color--1);
+        &:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
-        .bg-grid__context-menu__icon {
-          --size: var(--bg-size--4);
-          width: var(--size);
-          height: var(--size);
+        .bg-grid__context-menu__item {
+            padding: var(--bg-size--2);
+            margin: 0 var(--bg-size--1);
+            gap: var(--bg-size--3);
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--bg-hover-color--1);
+            }
+
+            .bg-grid__context-menu__icon {
+                --size: var(--bg-size--4);
+                width: var(--size);
+                height: var(--size);
+            }
         }
-      }
     }
 }
