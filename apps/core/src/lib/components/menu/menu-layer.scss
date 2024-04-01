@@ -69,6 +69,7 @@
             color: var(--bg-text-color--1);
             gap: var(--bg-size--3);
             padding: var(--bg-size--2);
+            width: calc(100% - var(--bg-size--4) - var(--bg-size--2));
             margin: 0 var(--bg-size--1);
             cursor: pointer;
 

@@ -16,7 +16,7 @@ import {
     toggleHide,
 } from './utils';
 import { GridState, GridStore } from './store';
-import { ColumnStore, Coords, FilterType, PinType, SelectedCells, SideBarConfig, SortType } from '../../common';
+import { Coords, FilterType, PinType, SelectedCells, SideBarConfig, SortType } from '../../common';
 import { createGroupColumn } from './utils/group';
 import { clone } from '../../utils/functions';
 
