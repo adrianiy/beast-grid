@@ -48,6 +48,7 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                         left: idx * MIN_COL_WIDTH
                     };
                 });
+                console.log("columns", columns);
 
                 _levels.push(columns);
             });
@@ -62,6 +63,8 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
 
         setLevels(_levels);
     }, [columns, pivot, data]);
+
+    if (!levels.length) return null;
 
 
     const levelZero = levels[0].filter((column) => !column.hidden);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import { useBeastStore } from '../../../stores/beast-store';
@@ -13,6 +13,7 @@ import SimpleBar from 'simplebar-react';
 import cn from 'classnames';
 import Accordion from '../../accordion/accordion';
 import { useDrag, useDrop } from 'react-dnd';
+import { PivotState } from '../../../stores/grid-store/store';
 
 type Props<T> = {
     columns: ColumnStore;
@@ -170,15 +171,15 @@ const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
 
     return (
         <SimpleBar className="bg-sidebar__pivot__container column fl-1">
-            <PivotBox pivotType="Row" onChanges={handleRowChange} />
-            <PivotBox pivotType="Column" onChanges={handleColumnChange} />
-            <PivotBox pivotType="Value" onChanges={handleValueChange} />
+            <PivotBox pivotType="rows" onChanges={handleRowChange} />
+            <PivotBox pivotType="columns" onChanges={handleColumnChange} />
+            <PivotBox pivotType="values" onChanges={handleValueChange} />
         </SimpleBar>
     );
 };
 
 const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
-    const [columnStore] = useBeastStore((state) => [state.columns]);
+    const [columnStore, pivot] = useBeastStore((state) => [state.columns, state.pivot]);
     const [columns, setColumns] = useState<Column[]>([]);
 
     const [, drop] = useDrop(() => ({
@@ -192,6 +193,12 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
             onChanges(newState);
         },
     }));
+
+    useEffect(() => {
+        if (pivot?.[pivotType.toLowerCase() as keyof PivotState]) {
+            setColumns(pivot[pivotType.toLowerCase() as keyof PivotState] as Column[]);
+        }
+    }, [pivot, pivotType]);
 
     return (
         <div className="bg-box column left" ref={drop}>

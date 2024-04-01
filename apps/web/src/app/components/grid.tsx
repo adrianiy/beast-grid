@@ -13,6 +13,7 @@ type Props = {
   theme: string;
   config?: Partial<BeastGridConfig<User[]>>;
 };
+
 const columnDefs: ColumnDef[] = [
   {
     headerName: 'COUNTRY',
@@ -24,7 +25,6 @@ const columnDefs: ColumnDef[] = [
       filter: true,
       column: true
     },
-    rowGroup: true
   },
   {
     headerName: 'USER',
