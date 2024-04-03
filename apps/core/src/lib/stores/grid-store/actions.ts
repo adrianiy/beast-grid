@@ -5,6 +5,7 @@ import { MIN_COL_WIDTH } from './../../common/globals';
 import {
     addSort,
     changePosition,
+    getColumnsFromDefs,
     getSwappableClone,
     groupDataByColumnDefs,
     mergeColumns,
@@ -16,9 +17,19 @@ import {
     toggleHide,
 } from './utils';
 import { GridState, GridStore } from './store';
-import { Coords, FilterType, PinType, SelectedCells, SideBarConfig, SortType } from '../../common';
+import {
+    ColumnDef,
+    ColumnStore,
+    Coords,
+    Data,
+    FilterType,
+    PinType,
+    SelectedCells,
+    SideBarConfig,
+    SortType,
+} from '../../common';
 import { createGroupColumn } from './utils/group';
-import { clone } from '../../utils/functions';
+import { clone, getAggregationType, groupBy, groupByMultiple } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
     const { columns } = state;
@@ -38,15 +49,24 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, sortedColumns, container } = state;
+    const { columns, hiddenColumns, sortedColumns, container } = state;
+
     const column = columns[id];
 
-    toggleHide(column, columns);
+    if (column) {
+        toggleHide(column, columns);
 
-    setColumnsStyleProps(columns, container.offsetWidth);
-    moveColumns(columns, sortedColumns, column.pinned);
+        setColumnsStyleProps(columns, container.offsetWidth);
+        moveColumns(columns, sortedColumns, column.pinned);
+    }
 
-    return { columns, edited: true };
+    if (hiddenColumns.includes(id)) {
+        hiddenColumns.splice(hiddenColumns.indexOf(id), 1);
+    } else {
+        hiddenColumns.push(id);
+    }
+
+    return { columns, hiddenColumns, edited: true };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -138,39 +158,39 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
 export const addFilter =
     (id: ColumnId, value: IFilter | null, idx = 0) =>
-        (state: GridStore) => {
-            const { columns, filters } = state;
-            const column = columns[id];
+    (state: GridStore) => {
+        const { columns, filters } = state;
+        const column = columns[id];
 
-            if (column.filterType === FilterType.TEXT) {
-                if (filters[id]?.includes(value as string)) {
-                    filters[id] = filters[id]?.filter((val) => val !== value);
-                } else {
-                    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-                }
+        if (column.filterType === FilterType.TEXT) {
+            if (filters[id]?.includes(value as string)) {
+                filters[id] = filters[id]?.filter((val) => val !== value);
+            } else {
+                filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
             }
-            if (column.filterType === FilterType.NUMBER) {
-                if (!filters[id]) {
+        }
+        if (column.filterType === FilterType.NUMBER) {
+            if (!filters[id]) {
+                filters[id] = [];
+            }
+            if (!value) {
+                if (!idx) {
                     filters[id] = [];
-                }
-                if (!value) {
-                    if (!idx) {
-                        filters[id] = [];
-                    } else {
-                        filters[id] = filters[id]?.filter((_, i) => i !== idx);
-                    }
-                } else if (filters[id][idx]) {
-                    filters[id][idx] = value;
                 } else {
-                    filters[id][idx] = value;
+                    filters[id] = filters[id]?.filter((_, i) => i !== idx);
                 }
+            } else if (filters[id][idx]) {
+                filters[id][idx] = value;
+            } else {
+                filters[id][idx] = value;
             }
-            if (!filters[id].length) {
-                delete filters[id];
-            }
+        }
+        if (!filters[id].length) {
+            delete filters[id];
+        }
 
-            return { columns, filters: { ...filters }, edited: true };
-        };
+        return { columns, filters: { ...filters }, edited: true };
+    };
 
 export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
     const { columns, filters } = state;
@@ -197,7 +217,7 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
         });
     }
 
-    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+    moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE, 0);
     moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
@@ -297,20 +317,24 @@ export const autoSizeColumns = () => (state: GridStore) => {
 };
 
 export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
-    const { columns } = state;
+    const { container } = state;
+    const columns: ColumnStore = {};
+
     Object.values(initialState.columns || {}).forEach((column) => {
         columns[column.id] = clone(column);
     });
+
     const sortedColumns = sortColumns(columns);
     const groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
 
-    moveColumns(columns, sortedColumns, PinType.LEFT);
+    setColumnsStyleProps(columns, container.offsetWidth);
+    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
     moveColumns(columns, sortedColumns, PinType.NONE, 0);
     moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
 
-    return { ...clone(initialState), columns, groupOrder, edited: false, sortedColumns };
+    return { ...clone(initialState), sortedColumns, columns, groupOrder, edited: false };
 };
 
 export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridStore) => {
@@ -321,4 +345,71 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
     }
 
     return { sideBarConfig: config };
+};
+
+export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
+    const { pivot: currentPivot, initialData, defaultColumnDef, container } = state;
+
+    const pivot = { ...currentPivot, ...newPivot };
+
+    if (pivot.rows || pivot.columns || pivot.values) {
+        const rowColumnDefs: ColumnDef[] = [];
+        const columnDefs: ColumnDef[] = [];
+
+        if (pivot.rows?.length) {
+            rowColumnDefs.push({
+                headerName: pivot.rows[0].headerName,
+                field: pivot.rows[0].headerName,
+                width: MIN_COL_WIDTH,
+            });
+        }
+
+        if (pivot.columns) {
+            const getDynamicHeaders = (columnIdx: number, data: Data, value: Column, parentField = '') => {
+                if (!pivot.columns || columnIdx >= pivot.columns.length || !data.length) {
+                    return;
+                }
+                if (pivot.values) {
+                    pivot.values.forEach((val) => {
+                        val.aggregation = getAggregationType(val, data[0]);
+                    });
+                }
+                const column = pivot.columns[columnIdx];
+                const groupedData = groupBy(data, column, pivot.values || []);
+                const newColumnDefs: ColumnDef[] = [];
+
+                groupedData.forEach((group) => {
+                    const groupField = `${parentField}@${column.field}:${group[column.field as string]}`;
+                    const field = `${value?.field || ''}${groupField}`;
+                    newColumnDefs.push({
+                        headerName: !parentField
+                            ? `${group[column.field as string]}${value?.headerName ? ' | ' + value.headerName : ''}`
+                            : `${group[column.field as string]}`,
+                        field,
+                        flex: 1,
+                        aggregation: getAggregationType(value, data[0]),
+                        children: getDynamicHeaders(columnIdx + 1, group.children || [], value, groupField),
+                    });
+                });
+
+                return newColumnDefs;
+            };
+            (pivot.values || [null]).forEach((val) => {
+                columnDefs.push(...(getDynamicHeaders(0, initialData, val as Column) || []));
+            });
+        }
+
+        const columns = getColumnsFromDefs([...rowColumnDefs, ...columnDefs], defaultColumnDef);
+        const sortedColumns = sortColumns(columns);
+
+        const newData = groupByMultiple(initialData, pivot.rows || [], pivot.values || [], columnDefs as Column[]);
+
+        setColumnsStyleProps(columns, container.offsetWidth);
+        moveColumns(columns, sortedColumns, PinType.LEFT, 0);
+        moveColumns(columns, sortedColumns, PinType.NONE, 0);
+
+        return { pivot, columns, sortedColumns, data: newData, edited: true };
+    }
+
+    return { pivot, edited: true };
 };

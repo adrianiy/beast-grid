@@ -326,7 +326,7 @@ export default function TBody<T>({
         const chartColumns = finalColumns.slice(selectedCells?.start.x, selectedCells.end.x + 1);
 
         const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
-        console.log(selectedCells, actionData)
+        console.log(selectedCells, actionData);
 
         setChartColumns(chartColumns);
         setChartData(actionData);

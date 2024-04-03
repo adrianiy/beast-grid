@@ -8,84 +8,84 @@ import ColumnSection from './column';
 import GridSection from './grid';
 
 type Props = {
-  sections: SectionsEnum[];
-  column: Column;
-  horizontal: MenuHorizontalPosition;
-  multiSort: boolean;
-  onClose: () => void;
+    sections: SectionsEnum[];
+    column: Column;
+    horizontal: MenuHorizontalPosition;
+    multiSort: boolean;
+    onClose: () => void;
 };
 
 export type PropsWithMouseEnter<T> = {
-  onMouseEnter: () => void;
+    onMouseEnter: () => void;
 } & T;
 
 export default function MenuSections(props: Props) {
-  const { column, horizontal, multiSort, onClose: _onClose } = props;
-  const [activeSection, setActiveSection] = useState<SectionsEnum | undefined>(undefined);
+    const { column, horizontal, multiSort, onClose: _onClose } = props;
+    const [activeSection, setActiveSection] = useState<SectionsEnum | undefined>(undefined);
 
-  const handleMouseEnter = (section: SectionsEnum) => () => {
-    setActiveSection(section);
-  };
+    const handleMouseEnter = (section: SectionsEnum) => () => {
+        setActiveSection(section);
+    };
 
-  const onClose = () => {
-    _onClose();
-    setActiveSection(undefined);
-  }
+    const onClose = () => {
+        _onClose();
+        setActiveSection(undefined);
+    };
 
-  const renderSection = (section: SectionsEnum) => {
-    switch (section) {
-      case SectionsEnum.SORT:
-        return (
-          <SortSection
-            key={section}
-            column={column}
-            multiSort={multiSort}
-            onMouseEnter={handleMouseEnter(section)}
-          />
-        );
-      case SectionsEnum.PIN:
-        return (
-          <PinSection
-            key={section}
-            column={column}
-            horizontal={horizontal}
-            onClose={onClose}
-            activeSection={activeSection}
-            onMouseEnter={handleMouseEnter(section)}
-          />
-        );
-      case SectionsEnum.FILTER:
-        return (
-          <FilterSection
-            key={section}
-            column={column}
-            horizontal={horizontal}
-            activeSection={activeSection}
-            onMouseEnter={handleMouseEnter(section)}
-          />
-        );
-      case SectionsEnum.GRID:
-        return (
-          <GridSection
-            key={section}
-            column={column}
-            onClose={onClose}
-            onMouseEnter={handleMouseEnter(section)}
-          />
-        );
-      case SectionsEnum.COLUMN:
-        return (
-          <ColumnSection
-            key={section}
-            column={column}
-            onClose={onClose}
-            onMouseEnter={handleMouseEnter(section)}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+    const renderSection = (section: SectionsEnum) => {
+        switch (section) {
+            case SectionsEnum.SORT:
+                return (
+                    <SortSection
+                        key={section}
+                        column={column}
+                        multiSort={multiSort}
+                        onMouseEnter={handleMouseEnter(section)}
+                    />
+                );
+            case SectionsEnum.PIN:
+                return (
+                    <PinSection
+                        key={section}
+                        column={column}
+                        horizontal={horizontal}
+                        onClose={onClose}
+                        activeSection={activeSection}
+                        onMouseEnter={handleMouseEnter(section)}
+                    />
+                );
+            case SectionsEnum.FILTER:
+                return (
+                    <FilterSection
+                        key={section}
+                        column={column}
+                        horizontal={horizontal}
+                        activeSection={activeSection}
+                        onMouseEnter={handleMouseEnter(section)}
+                    />
+                );
+            case SectionsEnum.GRID:
+                return (
+                    <GridSection
+                        key={section}
+                        column={column}
+                        onClose={onClose}
+                        onMouseEnter={handleMouseEnter(section)}
+                    />
+                );
+            case SectionsEnum.COLUMN:
+                return (
+                    <ColumnSection
+                        key={section}
+                        column={column}
+                        onClose={onClose}
+                        onMouseEnter={handleMouseEnter(section)}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
 
-  return props.sections.map(renderSection);
+    return props.sections.map(renderSection);
 }

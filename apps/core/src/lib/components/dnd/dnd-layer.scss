@@ -1,7 +1,7 @@
 .dnd-drag-preview {
     @import './../../flex';
     @import './../../themes';
-    
+
     position: absolute;
     z-index: 1000;
     background: var(--bg-background-color--1);

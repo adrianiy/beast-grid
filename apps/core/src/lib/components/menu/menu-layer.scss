@@ -50,11 +50,13 @@
         &--light {
             border-bottom: var(--bg-border--2);
         }
+
         &--transparent {
             border-bottom: var(--bg-border--3);
             opacity: 0;
         }
     }
+
     .bg-menu__content {
         padding: 0 var(--bg-size--1);
         border-bottom: var(--bg-border--3);
@@ -113,7 +115,9 @@
                 left: auto;
                 right: 100%;
             }
+
             .bg-filter {
+                width: 100%;
                 margin-top: 0;
             }
         }
@@ -122,6 +126,7 @@
             .bg-menu__item--with-submenu {
                 background-color: var(--bg-hover-color--1);
             }
+
             .bg-menu__item__submenu {
                 display: flex;
             }

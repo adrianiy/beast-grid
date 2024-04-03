@@ -7,30 +7,24 @@ type ExtractState<S> = S extends { getState: () => infer T } ? T : never;
 const StoreContext = createContext<StoreApi<DndStore> | undefined>(undefined);
 
 export const DndStoreProvider = ({
-  createStore,
-  children,
+    createStore,
+    children,
 }: {
-  createStore: () => StoreApi<DndStore>;
-  children: React.ReactNode;
+    createStore: () => StoreApi<DndStore>;
+    children: React.ReactNode;
 }) => {
-  const storeRef = useRef<StoreApi<DndStore>>();
-  if (!storeRef.current) {
-    storeRef.current = createStore();
-  }
+    const storeRef = useRef<StoreApi<DndStore>>();
+    if (!storeRef.current) {
+        storeRef.current = createStore();
+    }
 
-  return createElement(
-    StoreContext.Provider,
-    { value: storeRef.current },
-    children
-  );
+    return createElement(StoreContext.Provider, { value: storeRef.current }, children);
 };
 
-export const useDndStore = <T>(
-  selector: (state: ExtractState<StoreApi<DndStore>>) => T
-) => {
-  const store = useContext(StoreContext);
-  if (!store) {
-    throw new Error('Missing StoreProvider');
-  }
-  return useStore(store, selector);
+export const useDndStore = <T>(selector: (state: ExtractState<StoreApi<DndStore>>) => T) => {
+    const store = useContext(StoreContext);
+    if (!store) {
+        throw new Error('Missing StoreProvider');
+    }
+    return useStore(store, selector);
 };

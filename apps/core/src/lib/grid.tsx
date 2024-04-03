@@ -5,13 +5,13 @@ import SimpleBarCore from 'simplebar-core';
 import { useBeastStore } from './stores/beast-store';
 
 import { BeastGridConfig, Column, Data } from './common';
-import TBody from './components/body/tbody';
 import Header from './components/header/header';
 import SideBar from './components/sidebar/sidebar';
 
 import cn from 'classnames';
 
 import 'simplebar-react/dist/simplebar.min.css';
+import TBody from './components/body/tbody';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -22,7 +22,11 @@ type Props<T> = {
 
 export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [setScrollElement, setTheme, autoSize] = useBeastStore((state) => [state.setScrollElement, state.setTheme, state.autoSizeColumns]);
+    const [setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
+        state.setScrollElement,
+        state.setTheme,
+        state.autoSizeColumns,
+    ]);
     const ref = useRef<SimpleBarCore>(null);
 
     useEffect(() => {
@@ -63,7 +67,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
         }
 
         return toolbarHeight;
-    }
+    };
 
     return (
         <div
@@ -72,11 +76,15 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
             style={{
                 maxHeight: config.style?.maxHeight,
                 height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined,
-                width: '100%'
+                width: '100%',
             }}
         >
             <SimpleBar
-                style={{ width: '100%', maxHeight: config.style?.maxHeight, height: !config.style?.maxHeight ? '100%' : undefined }}
+                style={{
+                    width: '100%',
+                    maxHeight: config.style?.maxHeight,
+                    height: !config.style?.maxHeight ? '100%' : undefined,
+                }}
                 ref={ref}
                 className={cn('beast-grid__container', {
                     border: config?.style?.border,

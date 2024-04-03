@@ -2,6 +2,7 @@
     position: relative;
     width: 100%;
 }
+
 .bg-chart__modal__container {
     @import './flex';
     @import './themes';
@@ -58,7 +59,7 @@
     }
 
     .bg-chart__modal__button {
-      cursor: pointer;
-      gap: var(--bg-size--3);
+        cursor: pointer;
+        gap: var(--bg-size--3);
     }
 }

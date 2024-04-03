@@ -1,10 +1,11 @@
 import { useBeastStore } from './../../stores/beast-store';
 
 import { BeastGridConfig, Column } from '../../common/interfaces';
+import { HeaderEvents, PinType } from '../../common';
+
+import HeaderSection from './header-section';
 
 import './header.scss';
-import { HeaderEvents, PinType } from '../../common';
-import HeaderSection from './headerSection';
 
 type Props<T> = {
     height: number;
@@ -20,13 +21,15 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
     const levels = Object.values(columns).reduce((acc, column) => {
         const level = column.level || 0;
         acc[level] = acc[level] || [];
-        acc[level].push(column);
+        acc[level].push(columns[column.id]);
         return acc;
     }, [] as Column[][]);
 
+    if (!levels.length) return null;
+
     const levelZero = levels[0].filter((column) => !column.hidden);
 
-    const totalWidth = levelZero.reduce((acc, curr) => acc + curr.width, 0)
+    const totalWidth = levelZero.reduce((acc, curr) => acc + curr.width, 0);
     const leftWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const rightWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
 

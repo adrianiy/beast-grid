@@ -12,125 +12,125 @@ import './menu-layer.scss';
 import useOnClickOutside from '../../hooks/clickOutside';
 
 export enum SectionsEnum {
-  SORT = 'sort',
-  PIN = 'pin',
-  FILTER = 'filter',
-  GRID = 'grid',
-  COLUMN = 'column',
+    SORT = 'sort',
+    PIN = 'pin',
+    FILTER = 'filter',
+    GRID = 'grid',
+    COLUMN = 'column',
 }
 
 type Props = {
-  visible: boolean;
-  column: Column;
-  theme: string;
-  multiSort: boolean;
-  horizontal: MenuHorizontalPosition;
-  clipRef: () => SVGSVGElement;
-  onClose: () => void;
+    visible: boolean;
+    column: Column;
+    theme: string;
+    multiSort: boolean;
+    horizontal: MenuHorizontalPosition;
+    clipRef: () => SVGSVGElement;
+    onClose: () => void;
 };
 
 export default function MenuLayer(props: Props) {
-  if (!props.visible) {
-    return null;
-  }
+    if (!props.visible) {
+        return null;
+    }
 
-  return createPortal(<HeaderMenu {...props} />, document.body);
+    return createPortal(<HeaderMenu {...props} />, document.body);
 }
 
 function HeaderMenu({ column, multiSort, theme, horizontal, clipRef, onClose }: Props) {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
-  const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
-  const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
+    const menuRef = useRef<HTMLDivElement>(null);
+    const [horizontalPosition, setHorizontalPosition] = useState<MenuHorizontalPosition>(horizontal);
+    const [horizontalSubmenuPosition, setHorizontalSubmenuPosition] = useState<MenuHorizontalPosition>(horizontal);
+    const [coords, setCoords] = useState<{ x: number; y: number } | null>({ x: 0, y: 0 });
 
-  const [container, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
+    const [container, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
 
-  useOnClickOutside(menuRef, onClose, ['.bg-select__options']);
+    useOnClickOutside(menuRef, onClose, ['.bg-select__options']);
 
-  const sections = [SectionsEnum.SORT, SectionsEnum.PIN, SectionsEnum.FILTER, SectionsEnum.GRID, SectionsEnum.COLUMN];
+    const sections = [SectionsEnum.SORT, SectionsEnum.PIN, SectionsEnum.FILTER, SectionsEnum.GRID, SectionsEnum.COLUMN];
 
-  useEffect(() => {
-    const leftPinned = Object.values(columns)
-      .filter((col) => col.pinned === PinType.LEFT)
-      .reduce((acc, curr) => acc + curr.width, 0);
+    useEffect(() => {
+        const leftPinned = Object.values(columns)
+            .filter((col) => col.pinned === PinType.LEFT)
+            .reduce((acc, curr) => acc + curr.width, 0);
 
-    const moveMenu = () => {
-      if (!clipRef) {
-        return;
-      }
+        const moveMenu = () => {
+            if (!clipRef) {
+                return;
+            }
 
-      const { left: cLeft, right: cRight } = container.getBoundingClientRect();
-      const { width } = menuRef.current?.getBoundingClientRect() || {
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: 0,
-      };
-      const { left, right, bottom } = clipRef().getBoundingClientRect();
+            const { left: cLeft, right: cRight } = container.getBoundingClientRect();
+            const { width } = menuRef.current?.getBoundingClientRect() || {
+                left: 0,
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 0,
+            };
+            const { left, right, bottom } = clipRef().getBoundingClientRect();
 
-      const x = window.scrollX + left;
-      const y = window.scrollY + bottom + 8;
+            const x = window.scrollX + left;
+            const y = window.scrollY + bottom + 8;
 
-      setCoords({ x, y });
+            setCoords({ x, y });
 
-      if (right > cRight) {
-        onClose();
-        return;
-      }
-      if (left + width * 2 > cRight) {
-        setHorizontalSubmenuPosition(MenuHorizontalPosition.RIGHT);
-      } else {
-        setHorizontalSubmenuPosition(MenuHorizontalPosition.LEFT);
-      }
-      if (left + width > cRight) {
-        setHorizontalPosition(MenuHorizontalPosition.RIGHT);
-        return;
-      } else {
-        setHorizontalPosition(MenuHorizontalPosition.LEFT);
-      }
+            if (right > cRight) {
+                onClose();
+                return;
+            }
+            if (left + width * 2 > cRight) {
+                setHorizontalSubmenuPosition(MenuHorizontalPosition.RIGHT);
+            } else {
+                setHorizontalSubmenuPosition(MenuHorizontalPosition.LEFT);
+            }
+            if (left + width > cRight) {
+                setHorizontalPosition(MenuHorizontalPosition.RIGHT);
+                return;
+            } else {
+                setHorizontalPosition(MenuHorizontalPosition.LEFT);
+            }
 
-      if (column.pinned !== PinType.NONE) {
-        return;
-      }
-      if (left < cLeft + leftPinned || x + width > cRight) {
-        onClose();
-      }
-    };
+            if (column.pinned !== PinType.NONE) {
+                return;
+            }
+            if (left < cLeft + leftPinned || x + width > cRight) {
+                onClose();
+            }
+        };
 
-    moveMenu();
+        moveMenu();
 
-    setTimeout(() => {
-      menuRef.current?.style.setProperty('overflow', 'visible');
-    }, 400);
+        setTimeout(() => {
+            menuRef.current?.style.setProperty('overflow', 'visible');
+        }, 400);
 
-    container.addEventListener('scroll', moveMenu);
+        container.addEventListener('scroll', moveMenu);
 
-    return () => {
-      container.removeEventListener('scroll', moveMenu);
-    };
-  }, []);
+        return () => {
+            container.removeEventListener('scroll', moveMenu);
+        };
+    }, []);
 
-  return (
-    <div
-      ref={menuRef}
-      className={cn(
-        'bg-menu__container animate__animated animate__faster animate__fadeIn',
-        horizontalPosition,
-        theme
-      )}
-      style={{ top: coords?.y, left: coords?.x }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="bg-menu__wrapper animate__animated animate__faster animate__fadeInDown">
-        <MenuSections
-          sections={sections}
-          column={column}
-          horizontal={horizontalSubmenuPosition}
-          multiSort={multiSort}
-          onClose={onClose}
-        />
-      </div>
-    </div>
-  );
+    return (
+        <div
+            ref={menuRef}
+            className={cn(
+                'bg-menu__container animate__animated animate__faster animate__fadeIn',
+                horizontalPosition,
+                theme
+            )}
+            style={{ top: coords?.y, left: coords?.x }}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div className="bg-menu__wrapper animate__animated animate__faster animate__fadeInDown">
+                <MenuSections
+                    sections={sections}
+                    column={column}
+                    horizontal={horizontalSubmenuPosition}
+                    multiSort={multiSort}
+                    onClose={onClose}
+                />
+            </div>
+        </div>
+    );
 }
