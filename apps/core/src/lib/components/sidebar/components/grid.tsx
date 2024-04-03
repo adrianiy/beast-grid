@@ -74,7 +74,7 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
 
 const ItemLabel = ({ item, checked, onClick }: { item: Column; checked: boolean, onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
     const [, drag] = useDrag(() => ({
-        type: 'COLUMN',
+        type: item.childrenId?.length ? 'PARENT' : 'COLUMN',
         item: { id: item.id },
     }));
 
