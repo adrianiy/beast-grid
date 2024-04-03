@@ -45,8 +45,7 @@ const getGroupRows = (
 
     return Object.entries(groups).map(([key, children]) => {
         const calculatedFields =
-            children.length > 1
-                ? aggTypeColumns.reduce((acc, column) => {
+                aggTypeColumns.reduce((acc, column) => {
                       if (aggregationColumns) {
                           const setChildrenFieldsByAggregation = (aggColumn: Column) => {
                               const [field, ...rest] = (aggColumn.field || '').split('@');
@@ -76,8 +75,7 @@ const getGroupRows = (
                           acc[column.field as string] = _calculate(children, column) || null;
                       }
                       return acc;
-                  }, {} as Record<string, number | null>)
-                : children[0];
+                  }, children.length > 1 ? {} as Record<string, number | null> : children[0])
 
         const newRow = {
             [field]: key,
