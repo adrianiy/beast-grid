@@ -20,6 +20,10 @@
     color: var(--bg-text-color--1);
     font-size: var(--bg-font-size--1);
 
+    * {
+        box-sizing: border-box;
+    }
+
     .bg-dot--active {
         --size: var(--bg-size--2);
         background-color: var(--bg-background-color--active);
@@ -78,7 +82,7 @@
                 border-right: var(--bg-border--1);
             }
         }
-            
+
     }
     .grid-right-pin {
         position: sticky;
