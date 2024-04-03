@@ -16,6 +16,10 @@
     box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
         rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
 
+    * {
+        box-sizing: border-box;
+    }
+
     .bg-dot--active {
         --size: var(--bg-size--2);
         background-color: var(--bg-background-color--active);
@@ -54,6 +58,7 @@
     }
 
     .bg-menu__content {
+        padding: 0 var(--bg-size--1);
         border-bottom: var(--bg-border--3);
         margin-bottom: var(--bg-size--1);
         padding-bottom: var(--bg-size--1);
@@ -69,8 +74,7 @@
             color: var(--bg-text-color--1);
             gap: var(--bg-size--3);
             padding: var(--bg-size--2);
-            width: calc(100% - var(--bg-size--4) - var(--bg-size--2));
-            margin: 0 var(--bg-size--1);
+            width: 100%;
             cursor: pointer;
 
             .left {
@@ -97,7 +101,7 @@
 
         .bg-menu__item__submenu {
             position: absolute;
-            width: calc(100% - var(--bg-size--2));
+            width: 100%;
             margin-top: calc(calc(var(--bg-size--1) * -1) - 1px);
             padding: var(--bg-size--1) 0;
             border: var(--bg-border--3);

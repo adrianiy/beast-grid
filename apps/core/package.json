@@ -1,6 +1,6 @@
 {
   "name": "beast-grid",
-  "version": "0.0.84",
+  "version": "0.0.86",
   "main": "./index.js",
   "types": "./index.d.ts",
   "style": "./style.css",
