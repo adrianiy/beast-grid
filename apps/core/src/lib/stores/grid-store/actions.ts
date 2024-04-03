@@ -383,7 +383,7 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
                     const field = `${value?.field || ''}${groupField}`;
                     newColumnDefs.push({
                         headerName: !parentField
-                            ? `${group[column.field as string]}${value?.headerName ? ' | ' + value.headerName : ''}`
+                            ? `${group[column.field as string]}${value?.headerName ? ' | ' + value.aggregation + ' of ' + value.headerName : ''}`
                             : `${group[column.field as string]}`,
                         field,
                         flex: 1,

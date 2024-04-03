@@ -16,6 +16,7 @@ export enum AggregationType {
     SUM = 'sum',
     AVG = 'avg',
     COUNT = 'count',
+    COUNT_DISTINCT = 'distinct',
     MAX = 'max',
     MIN = 'min',
 }

@@ -99,10 +99,10 @@ const FilterLine = ({ id, idx, filter, scrollContainer }: LineProps) => {
             setInputValue(undefined);
             setActiveOption(undefined);
         } else {
-            setActiveOption(e.value);
+            setActiveOption(e.value as OperationType);
 
             if (inputValue) {
-                addFilter(id, { op: e.value, value: Number(inputValue) }, idx);
+                addFilter(id, { op: e.value as OperationType, value: Number(inputValue) }, idx);
             }
         }
     };

@@ -165,8 +165,13 @@
                 margin: var(--bg-size--1);
                 padding: var(--bg-size--2) var(--bg-size--3);
                 background-color: var(--bg-background-color--chip);
-                width: min-content;
                 gap: var(--bg-size--3);
+            }
+
+            svg {
+                --size: var(--bg-size--3);
+                min-width: var(--size);
+                height: var(--size);
             }
         }
     }

@@ -25,10 +25,12 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
             return data.reduce((acc, row) => acc + +(row[column.field as keyof TData] || 0), 0) / data.length;
         case AggregationType.COUNT:
             return data.length;
+        case AggregationType.COUNT_DISTINCT:
+            return new Set(data.map((row) => row[column.field as keyof TData]).filter(Boolean)).size;
         case AggregationType.MIN:
-            return Math.min(...data.map((row) => row[column.field as keyof TData] as number));
+            return Math.min(...data.map((row) => (+row[column.field as keyof TData] || Infinity) as number));
         case AggregationType.MAX:
-            return Math.max(...data.map((row) => row[column.field as keyof TData] as number));
+            return Math.max(...data.map((row) => (+row[column.field as keyof TData] || -Infinity) as number));
         default:
             return null;
     }

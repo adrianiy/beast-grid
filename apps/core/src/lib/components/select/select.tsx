@@ -1,7 +1,6 @@
 import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons';
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { OperationType } from '../../common';
 
 import useOnClickOutside from '../../hooks/clickOutside';
 
@@ -10,8 +9,8 @@ import cn from 'classnames';
 import './select.scss';
 
 export type Option = {
-    value: OperationType;
-    label: JSX.Element;
+    value: string;
+    label: JSX.Element | string;
     active?: boolean;
 };
 
