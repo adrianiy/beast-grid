@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import SimpleBar from 'simplebar-react';
 import SimpleBarCore from 'simplebar-core';
 
@@ -22,11 +22,13 @@ type Props<T> = {
 
 export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
+    const [pivot, setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
+        state.pivot,
         state.setScrollElement,
         state.setTheme,
         state.autoSizeColumns,
     ]);
+    const [loading, setLoading] = useState(false);
     const ref = useRef<SimpleBarCore>(null);
 
     useEffect(() => {
@@ -55,6 +57,14 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
     useEffect(() => {
         setTheme(theme);
     }, [theme, setTheme]);
+
+    useEffect(() => {
+        setLoading(true);
+
+        setTimeout(() => {
+            setLoading(false);
+        }, 0);
+    }, [pivot]);
 
     const getToolbarHeight = () => {
         let toolbarHeight = 0;
@@ -91,22 +101,26 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                     headerBorder: config?.header?.border ?? true,
                 })}
             >
-                <Header
-                    height={config.header?.height || (defaultConfig.headerHeight as number)}
-                    border={config.header?.border ?? true}
-                    multiSort={config.sort?.multiple}
-                    dragOptions={config.dragOptions}
-                />
-                <TBody
-                    rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
-                    headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
-                    config={config.row}
-                    maxHeight={config.style?.maxHeight}
-                    border={config.row?.border}
-                    onSortChange={onSortChange}
-                    events={config.row?.events}
-                    beastConfig={config}
-                />
+                {!loading && (
+                    <Fragment>
+                        <Header
+                            height={config.header?.height || (defaultConfig.headerHeight as number)}
+                            border={config.header?.border ?? true}
+                            multiSort={config.sort?.multiple}
+                            dragOptions={config.dragOptions}
+                        />
+                        <TBody
+                            rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
+                            headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
+                            config={config.row}
+                            maxHeight={config.style?.maxHeight}
+                            border={config.row?.border}
+                            onSortChange={onSortChange}
+                            events={config.row?.events}
+                            beastConfig={config}
+                        />
+                    </Fragment>
+                )}
             </SimpleBar>
             <SideBar config={config} />
         </div>

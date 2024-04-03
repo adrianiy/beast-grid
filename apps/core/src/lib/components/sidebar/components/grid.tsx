@@ -109,6 +109,8 @@ const Options = ({
         hideColumn(column.id);
     };
 
+    const someHasChildren = options.some(opt => opt.childrenId?.length);
+
     return options?.map((item, idx) => {
         const children = Object.values(columns).filter((c) => item.childrenId?.includes(c.id));
         const matchSearch = !searchValue || item.headerName.toLowerCase().includes(searchValue.toLowerCase());
@@ -128,6 +130,7 @@ const Options = ({
                 key={`sidebar_grid_${item.id}_${idx}`}
                 id={`sidebar_grid_${item.id}`}
                 hideArrow={!hasChildren}
+                withoutArrow={!someHasChildren}
                 label={<ItemLabel item={item} checked={!hiddenColumns.includes(item.id)} onClick={handleGridChange(item)} />}
                 elements={children.length}
             >
