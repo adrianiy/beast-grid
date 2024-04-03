@@ -42,6 +42,7 @@ export type IFilter = string | NumberFilter | boolean;
 export type AggregationFunction = (row: Row) => string | number;
 
 export interface BaseColumnDef {
+    id?: ColumnId;
     headerName: string;
     pinned?: PinType;
     field?: string;

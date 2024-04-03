@@ -18,7 +18,6 @@ import {
 } from './utils';
 import { GridState, GridStore } from './store';
 import {
-    AggregationType,
     ColumnDef,
     ColumnStore,
     Coords,
@@ -50,15 +49,24 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, sortedColumns, container } = state;
+    const { columns, hiddenColumns, sortedColumns, container } = state;
+
     const column = columns[id];
 
-    toggleHide(column, columns);
+    if (column) {
+        toggleHide(column, columns);
 
-    setColumnsStyleProps(columns, container.offsetWidth);
-    moveColumns(columns, sortedColumns, column.pinned);
+        setColumnsStyleProps(columns, container.offsetWidth);
+        moveColumns(columns, sortedColumns, column.pinned);
+    }
 
-    return { columns, edited: true };
+    if (hiddenColumns.includes(id)) {
+        hiddenColumns.splice(hiddenColumns.indexOf(id), 1);
+    } else {
+        hiddenColumns.push(id);
+    }
+
+    return { columns, hiddenColumns, edited: true };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -150,39 +158,39 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
 export const addFilter =
     (id: ColumnId, value: IFilter | null, idx = 0) =>
-        (state: GridStore) => {
-            const { columns, filters } = state;
-            const column = columns[id];
+    (state: GridStore) => {
+        const { columns, filters } = state;
+        const column = columns[id];
 
-            if (column.filterType === FilterType.TEXT) {
-                if (filters[id]?.includes(value as string)) {
-                    filters[id] = filters[id]?.filter((val) => val !== value);
-                } else {
-                    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-                }
+        if (column.filterType === FilterType.TEXT) {
+            if (filters[id]?.includes(value as string)) {
+                filters[id] = filters[id]?.filter((val) => val !== value);
+            } else {
+                filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
             }
-            if (column.filterType === FilterType.NUMBER) {
-                if (!filters[id]) {
+        }
+        if (column.filterType === FilterType.NUMBER) {
+            if (!filters[id]) {
+                filters[id] = [];
+            }
+            if (!value) {
+                if (!idx) {
                     filters[id] = [];
-                }
-                if (!value) {
-                    if (!idx) {
-                        filters[id] = [];
-                    } else {
-                        filters[id] = filters[id]?.filter((_, i) => i !== idx);
-                    }
-                } else if (filters[id][idx]) {
-                    filters[id][idx] = value;
                 } else {
-                    filters[id][idx] = value;
+                    filters[id] = filters[id]?.filter((_, i) => i !== idx);
                 }
+            } else if (filters[id][idx]) {
+                filters[id][idx] = value;
+            } else {
+                filters[id][idx] = value;
             }
-            if (!filters[id].length) {
-                delete filters[id];
-            }
+        }
+        if (!filters[id].length) {
+            delete filters[id];
+        }
 
-            return { columns, filters: { ...filters }, edited: true };
-        };
+        return { columns, filters: { ...filters }, edited: true };
+    };
 
 export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
     const { columns, filters } = state;
@@ -390,7 +398,6 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
                 columnDefs.push(...(getDynamicHeaders(0, initialData, val as Column) || []));
             });
         }
-
 
         const columns = getColumnsFromDefs([...rowColumnDefs, ...columnDefs], defaultColumnDef);
         const sortedColumns = sortColumns(columns);

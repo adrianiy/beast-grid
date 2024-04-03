@@ -35,7 +35,7 @@ const loopColumns = (
     // Create column object
     // If column has children, call getColumnsFromDefs recursively
     columnDefs.forEach((columnDef) => {
-        const id = uuidv4();
+        const id = columnDef.id ?? uuidv4();
         const column: Column = {
             ...deepmerge(defaultColumnDef || {}, columnDef),
             width: columnDef.width || 0,

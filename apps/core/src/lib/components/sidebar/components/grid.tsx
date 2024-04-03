@@ -72,7 +72,7 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
     );
 }
 
-const ItemLabel = ({ item, onClick }: { item: Column; onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
+const ItemLabel = ({ item, checked, onClick }: { item: Column; checked: boolean, onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
     const [, drag] = useDrag(() => ({
         type: 'COLUMN',
         item: { id: item.id },
@@ -80,7 +80,7 @@ const ItemLabel = ({ item, onClick }: { item: Column; onClick: (e: React.MouseEv
 
     return (
         <div className="row middle bg-option__container" ref={drag}>
-            <Checkbox.Root className="bg-checkbox__root" checked={!item.hidden} id={item.id} onClick={onClick}>
+            <Checkbox.Root className="bg-checkbox__root" checked={checked} id={item.id} onClick={onClick}>
                 <Checkbox.Indicator className="bg-checbox__indicator row center middle">
                     <CheckIcon />
                 </Checkbox.Indicator>
@@ -102,7 +102,7 @@ const Options = ({
     columns: ColumnStore;
     searchValue: string;
 }) => {
-    const [hideColumn] = useBeastStore((state) => [state.hideColumn]);
+    const [hideColumn, hiddenColumns] = useBeastStore((state) => [state.hideColumn, state.hiddenColumns]);
 
     const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
@@ -128,7 +128,7 @@ const Options = ({
                 key={`sidebar_grid_${item.id}_${idx}`}
                 id={`sidebar_grid_${item.id}`}
                 hideArrow={!hasChildren}
-                label={<ItemLabel item={item} onClick={handleGridChange(item)} />}
+                label={<ItemLabel item={item} checked={!hiddenColumns.includes(item.id)} onClick={handleGridChange(item)} />}
                 elements={children.length}
             >
                 <Options options={children} parentMatch={matchSearch} columns={columns} searchValue={searchValue} />

@@ -57,6 +57,7 @@ export interface GridState {
     initialData: Data;
     initialColumns: ColumnStore;
     sortedColumns: Column[];
+    hiddenColumns: ColumnId[];
     loading: boolean;
     sorting: boolean;
     scrollElement: HTMLDivElement;
@@ -122,6 +123,7 @@ export const createGridStore = <T>(
         data,
         initialData: clone(initialData),
         initialColumns: clone(columns),
+        hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,
         groupOrder,
         columns,
