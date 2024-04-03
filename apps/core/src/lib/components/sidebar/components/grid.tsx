@@ -72,15 +72,15 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
     );
 }
 
-const ItemLabel = ({ item, checked, onClick }: { item: Column; checked: boolean, onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
+const ItemLabel = ({ item, checked, onClick }: { item: Column; checked: boolean, onClick: React.MouseEventHandler<HTMLDivElement> }) => {
     const [, drag] = useDrag(() => ({
         type: item.childrenId?.length ? 'PARENT' : 'COLUMN',
         item: { id: item.id },
     }));
 
     return (
-        <div className="row middle bg-option__container" ref={drag}>
-            <Checkbox.Root className="bg-checkbox__root" checked={checked} id={item.id} onClick={onClick}>
+        <div className="row middle bg-option__container" ref={drag} onClick={onClick}>
+            <Checkbox.Root className="bg-checkbox__root" checked={checked} id={item.id}>
                 <Checkbox.Indicator className="bg-checbox__indicator row center middle">
                     <CheckIcon />
                 </Checkbox.Indicator>
