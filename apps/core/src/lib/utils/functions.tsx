@@ -20,9 +20,9 @@ import dayjs from 'dayjs';
 const _calculate = <TData,>(data: TData[], column: Column) => {
     switch (column.aggregation) {
         case AggregationType.SUM:
-            return data.reduce((acc, row) => acc + +row[column.field as keyof TData], 0);
+            return data.reduce((acc, row) => acc + +(row[column.field as keyof TData] || 0), 0);
         case AggregationType.AVG:
-            return data.reduce((acc, row) => acc + +row[column.field as keyof TData], 0) / data.length;
+            return data.reduce((acc, row) => acc + +(row[column.field as keyof TData] || 0), 0) / data.length;
         case AggregationType.COUNT:
             return data.length;
         case AggregationType.MIN:
@@ -34,7 +34,12 @@ const _calculate = <TData,>(data: TData[], column: Column) => {
     }
 };
 
-const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedColumns: Column[]): Row[] => {
+const getGroupRows = (
+    groups: Record<string, Row[]>,
+    field: string,
+    calculatedColumns: Column[],
+    aggregationColumns?: Column[]
+): Row[] => {
     const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
 
@@ -42,7 +47,34 @@ const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedCo
         const calculatedFields =
             children.length > 1
                 ? aggTypeColumns.reduce((acc, column) => {
-                      acc[column.field as string] = _calculate(children, column);
+                      if (aggregationColumns) {
+                          const setChildrenFieldsByAggregation = (aggColumn: Column) => {
+                              const [field, ...rest] = (aggColumn.field || '').split('@');
+                              children.forEach((child) => {
+                                  const match = rest.map((restField) => {
+                                      const [aggField, aggValue] = restField.split(':');
+                                      return `${child[aggField as keyof Row]}` === aggValue;
+                                  });
+
+                                  if (match.every(Boolean)){
+                                      child[aggColumn.field as string] = child[field as keyof Row];
+                                  }
+                              });
+
+                              acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
+
+                              if (aggColumn.children) {
+                                  aggColumn.children.forEach((aggChildColumn) => {
+                                      setChildrenFieldsByAggregation(aggChildColumn as Column);
+                                  });
+                              }
+                          };
+                          aggregationColumns.forEach((aggColumn) => {
+                              setChildrenFieldsByAggregation(aggColumn);
+                          });
+                      } else {
+                          acc[column.field as string] = _calculate(children, column) || null;
+                      }
                       return acc;
                   }, {} as Record<string, number | null>)
                 : children[0];
@@ -51,8 +83,8 @@ const getGroupRows = (groups: Record<string, Row[]>, field: string, calculatedCo
             [field]: key,
             _id: uuidv4(),
             _singleChild: children.length === 1,
-            children,
             ...calculatedFields,
+            children,
         };
 
         if (children.length <= 1) {
@@ -80,9 +112,14 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
     return getGroupRows(groups, column.field as string, calculatedColumns);
 };
 
-export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns: Column[]): Row[] => {
+export const groupByMultiple = (
+    data: Data,
+    columns: Column[],
+    calculatedColumns: Column[],
+    aggregationColumns?: Column[]
+): Row[] => {
     const groups = data.reduce((acc, row) => {
-        const key = columns.map((column) => `${row[column.field as keyof Row]}`).join('_');
+        const key = columns.length ? columns.map((column) => `${row[column.field as keyof Row]}`).join('_') : 'main';
         if (!acc[key]) {
             acc[key] = [];
         }
@@ -90,7 +127,7 @@ export const groupByMultiple = (data: Data, columns: Column[], calculatedColumns
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns);
+    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns, aggregationColumns);
 };
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -194,7 +231,6 @@ export const useDebounce = () => {
 };
 
 export const getCategories = (columns: Column[], data: Data) => {
-    console.log(data[0]);
     const rowZero = data[0];
     const stringCategories = columns.filter((column) => typeof rowZero[column.field as keyof Row] === 'string');
 
@@ -220,3 +256,16 @@ export const getDates = (columns: Column[], data: Data) => {
 export function clone<T>(obj: T): T {
     return cloneDeep(obj);
 }
+
+export function getAggregationType(column: Column | undefined, row: Row): AggregationType | AggregationFunction {
+    if (column?.aggregation) {
+        return column.aggregation;
+    }
+
+    if (typeof row[column?.field as keyof Row] === 'number') {
+        return AggregationType.SUM;
+    }
+
+    return AggregationType.COUNT;
+}
+

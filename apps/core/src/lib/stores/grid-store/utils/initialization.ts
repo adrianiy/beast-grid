@@ -19,6 +19,51 @@ import deepmerge from 'deepmerge';
 import { createGroupColumn } from './group';
 import { toggleHide } from './edition';
 
+const loopColumns = (
+    levelIndexes: Record<number, number>,
+    columnDefs: ColumnDef[],
+    defaultColumnDef?: Partial<ColumnDef>,
+    level = 0,
+    parent?: Column
+): ColumnStore => {
+    if (!levelIndexes[level]) {
+        levelIndexes[level] = 0;
+    }
+
+    const columns: ColumnStore = {};
+    // Loop through columnDefs
+    // Create column object
+    // If column has children, call getColumnsFromDefs recursively
+    columnDefs.forEach((columnDef) => {
+        const id = uuidv4();
+        const column: Column = {
+            ...deepmerge(defaultColumnDef || {}, columnDef),
+            width: columnDef.width || 0,
+            position: levelIndexes[level],
+            finalPosition: levelIndexes[level],
+            pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
+            top: 0,
+            left: 0,
+            final: !columnDef.children || columnDef.children.length === 0,
+            id,
+            parent: parent?.id,
+            level,
+        };
+        columns[id] = column;
+        levelIndexes[level]++;
+
+        if (columnDef.children) {
+            const childrenColumns = loopColumns(levelIndexes, columnDef.children, defaultColumnDef, level + 1, column);
+            column.childrenId = Object.values(childrenColumns).filter(c => c.level === level + 1).map((c) => c.id);
+            column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
+
+            Object.assign(columns, childrenColumns);
+        }
+    });
+
+    return columns;
+};
+
 export const getColumnsFromDefs = (
     columnDefs: ColumnDef[],
     defaultColumnDef?: Partial<ColumnDef>,
@@ -30,36 +75,9 @@ export const getColumnsFromDefs = (
         return {};
     }
 
-    const columns: ColumnStore = {};
+    const levelIndexes = {};
 
-    // Loop through columnDefs
-    // Create column object
-    // If column has children, call getColumnsFromDefs recursively
-    columnDefs.forEach((columnDef, idx) => {
-        const id = uuidv4();
-        const column: Column = {
-            ...deepmerge(defaultColumnDef || {}, columnDef),
-            width: columnDef.width || 0,
-            position: idx,
-            finalPosition: idx,
-            pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
-            top: 0,
-            left: 0,
-            final: !columnDef.children || columnDef.children.length === 0,
-            id,
-            parent: parent?.id,
-            level,
-        };
-        columns[id] = column;
-
-        if (columnDef.children) {
-            const childrenColumns = getColumnsFromDefs(columnDef.children, defaultColumnDef, level + 1, column);
-            column.childrenId = Object.values(childrenColumns).map((c) => c.id);
-            column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
-
-            Object.assign(columns, childrenColumns);
-        }
-    });
+    const columns = loopColumns(levelIndexes, columnDefs, defaultColumnDef, level, parent);
 
     // Return columns
     return columns;
@@ -115,15 +133,21 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
     return columns;
 };
 
-const _getChildrenWidth = (column: Column, columnStore: ColumnStore): number => {
+const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     if (column.hidden) {
-        return 0;
+        return;
     }
     if (!column.childrenId) {
-        return column.width || MIN_COL_WIDTH;
+        column.width = column.width || MIN_COL_WIDTH;
     }
 
-    return column.childrenId.reduce((acc, childId) => acc + _getChildrenWidth(columnStore[childId], columnStore), 0);
+    if (column.childrenId) {
+        column.childrenId?.forEach((childId) => {
+            _getChildrenWidth(columnStore[childId], columnStore);
+        });
+
+        column.width = column.childrenId.reduce((acc, childId) => acc + columnStore[childId].width, 0);
+    }
 };
 
 export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: number): ColumnStore => {
@@ -149,7 +173,9 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
 
     // Calculate parent widths based on children
     notFinalColumns.forEach((column) => {
-        column.width = _getChildrenWidth(column, columnStore);
+        if (column.level === 0) {
+            _getChildrenWidth(column, columnStore);
+        }
     });
 
     return columnStore;

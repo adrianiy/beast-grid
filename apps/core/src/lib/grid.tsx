@@ -5,13 +5,13 @@ import SimpleBarCore from 'simplebar-core';
 import { useBeastStore } from './stores/beast-store';
 
 import { BeastGridConfig, Column, Data } from './common';
-import TBody from './components/body/tbody';
 import Header from './components/header/header';
 import SideBar from './components/sidebar/sidebar';
 
 import cn from 'classnames';
 
 import 'simplebar-react/dist/simplebar.min.css';
+import TBody from './components/body/tbody';
 
 type Props<T> = {
     config: BeastGridConfig<T>;

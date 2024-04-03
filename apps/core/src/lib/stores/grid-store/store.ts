@@ -12,6 +12,7 @@ import {
     restore,
     selectAllFilters,
     setColumn,
+    setPivot,
     setSelectedEnd,
     setSelectedStart,
     setSideBarConfig,
@@ -23,6 +24,7 @@ import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/int
 import {
     BeastGridConfig,
     BeastMode,
+    ColumnDef,
     Coords,
     PinType,
     SelectedCells,
@@ -47,11 +49,13 @@ export interface GridState {
     columns: ColumnStore;
     theme: string;
     container: HTMLDivElement;
+    defaultColumnDef: Partial<ColumnDef> | undefined;
     allowMultipleColumnSort: boolean;
     sort: ColumnId[];
     tree: Partial<TreeConstructor> | undefined;
     groupOrder: ColumnId[];
     initialData: Data;
+    initialColumns: ColumnStore;
     sortedColumns: Column[];
     loading: boolean;
     sorting: boolean;
@@ -114,8 +118,10 @@ export const createGridStore = <T>(
 
     const initialState = {
         edited: false,
+        defaultColumnDef,
         data,
         initialData: clone(initialData),
+        initialColumns: clone(columns),
         tree,
         groupOrder,
         columns,
@@ -163,7 +169,7 @@ export const createGridStore = <T>(
         setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
         setSelecting: (selecting: boolean) => set({ selecting }),
         setMode: (mode: BeastMode) => set({ mode }),
-        setPivot: (pivot: Partial<PivotState> | null) => set({ pivot }),
+        setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot)),
         restore: () => set(restore(initialState)),
         autoSizeColumns: () => set(autoSizeColumns()),
     }));

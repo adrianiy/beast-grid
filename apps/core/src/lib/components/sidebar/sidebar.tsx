@@ -17,14 +17,14 @@ type ChartProps = {
   activeValues: Column[];
   activeGroups: Column[];
   activeChartType: ChartType;
-  setActiveCategory: (column: Column) => void;  
+  setActiveCategory: (column: Column) => void;
   setActiveValue: (column: Column) => void;
   setActiveGroup: (column: Column) => void;
   setActiveChartType: (chartType: ChartType) => void;
 }
 
 function SideBarSwitch<T>({ sideBarConfig, config, ...chartProps }: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> } & Partial<ChartProps>) {
-  const [columns] = useBeastStore((state) => [state.columns]);
+  const [columns] = useBeastStore((state) => [state.initialColumns]);
 
   switch (sideBarConfig) {
     case SideBarConfig.GRID:

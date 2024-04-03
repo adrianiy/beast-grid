@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import { useBeastStore } from '../../../stores/beast-store';
@@ -14,6 +14,7 @@ import cn from 'classnames';
 import Accordion from '../../accordion/accordion';
 import { useDrag, useDrop } from 'react-dnd';
 import { PivotState } from '../../../stores/grid-store/store';
+import { clone } from '../../../utils/functions';
 
 type Props<T> = {
     columns: ColumnStore;
@@ -21,10 +22,8 @@ type Props<T> = {
 };
 
 export default function GridConfig<T>({ columns, config }: Props<T>) {
-    const [pivot, setSidebar, setPivot] = useBeastStore((state) => [
-        state.pivot,
+    const [setSidebar] = useBeastStore((state) => [
         state.setSideBarConfig,
-        state.setPivot,
     ]);
 
     const [searchValue, setSearchValue] = useState('');
@@ -35,13 +34,6 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
         setSearchValue(searchValue);
     };
 
-    const togglePivotMode = () => {
-        if (pivot?.enabled) {
-            setPivot(null);
-        } else {
-            setPivot({ enabled: true });
-        }
-    };
 
     const options = Object.values(columns).filter((column) => column.level === 0);
 
@@ -52,12 +44,7 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
                 style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
             >
                 <FormattedMessage id="toolbar.grid" />
-                <div className="row middle">
-                    <div className="row middle pivot" onClick={togglePivotMode}>
-                        <FormattedMessage id="sidebar.pivot" />
-                    </div>
-                    <Cross2Icon onClick={() => setSidebar(null)} />
-                </div>
+                <Cross2Icon onClick={() => setSidebar(null)} />
             </div>
             <div className="row top h-full overflow-hidden">
                 <div className="column fl-1 h-full">
@@ -79,7 +66,7 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
                         <Options options={options} columns={columns} searchValue={searchValue} />
                     </SimpleBar>
                 </div>
-                <PivotOptions enabled={pivot?.enabled} />
+                <PivotOptions enabled={config.pivot?.enabled} />
             </div>
         </div>
     );
@@ -151,22 +138,22 @@ const Options = ({
 };
 
 const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
-    const [pivot, setPivot] = useBeastStore((state) => [state.pivot, state.setPivot]);
+    const [setPivot] = useBeastStore((state) => [state.setPivot]);
 
     if (!enabled) {
         return null;
     }
 
-    const handleRowChange = (columns: Column[]) => {
-        setPivot({ ...pivot, rows: columns });
+    const handleRowChange = (rows: Column[]) => {
+        setPivot({ rows });
     };
 
     const handleColumnChange = (columns: Column[]) => {
-        setPivot({ ...pivot, columns });
+        setPivot({ columns });
     };
 
-    const handleValueChange = (columns: Column[]) => {
-        setPivot({ ...pivot, values: columns });
+    const handleValueChange = (values: Column[]) => {
+        setPivot({ values });
     };
 
     return (
@@ -178,36 +165,92 @@ const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
     );
 };
 
-const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
-    const [columnStore, pivot] = useBeastStore((state) => [state.columns, state.pivot]);
-    const [columns, setColumns] = useState<Column[]>([]);
+const Box = ({
+    column,
+    index,
+    onRemove,
+    onHover,
+}: {
+    column: Column;
+    index: number;
+    onRemove: (column: Column) => () => void;
+    onHover: (index: number, hoverIndex: number) => void;
+}) => {
+    const [, drag] = useDrag(() => ({
+        type: 'BOX',
+        item: () => ({ id: column.id, index }),
+    }));
 
     const [, drop] = useDrop(() => ({
-        accept: 'COLUMN',
-        drop: (item: { id: string }) => {
-            const column = columnStore[item.id];
-
-            const newState = [...columns, column];
-
-            setColumns(newState);
-            onChanges(newState);
+        accept: 'BOX',
+        hover: (item: { index: number }) => {
+            if (!ref.current) {
+                return;
+            }
+            if (item.index === index) {
+                return;
+            }
+            onHover(item.index, index);
         },
     }));
 
-    useEffect(() => {
-        if (pivot?.[pivotType.toLowerCase() as keyof PivotState]) {
-            setColumns(pivot[pivotType.toLowerCase() as keyof PivotState] as Column[]);
-        }
-    }, [pivot, pivotType]);
+    const ref = useRef<HTMLDivElement>(null);
+
+    drag(drop(ref));
+
+    return (
+        <div className="row middle bg-chip" ref={ref}>
+            <label>{column.headerName}</label>
+            <Cross2Icon onClick={onRemove(column)} />
+        </div>
+    );
+};
+
+const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
+    const [columnStore, pivot] = useBeastStore((state) => [state.initialColumns, state.pivot]);
+    const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
+
+    const [, drop] = useDrop(() => ({
+        accept: ['COLUMN', 'BOX'],
+        drop: (item: { id: string }) => {
+            if (columns.current.find((c) => c.id === item.id)) {
+                return;
+            }
+            const column = columnStore[item.id];
+
+            const newState = columns.current.concat(clone(column));
+
+            columns.current = newState;
+            onChanges(columns.current);
+        },
+    }));
+
+    const removeColumn = (column: Column) => () => {
+        columns.current = columns.current.filter((c) => c.id !== column.id);
+        onChanges(columns.current);
+    };
+
+    const onHover = (index: number, hoverIndex: number) => {
+        const dragColumn = columns.current[index];
+        const hoverColumn = columns.current[hoverIndex];
+
+        columns.current[index] = hoverColumn;
+        columns.current[hoverIndex] = dragColumn;
+
+        onChanges(columns.current);
+    };
 
     return (
         <div className="bg-box column left" ref={drop}>
-            {columns.length ? (
-                columns.map((column) => (
-                    <div className="row middle bg-chip">
-                        <label>{column.headerName}</label>
-                        <Cross2Icon onClick={() => setColumns((prev) => prev.filter((c) => c.id !== column.id))} />
-                    </div>
+            {columns.current.length ? (
+                columns.current.map((column, idx) => (
+                    <Box
+                        key={`${pivotType}-${column.id}`}
+                        index={idx}
+                        column={column}
+                        onRemove={removeColumn}
+                        onHover={onHover}
+                    />
                 ))
             ) : (
                 <label>{pivotType}</label>

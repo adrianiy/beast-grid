@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useBeastStore } from './../../stores/beast-store';
 
 import { BeastGridConfig, Column } from '../../common/interfaces';
-import { HeaderEvents, MIN_COL_WIDTH, PinType } from '../../common';
-import { groupBy } from '../../utils/functions';
+import { HeaderEvents, PinType } from '../../common';
 
 import HeaderSection from './header-section';
-import { v4 as uuidv4 } from 'uuid';
 
 import './header.scss';
 
@@ -19,53 +16,16 @@ type Props<T> = {
 };
 
 export default function Header<T>({ height, border, multiSort, dragOptions, events }: Props<T>) {
-    const [columns, pivot, data] = useBeastStore((state) => [state.columns, state.pivot, state.data]);
-    const [levels, setLevels] = useState<Column[][]>([]);
+    const [columns] = useBeastStore((state) => [state.columns]);
 
-    useEffect(() => {
-        let _levels: Column[][] = [];
-
-        if (pivot?.columns) {
-            pivot?.columns.forEach((column) => {
-                const groupedData = groupBy(data, column, []);
-                const values = groupedData.map((row) => row[column.field as string]);
-
-                // convert values to columnDefs
-
-                const columns: Column[] = values.map((value, idx) => {
-                    return {
-                        id: uuidv4(),
-                        position: idx,
-                        idx,
-                        level: 0,
-                        final: true,
-                        headerName: `${value}`,
-                        field: `${value}`,
-                        width: MIN_COL_WIDTH,
-                        pinned: PinType.NONE,
-                        finalPosition: idx,
-                        top: 0,
-                        left: idx * MIN_COL_WIDTH
-                    };
-                });
-                console.log("columns", columns);
-
-                _levels.push(columns);
-            });
-        } else {
-            _levels = Object.values(columns).reduce((acc, column) => {
-                const level = column.level || 0;
-                acc[level] = acc[level] || [];
-                acc[level].push(column);
-                return acc;
-            }, [] as Column[][]);
-        }
-
-        setLevels(_levels);
-    }, [columns, pivot, data]);
+    const levels = Object.values(columns).reduce((acc, column) => {
+        const level = column.level || 0;
+        acc[level] = acc[level] || [];
+        acc[level].push(columns[column.id]);
+        return acc;
+    }, [] as Column[][]);
 
     if (!levels.length) return null;
-
 
     const levelZero = levels[0].filter((column) => !column.hidden);
 

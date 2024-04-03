@@ -1,10 +1,12 @@
+import React, { useRef } from 'react';
+
 import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 
-import cn from 'classnames';
 import { LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
-import React, { useRef } from 'react';
+
+import cn from 'classnames';
 
 function getProperty<Key extends keyof Row>(
     row: Row,
@@ -59,7 +61,6 @@ export function RowCell({
     columnDef,
     border,
     expandableSibling,
-    config,
     level,
     groupOrder,
     columns,

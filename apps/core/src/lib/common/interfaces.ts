@@ -131,10 +131,15 @@ export interface Chart {
     config: Partial<EChartsCoreOption>;
 }
 
+export interface Pivot {
+    enabled: boolean;
+}
+
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
     columnDefs: ColumnDef[];
     defaultColumnDef?: Partial<ColumnDef>;
     data: T;
+    pivot?: Partial<Pivot>;
     sort?: Partial<SortConfig>;
     row?: Partial<RowConfig>;
     header?: Partial<HeaderConfig>;

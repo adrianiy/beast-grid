@@ -12,6 +12,7 @@
     "menu.column.collapse": "Collapse groups",
     "menu.column.group": "Group by {columnName}",
     "menu.column.ungroup": "Ungroup",
+    "sidebar.pivot": "Dynamic table",
     "sidebar.pivotBy": "Pivot",
     "toolbar.mode.grid": "Table",
     "toolbar.mode.chart": "Chart",
