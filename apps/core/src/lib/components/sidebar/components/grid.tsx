@@ -77,7 +77,7 @@ const ItemLabel = ({
 }: {
     item: Column;
     checked: boolean;
-    onClick: React.MouseEventHandler<HTMLDivElement>;
+    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
     const [, drag] = useDrag(() => ({
         type: item.childrenId?.length ? 'PARENT' : 'COLUMN',
@@ -110,7 +110,7 @@ const Options = ({
 }) => {
     const [hideColumn, hiddenColumns] = useBeastStore((state) => [state.hideColumn, state.hiddenColumns]);
 
-    const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         hideColumn(column.id);
     };
