@@ -46,38 +46,40 @@ const getGroupRows = (
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
 
     return Object.entries(groups).map(([key, children]) => {
-        const calculatedFields =
-                aggTypeColumns.reduce((acc, column) => {
-                      if (aggregationColumns) {
-                          const setChildrenFieldsByAggregation = (aggColumn: Column) => {
-                              const [field, ...rest] = (aggColumn.field || '').split('@');
-                              children.forEach((child) => {
-                                  const match = rest.map((restField) => {
-                                      const [aggField, aggValue] = restField.split(':');
-                                      return `${child[aggField as keyof Row]}` === aggValue;
-                                  });
+        const calculatedFields = aggTypeColumns.reduce(
+            (acc, column) => {
+                if (aggregationColumns) {
+                    const setChildrenFieldsByAggregation = (aggColumn: Column) => {
+                        const [field, rest] = (aggColumn.field || '').split('@');
+                        children.forEach((child) => {
+                            const match = rest?.split('&').map((filterField) => {
+                                const [aggField, aggValue] = filterField.split(':');
+                                return `${child[aggField as keyof Row]}` === aggValue;
+                            });
 
-                                  if (match.every(Boolean)){
-                                      child[aggColumn.field as string] = child[field as keyof Row];
-                                  }
-                              });
+                            if (match?.every(Boolean)) {
+                                child[aggColumn.field as string] = child[field as keyof Row];
+                            }
+                        });
 
-                              acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
+                        acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
 
-                              if (aggColumn.children) {
-                                  aggColumn.children.forEach((aggChildColumn) => {
-                                      setChildrenFieldsByAggregation(aggChildColumn as Column);
-                                  });
-                              }
-                          };
-                          aggregationColumns.forEach((aggColumn) => {
-                              setChildrenFieldsByAggregation(aggColumn);
-                          });
-                      } else {
-                          acc[column.field as string] = _calculate(children, column) || null;
-                      }
-                      return acc;
-                  }, children.length > 1 ? {} as Record<string, number | null> : children[0])
+                        if (aggColumn.children) {
+                            aggColumn.children.forEach((aggChildColumn) => {
+                                setChildrenFieldsByAggregation(aggChildColumn as Column);
+                            });
+                        }
+                    };
+                    aggregationColumns.forEach((aggColumn) => {
+                        setChildrenFieldsByAggregation(aggColumn);
+                    });
+                } else {
+                    acc[column.field as string] = _calculate(children, column) || null;
+                }
+                return acc;
+            },
+            children.length > 1 ? ({} as Record<string, number | null>) : children[0]
+        );
 
         const newRow = {
             [field]: key,
@@ -243,7 +245,9 @@ export const getSeries = (columns: Column[], data: Data, chartConfig?: Partial<C
     }
 
     const rowZero = data[0];
-    const numberSeries = columns.filter((column) => !isNaN(+(rowZero[column.field as keyof Row] as number)));
+    const numberSeries = columns.filter(
+        (column) => column.final && !isNaN(+(rowZero[column.field as keyof Row] as number))
+    );
 
     return numberSeries;
 };
@@ -258,7 +262,7 @@ export function clone<T>(obj: T): T {
 }
 
 export function getAggregationType(column: Column | undefined, row: Row): AggregationType | AggregationFunction {
-    if (column?.aggregation) {
+    if (column?.aggregation && typeof column.aggregation === 'string') {
         return column.aggregation;
     }
 
@@ -268,4 +272,3 @@ export function getAggregationType(column: Column | undefined, row: Row): Aggreg
 
     return AggregationType.COUNT;
 }
-

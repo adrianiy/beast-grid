@@ -137,11 +137,11 @@ const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     if (column.hidden) {
         return;
     }
-    if (!column.childrenId) {
+    if (!column.childrenId?.length) {
         column.width = column.width || MIN_COL_WIDTH;
     }
 
-    if (column.childrenId) {
+    if (column.childrenId?.length) {
         column.childrenId?.forEach((childId) => {
             _getChildrenWidth(columnStore[childId], columnStore);
         });

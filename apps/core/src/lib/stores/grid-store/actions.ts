@@ -24,11 +24,12 @@ import {
     Data,
     FilterType,
     PinType,
+    Row,
     SelectedCells,
     SideBarConfig,
     SortType,
 } from '../../common';
-import { createGroupColumn } from './utils/group';
+import { createGroupColumn, getDynamicHeaders } from './utils/group';
 import { clone, getAggregationType, groupBy, groupByMultiple } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
@@ -88,6 +89,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     mergeColumns(columns);
 
     sortedColumns = sortColumns(columns);
+    console.log(sortedColumns)
 
     moveColumns(columns, sortedColumns, column1.pinned, 0);
 
@@ -365,38 +367,7 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         }
 
         if (pivot.columns) {
-            const getDynamicHeaders = (columnIdx: number, data: Data, value: Column, parentField = '') => {
-                if (!pivot.columns || columnIdx >= pivot.columns.length || !data.length) {
-                    return;
-                }
-                if (pivot.values) {
-                    pivot.values.forEach((val) => {
-                        val.aggregation = getAggregationType(val, data[0]);
-                    });
-                }
-                const column = pivot.columns[columnIdx];
-                const groupedData = groupBy(data, column, pivot.values || []);
-                const newColumnDefs: ColumnDef[] = [];
-
-                groupedData.forEach((group) => {
-                    const groupField = `${parentField}@${column.field}:${group[column.field as string]}`;
-                    const field = `${value?.field || ''}${groupField}`;
-                    newColumnDefs.push({
-                        headerName: !parentField
-                            ? `${group[column.field as string]}${value?.headerName ? ' | ' + value.aggregation + ' of ' + value.headerName : ''}`
-                            : `${group[column.field as string]}`,
-                        field,
-                        flex: 1,
-                        aggregation: getAggregationType(value, data[0]),
-                        children: getDynamicHeaders(columnIdx + 1, group.children || [], value, groupField),
-                    });
-                });
-
-                return newColumnDefs;
-            };
-            (pivot.values || [null]).forEach((val) => {
-                columnDefs.push(...(getDynamicHeaders(0, initialData, val as Column) || []));
-            });
+            columnDefs.push(...getDynamicHeaders(0, initialData || [], pivot.columns || [], pivot.values || []));
         }
 
         const columns = getColumnsFromDefs([...rowColumnDefs, ...columnDefs], defaultColumnDef);

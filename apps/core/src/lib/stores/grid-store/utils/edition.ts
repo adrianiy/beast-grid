@@ -25,11 +25,11 @@ const _updateParent = (parent: Column, columns: ColumnStore) => {
     });
 };
 const _mergeIn = (parent: Column, column: Column, columns: ColumnStore) => {
-    parent.childrenId?.push(...(column.childrenId || []));
+    parent.childrenId?.push(...(column.childrenId || []).filter(id => columns[id]));
     _updateParent(parent, columns);
 };
 const _mergeTo = (parent: Column, column: Column, columns: ColumnStore) => {
-    parent.childrenId = [...(column.childrenId || []), ...(parent.childrenId || [])];
+    parent.childrenId = [...(column.childrenId || []).filter(id => columns[id]), ...(parent.childrenId || [])];
     _updateParent(parent, columns);
 };
 
@@ -61,12 +61,18 @@ export const mergeColumns = (columns: ColumnStore) => {
             _mergeIn(lastColumn, column, columns);
             changePosition(columns, lastColumn, [lastColumn.id], -1);
             delete columns[column.id];
+            if (column.parent) {
+                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
+            }
             position--;
         }
         if (lastColumn.original === column.id) {
             _mergeTo(column, lastColumn, columns);
             column.position = lastColumn.position;
             delete columns[lastColumn.id];
+            if (column.parent) {
+                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
+            }
             position--;
         }
         if (lastColumn.original && lastColumn.original === column.original) {
@@ -104,6 +110,10 @@ const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
 export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, finalPosition = 0) => {
     columnIds.forEach((columnId) => {
         const column = columns[columnId];
+
+        if (!column) {
+            return;
+        }
 
         if (column.childrenId) {
             finalPosition = setFinalPosition(column.childrenId as ColumnId[], columns, finalPosition);

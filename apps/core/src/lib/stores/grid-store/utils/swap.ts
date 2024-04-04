@@ -19,6 +19,8 @@ const _getParentClone = (column: Column, columns: ColumnStore): Column => {
     parent.childrenId = parent.childrenId?.filter((child) => child !== column.id);
     _changeCloneStyles(column, parent, parentClone, columns);
 
+    columns[id] = parentClone;
+
     return _getParentClone(parentClone, columns);
 };
 
@@ -30,18 +32,21 @@ const _cloneColumn = (column: Column, columns: ColumnStore): Column => {
     return parentClone;
 };
 
-const _getParent = (column: Column, columns: ColumnStore): Column => {
-    if (!column.parent) {
-        return column;
+const _getParents = (column: Column, column2: Column, columns: ColumnStore): [Column, Column] => {
+    if (!column || !column2 || !column.parent || !column2.parent) {
+        return [column, column2];
+    }
+    if (column.parent === column2.parent) {
+        return [column, column2];
     }
 
-    return _getParent(columns[column.parent], columns);
+    return _getParents(columns[column.parent], columns[column2.parent], columns);
 };
 
 export const getSwappableClone = (column1: Column, column2: Column, columns: ColumnStore): [Column, Column] => {
     const ltr = column1.left < column2.left;
-    const parent1 = _getParent(column1, columns);
-    const parent2 = _getParent(column2, columns);
+    const [parent1, parent2] = _getParents(column1, column2, columns);
+
     let swappable1 =
         columns[column1.parent as ColumnId]?.childrenId?.length === 1 ? parent1 : column1.parent ? undefined : column1;
     let swappable2 =
@@ -57,6 +62,9 @@ export const getSwappableClone = (column1: Column, column2: Column, columns: Col
             changePosition(columns, swappable2, [ltr ? swappable2.id : parent2.id], 1);
         }
     }
+    console.log('swappable1', swappable1);
+    console.log('swappable2', swappable2);
+    console.log('columns', columns);
 
     return [swappable1, swappable2];
 };
