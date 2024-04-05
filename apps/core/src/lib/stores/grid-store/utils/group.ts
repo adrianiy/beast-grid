@@ -40,11 +40,12 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
 export const getValueHeaders = (group: Row, values: Column[], parentField = ''): ColumnDef[] => {
     const columnDefs: ColumnDef[] = [];
     values.forEach((val) => {
-        const aggregation = getAggregationType(val, group);
+        const aggregation = val.aggregation;
 
         columnDefs.push({
             headerName: `${aggregation} of ${val.headerName}`,
-            field: `${val.field}@${parentField}`,
+            pivotField: `${val.field}@${parentField}`,
+            field: val.field,
             flex: 1,
             aggregation,
         });

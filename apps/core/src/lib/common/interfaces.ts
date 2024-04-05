@@ -46,6 +46,7 @@ export interface BaseColumnDef {
     headerName: string;
     pinned?: PinType;
     field?: string;
+    pivotField?: string;
     sortable?: boolean;
     children?: ColumnDef[];
     formatter?: (value: string & number, row: Row) => string;

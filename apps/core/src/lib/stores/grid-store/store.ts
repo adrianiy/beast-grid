@@ -32,7 +32,7 @@ import {
     SortType,
     TreeConstructor,
 } from '../../common';
-import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
+import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, setColumnAggregationDefaults, sortColumns } from './utils';
 import { clone } from '../../utils/functions';
 
 export interface PivotState {
@@ -106,10 +106,13 @@ export const createGridStore = <T>(
     theme: string
 ) => {
     const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
+
     const groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
     const initialData = createVirtualIds(_data as Data);
+
+    setColumnAggregationDefaults(columns, initialData);
 
     const data = initialize(columns, container, initialData, groupOrder, tree);
     const sortedColumns = sortColumns(columns);

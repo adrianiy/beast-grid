@@ -1,6 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Column, ColumnId, IFilter } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
     addSort,
@@ -89,7 +90,6 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     mergeColumns(columns);
 
     sortedColumns = sortColumns(columns);
-    console.log(sortedColumns)
 
     moveColumns(columns, sortedColumns, column1.pinned, 0);
 
@@ -351,6 +351,7 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
 
 export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
     const { pivot: currentPivot, initialData, defaultColumnDef, container } = state;
+    const data = clone(initialData);
 
     const pivot = { ...currentPivot, ...newPivot };
 
@@ -359,27 +360,45 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         const columnDefs: ColumnDef[] = [];
 
         if (pivot.rows?.length) {
-            rowColumnDefs.push({
-                headerName: pivot.rows[0].headerName,
-                field: pivot.rows[0].headerName,
-                width: MIN_COL_WIDTH,
+            pivot.rows.forEach((row) => {
+                rowColumnDefs.push({
+                    id: uuidv4(),
+                    headerName: row.headerName,
+                    field: row.field,
+                    width: MIN_COL_WIDTH,
+                });
             });
         }
 
         if (pivot.columns) {
-            columnDefs.push(...getDynamicHeaders(0, initialData || [], pivot.columns || [], pivot.values || []));
+            columnDefs.push(...getDynamicHeaders(0, data || [], pivot.columns || [], pivot.values || []));
         }
 
         const columns = getColumnsFromDefs([...rowColumnDefs, ...columnDefs], defaultColumnDef);
+        const groupOrder: ColumnId[] = [];
+
+        if (pivot.rows?.length) {
+            rowColumnDefs.forEach((columnDef) => {
+                const column = columns[columnDef.id as ColumnId];
+                const newColumn = createGroupColumn(column, columns, { name: 'rows', field: 'tree', width: 200, menu: { grid: true, pin: true } });
+
+                column.hidden = true;
+
+                newColumn.rowGroup = true;
+
+                groupOrder.push(column.id);
+            });
+        }
         const sortedColumns = sortColumns(columns);
 
-        const newData = groupByMultiple(initialData, pivot.rows || [], pivot.values || [], columnDefs as Column[]);
+
+        const newData = groupDataByColumnDefs(columns, sortedColumns.filter(c => !c.hidden && !c.tree && c.final), data, groupOrder, 0, true);
 
         setColumnsStyleProps(columns, container.offsetWidth);
         moveColumns(columns, sortedColumns, PinType.LEFT, 0);
         moveColumns(columns, sortedColumns, PinType.NONE, 0);
 
-        return { pivot, columns, sortedColumns, data: newData, edited: true };
+        return { pivot, columns, sortedColumns, data: newData, edited: true, groupOrder };
     }
 
     return { pivot, edited: true };

@@ -272,7 +272,7 @@ const AggSelection = ({
             <Select
                 options={options}
                 label={
-                    <label>{column.aggregation as string || 'FUNC'}</label>
+                    <label>{column.aggregation as string}</label>
                 }
                 activeOption={options.find((opt) => opt.value === column.aggregation)}
                 theme={theme}

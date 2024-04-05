@@ -146,7 +146,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     const [options, setOptions] = useState<EChartsCoreOption>();
 
     useEffect(() => {
-        const aggColumns = columns.filter((col) => col.aggregation);
+        const aggColumns = values.filter((col) => col.aggregation);
         const groupedData = category ? groupBy(data, category, aggColumns) : data;
         const categories = category
             ? groupedData.map((row) => row[category.field as string])

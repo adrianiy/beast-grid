@@ -10,6 +10,7 @@ import {
     ColumnId,
     TreeConstructor,
     FilterType,
+    AggregationType,
 } from '../../../common';
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
@@ -101,9 +102,10 @@ export const groupDataByColumnDefs = (
     aggColumns: Column[],
     data: Data,
     groupOrder: ColumnId[],
-    level = 0
+    level = 0,
+    pivoting = false
 ): Data => {
-    const aggregationLevel = Object.values(columns).find((c) => groupOrder && c.id === groupOrder[level]);
+    const aggregationLevel = columns[groupOrder[level]];
 
     if (!aggregationLevel) {
         return data;
@@ -112,10 +114,20 @@ export const groupDataByColumnDefs = (
     const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
 
     finalData.forEach((row) => {
-        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
+        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1, pivoting);
         row.children.forEach((child) => {
             child._level = level + 1;
         });
+
+        if (pivoting) {
+            if (groupOrder.length - 1 === level) {
+                row.children = undefined;
+                row._singleChild = true;
+            } else {
+                row._singleChild = false;
+            }
+        }
+
     });
 
     return finalData;
@@ -200,6 +212,20 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
         }
     });
 };
+
+export const setColumnAggregationDefaults = (columns: ColumnStore, data: Data) => {
+    Object.values(columns).forEach((column) => {
+        if (column.aggregation) {
+            return;
+        }
+
+        if (typeof data[0][column.field as string] === 'number') {
+            column.aggregation = AggregationType.SUM;
+        } else {
+            column.aggregation = AggregationType.COUNT;
+        }
+    });
+}
 
 export const initialize = (
     columns: ColumnStore,

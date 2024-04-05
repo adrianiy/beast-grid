@@ -50,15 +50,19 @@ const getGroupRows = (
             (acc, column) => {
                 if (aggregationColumns) {
                     const setChildrenFieldsByAggregation = (aggColumn: Column) => {
-                        const [field, rest] = (aggColumn.field || '').split('@');
+                        const [, rest] = (aggColumn.pivotField || '').split('@');
                         children.forEach((child) => {
-                            const match = rest?.split('&').map((filterField) => {
-                                const [aggField, aggValue] = filterField.split(':');
-                                return `${child[aggField as keyof Row]}` === aggValue;
-                            });
+                            if (rest) {
+                                const match = rest?.split('&').map((filterField) => {
+                                    const [aggField, aggValue] = filterField.split(':');
+                                    return `${child[aggField as keyof Row]}` === aggValue;
+                                });
 
-                            if (match?.every(Boolean)) {
-                                child[aggColumn.field as string] = child[field as keyof Row];
+                                if (match?.every(Boolean)) {
+                                    child[field] = child[field as keyof Row];
+                                }
+                            } else {
+                                child[field] = child[field as keyof Row];
                             }
                         });
 

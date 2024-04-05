@@ -48,7 +48,8 @@ const createData = (count) => {
 const createDateData = (count) => {
   return [
     { id: 0, date: '2021-01-01', week: 1, country: 'USA', language: 'English', orders: 100, units: 1000 },
-    { id: 1, date: '2021-01-01', week: 1, country: 'Spain', language: 'Spanish', orders: 200, units: 2000 },
+    { id: 1, date: '2021-01-02', week: 1, country: 'Spain', language: 'Spanish', orders: 200, units: 2000 },
+    { id: 1, date: '2021-01-02', week: 1, country: 'USA', language: 'Spanish', orders: 200, units: 2000 },
     { id: 1, date: '2021-01-12', week: 2,  country: 'USA', language: 'English', orders: 200, units: 2000 },
     { id: 1, date: '2021-01-12', week: 2, country: 'Spain', language: 'Spanish', orders: 200, units: 2000},
     { id: 2, date: '2021-01-23', week: 3, country: 'USA', language: 'English', orders: 300, units: 3000 },
