@@ -168,6 +168,7 @@ export function RowCell({
                 left: columnDef.left,
                 paddingLeft:
                     LEVEL_PADDING +
+                    (expandableSibling && row.children?.length === 1 && columnDef.rowGroup ? LEVEL_PADDING + 2 : 0) +
                     (columnDef.tree ? LEVEL_PADDING * level : 0) +
                     (columnDef.tree && !row.children && !pivot ? LEVEL_PADDING : 0),
                 width: columnDef.width,

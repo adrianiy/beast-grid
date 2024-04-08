@@ -143,9 +143,10 @@ export default function TBody<T>({
                 }
                 setTimeout(() => {
                     newSortedData.sort(sortData(sortColumns));
-                    updateGaps(0, sortedData);
+                    updateGaps(0, newSortedData);
 
                     setSortedData([...newSortedData]);
+
                     if (data.length > PERFORMANCE_LIMIT) {
                         setTimeout(() => setSorting(false), 100);
                     }
@@ -326,7 +327,6 @@ export default function TBody<T>({
         const chartColumns = finalColumns.slice(selectedCells?.start.x, selectedCells.end.x + 1);
 
         const actionData = getActionData(sortedData, selectedCells.start.y, selectedCells.end.y)[0];
-        console.log(selectedCells, actionData);
 
         setChartColumns(chartColumns);
         setChartData(actionData);

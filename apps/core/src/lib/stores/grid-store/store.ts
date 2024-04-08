@@ -112,8 +112,6 @@ export const createGridStore = <T>(
         .map((col) => col.id);
     const initialData = createVirtualIds(_data as Data);
 
-    setColumnAggregationDefaults(columns, initialData);
-
     const data = initialize(columns, container, initialData, groupOrder, tree);
     const sortedColumns = sortColumns(columns);
 
