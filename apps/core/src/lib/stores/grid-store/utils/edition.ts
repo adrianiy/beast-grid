@@ -52,32 +52,34 @@ export const mergeColumns = (columns: ColumnStore) => {
                 a.left - b.left
         )
         .filter((column) => (column.final && !column.parent) || column.childrenId);
+    const moved: string[] = [];
+
     let lastColumn: Column = sortedColumns[0];
     let position = 0;
 
     for (const column of sortedColumns.slice(1)) {
+        if (moved.includes(column.id)) {
+            continue;
+        }
         columns[column.id].position = ++position;
         if (lastColumn.id === column.original) {
             _mergeIn(lastColumn, column, columns);
             changePosition(columns, lastColumn, [lastColumn.id], -1);
+            moved.push(...column.childrenId || []);
             delete columns[column.id];
-            if (column.parent) {
-                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
-            }
             position--;
         }
         if (lastColumn.original === column.id) {
             _mergeTo(column, lastColumn, columns);
             column.position = lastColumn.position;
+            moved.push(...column.childrenId || []);
             delete columns[lastColumn.id];
-            if (column.parent) {
-                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
-            }
             position--;
         }
         if (lastColumn.original && lastColumn.original === column.original) {
             _mergeIn(lastColumn, column, columns);
             changePosition(columns, lastColumn, [lastColumn.id], -1);
+            moved.push(...column.childrenId || []);
             delete columns[column.id];
             position--;
         }

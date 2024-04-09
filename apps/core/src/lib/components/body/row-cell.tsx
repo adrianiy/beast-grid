@@ -137,6 +137,7 @@ export function RowCell({
     };
 
     const handleMouseClick = (e: React.MouseEvent) => {
+        console.log(e)
         const coords = { x: columnDef.finalPosition, y: idx };
         if (e.shiftKey && selectable) {
             setSelectedEnd(coords);
@@ -168,7 +169,7 @@ export function RowCell({
                 left: columnDef.left,
                 paddingLeft:
                     LEVEL_PADDING +
-                    (expandableSibling && row.children?.length === 1 && columnDef.rowGroup ? LEVEL_PADDING + 2 : 0) +
+                    (expandableSibling && row.children?.length === 1 && columnDef.rowGroup && !columnDef.tree ? LEVEL_PADDING + 2 : 0) +
                     (columnDef.tree ? LEVEL_PADDING * level : 0) +
                     (columnDef.tree && !row.children && !pivot ? LEVEL_PADDING : 0),
                 width: columnDef.width,
