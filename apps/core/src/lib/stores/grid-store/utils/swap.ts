@@ -87,16 +87,6 @@ export const getSwappableClone = (column1: Column, column2: Column, columns: Col
     const [breakNode1, breakNode2] = _getLastDifferentColumn(column1, column2, columns);
     const [children1, children2] = _countMaxParentsChildren(column1, column2, breakNode1, breakNode2, columns);
 
-    console.log(
-        JSON.parse(JSON.stringify(diffColumn1)),
-        JSON.parse(JSON.stringify(diffColumn2)),
-        JSON.parse(JSON.stringify(breakNode1)),
-        JSON.parse(JSON.stringify(breakNode2)),
-        children1,
-        children2,
-        ltr
-    )
-
     let [swappable1, swappable2]: [Column | undefined, Column | undefined] = [undefined, undefined];
 
     if (children1 > 1) {
