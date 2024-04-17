@@ -22,16 +22,14 @@ import {
     ColumnDef,
     ColumnStore,
     Coords,
-    Data,
     FilterType,
     PinType,
-    Row,
     SelectedCells,
     SideBarConfig,
     SortType,
 } from '../../common';
 import { createGroupColumn, getDynamicHeaders } from './utils/group';
-import { clone, getAggregationType, groupBy, groupByMultiple } from '../../utils/functions';
+import { clone } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
     const { columns } = state;

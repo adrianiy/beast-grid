@@ -91,17 +91,18 @@ export const getSwappableClone = (column1: Column, column2: Column, columns: Col
         JSON.parse(JSON.stringify(diffColumn1)),
         JSON.parse(JSON.stringify(diffColumn2)),
         JSON.parse(JSON.stringify(breakNode1)),
+        JSON.parse(JSON.stringify(breakNode2)),
         children1,
-        children2
+        children2,
+        ltr
     )
 
     let [swappable1, swappable2]: [Column | undefined, Column | undefined] = [undefined, undefined];
 
     if (children1 > 1) {
         swappable1 = _cloneColumn(column1, columns, breakNode1.id);
-        const path = _getChildrenPath(breakNode1, columns);
-        console.log(path)
-        changePosition(columns, swappable1, !ltr ? path.map(c => c.id) : [swappable1.id], 1);
+        const path = _getChildrenPath(breakNode1, columns).map(c => c.id);
+        changePosition(columns, swappable1, ltr ? path : [swappable1.id], 1);
     } else if (children1 === 1) {
         swappable1 = breakNode1
     } else {
@@ -109,19 +110,14 @@ export const getSwappableClone = (column1: Column, column2: Column, columns: Col
     }
     if (children2 > 1) {
         swappable2 = _cloneColumn(column2, columns, breakNode2.id);
-        const path = _getChildrenPath(breakNode2, columns);
-        console.log(path)
-        changePosition(columns, swappable2, !ltr ? path.map(c => c.id) : [swappable2.id], 1);
+        const path = _getChildrenPath(breakNode2, columns).map(c => c.id);
+
+        changePosition(columns, swappable2, !ltr ? path : [swappable2.id], 1);
     } else if (children2 === 1) {
         swappable2 = breakNode2;
     } else {
         swappable2 = diffColumn2;
     }
-
-    console.log(
-        JSON.parse(JSON.stringify(swappable1)),
-        JSON.parse(JSON.stringify(swappable2)),
-    )
 
     return [swappable1, swappable2];
 };
