@@ -97,7 +97,8 @@ const _moveColumns = (columns: Column[], columnStore: ColumnStore, left = 0) => 
         left += column.width || 150;
 
         if (column.childrenId) {
-            _moveColumns(column.childrenId.map((id) => columnStore[id]), columnStore, column.left);
+            const sortedChildren = column.childrenId.sort((a, b) => columnStore[a].position - columnStore[b].position);
+            _moveColumns(sortedChildren.map(id => columnStore[id]), columnStore, column.left);
         }
     });
 }

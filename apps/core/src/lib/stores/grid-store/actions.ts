@@ -89,7 +89,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
 
     sortedColumns = sortColumns(columns);
 
-    moveColumns(columns, sortedColumns, column1.pinned, 0);
+    moveColumns(columns, sortedColumns, column1.pinned);
 
     return { columns, sortedColumns, edited: true };
 };
