@@ -22,7 +22,7 @@ export default function Welcome() {
           <h3>Unleash your data&apos;s inner beast!</h3>
           <div className="row middle misc">
             <Code
-              code="npm i beast-grid@0.0.32"
+              code="npm i beast-grid@0.1.0"
               language={'sh'}
               canCopy
               style={{ width: 250 }}
