@@ -24,13 +24,21 @@ const _updateParent = (parent: Column, columns: ColumnStore) => {
         parent.width += columns[id].width;
     });
 };
-const _mergeIn = (parent: Column, column: Column, columns: ColumnStore) => {
-    parent.childrenId?.push(...(column.childrenId || []).filter(id => columns[id]));
-    _updateParent(parent, columns);
+const _mergeIn = (main: Column, column: Column, columns: ColumnStore) => {
+    main.childrenId?.push(...(column.childrenId || []).filter((id) => columns[id]));
+    if (columns[column.parent as string]) {
+        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) => (id === column.id ? main.id : id));
+    }
+    _updateParent(main, columns);
 };
-const _mergeTo = (parent: Column, column: Column, columns: ColumnStore) => {
-    parent.childrenId = [...(column.childrenId || []).filter(id => columns[id]), ...(parent.childrenId || [])];
-    _updateParent(parent, columns);
+const _mergeTo = (main: Column, column: Column, columns: ColumnStore) => {
+    main.childrenId = [...(column.childrenId || []).filter((id) => columns[id]), ...(main.childrenId || [])];
+    if (columns[column.parent as string]) {
+        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) => (id === column.id ? main.id : id));
+    }
+
+
+    _updateParent(main, columns);
 };
 
 export const changePosition = (columns: ColumnStore, pivot: Column, ignoreIds: ColumnId[], increase: number) => {
@@ -52,6 +60,7 @@ export const mergeColumns = (columns: ColumnStore) => {
                 a.left - b.left
         )
         .filter((column) => (column.final && !column.parent) || column.childrenId);
+
     let lastColumn: Column = sortedColumns[0];
     let position = 0;
 
@@ -61,18 +70,12 @@ export const mergeColumns = (columns: ColumnStore) => {
             _mergeIn(lastColumn, column, columns);
             changePosition(columns, lastColumn, [lastColumn.id], -1);
             delete columns[column.id];
-            if (column.parent) {
-                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
-            }
             position--;
         }
         if (lastColumn.original === column.id) {
             _mergeTo(column, lastColumn, columns);
             column.position = lastColumn.position;
             delete columns[lastColumn.id];
-            if (column.parent) {
-                columns[column.parent].childrenId = columns[column.parent].childrenId?.filter((id) => columns[id]);
-            }
             position--;
         }
         if (lastColumn.original && lastColumn.original === column.original) {
@@ -85,24 +88,25 @@ export const mergeColumns = (columns: ColumnStore) => {
     }
 };
 
-export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinType: PinType, initialLeft?: number) => {
-    let lastColumn: Column = sortedColumns[0];
-    let left = initialLeft ?? (lastColumn?.left || 0);
-
-    for (const column of sortedColumns) {
-        if (column.pinned !== pinType || column.hidden) {
-            continue;
+const _moveColumns = (columns: Column[], columnStore: ColumnStore, left = 0) => {
+    columns.forEach((column) => {
+        if (column.hidden) {
+            return;
         }
-        if (column.parent && lastColumn.parent !== column.parent) {
-            left = 0;
+        column.left = left;
+        left += column.width || 150;
+
+        if (column.childrenId) {
+            const sortedChildren = column.childrenId.sort((a, b) => columnStore[a].position - columnStore[b].position);
+            _moveColumns(sortedChildren.map(id => columnStore[id]), columnStore, column.left);
         }
-        lastColumn = column;
+    });
+}
 
-        columns[column.id].left = left + (columns[column.parent as string]?.left || 0);
-        left += columns[column.id].width || 150;
-    }
+export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinType: PinType) => {
+    const levelZero = sortedColumns.filter((column) => column.level === 0 && column.pinned === pinType);
 
-    return left;
+    _moveColumns(levelZero, columns, 0);
 };
 
 const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
@@ -126,6 +130,7 @@ export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, fi
     return finalPosition;
 };
 
+
 export const sortColumns = (columns: ColumnStore) => {
     const sortedColumns = Object.values(columns).sort(
         (a, b) =>
@@ -140,6 +145,7 @@ export const sortColumns = (columns: ColumnStore) => {
         sortedColumns.filter((c) => c.level === 0).map((c) => c.id),
         columns
     );
+
 
     return sortedColumns;
 };

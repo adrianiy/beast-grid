@@ -22,16 +22,14 @@ import {
     ColumnDef,
     ColumnStore,
     Coords,
-    Data,
     FilterType,
     PinType,
-    Row,
     SelectedCells,
     SideBarConfig,
     SortType,
 } from '../../common';
 import { createGroupColumn, getDynamicHeaders } from './utils/group';
-import { clone, getAggregationType, groupBy, groupByMultiple } from '../../utils/functions';
+import { clone } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
     const { columns } = state;
@@ -91,7 +89,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
 
     sortedColumns = sortColumns(columns);
 
-    moveColumns(columns, sortedColumns, column1.pinned, 0);
+    moveColumns(columns, sortedColumns, column1.pinned);
 
     return { columns, sortedColumns, edited: true };
 };
@@ -220,8 +218,8 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
     }
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
-    moveColumns(columns, sortedColumns, PinType.NONE, 0);
-    moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+    moveColumns(columns, sortedColumns, PinType.NONE);
+    moveColumns(columns, sortedColumns, PinType.RIGHT);
 
     return { columns, edited: true };
 };
@@ -245,9 +243,9 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 
     const sortedColumns = sortColumns(columns);
 
-    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
-    moveColumns(columns, sortedColumns, PinType.NONE, 0);
-    moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+    moveColumns(columns, sortedColumns, PinType.LEFT);
+    moveColumns(columns, sortedColumns, PinType.NONE);
+    moveColumns(columns, sortedColumns, PinType.RIGHT);
 
     return { columns, groupOrder, data, sortedColumns, edited: true };
 };
@@ -276,9 +274,9 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
 
     const sortedColumns = sortColumns(columns);
 
-    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
-    moveColumns(columns, sortedColumns, PinType.NONE, 0);
-    moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+    moveColumns(columns, sortedColumns, PinType.LEFT);
+    moveColumns(columns, sortedColumns, PinType.NONE);
+    moveColumns(columns, sortedColumns, PinType.RIGHT);
 
     return { columns, groupOrder, data, sortedColumns, edited: true };
 };
@@ -311,9 +309,9 @@ export const autoSizeColumns = () => (state: GridStore) => {
     const { columns, container, sortedColumns } = state;
 
     setColumnsStyleProps(columns, container.offsetWidth);
-    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
-    moveColumns(columns, sortedColumns, PinType.NONE, 0);
-    moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+    moveColumns(columns, sortedColumns, PinType.LEFT);
+    moveColumns(columns, sortedColumns, PinType.NONE);
+    moveColumns(columns, sortedColumns, PinType.RIGHT);
 
     return { columns };
 };
@@ -332,9 +330,9 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
         .map((col) => col.id);
 
     setColumnsStyleProps(columns, container.offsetWidth);
-    moveColumns(columns, sortedColumns, PinType.LEFT, 0);
-    moveColumns(columns, sortedColumns, PinType.NONE, 0);
-    moveColumns(columns, sortedColumns, PinType.RIGHT, 0);
+    moveColumns(columns, sortedColumns, PinType.LEFT);
+    moveColumns(columns, sortedColumns, PinType.NONE);
+    moveColumns(columns, sortedColumns, PinType.RIGHT);
 
     return { ...clone(initialState), sortedColumns, columns, groupOrder, edited: false };
 };
@@ -395,10 +393,10 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         const newData = groupDataByColumnDefs(columns, sortedColumns.filter(c => !c.hidden && !c.tree && c.final), data, groupOrder, 0, true);
 
         setColumnsStyleProps(columns, container.offsetWidth);
-        moveColumns(columns, sortedColumns, PinType.LEFT, 0);
-        moveColumns(columns, sortedColumns, PinType.NONE, 0);
+        moveColumns(columns, sortedColumns, PinType.LEFT);
+        moveColumns(columns, sortedColumns, PinType.NONE);
 
-        return { pivot, columns, sortedColumns, data: newData, edited: true, groupOrder };
+        return { pivot, columns, sortedColumns, data: newData, edited: true, groupOrder, filters: {} };
     }
 
     return { pivot, edited: true };
