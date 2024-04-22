@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect, useState } from 'react';
+import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { List } from 'react-virtualized';
 
@@ -25,6 +25,7 @@ export default function TextFilters(props: Props) {
     const intl = useIntl();
     const [searchValue, setSearchValue] = useState('');
     const [checked, setChecked] = useState<'indeterminate' | boolean>(false);
+    const list = useRef<List | null>(null);
 
     const [filters, addFilter, selectAll] = useBeastStore((state) => [
         state.filters,
@@ -56,6 +57,9 @@ export default function TextFilters(props: Props) {
         const searchValue = e.target.value;
 
         setSearchValue(searchValue);
+
+        list.current?.recomputeRowHeights();
+        list.current?.forceUpdate();
     };
 
     const handleClick = (e: React.MouseEvent) => {
@@ -102,6 +106,13 @@ export default function TextFilters(props: Props) {
         )
     }
 
+    const rowHeihgt = ({ index }: { index: number }) => {
+        const item = column.filterOptions?.[index];
+        const inSearch = (item as string)?.toLowerCase().includes(searchValue.toLowerCase());
+
+        return !searchValue || inSearch ? 40 : 0;
+    }
+
     return (
         <div className="bg-filter bg-filter__text" onClick={handleClick}>
             <Input
@@ -112,10 +123,11 @@ export default function TextFilters(props: Props) {
 
             <div className="bg-filter__separator" />
             <List
+                ref={list}
                 height={200}
                 width={245}
                 rowCount={column.filterOptions?.length || 0}
-                rowHeight={40}
+                rowHeight={rowHeihgt}
                 rowRenderer={renderOption}
             />
             <div className="bg-filter__separator" />
