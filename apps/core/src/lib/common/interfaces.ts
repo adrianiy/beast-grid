@@ -37,7 +37,8 @@ export interface MenuProps {
 export type ColumnId = string;
 
 export type NumberFilter = { op: OperationType | undefined; value: number | undefined };
-export type IFilter = string | NumberFilter | boolean;
+export type ColumnFilter = { label: string, selected: boolean, id: string };
+export type IFilter = string | NumberFilter | ColumnFilter | boolean;
 
 export type AggregationFunction = (row: Row) => string | number;
 

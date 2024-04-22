@@ -6,12 +6,15 @@ import './accordion.scss';
 import cn from 'classnames';
 
 type Props = {
+    ref?: () => void;
     id: string;
     label: React.ReactNode | string;
     elements: number;
     height?: number;
     withoutArrow?: boolean;
     hideArrow?: boolean;
+    style?: React.CSSProperties;
+    onExpand?: (expanded: boolean) => void;
 };
 export default function Accordion(props: PropsWithChildren<Props>) {
     const { label, id, elements, hideArrow, withoutArrow, height, children } = props;
@@ -22,9 +25,12 @@ export default function Accordion(props: PropsWithChildren<Props>) {
     const toggleRow = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
 
+        if (props.onExpand) {
+            props.onExpand(!expanded);
+        }
         if (expanded) {
-            setChildrenHeight(0);
             setMinHeight(0);
+            setChildrenHeight(0);
             setExpaned(false);
         } else if (height || elements) {
             setChildrenHeight((height || 37 * elements) + 16);
@@ -38,7 +44,14 @@ export default function Accordion(props: PropsWithChildren<Props>) {
     };
 
     return (
-        <div key={id} id={id} className="bg-accordion__wrapper column left" onClick={toggleRow}>
+        <div
+            ref={props.ref}
+            key={id}
+            id={id}
+            className="bg-accordion__wrapper column left"
+            onClick={toggleRow}
+            style={props.style}
+        >
             <div className="bg-accordion__item row middle">
                 <ChevronDownIcon
                     id={`bg-accordion__arrow__${id}`}
@@ -52,7 +65,7 @@ export default function Accordion(props: PropsWithChildren<Props>) {
                 id={`bg-accordion__children__${id}`}
                 style={{ height: childrenHeight, minHeight: minHeight }}
             >
-                {children}
+                {expanded ? children : undefined}
             </div>
         </div>
     );

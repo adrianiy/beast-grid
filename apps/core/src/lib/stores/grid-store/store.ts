@@ -32,7 +32,7 @@ import {
     SortType,
     TreeConstructor,
 } from '../../common';
-import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, setColumnAggregationDefaults, sortColumns } from './utils';
+import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
 import { clone } from '../../utils/functions';
 
 export interface PivotState {
@@ -122,7 +122,7 @@ export const createGridStore = <T>(
         edited: false,
         defaultColumnDef,
         data,
-        initialData: clone(initialData),
+        initialData: [],
         initialColumns: clone(columns),
         hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,
@@ -141,7 +141,7 @@ export const createGridStore = <T>(
     };
 
     return create<GridStore>((set) => ({
-        ...clone(initialState),
+        ...initialState,
         container,
         mode: BeastMode.GRID,
         scrollElement: null as unknown as HTMLDivElement,

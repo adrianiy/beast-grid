@@ -1,9 +1,9 @@
 import { MouseEventHandler, useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { List } from 'react-virtualized';
 
 import * as Checkbox from '@radix-ui/react-checkbox';
 
-import SimpleBar from 'simplebar-react';
 
 import { Column, IFilter } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
@@ -44,9 +44,9 @@ export default function TextFilters(props: Props) {
 
     const handleFilterChange =
         (value: IFilter): MouseEventHandler<HTMLDivElement> =>
-        () => {
-            addFilter(column.id, value);
-        };
+            () => {
+                addFilter(column.id, value);
+            };
 
     const handleSelectAll: MouseEventHandler<HTMLDivElement> = () => {
         selectAll(column.id);
@@ -62,6 +62,46 @@ export default function TextFilters(props: Props) {
         e.stopPropagation();
     };
 
+    function renderOption({
+        key,
+        index,
+        style
+    }: {
+        key: string;
+        index: number;
+        style: React.CSSProperties;
+    }) {
+        const item = column.filterOptions?.[index];
+
+        if (!item) {
+            return null;
+        }
+
+        return (
+            <div
+                key={key}
+                className={
+                    cn('bg-filter__item row middle', {
+                        hidden: searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase()),
+                    })
+                }
+                style={style}
+                onClick={handleFilterChange(item)}
+            >
+                <Checkbox.Root
+                    className="bg-checkbox__root"
+                    checked={!!filters[column.id]?.includes(item)}
+                    id={column.id}
+                >
+                    <Checkbox.Indicator className="bg-checbox__indicator row middle center">
+                        <CheckIcon />
+                    </Checkbox.Indicator>
+                </Checkbox.Root>
+                <label>{item as string}</label>
+            </div >
+        )
+    }
+
     return (
         <div className="bg-filter bg-filter__text" onClick={handleClick}>
             <Input
@@ -71,29 +111,13 @@ export default function TextFilters(props: Props) {
             />
 
             <div className="bg-filter__separator" />
-
-            <SimpleBar style={{ maxHeight: 300 }} className="bg-filter__container">
-                {column.filterOptions?.map((item, idx) => (
-                    <div
-                        key={idx}
-                        className={cn('bg-filter__item row middle', {
-                            hidden: searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase()),
-                        })}
-                        onClick={handleFilterChange(item)}
-                    >
-                        <Checkbox.Root
-                            className="bg-checkbox__root"
-                            checked={!!filters[column.id]?.includes(item)}
-                            id={column.id}
-                        >
-                            <Checkbox.Indicator className="bg-checbox__indicator row middle center">
-                                <CheckIcon />
-                            </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <label>{item as string}</label>
-                    </div>
-                ))}
-            </SimpleBar>
+            <List
+                height={200}
+                width={245}
+                rowCount={column.filterOptions?.length || 0}
+                rowHeight={40}
+                rowRenderer={renderOption}
+            />
             <div className="bg-filter__separator" />
             <div className="bg-filter__item bg-menu__filter__item--big row middle" onClick={handleSelectAll}>
                 <Checkbox.Root

@@ -16,6 +16,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { PivotState } from '../../../stores/grid-store/store';
 import { clone } from '../../../utils/functions';
 import Select, { Option } from '../../select/select';
+import { List, ListRowProps } from 'react-virtualized';
 
 type Props<T> = {
     columns: ColumnStore;
@@ -96,28 +97,30 @@ const ItemLabel = ({
     );
 };
 
-const Options = ({
+function renderOption({
     options,
-    parentMatch,
     columns,
     searchValue,
+    parentMatch,
+    someHasChildren,
+    hiddenColumns,
+    list,
+    handleGridChange,
+    handleExpand,
 }: {
     options: Column[];
-    parentMatch?: boolean;
-    paddingLeft?: string;
     columns: ColumnStore;
     searchValue: string;
-}) => {
-    const [hideColumn, hiddenColumns] = useBeastStore((state) => [state.hideColumn, state.hiddenColumns]);
+    parentMatch?: boolean;
+    someHasChildren: boolean;
+    hiddenColumns: string[];
+    list: React.MutableRefObject<List | null>;
+    handleGridChange: (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => void;
+    handleExpand: (expanded: boolean, index: number) => void;
+}) {
+    return function _renderOption({ key, index, style }: ListRowProps) {
+        const item = options[index];
 
-    const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        hideColumn(column.id);
-    };
-
-    const someHasChildren = options.some((opt) => opt.childrenId?.length);
-
-    return options?.map((item, idx) => {
         const children = Object.values(columns).filter((c) => item.childrenId?.includes(c.id));
         const matchSearch = !searchValue || item.headerName.toLowerCase().includes(searchValue.toLowerCase());
         const hasChildren = item.childrenId?.length || 0;
@@ -133,10 +136,11 @@ const Options = ({
 
         return (
             <Accordion
-                key={`sidebar_grid_${item.id}_${idx}`}
+                key={key}
                 id={`sidebar_grid_${item.id}`}
                 hideArrow={!hasChildren}
                 withoutArrow={!someHasChildren}
+                style={style || {}}
                 label={
                     <ItemLabel
                         item={item}
@@ -145,11 +149,81 @@ const Options = ({
                     />
                 }
                 elements={children.length}
+                onExpand={(expanded: boolean) => {
+                    handleExpand(expanded, index);
+                    list.current?.recomputeRowHeights();
+                    list.current?.forceUpdate();
+                }}
             >
                 <Options options={children} parentMatch={matchSearch} columns={columns} searchValue={searchValue} />
             </Accordion>
         );
-    });
+    };
+}
+
+const Options = ({
+    options,
+    parentMatch,
+    columns,
+    searchValue,
+}: {
+    options: Column[];
+    parentMatch?: boolean;
+    paddingLeft?: string;
+    columns: ColumnStore;
+    searchValue: string;
+}) => {
+    const ref = useRef<List | null>(null);
+    const expandedIndexes = useRef<number[]>([]);
+    const [hideColumn, hiddenColumns] = useBeastStore((state) => [state.hideColumn, state.hiddenColumns]);
+
+    const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        hideColumn(column.id);
+    };
+
+    const handleExpand = (expanded: boolean, index: number) => {
+        if (expanded) {
+            expandedIndexes.current.push(index);
+        } else {
+            expandedIndexes.current = expandedIndexes.current.filter((i) => i !== index);
+        }
+    };
+
+    const someHasChildren = options.some((opt) => opt.childrenId?.length);
+
+    const rowHeight = (props: { index: number }) => {
+        const expanded = expandedIndexes.current.includes(props.index);
+
+        if (expanded) {
+            const children = Object.values(columns).filter((c) => options[props.index].childrenId?.includes(c.id));
+            return 37 * children.length;
+        } else {
+            return 37;
+        }
+    };
+
+
+    return (
+        <List
+            ref={ref}
+            height={400}
+            width={300}
+            rowHeight={rowHeight}
+            rowCount={options.length}
+            rowRenderer={renderOption({
+                options,
+                columns,
+                searchValue,
+                parentMatch,
+                someHasChildren,
+                hiddenColumns,
+                list: ref,
+                handleGridChange,
+                handleExpand
+            })}
+        />
+    );
 };
 
 const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
@@ -230,7 +304,13 @@ const Box = ({
     return (
         <div className="row middle bg-chip" ref={ref}>
             <label>{column.headerName}</label>
-            <AggSelection enabled={isValue} column={column} theme={theme} scrollContainer={scrollContainer} onChanges={onChanges} />
+            <AggSelection
+                enabled={isValue}
+                column={column}
+                theme={theme}
+                scrollContainer={scrollContainer}
+                onChanges={onChanges}
+            />
             <Cross2Icon onClick={onRemove(column)} />
         </div>
     );
@@ -257,7 +337,7 @@ const AggSelection = ({
         { label: 'Sum', value: AggregationType.SUM },
         { label: 'Avg', value: AggregationType.AVG },
         { label: 'Count', value: AggregationType.COUNT },
-        { label: 'Count Distinct', value: AggregationType.COUNT_DISTINCT},
+        { label: 'Count Distinct', value: AggregationType.COUNT_DISTINCT },
         { label: 'Max', value: AggregationType.MAX },
         { label: 'Min', value: AggregationType.MIN },
     ];
@@ -271,9 +351,7 @@ const AggSelection = ({
         <div className="bg-agg-selection row middle">
             <Select
                 options={options}
-                label={
-                    <label>{column.aggregation as string}</label>
-                }
+                label={<label>{column.aggregation as string}</label>}
                 activeOption={options.find((opt) => opt.value === column.aggregation)}
                 theme={theme}
                 container={scrollContainer}
@@ -284,7 +362,12 @@ const AggSelection = ({
 };
 
 const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
-    const [columnStore, pivot, theme, scrollContainer] = useBeastStore((state) => [state.initialColumns, state.pivot, state.theme, state.scrollElement]);
+    const [columnStore, pivot, theme, scrollContainer] = useBeastStore((state) => [
+        state.initialColumns,
+        state.pivot,
+        state.theme,
+        state.scrollElement,
+    ]);
     const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
 
     const [, drop] = useDrop(() => ({
@@ -323,7 +406,7 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
 
     const handleChanges = () => {
         onChanges(columns.current);
-    }
+    };
 
     return (
         <div className="bg-box column left" ref={drop}>
