@@ -64,7 +64,7 @@ const createDateData = (count) => {
     return Array.from({ length: count }, (_, idx) => createRandomDate(idx));
 };
 
-const dateData = createDateData(500000);
+const dateData = createDateData(600000);
 
 const sortData = (sortColumns) => (a, b) => {
     for (const column of sortColumns) {
