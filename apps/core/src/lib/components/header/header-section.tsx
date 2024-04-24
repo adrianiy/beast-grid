@@ -8,6 +8,8 @@ type Props<T> = {
     width: number;
     height: number;
     headers: Column[][];
+    leftEdge?: number;
+    rightEdge?: number;
     pinType?: PinType;
     border?: boolean;
     multiSort?: boolean;
@@ -19,19 +21,37 @@ export default function HeaderSection<T>({
     width,
     height,
     border,
+    leftEdge,
+    rightEdge,
     pinType,
     multiSort,
     dragOptions,
     events,
     headers,
 }: Props<T>) {
+    const getColumnSlice = (columns: Column[]) => {
+        if (leftEdge || rightEdge) {
+            const leftIndex = columns.findIndex((column) => column.left >= (leftEdge || 0));
+            const rightIndex = columns.findIndex((column) => column.left > (rightEdge || 0));
+
+            return [Math.max(0, leftIndex - 2), rightIndex > -1 ? rightIndex + 2 : Infinity];
+        }
+
+        return [0, columns.length];
+    };
     const HeaderRow = ({ level, levelIdx }: { level: Column[]; levelIdx: number }) => {
+        const [init, end] = getColumnSlice(level);
+
         return (
             <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
                 {level.map((column, idx) => {
+                    if (idx >= end || idx < init) {
+                        return null;
+                    }
                     if (column.pinned !== pinType || column.hidden) {
                         return null;
                     }
+
                     return (
                         <HeaderCell
                             key={idx}

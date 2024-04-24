@@ -19,9 +19,12 @@ type TBodyProps<T> = {
     config?: Partial<RowConfig>;
     maxHeight?: number;
     border?: boolean;
-    onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     filters?: Record<string, string[]>;
     events?: Partial<RowEvents>;
+    startIndex: number;
+    endIndex: number;
+    scrollTop: number;
+    onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
@@ -34,8 +37,11 @@ export default function TBody<T>({
     beastConfig,
     maxHeight,
     border,
-    onSortChange,
     events,
+    startIndex,
+    endIndex,
+    scrollTop,
+    onSortChange,
 }: TBodyProps<T>) {
     const gaps = useRef<Record<string, number>>({});
     const [
@@ -44,7 +50,6 @@ export default function TBody<T>({
         sortedColumns,
         theme,
         container,
-        scrollElement,
         sort,
         filters,
         setSorting,
@@ -58,7 +63,6 @@ export default function TBody<T>({
         state.sortedColumns,
         state.theme,
         state.container,
-        state.scrollElement,
         state.sort,
         state.filters,
         state.setSorting,
@@ -68,7 +72,6 @@ export default function TBody<T>({
         state.updateSelectedCells,
     ]);
     const [expandedRows, setExpandedRows] = useState<number>(0);
-    const [lastScroll, setLastScroll] = useState<number>(0);
     const [[max, min], setMaxMin] = useState([0, 0]);
     const [sortedData, setSortedData] = useState<Data>([]);
     const [contextMenu, setContextMenu] = useState<Coords | null>(null);
@@ -87,34 +90,18 @@ export default function TBody<T>({
         updateSelected(null);
     }, [sortedColumns, updateSelected]);
 
-    useEffect(() => {
-        const updateLastScroll = () => {
-            if (scrollElement) {
-                setLastScroll(scrollElement.scrollTop);
-            }
-        };
-        if (scrollElement && container) {
-            scrollElement.addEventListener('scroll', updateLastScroll);
-        }
-
-        return () => {
-            if (scrollElement) {
-                scrollElement.removeEventListener('scroll', updateLastScroll);
-            }
-        };
-    }, [scrollElement, container, headerHeight, rowHeight, levels.length, data.length]);
 
     useEffect(() => {
         const containerHeight =
             (maxHeight ? maxHeight : container.getBoundingClientRect().height) - headerHeight * levels.length;
         const visibleRows = Math.floor(containerHeight / rowHeight);
-        const topRow = Math.floor(lastScroll / rowHeight);
+        const topRow = Math.floor(scrollTop / rowHeight);
         const bottomRow = topRow + visibleRows;
         const maxValue = Math.min(data.length + expandedRows, bottomRow + THRESHOLD);
         const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
 
         setMaxMin([maxValue, minValue]);
-    }, [lastScroll, expandedRows, data.length, filters]);
+    }, [scrollTop, expandedRows, data.length, filters]);
 
     useEffect(() => {
         gaps.current = {};
@@ -341,7 +328,7 @@ export default function TBody<T>({
         y: number,
         level: number,
         gap: number,
-        expandableSibling: boolean
+        expandableSibling: boolean,
     ): [number, number] => {
         if (!renderArray[level]) {
             renderArray[level] = [];
@@ -358,6 +345,8 @@ export default function TBody<T>({
                 selectable={!!beastConfig.contextualMenu}
                 idx={idx}
                 y={y}
+                startIndex={startIndex}
+                endIndex={endIndex}
                 border={border}
                 height={rowHeight}
                 level={level}
@@ -379,7 +368,7 @@ export default function TBody<T>({
                     y + i,
                     level + 1,
                     gap,
-                    row.children.some((r) => (r.children?.length || 0) > 1)
+                    row.children.some((r) => (r.children?.length || 0) > 1),
                 );
 
                 gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
@@ -398,6 +387,7 @@ export default function TBody<T>({
 
         let gap = 0;
         let y = min;
+
         for (let idx = min; idx < max; idx++) {
             const row = sortedData[idx];
 

@@ -349,7 +349,7 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
 
 export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
     const { pivot: currentPivot, initialData, defaultColumnDef, container } = state;
-    const data = clone(initialData);
+    const data = [...initialData];
 
     const pivot = { ...currentPivot, ...newPivot };
 
@@ -379,6 +379,7 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
             rowColumnDefs.forEach((columnDef) => {
                 const column = columns[columnDef.id as ColumnId];
                 const newColumn = createGroupColumn(column, columns, { name: 'rows', field: 'tree', width: 200, menu: { grid: true, pin: true } });
+                console.log('newColumn', newColumn);
 
                 column.hidden = true;
 
@@ -390,11 +391,15 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         const sortedColumns = sortColumns(columns);
 
 
+        console.log('pivoting data');
         const newData = groupDataByColumnDefs(columns, sortedColumns.filter(c => !c.hidden && !c.tree && c.final), data, groupOrder, 0, true);
+        console.log('pivoted')
 
         setColumnsStyleProps(columns, container.offsetWidth);
         moveColumns(columns, sortedColumns, PinType.LEFT);
         moveColumns(columns, sortedColumns, PinType.NONE);
+
+        console.log('store pivot');
 
         return { pivot, columns, sortedColumns, data: newData, edited: true, groupOrder, filters: {} };
     }

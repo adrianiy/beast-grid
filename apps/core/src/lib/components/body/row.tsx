@@ -11,6 +11,8 @@ type Props = {
     selectable: boolean;
     y: number;
     idx: number;
+    startIndex: number;
+    endIndex: number;
     config?: Partial<RowConfig>;
     border?: boolean;
     height: number;
@@ -29,6 +31,8 @@ export default function RowContainer({
     selectable,
     config,
     idx,
+    startIndex,
+    endIndex,
     y,
     border,
     height,
@@ -56,23 +60,29 @@ export default function RowContainer({
     const renderRow = (pinType: PinType | undefined) => {
         return columns
             .filter((column) => column.pinned === pinType)
-            .map((column, cidx) => (
-                <RowCell
-                    key={cidx}
-                    idx={y}
-                    height={height}
-                    row={row}
-                    border={border}
-                    columns={columnStore}
-                    groupOrder={groupOrder}
-                    selectable={selectable}
-                    level={level}
-                    config={config}
-                    columnDef={column}
-                    expandableSibling={expandableSibling}
-                    onClick={handleClick}
-                />
-            ));
+            .map((column, cidx) => {
+                if (pinType === PinType.NONE && (cidx < startIndex || cidx >= (endIndex || columns.length))) {
+                    return null;
+                }
+
+                return (
+                    <RowCell
+                        key={cidx}
+                        idx={y}
+                        height={height}
+                        row={row}
+                        border={border}
+                        columns={columnStore}
+                        groupOrder={groupOrder}
+                        selectable={selectable}
+                        level={level}
+                        config={config}
+                        columnDef={column}
+                        expandableSibling={expandableSibling}
+                        onClick={handleClick}
+                    />
+                );
+            });
     };
 
     return (

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { BeastGridConfig, ChartType, Column, SideBarConfig } from '../../common';
 
 import GridConfig from './components/grid';
-import ChartConfig from './components/chart';
-import Filters from './components/filters';
+// import ChartConfig from './components/chart';
+// import Filters from './components/filters';
 
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -29,10 +29,10 @@ function SideBarSwitch<T>({ sideBarConfig, config, ...chartProps }: { sideBarCon
   switch (sideBarConfig) {
     case SideBarConfig.GRID:
       return <GridConfig config={config} columns={columns} />;
-    case SideBarConfig.FILTERS:
-      return <Filters config={config} />;
-    case SideBarConfig.CHART:
-      return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
+    // case SideBarConfig.FILTERS:
+    //   return <Filters config={config} />;
+    // case SideBarConfig.CHART:
+    //   return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
     default:
       return null;
   }

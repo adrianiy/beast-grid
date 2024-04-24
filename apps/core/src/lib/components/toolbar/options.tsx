@@ -2,8 +2,9 @@ import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, TableIcon, UpdateIcon 
 import { BeastMode, SideBarConfig, ToolBar } from '../../common';
 import { FormattedMessage } from 'react-intl';
 import { useBeastStore } from '../../stores/beast-store';
-import { CSVLink } from 'react-csv';
+import { CSVDownload, CSVLink } from 'react-csv';
 import { LabelKeyObject } from 'react-csv/lib/core';
+import { useState } from 'react';
 
 type Props = {
     toolbar: Partial<ToolBar>;
@@ -27,23 +28,34 @@ export const Filter = ({ toolbar }: Props) => {
 
 export const Download = ({ toolbar }: Props) => {
     const [data, columns] = useBeastStore((state) => [state.initialData, state.sortedColumns]);
+    const [downloading, setDownloading] = useState(false);
 
     if (!toolbar.download) {
         return null;
     }
 
+    const initializeDownload = () => {
+        setDownloading(!downloading);
+    };
+
     return (
-        <CSVLink
-            className="bg-toolbar__button row middle"
-            data={data}
-            headers={columns
-                .filter((column) => !column.hidden && column.final)
-                .map((c) => ({ label: c.headerName, key: c.field } as LabelKeyObject))}
-            filename={`delta-data-${new Date().toISOString()}.csv`}
-        >
-            <DownloadIcon />
-            <FormattedMessage id="toolbar.download" defaultMessage="Download" />
-        </CSVLink>
+        <div className="bg-toolbar__button row middle" onClick={initializeDownload}>
+            {!downloading ? (
+                <>
+                    <DownloadIcon />
+                    <FormattedMessage id="toolbar.download" defaultMessage="Download" />
+                </>
+            ) : (
+                <CSVDownload
+                    data={data}
+                    headers={columns
+                        .filter((column) => !column.hidden && column.final)
+                        .map((c) => ({ label: c.headerName, key: c.field } as LabelKeyObject))}
+                    target="_blank"
+                    filename={`data-${new Date().toISOString()}.csv`}
+                />
+            )}
+        </div>
     );
 };
 

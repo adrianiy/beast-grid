@@ -122,7 +122,7 @@ export const createGridStore = <T>(
         edited: false,
         defaultColumnDef,
         data,
-        initialData: [],
+        initialData: [...initialData],
         initialColumns: clone(columns),
         hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,

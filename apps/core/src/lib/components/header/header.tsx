@@ -13,9 +13,11 @@ type Props<T> = {
     multiSort?: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
+    leftEdge: number;
+    rightEdge: number;
 };
 
-export default function Header<T>({ height, border, multiSort, dragOptions, events }: Props<T>) {
+export default function Header<T>({ height, border, multiSort, dragOptions, events, leftEdge, rightEdge }: Props<T>) {
     const [columns] = useBeastStore((state) => [state.columns]);
 
     const levels = Object.values(columns).reduce((acc, column) => {
@@ -54,6 +56,8 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                 multiSort={multiSort}
                 dragOptions={dragOptions}
                 events={events}
+                leftEdge={leftEdge}
+                rightEdge={rightEdge}
             />
             <HeaderSection
                 width={rightWidth}
