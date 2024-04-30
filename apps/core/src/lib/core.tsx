@@ -5,7 +5,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
-import { ToolbarPosition } from './common';
+import { ColumnStore, ToolbarPosition } from './common';
 
 import { BeastGridProvider, BeastApi } from './stores/beast-store';
 
@@ -37,6 +37,7 @@ export function BeastGrid<T>({
     injectStyles = false,
     api,
     onSortChange,
+    onSwapChange,
 }: {
     config?: BeastGridConfig<T>;
     theme?: string;
@@ -44,6 +45,7 @@ export function BeastGrid<T>({
     api?: MutableRefObject<BeastGridApi | undefined>;
     injectStyles?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
@@ -79,7 +81,7 @@ export function BeastGrid<T>({
 
     useEffect(() => {
         if (ref.current && config?.columnDefs) {
-            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme);
+            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange);
             const dndStore = () => createDndStore();
 
             setStores([gridStore, dndStore]);

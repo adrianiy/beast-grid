@@ -67,6 +67,7 @@ export interface GridState {
     selecting: boolean;
     mode: BeastMode;
     pivot: Partial<PivotState> | null;
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
 }
 
 export interface GridStore extends GridState {
@@ -103,7 +104,8 @@ export interface GridStore extends GridState {
 export const createGridStore = <T>(
     { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
     container: HTMLDivElement,
-    theme: string
+    theme: string,
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
 ) => {
     const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
@@ -138,6 +140,7 @@ export const createGridStore = <T>(
         sorting: false,
         selecting: false,
         pivot: null,
+        onSwapChange
     };
 
     return create<GridStore>((set) => ({
