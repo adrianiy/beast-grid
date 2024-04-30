@@ -70,7 +70,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
-    const { columns } = state;
+    const { columns, onSwapChange } = state;
     let { sortedColumns } = state;
     let column1 = columns[id1];
     let column2 = columns[id2];
@@ -90,6 +90,8 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     sortedColumns = sortColumns(columns);
 
     moveColumns(columns, sortedColumns, column1.pinned);
+
+    onSwapChange?.(columns, sortedColumns);
 
     return { columns, sortedColumns, edited: true };
 };
