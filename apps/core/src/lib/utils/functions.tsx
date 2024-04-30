@@ -59,14 +59,14 @@ const getGroupRows = (
                                 });
 
                                 if (match?.every(Boolean)) {
-                                    child[field] = child[field as keyof Row];
+                                    child[aggColumn.pivotField as string] = child[field as keyof Row];
                                 }
                             } else {
-                                child[field] = child[field as keyof Row];
+                                child[aggColumn.pivotField as string] = child[field as keyof Row];
                             }
                         });
 
-                        acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
+                        acc[aggColumn.pivotField as string] = _calculate(children, aggColumn) || null;
 
                         if (aggColumn.children) {
                             aggColumn.children.forEach((aggChildColumn) => {
@@ -75,10 +75,13 @@ const getGroupRows = (
                         }
                     };
                     aggregationColumns.forEach((aggColumn) => {
+                        console.log('aggColumn', aggColumn);
                         setChildrenFieldsByAggregation(aggColumn);
                     });
                 } else {
-                    acc[column.field as string] = _calculate(children, column) || null;
+                    const data = _calculate(children, column);
+                    console.log(`${column.field}@${field}:${key}`, children.length,  data);
+                    acc[`${column.field}@${field}:${key}`] = data || null;
                 }
                 return acc;
             },

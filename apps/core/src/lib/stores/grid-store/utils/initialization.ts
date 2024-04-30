@@ -106,10 +106,12 @@ export const groupDataByColumnDefs = (
     pivoting = false
 ): Data => {
     const aggregationLevel = columns[groupOrder[level]];
+    console.log('aggregationLevel', aggregationLevel);
 
     if (!aggregationLevel) {
         return data;
     }
+    console.log('aggColumns', aggColumns);
 
     const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
 

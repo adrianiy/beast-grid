@@ -1,6 +1,8 @@
 const express = require('express');
 const { faker } = require('@faker-js/faker');
 const dayjs = require('dayjs');
+const csvParser = require('csv-parser');
+const fs = require('fs');
 const weekOfYear = require('dayjs/plugin/weekOfYear');
 
 dayjs.extend(weekOfYear);
@@ -64,7 +66,7 @@ const createDateData = (count) => {
     return Array.from({ length: count }, (_, idx) => createRandomDate(idx));
 };
 
-const dateData = createDateData(600000);
+const dateData = createDateData(1000);
 
 const sortData = (sortColumns) => (a, b) => {
     for (const column of sortColumns) {
@@ -88,8 +90,32 @@ app.get('/api/mock-data', (req, res) => {
 });
 
 app.get('/api/mock-date', (req, res) => {
-
     res.json(dateData);
+});
+
+app.get('/api/mock-itx', (req, res) => {
+    const csv = [];
+    // get data from csv
+    fs.createReadStream('test.csv')
+        .pipe(csvParser({ separator: ';' }))
+        .on('data', (row) => {
+            csv.push({
+                ...row,
+                'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_AMOUNT IN EUROS':
+                    +row['VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_AMOUNT IN EUROS'],
+                'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_ORDERS': +row['VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_ORDERS'],
+                'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_SHIPMENTS':
+                    +row['VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_SHIPMENTS'],
+                'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_UNITS': +row['VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_UNITS'],
+                'VB_AMOUNT IN EUROS': +row['VB_AMOUNT IN EUROS'],
+                VB_ORDERS: +row['VB_ORDERS'],
+                VB_SHIPMENTS: +row['VB_SHIPMENTS'],
+                VB_UNITS: +row['VB_UNITS'],
+            });
+        })
+        .on('end', () => {
+            res.json(csv);
+        });
 });
 
 app.post('/api/sort', (req, res) => {

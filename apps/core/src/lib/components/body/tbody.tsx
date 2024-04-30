@@ -159,7 +159,7 @@ export default function TBody<T>({
 
     useBus(BusActions.COLLAPSE, () => sortedData.forEach((row) => forceRowExpand(row, false)), [sortedData]);
 
-    const lastLevel = Object.values(columns).filter((c) => c.final);
+    const lastLevel = sortedColumns.filter((c) => c.final);
 
     const forceRowExpand = (row: Row, value: boolean) => {
         if (row._expanded == null && !value) {

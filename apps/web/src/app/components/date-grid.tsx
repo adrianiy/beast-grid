@@ -1,7 +1,7 @@
 'use client';
 
 import numeral from 'numeral';
-import { User, getDateData } from '../api/data';
+import { User, getItxData } from '../api/data';
 
 import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
@@ -13,41 +13,68 @@ type Props = {
     theme: string;
     config?: Partial<BeastGridConfig<User[]>>;
 };
+// const columnDefs: ColumnDef[] = [
+//     {
+//         headerName: 'DATE',
+//         field: 'date',
+//         width: 200,
+//         sortable: true,
+//         menu: {
+//             pin: true,
+//             filter: true,
+//             column: true,
+//         },
+//     },
+//     { headerName: 'WEEK', field: 'week', width: 200, sortable: true, menu: { grid: true, column: true } },
+//     { headerName: 'COUNTRY', field: 'country', width: 200, sortable: true, menu: { grid: true, column: true } },
+//     { headerName: 'LANGUAGE', field: 'language', width: 200, sortable: true, menu: { grid: true, column: true } },
+//     {
+//         headerName: 'ORDERS',
+//         field: 'orders',
+//         width: 200,
+//         sortable: true,
+//         menu: { grid: true, column: true },
+//         aggregation: AggregationType.SUM,
+//         flex: 1,
+//     },
+//     {
+//         headerName: 'UNITS',
+//         field: 'units',
+//         width: 200,
+//         sortable: true,
+//         menu: { grid: true, column: true },
+//         aggregation: AggregationType.SUM,
+//         formatter: (value) => numeral(value).format('0,0'),
+//         flex: 1,
+//     },
+// ];
+
 const columnDefs: ColumnDef[] = [
-    {
-        headerName: 'DATE',
-        field: 'date',
+    'DATE',
+    'MARKET',
+    'SECTION',
+    'PRODUCT',
+    'FAMILY',
+    'SUBFAMILY',
+    'VB_ORDERS',
+    'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_ORDERS',
+    'VB_SHIPMENTS',
+    'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_AMOUNT IN EUROS',
+    'VB_AMOUNT IN EUROS',
+    'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_SHIPMENTS',
+    'VB.GENERAL.SAME_DATE_COMMERCIAL_DAY_A1_UNITS',
+    'VB_UNITS',
+].map((field) => {
+    return {
+        headerName: field,
+        field,
         width: 200,
         sortable: true,
         menu: {
-            pin: true,
-            filter: true,
-            column: true,
-        },
-    },
-    { headerName: 'WEEK', field: 'week', width: 200, sortable: true, menu: { grid: true, column: true } },
-    { headerName: 'COUNTRY', field: 'country', width: 200, sortable: true, menu: { grid: true, column: true } },
-    { headerName: 'LANGUAGE', field: 'language', width: 200, sortable: true, menu: { grid: true, column: true } },
-    {
-        headerName: 'ORDERS',
-        field: 'orders',
-        width: 200,
-        sortable: true,
-        menu: { grid: true, column: true },
-        aggregation: AggregationType.SUM,
-        flex: 1,
-    },
-    {
-        headerName: 'UNITS',
-        field: 'units',
-        width: 200,
-        sortable: true,
-        menu: { grid: true, column: true },
-        aggregation: AggregationType.SUM,
-        formatter: (value) => numeral(value).format('0,0'),
-        flex: 1,
-    },
-];
+            filter: field === 'VB_ORDERS'
+        }
+    };
+});
 
 function SlideTransition(props: SlideProps) {
     return <Slide {...props} direction="up" />;
@@ -63,7 +90,8 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await getDateData(qty - data.length);
+                const res = await getItxData();
+                console.log(res)
                 setData((state) => [...state, ...res]);
                 loading.current = false;
                 beastApi?.current?.setLoading(false);

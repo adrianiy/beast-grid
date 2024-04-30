@@ -23,6 +23,22 @@ function getProperty<Key extends keyof Row>(
 
     let value = row[field as Key];
 
+    if (columnDef.pivotField) {
+        const [, rest] = columnDef.pivotField.split('@');
+        if (rest) {
+            const match = rest.split('&').map((filterField) => {
+                const [aggField, aggValue] = filterField.split(':');
+                return `${row[aggField as keyof Row]}` === aggValue;
+            });
+
+            if (match.every(Boolean)) {
+                value = row[columnDef.field as Key];
+            } else {
+                value = null;
+            }
+        }
+    }
+
     const columnIdx = groupOrder.indexOf(columnDef.id);
 
     if (columnIdx >= level) {

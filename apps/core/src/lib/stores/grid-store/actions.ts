@@ -348,7 +348,7 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
 };
 
 export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
-    const { pivot: currentPivot, initialData, defaultColumnDef, container } = state;
+    const { pivot: currentPivot, initialData, defaultColumnDef } = state;
     const data = [...initialData];
 
     const pivot = { ...currentPivot, ...newPivot };
@@ -356,30 +356,33 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
     if (pivot.rows || pivot.columns || pivot.values) {
         const rowColumnDefs: ColumnDef[] = [];
         const columnDefs: ColumnDef[] = [];
+        const groupOrder: ColumnId[] = [];
 
         if (pivot.rows?.length) {
             pivot.rows.forEach((row) => {
-                rowColumnDefs.push({
+                const column = {
                     id: uuidv4(),
                     headerName: row.headerName,
                     field: row.field,
                     width: MIN_COL_WIDTH,
-                });
+                } as Column;
+
+                rowColumnDefs.push(column);
             });
         }
 
-        if (pivot.columns) {
-            columnDefs.push(...getDynamicHeaders(0, data || [], pivot.columns || [], pivot.values || []));
-        }
-
-        const columns = getColumnsFromDefs([...rowColumnDefs, ...columnDefs], defaultColumnDef);
-        const groupOrder: ColumnId[] = [];
+        const columns = getColumnsFromDefs(rowColumnDefs, defaultColumnDef);
+        const aggColumns = Object.values(columns).filter((col) => col.aggregation);
 
         if (pivot.rows?.length) {
-            rowColumnDefs.forEach((columnDef) => {
-                const column = columns[columnDef.id as ColumnId];
-                const newColumn = createGroupColumn(column, columns, { name: 'rows', field: 'tree', width: 200, menu: { grid: true, pin: true } });
-                console.log('newColumn', newColumn);
+            rowColumnDefs.forEach((row) => {
+                const column = columns[row.id as ColumnId];
+                const newColumn = createGroupColumn(column, columns, {
+                    name: 'rows',
+                    field: 'tree',
+                    width: 200,
+                    menu: { grid: true, pin: true },
+                });
 
                 column.hidden = true;
 
@@ -388,20 +391,19 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
                 groupOrder.push(column.id);
             });
         }
-        const sortedColumns = sortColumns(columns);
 
+        const groupedByRows = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
 
-        console.log('pivoting data');
-        const newData = groupDataByColumnDefs(columns, sortedColumns.filter(c => !c.hidden && !c.tree && c.final), data, groupOrder, 0, true);
-        console.log('pivoted')
+        if (pivot.columns?.length) {
+            const valueColumns = getDynamicHeaders(pivot.columns, pivot.values || [], groupedByRows);
+            columnDefs.push(...valueColumns);
+        }
 
-        setColumnsStyleProps(columns, container.offsetWidth);
-        moveColumns(columns, sortedColumns, PinType.LEFT);
-        moveColumns(columns, sortedColumns, PinType.NONE);
+        const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
 
-        console.log('store pivot');
+        const sortedColumns = sortColumns(finalColumns);
 
-        return { pivot, columns, sortedColumns, data: newData, edited: true, groupOrder, filters: {} };
+        return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, edited: true };
     }
 
     return { pivot, edited: true };
