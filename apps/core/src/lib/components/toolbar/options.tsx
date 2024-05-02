@@ -5,6 +5,7 @@ import { useBeastStore } from '../../stores/beast-store';
 import { CSVDownload, CSVLink } from 'react-csv';
 import { LabelKeyObject } from 'react-csv/lib/core';
 import { useState } from 'react';
+import { exportToExcel } from '../../utils/excel';
 
 type Props = {
     toolbar: Partial<ToolBar>;
@@ -55,6 +56,24 @@ export const Download = ({ toolbar }: Props) => {
                     filename={`data-${new Date().toISOString()}.csv`}
                 />
             )}
+        </div>
+    );
+};
+
+export const DownloadExcel = ({ toolbar }: Props) => {
+    const [data, columns] = useBeastStore((state) => [state.initialData, state.sortedColumns]);
+    if (!toolbar.downloadExcel) {
+        return null;
+    }
+
+    const initializeDownload = () => {
+        exportToExcel(data, columns, `data-${new Date().toISOString()}.xlsx`);
+    }
+
+    return (
+        <div className="bg-toolbar__button row middle" onClick={initializeDownload}>
+            <DownloadIcon />
+            <FormattedMessage id="toolbar.download" defaultMessage="Download" />
         </div>
     );
 };

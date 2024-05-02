@@ -149,7 +149,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     chart: true,
                 },
                 bottomToolbar: {
-                    download: true,
+                    downloadExcel: true,
                     restore: true,
                 },
                 defaultColumnDef: {

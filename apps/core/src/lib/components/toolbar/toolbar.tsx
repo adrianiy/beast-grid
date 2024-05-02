@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { BeastGridConfig, ToolbarPosition } from '../../common';
 
-import { ChartConfig, Download, Filter, Grid, Mode, Restore } from './options';
+import { ChartConfig, Download, DownloadExcel, Filter, Grid, Mode, Restore } from './options';
 
 import './toolbar.scss';
 
@@ -28,6 +28,7 @@ export default function Toolbar<T>({ config, position, onRestore }: Props<T>) {
             <Grid toolbar={toolbar} />
             <Restore toolbar={toolbar} callback={onRestore} />
             <Download toolbar={toolbar} />
+            <DownloadExcel toolbar={toolbar} />
             <ChartConfig toolbar={toolbar} />
         </div>
     );

@@ -140,7 +140,7 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
                     filter: true,
                 },
                 bottomToolbar: {
-                    download: true,
+                    downloadExcel: true,
                     restore: true,
                 },
                 contextualMenu: {

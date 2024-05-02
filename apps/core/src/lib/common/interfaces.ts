@@ -118,6 +118,7 @@ export interface ContextualMenuProps {
 
 export interface ToolBar {
     download: boolean;
+    downloadExcel: boolean;
     grid: boolean;
     filter: boolean;
     mode: boolean;
