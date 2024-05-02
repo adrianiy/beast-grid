@@ -58,22 +58,23 @@ export const getDynamicHeaders = (columns: Column[], values: Column[], data: Dat
 
     data.forEach((row) => {
         columns.forEach((column) => {
-            if (!row[column.field as string]) {
-                return;
-            }
-            const field = `${column.field}:${row[column.field as string]}`;
-            if (groups[field] == null) {
-                groups[field] = true;
-                columnDefs.push({
-                    headerName: row[column.field as string] as string,
-                    field,
-                    flex: 1,
-                    minWidth: MIN_COL_WIDTH,
-                    children: values.length > 0 ? getValueHeaders(values, field) : [],
-                });
-            }
-        })
-    })
+            if (!row[column.field as string]) return;
+
+            (row[column.field as string] as string[]).forEach((value: string) => {
+                const field = `${column.field}:${value}`;
+                if (groups[field] == null) {
+                    groups[field] = true;
+                    columnDefs.push({
+                        headerName: value,
+                        field,
+                        flex: 1,
+                        minWidth: MIN_COL_WIDTH,
+                        children: values.length > 0 ? getValueHeaders(values, field) : [],
+                    });
+                }
+            });
+        });
+    });
 
     return columnDefs;
 };

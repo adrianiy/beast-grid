@@ -115,36 +115,26 @@ const getPivotGroups = (
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
 
     return Object.entries(groups).map(([key, children]) => {
-        const calculatedFields = aggTypeColumns.reduce(
-            (acc, column) => {
+        const calculatedFields: Record<string, number | string[]> = {};
+        children.forEach((child) => {
+            aggTypeColumns.forEach((valueColumn) => {
                 if (columns.length) {
-                    const columnFields: Record<string, Row[]> = {};
-                    children.forEach((child) => {
-                        columns.forEach((c) => {
-                            const fieldName = `${c.field}:${child[c.field as keyof Row]}`;
-                            if (columnFields[fieldName] === undefined) {
-                                columnFields[fieldName] = [child];
-                            } else {
-                                columnFields[fieldName].push(child);
-                            }
-                        });
-                    })
-                    Object.keys(columnFields).forEach((field) => {
-                        acc[`${column.field}@${field}`] = _calculate(columnFields[field], column) || null;
+                    columns.forEach((column) => {
+                        const fieldName = `${valueColumn.field}@${column.field}:${child[column.field as keyof Row]}`;
+                        calculatedFields[column.field as string] = ((calculatedFields[column.field as string] || []) as string[]).concat(child[column.field as keyof Row] as string);
+
+                        calculatedFields[fieldName] = +(calculatedFields[fieldName] || 0) + +(child[valueColumn.field as keyof Row] || 0);
                     });
-                } else {
-                    acc[`${column.field}@total`] = _calculate(children, column) || null;
                 }
-                return acc;
-            },
-            children[0]
-        );
+                calculatedFields[`${valueColumn.field}@total`] = +(calculatedFields[`${valueColumn.field}@total`] || 0) + +(child[valueColumn.field as keyof Row] || 0);
+            });
+        });
 
         const newRow = {
+            ...calculatedFields,
             [field]: key,
             _id: uuidv4(),
             _singleChild: children.length === 1,
-            ...calculatedFields,
             children,
         };
 

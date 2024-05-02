@@ -143,6 +143,7 @@ export const groupPivot = (
     level = 0
 ): Data => {
     const aggregationLevel = columns[groupOrder[level]];
+    console.log(aggregationLevel)
 
     if (!aggregationLevel) {
         return data;
@@ -151,7 +152,7 @@ export const groupPivot = (
     const finalData: Row[] = groupByPivot(data, aggregationLevel, aggColumns, valueColumns);
 
     finalData.forEach((row) => {
-        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
+        row.children = groupPivot(columns, aggColumns, valueColumns, row.children || [], groupOrder, level + 1);
         row.children.forEach((child) => {
             child._level = level + 1;
         });
