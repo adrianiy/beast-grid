@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Column, ColumnStore, TreeConstructor, MIN_COL_WIDTH, PinType, ColumnDef, Data } from '../../../common';
 import { changePosition } from './edition';
-import { groupBy } from '../../../utils/functions';
 
 export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: Partial<TreeConstructor>) => {
     let newColumn = column;
@@ -63,7 +62,7 @@ export const getDynamicHeaders = (columns: Column[], values: Column[], data: Dat
                 return;
             }
             const field = `${column.field}:${row[column.field as string]}`;
-            if (!groups[field]) {
+            if (groups[field] == null) {
                 groups[field] = true;
                 columnDefs.push({
                     headerName: row[column.field as string] as string,
@@ -77,30 +76,4 @@ export const getDynamicHeaders = (columns: Column[], values: Column[], data: Dat
     })
 
     return columnDefs;
-    // if (!columns || columnIdx >= columns.length || !data.length) {
-    //     return [];
-    // }
-    // const column = columns[columnIdx];
-    // const isLastColumn = columnIdx === columns.length - 1;
-    // const withValues = values.length > 0;
-    //
-    // console.log(column, values);
-    // const groupedData = groupBy(data, column, values || []);
-    // const columnDefs: ColumnDef[] = [];
-    //
-    // groupedData.forEach((group) => {
-    //     const field = `${column.field}:${group[column.field as string]}${parentField}`;
-    //
-    //     columnDefs.push({
-    //         headerName: group[column.field as string] as string,
-    //         field,
-    //         flex: 1,
-    //         minWidth: MIN_COL_WIDTH,
-    //         children: isLastColumn && withValues
-    //             ? getValueHeaders(values, field)
-    //             : getDynamicHeaders(columnIdx + 1, group.children || [], columns, values, '&'+field),
-    //     });
-    // });
-    //
-    // return columnDefs;
 };

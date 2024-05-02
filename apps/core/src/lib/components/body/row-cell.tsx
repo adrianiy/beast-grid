@@ -15,29 +15,13 @@ function getProperty<Key extends keyof Row>(
     columns: ColumnStore,
     groupOrder: ColumnId[]
 ): string | null {
-    let field = columnDef.field;
+    let field = columnDef.pivotField || columnDef.field;
 
     if (columnDef.tree) {
         field = columns[groupOrder[level]]?.field || field;
     }
 
     let value = row[field as Key];
-
-    if (columnDef.pivotField) {
-        const [, rest] = columnDef.pivotField.split('@');
-        if (rest) {
-            const match = rest.split('&').map((filterField) => {
-                const [aggField, aggValue] = filterField.split(':');
-                return `${row[aggField as keyof Row]}` === aggValue;
-            });
-
-            if (match.every(Boolean)) {
-                value = row[columnDef.field as Key];
-            } else {
-                value = null;
-            }
-        }
-    }
 
     const columnIdx = groupOrder.indexOf(columnDef.id);
 

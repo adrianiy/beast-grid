@@ -250,6 +250,7 @@ const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
             <PivotBox pivotType="rows" onChanges={handleRowChange} />
             <PivotBox pivotType="columns" onChanges={handleColumnChange} />
             <PivotBox pivotType="values" onChanges={handleValueChange} />
+            <div className="bg-tag--beta">BETA</div>
         </SimpleBar>
     );
 };

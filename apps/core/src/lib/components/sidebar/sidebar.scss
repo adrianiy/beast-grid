@@ -175,4 +175,13 @@
             }
         }
     }
+
+    .bg-tag--beta {
+        background-color: var(--bg-background-color--beta);
+        color: var(--bg-text-color--beta);
+        padding: var(--bg-size--1) var(--bg-size--2);
+        margin: var(--bg-size--3);
+        border-radius: var(--bg-size--1);
+        width: fit-content;
+    }
 }

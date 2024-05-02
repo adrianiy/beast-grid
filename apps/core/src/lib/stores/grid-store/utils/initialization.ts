@@ -14,7 +14,7 @@ import {
 } from '../../../common';
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
-import { groupBy } from '../../../utils/functions';
+import { groupBy, groupByPivot } from '../../../utils/functions';
 
 import deepmerge from 'deepmerge';
 import { createGroupColumn } from './group';
@@ -55,7 +55,9 @@ const loopColumns = (
 
         if (columnDef.children) {
             const childrenColumns = loopColumns(levelIndexes, columnDef.children, defaultColumnDef, level + 1, column);
-            column.childrenId = Object.values(childrenColumns).filter(c => c.level === level + 1).map((c) => c.id);
+            column.childrenId = Object.values(childrenColumns)
+                .filter((c) => c.level === level + 1)
+                .map((c) => c.id);
             column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
 
             Object.assign(columns, childrenColumns);
@@ -106,12 +108,10 @@ export const groupDataByColumnDefs = (
     pivoting = false
 ): Data => {
     const aggregationLevel = columns[groupOrder[level]];
-    console.log('aggregationLevel', aggregationLevel);
 
     if (!aggregationLevel) {
         return data;
     }
-    console.log('aggColumns', aggColumns);
 
     const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
 
@@ -129,7 +129,39 @@ export const groupDataByColumnDefs = (
                 row._singleChild = false;
             }
         }
+    });
 
+    return finalData;
+};
+
+export const groupPivot = (
+    columns: ColumnStore,
+    aggColumns: Column[],
+    valueColumns: Column[],
+    data: Data,
+    groupOrder: ColumnId[],
+    level = 0
+): Data => {
+    const aggregationLevel = columns[groupOrder[level]];
+
+    if (!aggregationLevel) {
+        return data;
+    }
+
+    const finalData: Row[] = groupByPivot(data, aggregationLevel, aggColumns, valueColumns);
+
+    finalData.forEach((row) => {
+        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1);
+        row.children.forEach((child) => {
+            child._level = level + 1;
+        });
+
+        if (groupOrder.length - 1 === level) {
+            row.children = undefined;
+            row._singleChild = true;
+        } else {
+            row._singleChild = false;
+        }
     });
 
     return finalData;
@@ -227,7 +259,7 @@ export const setColumnAggregationDefaults = (columns: ColumnStore, data: Data) =
             column.aggregation = AggregationType.COUNT;
         }
     });
-}
+};
 
 export const initialize = (
     columns: ColumnStore,

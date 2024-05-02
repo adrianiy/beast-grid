@@ -59,14 +59,14 @@ const getGroupRows = (
                                 });
 
                                 if (match?.every(Boolean)) {
-                                    child[aggColumn.pivotField as string] = child[field as keyof Row];
+                                    child[field] = child[field as keyof Row];
                                 }
                             } else {
-                                child[aggColumn.pivotField as string] = child[field as keyof Row];
+                                child[field] = child[field as keyof Row];
                             }
                         });
 
-                        acc[aggColumn.pivotField as string] = _calculate(children, aggColumn) || null;
+                        acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
 
                         if (aggColumn.children) {
                             aggColumn.children.forEach((aggChildColumn) => {
@@ -75,17 +75,69 @@ const getGroupRows = (
                         }
                     };
                     aggregationColumns.forEach((aggColumn) => {
-                        console.log('aggColumn', aggColumn);
                         setChildrenFieldsByAggregation(aggColumn);
                     });
                 } else {
-                    const data = _calculate(children, column);
-                    console.log(`${column.field}@${field}:${key}`, children.length,  data);
-                    acc[`${column.field}@${field}:${key}`] = data || null;
+                    acc[column.field as string] = _calculate(children, column) || null;
                 }
                 return acc;
             },
             children.length > 1 ? ({} as Record<string, number | null>) : children[0]
+        );
+
+        const newRow = {
+            [field]: key,
+            _id: uuidv4(),
+            _singleChild: children.length === 1,
+            ...calculatedFields,
+            children,
+        };
+
+        if (children.length <= 1) {
+            return newRow;
+        }
+        const computedFields = aggFuncColumns.reduce((acc, column) => {
+            acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow);
+            return acc;
+        }, {} as Record<string, number | string | null>);
+
+        return { ...newRow, ...computedFields };
+    });
+};
+
+const getPivotGroups = (
+    groups: Record<string, Row[]>,
+    field: string,
+    columns: Column[],
+    calculatedColumns: Column[]
+): Row[] => {
+    const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
+    const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
+
+    return Object.entries(groups).map(([key, children]) => {
+        const calculatedFields = aggTypeColumns.reduce(
+            (acc, column) => {
+                if (columns.length) {
+                    const columnFields: Record<string, Row[]> = {};
+                    children.forEach((child) => {
+                        columns.forEach((c) => {
+                            const fieldName = `${c.field}:${child[c.field as keyof Row]}`;
+                            if (columnFields[fieldName] === undefined) {
+                                columnFields[fieldName] = [child];
+                            } else {
+                                columnFields[fieldName].push(child);
+                            }
+                        });
+                    })
+                    Object.keys(columnFields).forEach((field) => {
+                        acc[`${column.field}@${field}`] = _calculate(columnFields[field], column) || null;
+                    });
+                } else {
+                    acc[`${column.field}@total`] = _calculate(children, column) || null;
+                }
+                return acc;
+            },
+            children[0]
         );
 
         const newRow = {
@@ -118,7 +170,20 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, column.field as string, calculatedColumns);
+    return getGroupRows(groups, column.field as string, calculatedColumns, undefined);
+};
+
+export const groupByPivot = (data: Data, column: Column, columns: Column[], calculatedColumns: Column[]): Row[] => {
+    const groups = data.reduce((acc, row) => {
+        const key = `${row[column.field as keyof Row]}`;
+        if (!acc[key]) {
+            acc[key] = [];
+        }
+        acc[key].push(row);
+        return acc;
+    }, {} as Record<string, Row[]>);
+
+    return getPivotGroups(groups, column.field as string, columns, calculatedColumns);
 };
 
 export const groupByMultiple = (

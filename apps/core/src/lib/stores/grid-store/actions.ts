@@ -9,6 +9,7 @@ import {
     getColumnsFromDefs,
     getSwappableClone,
     groupDataByColumnDefs,
+    groupPivot,
     mergeColumns,
     moveColumns,
     removeSort,
@@ -28,7 +29,7 @@ import {
     SideBarConfig,
     SortType,
 } from '../../common';
-import { createGroupColumn, getDynamicHeaders } from './utils/group';
+import { createGroupColumn, getDynamicHeaders, getValueHeaders } from './utils/group';
 import { clone } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
@@ -374,7 +375,6 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         }
 
         const columns = getColumnsFromDefs(rowColumnDefs, defaultColumnDef);
-        const aggColumns = Object.values(columns).filter((col) => col.aggregation);
 
         if (pivot.rows?.length) {
             rowColumnDefs.forEach((row) => {
@@ -394,10 +394,13 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
             });
         }
 
-        const groupedByRows = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
+        const groupedByRows = groupPivot(columns, pivot.columns || [], pivot.values || [],  data, groupOrder, 0);
 
         if (pivot.columns?.length) {
             const valueColumns = getDynamicHeaders(pivot.columns, pivot.values || [], groupedByRows);
+            columnDefs.push(...valueColumns);
+        } else if (pivot.values?.length) {
+            const valueColumns = getValueHeaders(pivot.values, 'total');
             columnDefs.push(...valueColumns);
         }
 
