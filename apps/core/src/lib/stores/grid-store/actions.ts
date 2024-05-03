@@ -379,22 +379,18 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         if (pivot.rows?.length) {
             rowColumnDefs.forEach((row) => {
                 const column = columns[row.id as ColumnId];
-                const newColumn = createGroupColumn(column, columns, {
-                    name: 'rows',
-                    field: 'tree',
-                    width: 200,
-                    menu: { grid: true, pin: true },
-                });
+                const newColumn = createGroupColumn(column, columns);
 
-                column.hidden = true;
+                // column.hidden = true;
 
-                newColumn.rowGroup = true;
+                // newColumn.rowGroup = true;
 
                 groupOrder.push(column.id);
             });
         }
 
-        const groupedByRows = groupPivot(columns, pivot.columns || [], pivot.values || [],  data, groupOrder, 0);
+        const groupedByRows = groupPivot(pivot.rows || [], pivot.columns || [], pivot.values || [],  data);
+        console.log(groupedByRows);
 
         if (pivot.columns?.length) {
             const valueColumns = getDynamicHeaders(pivot.columns, pivot.values || [], groupedByRows);

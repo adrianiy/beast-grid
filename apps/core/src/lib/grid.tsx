@@ -22,10 +22,11 @@ type Props<T> = {
     config: BeastGridConfig<T>;
     defaultConfig: Partial<BeastGridConfig<T>>;
     theme: string;
+    visible?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
-export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
+export default function Grid<T>({ config, defaultConfig, theme, visible, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pivot, columns, setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
         state.pivot,
@@ -112,6 +113,10 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
             setLoading(false);
         }, 0);
     }, [pivot]);
+
+    if (!visible) {
+        return null;
+    }
 
     const getToolbarHeight = () => {
         let toolbarHeight = 0;

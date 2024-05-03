@@ -135,37 +135,30 @@ export const groupDataByColumnDefs = (
 };
 
 export const groupPivot = (
-    columns: ColumnStore,
+    columns: Column[],
     aggColumns: Column[],
     valueColumns: Column[],
     data: Data,
-    groupOrder: ColumnId[],
     level = 0
 ): Data => {
-    const aggregationLevel = columns[groupOrder[level]];
-    console.log(aggregationLevel)
-
-    if (!aggregationLevel) {
+    if (level === columns.length) {
         return data;
     }
+    const aggregationLevel = columns[level];
+    const levelData: Row[][][] = groupByPivot(data, aggregationLevel, columns, aggColumns, valueColumns);
 
-    const finalData: Row[] = groupByPivot(data, aggregationLevel, aggColumns, valueColumns);
-
-    finalData.forEach((row) => {
-        row.children = groupPivot(columns, aggColumns, valueColumns, row.children || [], groupOrder, level + 1);
-        row.children.forEach((child) => {
-            child._level = level + 1;
-        });
-
-        if (groupOrder.length - 1 === level) {
-            row.children = undefined;
-            row._singleChild = true;
-        } else {
-            row._singleChild = false;
+    const finalData = levelData.map((row) => {
+        if (level === columns.length - 1) {
+            return row[1];
         }
-    });
+        const children = groupPivot(columns, aggColumns, valueColumns, row[0] as unknown as Data, level + 1);
+        row[1][0]._total = true;
+        row[1][0][aggregationLevel.field as string] = '';
+        row[1][0][columns[level + 1].field as string] = 'total';
+        return [...children, ...row[1]];
+    })
 
-    return finalData;
+    return finalData.flat();
 };
 
 export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => {

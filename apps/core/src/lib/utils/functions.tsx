@@ -108,14 +108,16 @@ const getGroupRows = (
 const getPivotGroups = (
     groups: Record<string, Row[]>,
     field: string,
+    groupRows: Column[],
     columns: Column[],
     calculatedColumns: Column[]
-): Row[] => {
+): Row[][][] => {
     const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
 
     return Object.entries(groups).map(([key, children]) => {
         const calculatedFields: Record<string, number | string[]> = {};
+        const groupFields: Record<string, string> = {};
         children.forEach((child) => {
             aggTypeColumns.forEach((valueColumn) => {
                 if (columns.length) {
@@ -124,29 +126,34 @@ const getPivotGroups = (
                         calculatedFields[column.field as string] = ((calculatedFields[column.field as string] || []) as string[]).concat(child[column.field as keyof Row] as string);
 
                         calculatedFields[fieldName] = +(calculatedFields[fieldName] || 0) + +(child[valueColumn.field as keyof Row] || 0);
+                        child[fieldName] = child[valueColumn.field as keyof Row];
                     });
                 }
                 calculatedFields[`${valueColumn.field}@total`] = +(calculatedFields[`${valueColumn.field}@total`] || 0) + +(child[valueColumn.field as keyof Row] || 0);
+                child[`${valueColumn.field}@total`] = calculatedFields[`${valueColumn.field}@total`];
             });
+            if (groupRows.length) {
+                groupRows.forEach((column) => {
+                    groupFields[column.field as string] = child[column.field as keyof Row] as string;
+                    child[column.field as string] = child[column.field as keyof Row]
+                });
+            }
         });
 
         const newRow = {
             ...calculatedFields,
+            ...groupFields,
             [field]: key,
+            _group: key,
             _id: uuidv4(),
-            _singleChild: children.length === 1,
-            children,
         };
 
-        if (children.length <= 1) {
-            return newRow;
-        }
         const computedFields = aggFuncColumns.reduce((acc, column) => {
             acc[column.field as string] = (column.aggregation as AggregationFunction)(newRow);
             return acc;
         }, {} as Record<string, number | string | null>);
 
-        return { ...newRow, ...computedFields };
+        return [children, [{ ...newRow, ...computedFields } as Row]];
     });
 };
 
@@ -163,7 +170,7 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
     return getGroupRows(groups, column.field as string, calculatedColumns, undefined);
 };
 
-export const groupByPivot = (data: Data, column: Column, columns: Column[], calculatedColumns: Column[]): Row[] => {
+export const groupByPivot = (data: Data, column: Column, groupRows: Column[], columns: Column[], calculatedColumns: Column[]): Row[][][] => {
     const groups = data.reduce((acc, row) => {
         const key = `${row[column.field as keyof Row]}`;
         if (!acc[key]) {
@@ -173,7 +180,7 @@ export const groupByPivot = (data: Data, column: Column, columns: Column[], calc
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getPivotGroups(groups, column.field as string, columns, calculatedColumns);
+    return getPivotGroups(groups, column.field as string, groupRows, columns, calculatedColumns);
 };
 
 export const groupByMultiple = (

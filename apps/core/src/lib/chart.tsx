@@ -62,11 +62,7 @@ export default function Chart<T>(props: Props<T>) {
         state.setSideBarConfig,
     ]);
 
-    if (!props.visible) {
-        return null;
-    }
-
-    return props.modal ? (
+    return props.modal ? props.visible && (
         createPortal(
             <div className={cn('bg-chart__modal__container', theme)} onClick={props.onClose}>
                 <div className="bg-chart__modal column" onClick={(e) => e.stopPropagation()}>
@@ -89,6 +85,7 @@ export default function Chart<T>(props: Props<T>) {
                         config={props.config}
                         columns={props.columns ?? sortedColumns}
                         activeColumns={props.activeColumns}
+                        visible={props.visible}
                         data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
                     />
                 </div>
@@ -101,6 +98,7 @@ export default function Chart<T>(props: Props<T>) {
                 config={props.config}
                 columns={props.columns ?? sortedColumns}
                 activeColumns={props.activeColumns}
+                visible={props.visible}
                 data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
             />
         </div>
@@ -112,6 +110,7 @@ type WrapperProps<T> = {
     columns: Column[];
     activeColumns?: Column[];
     data: Data;
+    visible?: boolean;
 };
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
@@ -146,6 +145,9 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     const [options, setOptions] = useState<EChartsCoreOption>();
 
     useEffect(() => {
+        if (!props.visible) {
+            return;
+        }
         const aggColumns = values.filter((col) => col.aggregation);
         const groupedData = category ? groupBy(data, category, aggColumns) : data;
         const categories = category
@@ -261,6 +263,10 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
         setOptions(_options);
     }, [props, category, values, groups, chartType]);
+
+    if (!props.visible) {
+        return null;
+    }
 
     if (!data.length) {
         return null;

@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import Chart from './chart';
 import { BeastGridConfig, BeastMode, Column, Data } from './common';
 import Grid from './grid';
@@ -13,11 +14,8 @@ type Props<T> = {
 export default function Beast<T>(props: Props<T>) {
     const [mode] = useBeastStore((state) => [state.mode]);
 
-    if (mode === BeastMode.GRID) {
-        return <Grid {...props} />;
-    } else if (mode === BeastMode.CHART) {
-        return <Chart visible {...props} />;
-    } else {
-        return null;
-    }
+    return <Fragment>
+        <Grid visible={mode === BeastMode.GRID} {...props} />
+        <Chart visible={mode === BeastMode.CHART} {...props} />
+    </Fragment>
 }
