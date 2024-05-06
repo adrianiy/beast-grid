@@ -15,7 +15,7 @@ export default function Beast<T>(props: Props<T>) {
     const [mode] = useBeastStore((state) => [state.mode]);
 
     return <Fragment>
-        <Grid visible={mode === BeastMode.GRID} {...props} />
+        {mode === BeastMode.GRID && <Grid {...props} />}
         <Chart visible={mode === BeastMode.CHART} {...props} />
     </Fragment>
 }

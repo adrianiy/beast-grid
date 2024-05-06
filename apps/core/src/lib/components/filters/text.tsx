@@ -4,7 +4,6 @@ import { List } from 'react-virtualized';
 
 import * as Checkbox from '@radix-ui/react-checkbox';
 
-
 import { Column, IFilter } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
@@ -24,33 +23,41 @@ export default function TextFilters(props: Props) {
     const { column } = props;
     const intl = useIntl();
     const [searchValue, setSearchValue] = useState('');
+    const [filterOptions, setFilterOptions] = useState<IFilter[]>([]);
     const [checked, setChecked] = useState<'indeterminate' | boolean>(false);
     const list = useRef<List | null>(null);
 
-    const [filters, addFilter, selectAll] = useBeastStore((state) => [
+    const [filters, data, addFilter, selectAll] = useBeastStore((state) => [
         state.filters,
+        state.data,
         state.addFilter,
         state.selectAllFilters,
     ]);
 
     useEffect(() => {
-        if (filters[column.id]?.length === column.filterOptions?.length) {
+        const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
+
+        setFilterOptions(values);
+    }, [data, column.field, setFilterOptions]);
+
+    useEffect(() => {
+        if (filters[column.id]?.length === filterOptions.length) {
             setChecked(true);
         } else if (!filters[column.id]?.length) {
             setChecked(false);
         } else {
             setChecked('indeterminate');
         }
-    }, [filters, column.filterOptions, column.id, setChecked]);
+    }, [filters, filterOptions, column.id, setChecked]);
 
     const handleFilterChange =
         (value: IFilter): MouseEventHandler<HTMLDivElement> =>
-            () => {
-                addFilter(column.id, value);
-            };
+        () => {
+            addFilter(column.id, value);
+        };
 
     const handleSelectAll: MouseEventHandler<HTMLDivElement> = () => {
-        selectAll(column.id);
+        selectAll(column.id, filterOptions);
     };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,16 +73,8 @@ export default function TextFilters(props: Props) {
         e.stopPropagation();
     };
 
-    function renderOption({
-        key,
-        index,
-        style
-    }: {
-        key: string;
-        index: number;
-        style: React.CSSProperties;
-    }) {
-        const item = column.filterOptions?.[index];
+    function renderOption({ key, index, style }: { key: string; index: number; style: React.CSSProperties }) {
+        const item = filterOptions[index];
 
         if (!item) {
             return null;
@@ -84,11 +83,9 @@ export default function TextFilters(props: Props) {
         return (
             <div
                 key={key}
-                className={
-                    cn('bg-filter__item row middle', {
-                        hidden: searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase()),
-                    })
-                }
+                className={cn('bg-filter__item row middle', {
+                    hidden: searchValue && !(item as string).toLowerCase().includes(searchValue.toLowerCase()),
+                })}
                 style={style}
                 onClick={handleFilterChange(item)}
             >
@@ -102,8 +99,8 @@ export default function TextFilters(props: Props) {
                     </Checkbox.Indicator>
                 </Checkbox.Root>
                 <label>{item as string}</label>
-            </div >
-        )
+            </div>
+        );
     }
 
     const rowHeihgt = ({ index }: { index: number }) => {
@@ -111,7 +108,7 @@ export default function TextFilters(props: Props) {
         const inSearch = (item as string)?.toLowerCase().includes(searchValue.toLowerCase());
 
         return !searchValue || inSearch ? 40 : 0;
-    }
+    };
 
     return (
         <div className="bg-filter bg-filter__text" onClick={handleClick}>
@@ -126,7 +123,7 @@ export default function TextFilters(props: Props) {
                 ref={list}
                 height={200}
                 width={245}
-                rowCount={column.filterOptions?.length || 0}
+                rowCount={filterOptions.length}
                 rowHeight={rowHeihgt}
                 rowRenderer={renderOption}
             />

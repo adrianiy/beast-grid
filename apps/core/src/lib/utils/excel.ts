@@ -10,12 +10,10 @@ export const exportToExcel = async (data: Data, columns: Column[], fileName: str
     sheet.columns = finalColumns.map((col) => ({
         header: col.headerName,
         key: col.field as string,
-        width: 200,
+        width: 20,
     }));
 
-    data.forEach((row) => {
-        sheet.addRow(row);
-    });
+    sheet.addRows(data);
 
     const buffer = await workBook.xlsx.writeBuffer();
 

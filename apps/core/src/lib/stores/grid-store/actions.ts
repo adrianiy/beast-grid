@@ -195,17 +195,16 @@ export const addFilter =
         return { columns, filters: { ...filters }, edited: true };
     };
 
-export const selectAllFilters = (id: ColumnId) => (state: GridStore) => {
-    const { columns, filters } = state;
-    const column = columns[id];
+export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
+    const { filters } = state;
 
-    if (column.filterOptions?.length === filters[id]?.length) {
+    if (options.length === filters[id]?.length) {
         filters[id] = [];
     } else {
-        filters[id] = column.filterOptions as string[];
+        filters[id] = options as string[];
     }
 
-    return { columns, filters: { ...filters }, edited: true };
+    return { filters: { ...filters }, edited: true };
 };
 
 export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
@@ -379,18 +378,12 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         if (pivot.rows?.length) {
             rowColumnDefs.forEach((row) => {
                 const column = columns[row.id as ColumnId];
-                const newColumn = createGroupColumn(column, columns);
-
-                // column.hidden = true;
-
-                // newColumn.rowGroup = true;
 
                 groupOrder.push(column.id);
             });
         }
 
         const groupedByRows = groupPivot(pivot.rows || [], pivot.columns || [], pivot.values || [],  data);
-        console.log(groupedByRows);
 
         if (pivot.columns?.length) {
             const valueColumns = getDynamicHeaders(pivot.columns, pivot.values || [], groupedByRows);

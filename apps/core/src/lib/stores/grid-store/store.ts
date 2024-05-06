@@ -88,7 +88,7 @@ export interface GridStore extends GridState {
     setLoading: (loading: boolean) => void;
     setSorting: (sorting: boolean) => void;
     addFilter: (id: ColumnId, value: IFilter | null, idx?: number) => void;
-    selectAllFilters: (id: ColumnId) => void;
+    selectAllFilters: (id: ColumnId, options: IFilter[]) => void;
     pinColumn: (id: ColumnId, pin: PinType) => void;
     setSideBarConfig: (config: SideBarConfig | null) => void;
     updateSelectedCells: (selected: SelectedCells | null) => void;
@@ -167,7 +167,7 @@ export const createGridStore = <T>(
         setLoading: (loading: boolean) => set({ loading }),
         setSorting: (sorting: boolean) => set({ sorting }),
         addFilter: (id: ColumnId, value: IFilter | null, idx?: number) => set(addFilter(id, value, idx)),
-        selectAllFilters: (id: ColumnId) => set(selectAllFilters(id)),
+        selectAllFilters: (id: ColumnId, options: IFilter[]) => set(selectAllFilters(id, options)),
         pinColumn: (id: ColumnId, pin: PinType) => set(pinColumn(id, pin)),
         setSideBarConfig: (config: SideBarConfig | null) => set(setSideBarConfig(config)),
         updateSelectedCells: (selected: SelectedCells | null) => set(updateSelectedCells(selected)),

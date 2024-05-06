@@ -126,16 +126,16 @@ const getPivotGroups = (
                         calculatedFields[column.field as string] = ((calculatedFields[column.field as string] || []) as string[]).concat(child[column.field as keyof Row] as string);
 
                         calculatedFields[fieldName] = +(calculatedFields[fieldName] || 0) + +(child[valueColumn.field as keyof Row] || 0);
-                        child[fieldName] = child[valueColumn.field as keyof Row];
+                        // child[fieldName] = child[valueColumn.field as keyof Row];
                     });
                 }
                 calculatedFields[`${valueColumn.field}@total`] = +(calculatedFields[`${valueColumn.field}@total`] || 0) + +(child[valueColumn.field as keyof Row] || 0);
-                child[`${valueColumn.field}@total`] = calculatedFields[`${valueColumn.field}@total`];
+                // child[`${valueColumn.field}@total`] = calculatedFields[`${valueColumn.field}@total`];
             });
             if (groupRows.length) {
                 groupRows.forEach((column) => {
                     groupFields[column.field as string] = child[column.field as keyof Row] as string;
-                    child[column.field as string] = child[column.field as keyof Row]
+                    // child[column.field as string] = child[column.field as keyof Row]
                 });
             }
         });

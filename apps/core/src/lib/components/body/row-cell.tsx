@@ -158,6 +158,7 @@ export function RowCell({
                 lastPinned: columnDef.lastPinned,
                 expandable: row.children || columnDef.rowGroup,
                 bordered: border,
+                totalRow: row._total,
                 selected,
                 borderTop,
                 borderLeft,

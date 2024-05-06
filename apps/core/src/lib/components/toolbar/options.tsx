@@ -67,7 +67,7 @@ export const DownloadExcel = ({ toolbar }: Props) => {
     }
 
     const initializeDownload = () => {
-        exportToExcel(data, columns, `data-${new Date().toISOString()}.xlsx`);
+        exportToExcel(data, columns, `data-${new Date().toISOString()}`);
     }
 
     return (

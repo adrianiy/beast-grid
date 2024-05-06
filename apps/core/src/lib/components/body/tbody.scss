@@ -81,6 +81,11 @@
         }
     }
 
+    &.totalRow {
+        background-color: var(--bg-hover-color--1);
+        font-weight: bold;
+    }
+
     .grid-row-value {
         display: block;
         width: 100%;

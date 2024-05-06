@@ -153,8 +153,10 @@ export const groupPivot = (
         }
         const children = groupPivot(columns, aggColumns, valueColumns, row[0] as unknown as Data, level + 1);
         row[1][0]._total = true;
-        row[1][0][aggregationLevel.field as string] = '';
-        row[1][0][columns[level + 1].field as string] = 'total';
+        row[1][0][columns[level + 1].field as string] = 'TOTAL';
+        for (let i = level + 2; i < columns.length; i++) {
+            row[1][0][columns[i].field as string] = '';
+        }
         return [...children, ...row[1]];
     })
 
@@ -229,9 +231,6 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
         }
         if (typeof data[0][column.field as string] === 'string') {
             column.filterType = FilterType.TEXT;
-            const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
-
-            column.filterOptions = values;
             return;
         }
         if (typeof data[0][column.field as string] === 'number') {

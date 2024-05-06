@@ -183,6 +183,9 @@ const Options = ({
     };
 
     const handleExpand = (expanded: boolean, index: number) => {
+        if (!options[index].childrenId?.length) {
+            return;
+        }
         if (expanded) {
             expandedIndexes.current.push(index);
         } else {

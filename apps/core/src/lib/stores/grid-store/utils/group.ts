@@ -42,11 +42,10 @@ export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[]
         const aggregation = val.aggregation;
 
         columnDefs.push({
+            ...val,
             headerName: `${aggregation} of ${val.headerName}`,
             pivotField: `${val.field}@${parentField}`,
-            field: val.field,
             flex: 1,
-            aggregation,
         });
     });
 

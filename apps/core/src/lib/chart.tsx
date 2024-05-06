@@ -61,8 +61,32 @@ export default function Chart<T>(props: Props<T>) {
         state.theme,
         state.setSideBarConfig,
     ]);
+    const [category, setCategory] = useState<Column>();
+    const [values, setValues] = useState<Column[]>();
+    const [groups, setGroups] = useState<Column[]>();
+    const [chartType, setChartType] = useState<ChartType>();
 
-    return props.modal ? props.visible && (
+    if (!props.visible) {
+        return null;
+    }
+
+    const updateCategory = (category: Column) => {
+        setCategory(category);
+    };
+
+    const updateValues = (values: Column[]) => {
+        setValues(values);
+    };
+
+    const updateGroups = (groups: Column[]) => {
+        setGroups(groups);
+    };
+
+    const updateChartType = (chartType: ChartType) => {
+        setChartType(chartType);
+    };
+
+    return props.modal ? (
         createPortal(
             <div className={cn('bg-chart__modal__container', theme)} onClick={props.onClose}>
                 <div className="bg-chart__modal column" onClick={(e) => e.stopPropagation()}>
@@ -85,7 +109,6 @@ export default function Chart<T>(props: Props<T>) {
                         config={props.config}
                         columns={props.columns ?? sortedColumns}
                         activeColumns={props.activeColumns}
-                        visible={props.visible}
                         data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
                     />
                 </div>
@@ -98,8 +121,15 @@ export default function Chart<T>(props: Props<T>) {
                 config={props.config}
                 columns={props.columns ?? sortedColumns}
                 activeColumns={props.activeColumns}
-                visible={props.visible}
                 data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+                category={category}
+                values={values}
+                groups={groups}
+                chartType={chartType}
+                updateCategory={updateCategory}
+                updateValues={updateValues}
+                updateGroups={updateGroups}
+                updateChartType={updateChartType}
             />
         </div>
     );
@@ -110,7 +140,14 @@ type WrapperProps<T> = {
     columns: Column[];
     activeColumns?: Column[];
     data: Data;
-    visible?: boolean;
+    category?: Column;
+    values?: Column[];
+    groups?: Column[];
+    chartType?: ChartType;
+    updateCategory?: (category: Column) => void;
+    updateValues?: (values: Column[]) => void;
+    updateGroups?: (groups: Column[]) => void;
+    updateChartType?: (chartType: ChartType) => void;
 };
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
@@ -133,21 +170,18 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         (categoryColumns.length ? categoryColumns : configurableCategories);
     const includeDate = activeCategories.find((c) => dateColumns.find((dc) => dc.id === c.id));
 
-    const [category, setCategory] = useState<Column>(activeCategories[0]);
-    const [values, setValues] = useState<Column[]>(activeColumns);
+    const [category, setCategory] = useState<Column>(props.category || activeCategories[0]);
+    const [values, setValues] = useState<Column[]>(props.values || activeColumns);
     const [groups, setGroups] = useState<Column[]>(
-        props.config.chart?.groupData === false ? [] : activeCategories.slice(1)
+        props.groups || props.config.chart?.groupData === false ? [] : activeCategories.slice(1)
     );
     const [chartType, setChartType] = useState<ChartType>(
-        (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
+        props.chartType || (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
     );
 
     const [options, setOptions] = useState<EChartsCoreOption>();
 
     useEffect(() => {
-        if (!props.visible) {
-            return;
-        }
         const aggColumns = values.filter((col) => col.aggregation);
         const groupedData = category ? groupBy(data, category, aggColumns) : data;
         const categories = category
@@ -264,10 +298,6 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         setOptions(_options);
     }, [props, category, values, groups, chartType]);
 
-    if (!props.visible) {
-        return null;
-    }
-
     if (!data.length) {
         return null;
     }
@@ -275,19 +305,24 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
     const changeCategory = (column: Column) => {
         setCategory(column);
         setGroups(groups.filter((g) => g.id !== column.id));
+        props.updateCategory?.(column);
     };
 
     const changeValues = (column: Column) => {
         const match = values.find((s) => s.id === column.id);
+        let newValues = [];
         if (match) {
-            setValues(values.filter((s) => s.id !== column.id));
+            newValues = values.filter((s) => s.id !== column.id);
         } else {
-            setValues([...values, column]);
+            newValues = [...values, column];
         }
+        setValues(newValues);
+        props.updateValues?.(newValues);
     };
 
     const changeChartType = (chartType: ChartType) => {
         setChartType(chartType);
+        props.updateChartType?.(chartType);
     };
 
     const changeGroups = (column: Column) => {
@@ -295,11 +330,14 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
             return;
         }
         const match = groups.find((s) => s.id === column.id);
+        let newGroups = [];
         if (match) {
-            setGroups(groups.filter((s) => s.id !== column.id));
+            newGroups = groups.filter((s) => s.id !== column.id);
         } else {
-            setGroups([...groups, column]);
+            newGroups = [...groups, column];
         }
+        setGroups(newGroups);
+        props.updateGroups?.(newGroups);
     };
 
     if (!options) {
