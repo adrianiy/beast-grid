@@ -43,6 +43,7 @@ export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[]
 
         columnDefs.push({
             ...val,
+            id: uuidv4(),
             headerName: `${aggregation} of ${val.headerName}`,
             pivotField: `${val.field}@${parentField}`,
             flex: 1,
@@ -51,28 +52,32 @@ export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[]
 
     return columnDefs;
 };
-export const getDynamicHeaders = (columns: Column[], values: Column[], data: Data): ColumnDef[] => {
+export const getDynamicHeaders = (
+    columns: Column[],
+    currentColumn: number,
+    values: Column[],
+    data: Data
+): ColumnDef[] => {
     const groups: Record<string, boolean> = {};
     const columnDefs: ColumnDef[] = [];
+    const column = columns[currentColumn];
+    const isFinal = currentColumn === columns.length - 1;
 
     data.forEach((row) => {
-        columns.forEach((column) => {
-            if (!row[column.field as string]) return;
+        if (row[column.field as string] == null) return;
 
-            (row[column.field as string] as string[]).forEach((value: string) => {
-                const field = `${column.field}:${value}`;
-                if (groups[field] == null) {
-                    groups[field] = true;
-                    columnDefs.push({
-                        headerName: value,
-                        field,
-                        flex: 1,
-                        minWidth: MIN_COL_WIDTH,
-                        children: values.length > 0 ? getValueHeaders(values, field) : [],
-                    });
-                }
+        const value = row[column.field as string] as string;
+        const field = `${column.field}:${value}`;
+        if (groups[field] == null) {
+            groups[field] = true;
+            columnDefs.push({
+                headerName: value,
+                field,
+                flex: 1,
+                minWidth: MIN_COL_WIDTH,
+                children: isFinal && values.length > 0 ? getValueHeaders(values, field) : !isFinal ? getDynamicHeaders(columns, currentColumn + 1, values, data) : []
             });
-        });
+        }
     });
 
     return columnDefs;

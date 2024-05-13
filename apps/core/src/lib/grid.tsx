@@ -52,7 +52,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                 const rightIndex = lastLevel.findIndex((column) => column.left > rightEdge);
 
                 setColumnSliceProps({
-                    limits: [leftIndex > -1 ? leftIndex - 2 : 0, rightIndex > - 1 ? rightIndex + 2 : 0],
+                    limits: [leftIndex > -1 ? leftIndex - 4 : 0, rightIndex > - 1 ? rightIndex + 4 : 0],
                     edges: [leftEdge, rightEdge],
                 });
                 setScrollTop(scrollElement.scrollTop);
@@ -71,6 +71,12 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
         const resizeObserver = new ResizeObserver(() => {
             if (containerRef.current) {
                 autoSize();
+
+                const scrollElement = ref.current?.getScrollElement() as HTMLDivElement;
+
+                if (scrollElement) {
+                    handleScroll(scrollElement)();
+                }
             }
         });
 
@@ -81,7 +87,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
         return () => {
             resizeObserver.disconnect();
         };
-    }, [autoSize]);
+    }, [autoSize, handleScroll]);
 
     // Handle scroll element
     useEffect(() => {
@@ -175,7 +181,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                     </Fragment>
                 )}
             </SimpleBar>
-            <SideBar config={config} />
+            <SideBar config={config} theme={theme} />
         </div>
     );
 }

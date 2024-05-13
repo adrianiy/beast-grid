@@ -103,11 +103,11 @@ export default function TextFilters(props: Props) {
         );
     }
 
-    const rowHeihgt = ({ index }: { index: number }) => {
-        const item = column.filterOptions?.[index];
+    const rowHeight = ({ index }: { index: number }) => {
+        const item = filterOptions?.[index];
         const inSearch = (item as string)?.toLowerCase().includes(searchValue.toLowerCase());
 
-        return !searchValue || inSearch ? 40 : 0;
+        return (!searchValue || inSearch) ? 40 : 0;
     };
 
     return (
@@ -124,7 +124,7 @@ export default function TextFilters(props: Props) {
                 height={200}
                 width={245}
                 rowCount={filterOptions.length}
-                rowHeight={rowHeihgt}
+                rowHeight={rowHeight}
                 rowRenderer={renderOption}
             />
             <div className="bg-filter__separator" />

@@ -61,7 +61,7 @@ export default function RowContainer({
         return columns
             .filter((column) => column.pinned === pinType)
             .map((column, cidx) => {
-                if (pinType === PinType.NONE && (cidx < startIndex || cidx >= (endIndex || columns.length))) {
+                if (pinType === PinType.NONE && (column.finalPosition < startIndex || column.finalPosition >= (endIndex || columns.length))) {
                     return null;
                 }
 

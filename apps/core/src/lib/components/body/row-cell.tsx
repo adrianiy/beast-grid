@@ -137,7 +137,6 @@ export function RowCell({
     };
 
     const handleMouseClick = (e: React.MouseEvent) => {
-        console.log(e)
         const coords = { x: columnDef.finalPosition, y: idx };
         if (e.shiftKey && selectable) {
             setSelectedEnd(coords);

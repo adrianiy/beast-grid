@@ -383,17 +383,19 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
             });
         }
 
-        const groupedByRows = groupPivot(pivot.rows || [], pivot.columns || [], pivot.values || [],  data);
+        const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data);
+        console.log(groupedByRows, valueColumns)
 
         if (pivot.columns?.length) {
-            const valueColumns = getDynamicHeaders(pivot.columns, pivot.values || [], groupedByRows);
-            columnDefs.push(...valueColumns);
+            columnDefs.push(...valueColumns.filter(c => c._firstLevel));
         } else if (pivot.values?.length) {
-            const valueColumns = getValueHeaders(pivot.values, 'total');
-            columnDefs.push(...valueColumns);
+            const valueHeaders = getValueHeaders(pivot.values, 'total:');
+            columnDefs.push(...valueHeaders);
         }
+        console.log(columnDefs)
 
         const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
+        console.log('finalColumns', finalColumns);
 
         const sortedColumns = sortColumns(finalColumns);
 

@@ -158,6 +158,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 pivot: {
                     enabled: true,
                 },
+                appendModalToBoy: true,
                 ..._customConfig,
             });
         }

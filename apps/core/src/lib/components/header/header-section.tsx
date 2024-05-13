@@ -34,7 +34,7 @@ export default function HeaderSection<T>({
             const leftIndex = columns.findIndex((column) => column.left >= (leftEdge || 0));
             const rightIndex = columns.findIndex((column) => column.left > (rightEdge || 0));
 
-            return [Math.max(0, leftIndex - 2), rightIndex > -1 ? rightIndex + 2 : Infinity];
+            return [Math.max(0, leftIndex - 4), rightIndex > -1 ? rightIndex + 4 : Infinity];
         }
 
         return [0, columns.length];
@@ -45,7 +45,7 @@ export default function HeaderSection<T>({
         return (
             <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
                 {level.map((column, idx) => {
-                    if (idx >= end || idx < init) {
+                    if (column.finalPosition >= end || column.finalPosition < init) {
                         return null;
                     }
                     if (column.pinned !== pinType || column.hidden) {

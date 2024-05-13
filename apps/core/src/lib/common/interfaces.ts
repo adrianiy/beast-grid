@@ -50,11 +50,13 @@ export interface BaseColumnDef {
     pivotField?: string;
     sortable?: boolean;
     children?: ColumnDef[];
+    childrenMap?: Record<string, string>;
     formatter?: (value: string & number, row: Row) => string;
     styleFormatter?: (value: string & number, row: Row) => CSSProperties;
     menu?: Partial<MenuProps>;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
+    _firstLevel?: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
@@ -154,6 +156,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     bottomToolbar?: Partial<ToolBar>;
     chart?: Partial<Chart>;
     contextualMenu?: Partial<ContextualMenuProps>;
+    appendModalToBoy?: boolean;
 }
 
 export interface TableStyles {
