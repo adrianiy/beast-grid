@@ -15,6 +15,7 @@ type Props<T> = {
     multiSort?: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
+    disableSwapColumns?: boolean;
 };
 
 export default function HeaderSection<T>({
@@ -27,6 +28,7 @@ export default function HeaderSection<T>({
     multiSort,
     dragOptions,
     events,
+    disableSwapColumns,
     headers,
 }: Props<T>) {
     const getColumnSlice = (columns: Column[]) => {
@@ -63,6 +65,7 @@ export default function HeaderSection<T>({
                             column={column}
                             dragOptions={dragOptions}
                             events={events}
+                            disableSwapColumns={disableSwapColumns}
                         />
                     );
                 })}

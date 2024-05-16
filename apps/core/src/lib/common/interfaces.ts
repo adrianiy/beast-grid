@@ -137,8 +137,16 @@ export interface Chart {
     config: Partial<EChartsCoreOption>;
 }
 
+export interface PivotValue {
+    field: string;
+    operation: AggregationType;
+}
+
 export interface Pivot {
     enabled: boolean;
+    rows: string[];
+    columns: string[];
+    values: PivotValue[];
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {

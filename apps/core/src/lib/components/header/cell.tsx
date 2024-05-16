@@ -21,6 +21,7 @@ type Props<T> = {
     multiSort: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
+    disableSwapColumns?: boolean;
 };
 
 export default function HeaderCell<T>({
@@ -32,6 +33,7 @@ export default function HeaderCell<T>({
     dragOptions,
     multiSort,
     events,
+    disableSwapColumns
 }: Props<T>) {
     const menuRef = useRef<SVGSVGElement>(null);
     const lastX = useRef<number>(0);
@@ -62,7 +64,8 @@ export default function HeaderCell<T>({
             onDrag: hitTest,
             onDragEnd,
         },
-        container
+        container,
+        disableSwapColumns
     );
     const [resize] = useDndHook({
         ...dragOptions,

@@ -20,7 +20,8 @@ export const useDndHook = (
         onDragEnd: (e: DragEvent, pointerCoords: Coords) => void;
         onAnimationFrame: (pointerCoords: Coords) => void;
     }>,
-    parent?: HTMLDivElement
+    parent?: HTMLDivElement,
+    disable?: boolean
 ) => {
     const ref = useRef<HTMLDivElement>(null);
     const reqAnimFrameNo = useRef<number>(0);
@@ -38,6 +39,9 @@ export const useDndHook = (
     const [scrollElement, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
 
     useEffect(() => {
+        if (disable) {
+            return;
+        }
         if (options?.isDropTarget && ref.current) {
             addDropTarget(ref.current);
         }
@@ -198,7 +202,7 @@ export const useDndHook = (
                 dragRef.removeEventListener('dragend', onDragEnd);
             };
         }
-    }, [ref, scrollElement]);
+    }, [ref, scrollElement, disable]);
 
     return [ref];
 };

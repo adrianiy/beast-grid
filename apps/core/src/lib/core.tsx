@@ -11,7 +11,7 @@ import { BeastGridProvider, BeastApi } from './stores/beast-store';
 
 import { DndStoreProvider } from './stores/dnd-store';
 
-import { TGridStore, createGridStore } from './stores/grid-store/store';
+import { PivotState, TGridStore, createGridStore } from './stores/grid-store/store';
 import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
@@ -35,17 +35,21 @@ export function BeastGrid<T>({
     theme = 'corpo-theme',
     locale = 'en',
     injectStyles = false,
+    disableColumnSwap = false,
     api,
     onSortChange,
     onSwapChange,
+    onPivotChange
 }: {
     config?: BeastGridConfig<T>;
     theme?: string;
     locale?: string;
     api?: MutableRefObject<BeastGridApi | undefined>;
     injectStyles?: boolean;
+    disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
+    onPivotChange?: (pivot: Partial<PivotState>) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
@@ -81,7 +85,7 @@ export function BeastGrid<T>({
 
     useEffect(() => {
         if (ref.current && config?.columnDefs) {
-            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange);
+            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange, onPivotChange);
             const dndStore = () => createDndStore();
 
             setStores([gridStore, dndStore]);
@@ -109,6 +113,7 @@ export function BeastGrid<T>({
                                 config={config}
                                 defaultConfig={defaultConfig}
                                 theme={theme}
+                                disaleColumnSwap={disableColumnSwap}
                                 onSortChange={onSortChange}
                             />
                             <Toolbar config={config} position={ToolbarPosition.BOTTOM} />

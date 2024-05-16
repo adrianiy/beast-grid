@@ -144,24 +144,7 @@ export const groupPivot = (
     if (level === columns.length) {
         return [data, []];
     }
-    const [levelData, columnDefs] = groupByPivot(data, columns, aggColumns, valueColumns);
-
-    console.log(levelData)
-
-    // const finalData = levelData.map((row) => {
-    //     if (level === columns.length - 1) {
-    //         return row[1];
-    //     }
-    //     const children = groupPivot(columns, aggColumns, valueColumns, row[0] as unknown as Data, level + 1);
-    //     row[1][0]._total = true;
-    //     row[1][0][columns[level + 1].field as string] = 'TOTAL';
-    //     for (let i = level + 2; i < columns.length; i++) {
-    //         row[1][0][columns[i].field as string] = '';
-    //     }
-    //     return [...children, ...row[1]];
-    // })
-
-    return [levelData, columnDefs];
+    return groupByPivot(data, columns, aggColumns, valueColumns);
 };
 
 export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => {

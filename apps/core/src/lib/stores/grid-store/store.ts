@@ -67,7 +67,8 @@ export interface GridState {
     selecting: boolean;
     mode: BeastMode;
     pivot: Partial<PivotState> | null;
-    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
+    onPivotChange?: (pivot: Partial<PivotState>) => void;
 }
 
 export interface GridStore extends GridState {
@@ -102,23 +103,57 @@ export interface GridStore extends GridState {
 }
 
 export const createGridStore = <T>(
-    { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
+    { data: _data, columnDefs, defaultColumnDef, sort, tree, pivot }: BeastGridConfig<T>,
     container: HTMLDivElement,
     theme: string,
-    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void,
+    onPivotChange?: (pivot: Partial<PivotState>) => void
 ) => {
-    const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
+    let columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
-    const groupOrder = Object.values(columns)
+    let groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
     const initialData = createVirtualIds(_data as Data);
 
-    const data = initialize(columns, container, initialData, groupOrder, tree);
-    const sortedColumns = sortColumns(columns);
+    let data = initialize(columns, container, initialData, groupOrder, tree);
+    let sortedColumns = sortColumns(columns);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
+
+    if (pivot?.pivotConfig) {
+        const _columns = pivot?.pivotConfig?.columns.map((columnField) =>
+            sortedColumns.find((column) => column.field === columnField)
+        ) as Column[];
+        const rows = pivot?.pivotConfig?.rows.map((rowField) =>
+            sortedColumns.find((column) => column.field === rowField)
+        ) as Column[];
+        const values = pivot?.pivotConfig?.values.map((valueField) =>
+            sortedColumns.find((column) => column.field === valueField.field)
+        ) as Column[];
+
+        const pivotResult = setPivot({ columns: _columns, rows, values })({
+            initialData: [...initialData],
+            defaultColumnDef
+        } as GridStore)
+
+        if (pivotResult.columns) {
+            columns = pivotResult.columns;
+        }
+
+        if (pivotResult.data) {
+            data = pivotResult.data;
+        }
+
+        if (pivotResult.groupOrder) {
+            groupOrder = pivotResult.groupOrder;
+        }
+
+        if (pivotResult.sortedColumns) {
+            sortedColumns = pivotResult.sortedColumns;
+        }
+    }
 
     const initialState = {
         edited: false,
@@ -140,7 +175,8 @@ export const createGridStore = <T>(
         sorting: false,
         selecting: false,
         pivot: null,
-        onSwapChange
+        onSwapChange,
+        onPivotChange
     };
 
     return create<GridStore>((set) => ({

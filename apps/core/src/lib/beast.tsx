@@ -8,6 +8,7 @@ type Props<T> = {
     config: BeastGridConfig<T>;
     defaultConfig: Partial<BeastGridConfig<T>>;
     theme: string;
+    disaleColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 

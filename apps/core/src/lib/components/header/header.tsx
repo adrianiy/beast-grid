@@ -15,9 +15,10 @@ type Props<T> = {
     events?: Partial<HeaderEvents>;
     leftEdge: number;
     rightEdge: number;
+    disableSwapColumns?: boolean;
 };
 
-export default function Header<T>({ height, border, multiSort, dragOptions, events, leftEdge, rightEdge }: Props<T>) {
+export default function Header<T>({ height, border, multiSort, dragOptions, events, leftEdge, rightEdge, disableSwapColumns }: Props<T>) {
     const [columns] = useBeastStore((state) => [state.columns]);
 
     const levels = Object.values(columns).reduce((acc, column) => {
@@ -45,6 +46,7 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                 border={border}
                 multiSort={multiSort}
                 dragOptions={dragOptions}
+                disableSwapColumns={disableSwapColumns}
                 events={events}
             />
             <HeaderSection
@@ -58,6 +60,7 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                 events={events}
                 leftEdge={leftEdge}
                 rightEdge={rightEdge}
+                disableSwapColumns={disableSwapColumns}
             />
             <HeaderSection
                 width={rightWidth}
@@ -68,6 +71,7 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                 multiSort={multiSort}
                 dragOptions={dragOptions}
                 events={events}
+                disableSwapColumns={disableSwapColumns}
             />
         </div>
     );

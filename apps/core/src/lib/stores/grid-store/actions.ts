@@ -29,7 +29,7 @@ import {
     SideBarConfig,
     SortType,
 } from '../../common';
-import { createGroupColumn, getDynamicHeaders, getValueHeaders } from './utils/group';
+import { createGroupColumn, getValueHeaders } from './utils/group';
 import { clone } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
@@ -350,7 +350,7 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
 };
 
 export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
-    const { pivot: currentPivot, initialData, defaultColumnDef } = state;
+    const { pivot: currentPivot, initialData, defaultColumnDef, onPivotChange } = state;
     const data = [...initialData];
 
     const pivot = { ...currentPivot, ...newPivot };
@@ -384,7 +384,6 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         }
 
         const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data);
-        console.log(groupedByRows, valueColumns)
 
         if (pivot.columns?.length) {
             columnDefs.push(...valueColumns.filter(c => c._firstLevel));
@@ -392,12 +391,14 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
             const valueHeaders = getValueHeaders(pivot.values, 'total:');
             columnDefs.push(...valueHeaders);
         }
-        console.log(columnDefs)
 
         const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
-        console.log('finalColumns', finalColumns);
 
         const sortedColumns = sortColumns(finalColumns);
+
+        if (onPivotChange) {
+            onPivotChange(pivot);
+        }
 
         return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, edited: true };
     }

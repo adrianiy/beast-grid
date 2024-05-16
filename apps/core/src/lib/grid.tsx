@@ -22,10 +22,11 @@ type Props<T> = {
     config: BeastGridConfig<T>;
     defaultConfig: Partial<BeastGridConfig<T>>;
     theme: string;
+    disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
-export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: Props<T>) {
+export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pivot, columns, setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
         state.pivot,
@@ -164,6 +165,7 @@ export default function Grid<T>({ config, defaultConfig, theme, onSortChange }: 
                             dragOptions={config.dragOptions}
                             leftEdge={columnSliceProps?.edges[0] || 0}
                             rightEdge={columnSliceProps?.edges[1] || 0}
+                            disableSwapColumns={disableColumnSwap}
                         />
                         <TBody
                             rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}

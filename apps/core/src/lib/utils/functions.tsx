@@ -193,7 +193,7 @@ export const acumData = (
     columns.forEach((column, index) => {
         const key = row[column.field as keyof Row] as string;
         const isLastColumn = index === columns.length - 1;
-        let field = `${column.field}:${key}`;
+        let field = `${column.field}:${key || ''}`;
 
         if (lastColumn) {
             field = `${field}@${lastColumn.field}`;
@@ -212,7 +212,10 @@ export const acumData = (
                 };
             }
 
-            if (lastColumn) {
+            if (lastColumn && !lastColumn.childrenMap?.[field]) {
+                if (lastColumn.childrenMap) {
+                    lastColumn.childrenMap[field] = columnDefs[field].id as string;
+                }
                 lastColumn.children?.push(columnDefs[field]);
             }
 
@@ -245,7 +248,6 @@ export const acumData = (
 
                     lastColumn.children?.push(newValueColumn);
                 }
-
             });
         }
 
@@ -283,23 +285,26 @@ class PivotRow {
         const key = row[aggregationColumn.field as keyof Row] as string;
 
         if (!isLeaf) {
-            if (!this._groups[key]) {
-                this._groups[key] = this.children.length;
+            const nextLevel = currentLevel + 1;
+            const nextField = aggregationColumns[nextLevel]?.field as string;
+            const nextKey = row[nextField as keyof Row] as string;
 
-                const child = new PivotRow(key, isLeaf);
-                child.addData(row, aggregationColumns, currentLevel + 1, columns, values, columnDefs);
+            if (this._groups[nextKey] == null) {
+                this._groups[nextKey] = this.children.length;
+
+                const child = new PivotRow(nextKey, nextLevel === aggregationColumns.length - 1);
 
                 this.children.push(child);
-            } else {
-                this.children[this._groups[key]].addData(
-                    row,
-                    aggregationColumns,
-                    currentLevel + 1,
-                    columns,
-                    values,
-                    columnDefs
-                );
             }
+
+            this.children[this._groups[nextKey]].addData(
+                row,
+                aggregationColumns,
+                nextLevel,
+                columns,
+                values,
+                columnDefs
+            );
         }
 
         this.data[aggregationColumn.field as string] = key;
@@ -327,7 +332,7 @@ export const groupByPivot = (
     data.forEach((row) => {
         const key = row[groupRows[0].field as keyof Row] as string;
 
-        if (!groups[key]) {
+        if (groups[key] == null) {
             groups[key] = rows.length;
             rows.push(new PivotRow(key, groupRows.length === 1));
         }
@@ -375,49 +380,49 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
 
 export const filterRow =
     (columns: ColumnStore, filters: Record<string, IFilter[]>) =>
-    (row: Row): Row | undefined => {
-        let show = true;
-        let children = row.children;
+        (row: Row): Row | undefined => {
+            let show = true;
+            let children = row.children;
 
-        for (const filterKey of Object.keys(filters)) {
-            if (
-                columns[filterKey].filterType === FilterType.TEXT &&
-                filters[filterKey].includes(`${row[columns[filterKey].field as string]}`)
-            ) {
-                show = show && true;
-            } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-                const rowValue = row[columns[filterKey].field as string] as number;
-                const numberFilter = filters[filterKey] as NumberFilter[];
-                for (const filter of numberFilter) {
-                    const op = filter.op;
-                    const value = filter.value || 0;
+            for (const filterKey of Object.keys(filters)) {
+                if (
+                    columns[filterKey].filterType === FilterType.TEXT &&
+                    filters[filterKey].includes(`${row[columns[filterKey].field as string]}`)
+                ) {
+                    show = show && true;
+                } else if (columns[filterKey].filterType === FilterType.NUMBER) {
+                    const rowValue = row[columns[filterKey].field as string] as number;
+                    const numberFilter = filters[filterKey] as NumberFilter[];
+                    for (const filter of numberFilter) {
+                        const op = filter.op;
+                        const value = filter.value || 0;
 
-                    if (op === OperationType.EQUAL) {
-                        show = show && rowValue === value;
-                    } else if (op === OperationType.GREATER_THAN) {
-                        show = show && rowValue > value;
-                    } else if (op === OperationType.LESS_THAN) {
-                        show = show && rowValue < value;
-                    } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
-                        show = show && rowValue >= value;
-                    } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
-                        show = show && rowValue <= value;
-                    } else if (op === OperationType.NOT_EQUAL) {
-                        show = show && rowValue !== value;
+                        if (op === OperationType.EQUAL) {
+                            show = show && rowValue === value;
+                        } else if (op === OperationType.GREATER_THAN) {
+                            show = show && rowValue > value;
+                        } else if (op === OperationType.LESS_THAN) {
+                            show = show && rowValue < value;
+                        } else if (op === OperationType.GREATER_THAN_OR_EQUAL) {
+                            show = show && rowValue >= value;
+                        } else if (op === OperationType.LESS_THAN_OR_EQUAL) {
+                            show = show && rowValue <= value;
+                        } else if (op === OperationType.NOT_EQUAL) {
+                            show = show && rowValue !== value;
+                        }
                     }
+                } else {
+                    show = show && false;
                 }
-            } else {
-                show = show && false;
             }
-        }
-        if (row.children && !row._singleChild) {
-            children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
-            show = children.length > 0;
-        }
-        if (show) {
-            return { ...row, children };
-        }
-    };
+            if (row.children && !row._singleChild) {
+                children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
+                show = children.length > 0;
+            }
+            if (show) {
+                return { ...row, children };
+            }
+        };
 
 export const useThrottle = () => {
     const throttleSeed = useRef<NodeJS.Timeout | null>(null);
