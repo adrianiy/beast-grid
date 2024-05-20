@@ -24,9 +24,10 @@ type Props<T> = {
     theme: string;
     disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
+    onRowClick?: (row: T) => void;
 };
 
-export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
+export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange, onRowClick }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [pivot, columns, setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
         state.pivot,
@@ -179,6 +180,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                             endIndex={columnSliceProps?.limits[1] || 0}
                             scrollTop={scrollTop}
                             onSortChange={onSortChange}
+                            onRowClick={onRowClick}
                         />
                     </Fragment>
                 )}

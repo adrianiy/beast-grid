@@ -39,7 +39,8 @@ export function BeastGrid<T>({
     api,
     onSortChange,
     onSwapChange,
-    onPivotChange
+    onPivotChange,
+    onRowClick
 }: {
     config?: BeastGridConfig<T>;
     theme?: string;
@@ -50,6 +51,7 @@ export function BeastGrid<T>({
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
     onPivotChange?: (pivot: Partial<PivotState>) => void;
+    onRowClick?: (row: T) => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
@@ -115,6 +117,7 @@ export function BeastGrid<T>({
                                 theme={theme}
                                 disaleColumnSwap={disableColumnSwap}
                                 onSortChange={onSortChange}
+                                onRowClick={onRowClick}
                             />
                             <Toolbar config={config} position={ToolbarPosition.BOTTOM} />
                         </IntlProvider>

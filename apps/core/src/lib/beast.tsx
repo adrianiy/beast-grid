@@ -10,6 +10,7 @@ type Props<T> = {
     theme: string;
     disaleColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
+    onRowClick?: (row: T) => void;
 };
 
 export default function Beast<T>(props: Props<T>) {

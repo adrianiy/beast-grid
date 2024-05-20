@@ -25,6 +25,7 @@ type TBodyProps<T> = {
     endIndex: number;
     scrollTop: number;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
+    onRowClick?: (row: T) => void;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
@@ -42,6 +43,7 @@ export default function TBody<T>({
     endIndex,
     scrollTop,
     onSortChange,
+    onRowClick
 }: TBodyProps<T>) {
     const gaps = useRef<Record<string, number>>({});
     const [
@@ -208,6 +210,10 @@ export default function TBody<T>({
 
     const handleRowExpand = (row: Row) => () => {
         updateSelected(null);
+
+        if (onRowClick) {
+            onRowClick(row as T);
+        }
         if (row._expanded) {
             collapseRow(row);
         } else {
