@@ -1,10 +1,13 @@
 {
-  "overview": "Overview",
-  "columns": "ColumnDef",
-  "sort": "Sort",
-  "row": "Row",
-  "header": "Header",
-  "style": "Style",
-  "drag": "DragOptions",
-  "tree": "Tree"
+    "overview": "Overview",
+    "columns": "ColumnDef",
+    "sort": "Sort",
+    "row": "Row",
+    "header": "Header",
+    "style": "Style",
+    "drag": "DragOptions",
+    "tree": "Tree",
+    "toolbar": "Toolbar",
+    "chart": "Chart",
+    "contextual-menu": "ContextualMenu"
 }

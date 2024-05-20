@@ -1,0 +1,71 @@
+# Toolbar
+
+When `toolbar` is configured a toolbar will be displayed at the disired position (top or bottom) of the viewer. The toolbar will contain buttons for the following actions:
+
+- Download
+- Download Excel
+- Configure Grid
+- Filter
+- Grid mode
+- Restore
+
+## Properties
+
+```tsx
+export interface ToolBar {
+    download: boolean;
+    downloadExcel: boolean;
+    grid: boolean;
+    filter: boolean;
+    mode: boolean;
+    restore: boolean;
+}
+```
+
+### Download
+
+| Property | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| download | boolean | true    | Enable download button in the toolbar. |
+
+This option enables download with CSV format.
+
+### Download Excel
+
+| Property     | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| downloadExcel | boolean | true    | Enable download Excel button in the toolbar. |
+
+This option enables download with Excel format.
+
+### Configure Grid
+
+| Property | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| grid     | boolean | true    | Enable configure grid button in the toolbar. |
+
+This option enables the configuration of the grid.
+
+### Filter
+
+| Property | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| filter   | boolean | true    | Enable filter button in the toolbar. |
+
+This option enables the filter.
+
+### Grid Mode
+
+| Property | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| mode     | boolean | true    | Enable grid mode button in the toolbar. |
+
+This option enables the grid mode change.
+
+### Restore
+
+| Property | Type    | Default | Description |
+|----------|---------|---------|-------------|
+| restore  | boolean | true    | Enable restore button in the toolbar. |
+
+This option enables the restore button.

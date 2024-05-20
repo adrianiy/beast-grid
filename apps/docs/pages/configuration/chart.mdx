@@ -1,0 +1,20 @@
+# Chart
+
+
+This property accepts an object to configure Echarts inside beast grid.
+
+You can pass de `data` `category` and `chartType` default values to configure the chart, or pass a JSON with the mergeable values of your Echart configuration.
+
+## Properties
+
+```tsx
+export interface Chart {
+    defaultValues: Partial<{
+        dataColumns: string[];
+        categoryColumns: string[];
+        chartType: 'line' | 'bar';
+    }>;
+    groupData: boolean;
+    config: Partial<EChartsCoreOption>;
+}
+```

@@ -10,9 +10,25 @@ Configure your grid with a simple `BeastGridConfig` object. check the [example](
 The theme name to use. The default theme is `default`.
 
 ### onSortChange
+`(data: T[], columns: Column[]) => Promise<T[]`
 
-A callback function that is called when the sort changes. 
+A callback function that is called when the sort changes.
 The function receives the sorted data and the sorted columns.
+
+### onRowClick
+`(row: T) => void`
+
+A callback function that is called when a row is clicked.
+
+### onSwapChange
+`(columns: ColumnStore, sortedColumns: Column[]) => void`
+
+A callback function that is called when a column is swapped.
+
+### onPivotChange
+`(pivot: Partial<PivotState>) => void`
+
+A callback function that is called when the pivot changes.
 
 ## locale
 
@@ -22,45 +38,82 @@ The locale to use. The default locale is `en`.
 
 ```tsx
 export interface SortConfig {
-  enabled: boolean;
-  multiple: boolean;
+    enabled: boolean;
+    multiple: boolean;
 }
 export interface StyleConfig {
-  maxHeight: number;
-  border: boolean;
+    maxHeight: number;
+    border: boolean;
 }
-export interface RowConfig { 
-  height: number;
-  border: boolean;
-  events: Partial<RowEvents>;
+export interface RowConfig {
+    height: number;
+    border: boolean;
+    events: Partial<RowEvents>;
 }
 export interface HeaderConfig {
-  height: number;
-  border: boolean;
-  events: Partial<HeaderEvents>;
+    height: number;
+    border: boolean;
+    events: Partial<HeaderEvents>;
 }
 export interface dragOptions {
-  autoScrollSpeed: number;
-  autoScrollMargin: number;
+    autoScrollSpeed: number;
+    autoScrollMargin: number;
 }
 export interface TreeConstructor {
-  name: string;
-  showOriginal: boolean;
-  field: string;
-  width: number;
-  menu: Partial<MenuProps>;
+    name: string;
+    showOriginal: boolean;
+    field: string;
+    width: number;
+    menu: Partial<MenuProps>;
 }
 
+export interface ToolBar {
+    download: boolean;
+    downloadExcel: boolean;
+    grid: boolean;
+    filter: boolean;
+    mode: boolean;
+    restore: boolean;
+}
+
+export interface Chart {
+    defaultValues: Partial<{
+        dataColumns: string[];
+        categoryColumns: string[];
+        chartType: 'line' | 'bar';
+    }>;
+    groupData: boolean;
+    config: Partial<EChartsCoreOption>;
+}
+
+export interface PivotValue {
+    field: string;
+    operation: AggregationType;
+}
+
+export interface Pivot {
+    enabled: boolean;
+    pivotConfig?: {
+        rows: string[];
+        columns: string[];
+        values: PivotValue[];
+    };
+}
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
-  columnDefs: ColumnDef[];
-  defaultColumnDef?: Partial<ColumnDef>;
-  data: T;
-  sort?: Partial<SortConfig>;
-  row?: Partial<RowConfig>;
-  header?: Partial<HeaderConfig>;
-  style?: Partial<StyleConfig>;
-  dragOptions?: Partial<dragOptions>;
-  tree?: Partial<TreeConstructor>;
+    columnDefs: ColumnDef[];
+    defaultColumnDef?: Partial<ColumnDef>;
+    data: T;
+    sort?: Partial<SortConfig>;
+    row?: Partial<RowConfig>;
+    header?: Partial<HeaderConfig>;
+    style?: Partial<StyleConfig>;
+    dragOptions?: Partial<dragOptions>;
+    tree?: Partial<TreeConstructor>;
+    topToolbar?: Partial<ToolBar>;
+    bottomToolbar?: Partial<ToolBar>;
+    chart?: Partial<Chart>;
+    contextualMenu?: Partial<ContextualMenuProps>;
+    appendModalToBoy?: boolean;
 }
 ```
 
@@ -99,3 +152,23 @@ Drag options. Check the [drag options](drag) for more information.
 ### tree
 
 Tree options. If active all row groups will be represented as a tree drilldown. Check the [tree constructor](tree) for more information.
+
+### topToolbar
+
+Top toolbar options. Check the [toolbar](toolbar) for more information.
+
+### bottomToolbar
+
+Bottom toolbar options. Check the [toolbar](toolbar) for more information.
+
+### chart
+
+Chart options. Check the [chart](chart) for more information.
+
+### contextualMenu
+
+Contextual menu options. Check the [contextual menu](contextual-menu) for more information.
+
+### appendModalToBody
+
+Append the configuration modals to the body. Default is `false`.
