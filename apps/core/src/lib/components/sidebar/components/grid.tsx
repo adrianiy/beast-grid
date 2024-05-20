@@ -178,13 +178,11 @@ const Options = ({
     const [hideColumn, hiddenColumns] = useBeastStore((state) => [state.hideColumn, state.hiddenColumns]);
 
     const handleGridChange = (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => {
-        console.log('handleGridChange', column)
         e.stopPropagation();
         hideColumn(column.id);
     };
 
     const handleExpand = (expanded: boolean, index: number) => {
-        console.log('handleExpand', index)
         if (!options[index].childrenId?.length) {
             return;
         }

@@ -57,7 +57,7 @@ export interface BaseColumnDef {
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
     _firstLevel?: boolean;
-    _total: boolean;
+    _total?: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
