@@ -30,7 +30,7 @@ import {
     SortType,
 } from '../../common';
 import { createGroupColumn, getValueHeaders } from './utils/group';
-import { clone } from '../../utils/functions';
+import { clone, getSumatoryColumns } from '../../utils/functions';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
     const { columns } = state;
@@ -386,7 +386,7 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data);
 
         if (pivot.columns?.length) {
-            columnDefs.push(...valueColumns.filter(c => c._firstLevel));
+            columnDefs.push(...getSumatoryColumns(valueColumns.filter(c => c._firstLevel), pivot.values || []));
         } else if (pivot.values?.length) {
             const valueHeaders = getValueHeaders(pivot.values, 'total:');
             columnDefs.push(...valueHeaders);

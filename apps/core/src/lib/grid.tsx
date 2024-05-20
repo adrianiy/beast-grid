@@ -44,7 +44,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
     const handleScroll = useCallback(
         (scrollElement: HTMLElement) => () => {
             // get Columns tagged as final.
-            const lastLevel = Object.values(columns).filter((column) => column.final);
+            const lastLevel = Object.values(columns).filter((column) => column.final).sort((a, b) => a.left - b.left);
 
             if (scrollElement) {
                 const leftEdge = scrollElement.scrollLeft;
@@ -53,7 +53,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                 const rightIndex = lastLevel.findIndex((column) => column.left > rightEdge);
 
                 setColumnSliceProps({
-                    limits: [leftIndex > -1 ? leftIndex - 4 : 0, rightIndex > - 1 ? rightIndex + 4 : 0],
+                    limits: [Math.max(0, leftIndex - 8), rightIndex > -1 ? rightIndex + 4 : lastLevel.length],
                     edges: [leftEdge, rightEdge],
                 });
                 setScrollTop(scrollElement.scrollTop);
@@ -163,8 +163,8 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                             border={config.header?.border ?? true}
                             multiSort={config.sort?.multiple}
                             dragOptions={config.dragOptions}
-                            leftEdge={columnSliceProps?.edges[0] || 0}
-                            rightEdge={columnSliceProps?.edges[1] || 0}
+                            leftEdge={columnSliceProps?.limits[0] || 0}
+                            rightEdge={columnSliceProps?.limits[1] || 0}
                             disableSwapColumns={disableColumnSwap}
                         />
                         <TBody

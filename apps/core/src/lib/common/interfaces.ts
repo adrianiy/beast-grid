@@ -37,7 +37,7 @@ export interface MenuProps {
 export type ColumnId = string;
 
 export type NumberFilter = { op: OperationType | undefined; value: number | undefined };
-export type ColumnFilter = { label: string, selected: boolean, id: string };
+export type ColumnFilter = { label: string; selected: boolean; id: string };
 export type IFilter = string | NumberFilter | ColumnFilter | boolean;
 
 export type AggregationFunction = (row: Row) => string | number;
@@ -57,6 +57,7 @@ export interface BaseColumnDef {
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
     _firstLevel?: boolean;
+    _total: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
@@ -144,9 +145,11 @@ export interface PivotValue {
 
 export interface Pivot {
     enabled: boolean;
-    rows: string[];
-    columns: string[];
-    values: PivotValue[];
+    pivotConfig?: {
+        rows: string[];
+        columns: string[];
+        values: PivotValue[];
+    };
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
@@ -191,6 +194,8 @@ export interface Column extends ColumnDef, Position {
     width: number;
     pinned: PinType;
     finalPosition: number;
+    minPosition?: number;
+    maxPosition?: number;
     childrenId?: ColumnId[];
     sort?: SortState;
     parent?: ColumnId;

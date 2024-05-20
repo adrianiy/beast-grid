@@ -31,23 +31,23 @@ export default function HeaderSection<T>({
     disableSwapColumns,
     headers,
 }: Props<T>) {
-    const getColumnSlice = (columns: Column[]) => {
-        if (leftEdge || rightEdge) {
-            const leftIndex = columns.findIndex((column) => column.left >= (leftEdge || 0));
-            const rightIndex = columns.findIndex((column) => column.left > (rightEdge || 0));
-
-            return [Math.max(0, leftIndex - 4), rightIndex > -1 ? rightIndex + 4 : Infinity];
-        }
-
-        return [0, columns.length];
-    };
     const HeaderRow = ({ level, levelIdx }: { level: Column[]; levelIdx: number }) => {
-        const [init, end] = getColumnSlice(level);
+        const isInViewField = (column: Column): boolean => {
+            const columnInView = column.finalPosition < (rightEdge || level.length) && column.finalPosition >= (leftEdge || 0);
+
+            if (columnInView) {
+                return true;
+            }
+
+            const someChildInView = (column.minPosition || column.finalPosition) >= (leftEdge || 0) && (column.maxPosition || column.finalPosition) < (rightEdge || level.length);
+
+            return someChildInView;
+        }
 
         return (
             <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
                 {level.map((column, idx) => {
-                    if (column.finalPosition >= end || column.finalPosition < init) {
+                    if (!isInViewField(column)) {
                         return null;
                     }
                     if (column.pinned !== pinType || column.hidden) {

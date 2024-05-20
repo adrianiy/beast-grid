@@ -116,8 +116,14 @@ export const swapPositions = (column1: Column, column2: Column) => {
     // change positions
     const position = column2.position;
     const finalPosition = column2.finalPosition;
+    const minPosition = column2.minPosition;
+    const maxPosition = column2.maxPosition;
     column2.position = column1.position;
     column2.finalPosition = column1.finalPosition;
+    column2.minPosition = column1.minPosition;
+    column2.maxPosition = column1.maxPosition;
     column1.position = position;
     column1.finalPosition = finalPosition;
+    column1.minPosition = minPosition;
+    column1.maxPosition = maxPosition;
 };

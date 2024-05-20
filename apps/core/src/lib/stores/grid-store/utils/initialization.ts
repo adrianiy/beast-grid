@@ -42,6 +42,8 @@ const loopColumns = (
             width: columnDef.width || 0,
             position: levelIndexes[level],
             finalPosition: levelIndexes[level],
+            minPosition: levelIndexes[level],
+            maxPosition: levelIndexes[level],
             pinned: parent?.pinned || columnDef.pinned || PinType.NONE,
             top: 0,
             left: 0,
@@ -54,11 +56,15 @@ const loopColumns = (
         levelIndexes[level]++;
 
         if (columnDef.children) {
+            const minPosition = levelIndexes[level + 1] || 0;
             const childrenColumns = loopColumns(levelIndexes, columnDef.children, defaultColumnDef, level + 1, column);
+            const maxPosition = levelIndexes[level + 1] - 1;
             column.childrenId = Object.values(childrenColumns)
                 .filter((c) => c.level === level + 1)
                 .map((c) => c.id);
             column.width = Object.values(childrenColumns).reduce((acc, c) => acc + (c.width || 0), 0);
+            column.minPosition = minPosition;
+            column.maxPosition = maxPosition;
 
             Object.assign(columns, childrenColumns);
         }
