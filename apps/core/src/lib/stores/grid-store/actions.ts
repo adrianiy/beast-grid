@@ -88,11 +88,9 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     swapPositions(column1, column2);
     mergeColumns(columns);
 
-    sortedColumns = sortColumns(columns);
+    sortedColumns = sortColumns(columns, onSwapChange);
 
     moveColumns(columns, sortedColumns, column1.pinned);
-
-    onSwapChange?.(columns, sortedColumns);
 
     return { columns, sortedColumns, edited: true };
 };
@@ -227,7 +225,7 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
 };
 
 export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, tree, container, groupOrder, initialData } = state;
+    const { columns, tree, container, groupOrder, initialData, onSwapChange } = state;
     const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const column = columns[id];
 
@@ -243,7 +241,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 
     const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-    const sortedColumns = sortColumns(columns);
+    const sortedColumns = sortColumns(columns, onSwapChange);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
@@ -253,7 +251,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, container, initialData } = state;
+    const { columns, container, initialData, onSwapChange } = state;
     let { groupOrder } = state;
     const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const column = columns[id];
@@ -274,7 +272,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
 
     const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-    const sortedColumns = sortColumns(columns);
+    const sortedColumns = sortColumns(columns, onSwapChange);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
@@ -319,14 +317,14 @@ export const autoSizeColumns = () => (state: GridStore) => {
 };
 
 export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
-    const { container } = state;
+    const { container, onSwapChange } = state;
     const columns: ColumnStore = {};
 
     Object.values(initialState.columns || {}).forEach((column) => {
         columns[column.id] = clone(column);
     });
 
-    const sortedColumns = sortColumns(columns);
+    const sortedColumns = sortColumns(columns, onSwapChange);
     const groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);

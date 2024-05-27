@@ -177,7 +177,7 @@ export const useDndHook = (
             return false;
         };
 
-        if (ref.current && scrollElement) {
+        if (ref.current && scrollElement && !disable) {
             const dragRef = ref.current;
             preview.current.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 

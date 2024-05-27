@@ -117,7 +117,7 @@ export const createGridStore = <T>(
     const initialData = createVirtualIds(_data as Data);
 
     let data = initialize(columns, container, initialData, groupOrder, tree);
-    let sortedColumns = sortColumns(columns);
+    let sortedColumns = sortColumns(columns, onSwapChange);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
