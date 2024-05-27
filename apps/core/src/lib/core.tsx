@@ -115,7 +115,7 @@ export function BeastGrid<T>({
                                 config={config}
                                 defaultConfig={defaultConfig}
                                 theme={theme}
-                                disaleColumnSwap={disableColumnSwap}
+                                disableColumnSwap={disableColumnSwap}
                                 onSortChange={onSortChange}
                                 onRowClick={onRowClick}
                             />

@@ -131,7 +131,7 @@ export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, fi
 };
 
 
-export const sortColumns = (columns: ColumnStore) => {
+export const sortColumns = (columns: ColumnStore, onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void) => {
     const sortedColumns = Object.values(columns).sort(
         (a, b) =>
             PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
@@ -146,6 +146,7 @@ export const sortColumns = (columns: ColumnStore) => {
         columns
     );
 
+    onSwapChange?.(columns, sortedColumns);
 
     return sortedColumns;
 };
