@@ -5,7 +5,6 @@ import {
     Column,
     Data,
     Row,
-    IFilter,
     PinType,
     ColumnId,
     TreeConstructor,
@@ -14,7 +13,7 @@ import {
 } from '../../../common';
 
 import { MIN_COL_WIDTH } from './../../../common/globals';
-import { groupBy, groupByPivot } from '../../../utils/functions';
+import { groupBy } from '../../../utils/functions';
 
 import deepmerge from 'deepmerge';
 import { createGroupColumn } from './group';
@@ -138,19 +137,6 @@ export const groupDataByColumnDefs = (
     });
 
     return finalData;
-};
-
-export const groupPivot = (
-    columns: Column[],
-    aggColumns: Column[],
-    valueColumns: Column[],
-    data: Data,
-    level = 0
-): [Data, ColumnDef[]] => {
-    if (level === columns.length) {
-        return [data, []];
-    }
-    return groupByPivot(data, columns, aggColumns, valueColumns);
 };
 
 export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => {

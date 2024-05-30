@@ -18,6 +18,7 @@
     "toolbar.chartConfig": "Configurar gráfico",
     "toolbar.download": "Descargar",
     "toolbar.grid": "Columnas",
+    "toolbar.pivot": "Pivotado",
     "toolbar.filter": "Filtros",
     "toolbar.restore": "Restaurar",
     "filter.selectAll": "Seleccionar todo",

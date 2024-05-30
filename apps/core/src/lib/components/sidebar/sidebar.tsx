@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import cn from 'classnames';
 
 import './sidebar.scss';
+import PivotConfig from './components/pivot';
 
 type ChartProps = {
     categories: Column[];
@@ -40,6 +41,8 @@ function SideBarSwitch<T>({
             return <Filters config={config} />;
         case SideBarConfig.CHART:
             return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
+        case SideBarConfig.PIVOT:
+            return <PivotConfig config={config} columns={columns} />;
         default:
             return null;
     }
@@ -50,7 +53,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
     const [useModal, setUseModal] = useState<boolean>(false);
 
     useEffect(() => {
-        const isModableSidebar = sideBarConfig && [SideBarConfig.FILTERS, SideBarConfig.GRID].includes(sideBarConfig);
+        const isModableSidebar = sideBarConfig && [SideBarConfig.FILTERS, SideBarConfig.GRID, SideBarConfig.PIVOT].includes(sideBarConfig);
         if (isModableSidebar && config.style?.maxHeight) {
             setUseModal(true);
         } else {

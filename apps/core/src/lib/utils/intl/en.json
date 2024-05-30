@@ -20,6 +20,7 @@
     "toolbar.download": "Download",
     "toolbar.restore": "Restore",
     "toolbar.grid": "Columns",
+    "toolbar.pivot": "Pivot",
     "toolbar.filter": "Filters",
     "filter.selectAll": "Select all",
     "filter.placeholder": "Search...",

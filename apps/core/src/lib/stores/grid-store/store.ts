@@ -13,6 +13,7 @@ import {
     selectAllFilters,
     setColumn,
     setPivot,
+    setPivotConfig,
     setSelectedEnd,
     setSelectedStart,
     setSideBarConfig,
@@ -41,6 +42,9 @@ export interface PivotState {
     values: Column[];
     data: Data;
     enabled: boolean;
+    columnTotals: boolean;
+    rowTotals: boolean;
+    rowGroups: boolean;
 }
 
 export interface GridState {
@@ -133,10 +137,19 @@ export const createGridStore = <T>(
             sortedColumns.find((column) => column.field === valueField.field)
         ) as Column[];
 
-        const pivotResult = setPivot({ columns: _columns, rows, values })({
+        const pivotResult = setPivot({
+            columns: _columns,
+            rows,
+            values,
+        })({
             initialData: [...initialData],
-            defaultColumnDef
-        } as GridStore)
+            defaultColumnDef,
+            pivot: {
+                columnTotals: pivot.pivotConfig.columnTotals,
+                rowTotals: pivot.pivotConfig.rowTotals,
+                rowGroups: pivot.pivotConfig.rowGroups,
+            },
+        } as GridStore);
 
         if (pivotResult.columns) {
             columns = pivotResult.columns;
@@ -175,8 +188,9 @@ export const createGridStore = <T>(
         sorting: false,
         selecting: false,
         pivot: null,
+        pivotConfig: null,
         onSwapChange,
-        onPivotChange
+        onPivotChange,
     };
 
     return create<GridStore>((set) => ({

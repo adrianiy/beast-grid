@@ -7,6 +7,7 @@ import { LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
+import { PivotState } from '../../stores/grid-store/store';
 
 function getProperty<Key extends keyof Row>(
     row: Row,
@@ -169,7 +170,7 @@ export function RowCell({
                 left: columnDef.left,
                 paddingLeft:
                     LEVEL_PADDING +
-                    (expandableSibling && row.children?.length === 1 && columnDef.rowGroup && !columnDef.tree ? LEVEL_PADDING + 2 : 0) +
+                    (expandableSibling && row._singleChild && columnDef.rowGroup && !columnDef.tree && !pivot?.rows ? LEVEL_PADDING + 2 : 0) +
                     (columnDef.tree ? LEVEL_PADDING * level : 0) +
                     (columnDef.tree && !row.children && !pivot ? LEVEL_PADDING : 0),
                 width: columnDef.width,
@@ -187,7 +188,7 @@ export function RowCell({
                 groupOrder={groupOrder}
                 enabled={expandableSibling}
                 level={level}
-                pivoting={!!pivot}
+                pivot={pivot}
             />
             <div className="grid-row-value">{value}</div>
         </div>
@@ -201,24 +202,28 @@ const Chevron = ({
     groupOrder,
     enabled,
     level,
-    pivoting
+    pivot
 }: {
     onClick: (e: React.MouseEvent) => void;
     row: Row;
     columnDef: Column;
     groupOrder: ColumnId[];
     enabled?: boolean;
-    pivoting?: boolean;
+    pivot: Partial<PivotState> | null;
     level: number;
 }) => {
-    if (!enabled && !pivoting) {
+    if (!enabled && !pivot) {
+        return null;
+    }
+
+    if (pivot && !pivot?.rowTotals) {
         return null;
     }
     if (
         !row.children ||
         !columnDef.rowGroup ||
         (groupOrder[level] !== columnDef.id && !columnDef.tree) ||
-        (row.children.length === 1 && !pivoting)
+        (row.children.length === 1 && !pivot)
     ) {
         return null;
     }

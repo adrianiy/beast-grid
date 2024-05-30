@@ -138,6 +138,7 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
                 topToolbar: {
                     mode: true,
                     grid: true,
+                    pivot: true,
                     filter: true,
                 },
                 bottomToolbar: {

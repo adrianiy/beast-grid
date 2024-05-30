@@ -9,7 +9,6 @@ import {
     getColumnsFromDefs,
     getSwappableClone,
     groupDataByColumnDefs,
-    groupPivot,
     mergeColumns,
     moveColumns,
     removeSort,
@@ -31,6 +30,7 @@ import {
 } from '../../common';
 import { createGroupColumn, getValueHeaders } from './utils/group';
 import { clone, getSumatoryColumns } from '../../utils/functions';
+import { groupPivot } from '../../utils/pivot';
 
 export const setColumn = (id: ColumnId, column: Column) => (state: GridStore) => {
     const { columns } = state;
@@ -347,6 +347,7 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
     return { sideBarConfig: config };
 };
 
+
 export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
     const { pivot: currentPivot, initialData, defaultColumnDef, onPivotChange } = state;
     const data = [...initialData];
@@ -359,12 +360,14 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         const groupOrder: ColumnId[] = [];
 
         if (pivot.rows?.length) {
-            pivot.rows.forEach((row) => {
+            pivot.rows.forEach((row, index) => {
                 const column = {
                     id: uuidv4(),
                     headerName: row.headerName,
                     field: row.field,
                     width: MIN_COL_WIDTH,
+                    rowGroup: index < (pivot.rows?.length || 0) - 1,
+                    tree: false,
                 } as Column;
 
                 rowColumnDefs.push(column);
@@ -381,10 +384,15 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
             });
         }
 
-        const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data);
+        const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data, !!pivot?.rowTotals);
+        console.log(groupedByRows, valueColumns);
 
         if (pivot.columns?.length) {
-            columnDefs.push(...getSumatoryColumns(valueColumns.filter(c => c._firstLevel), pivot.values || []));
+            if (pivot?.columnTotals) {
+                columnDefs.push(...getSumatoryColumns(valueColumns.filter(c => c._firstLevel), pivot.values || []));
+            } else {
+                columnDefs.push(...valueColumns.filter(c => c._firstLevel))
+            }
         } else if (pivot.values?.length) {
             const valueHeaders = getValueHeaders(pivot.values, 'total:');
             columnDefs.push(...valueHeaders);

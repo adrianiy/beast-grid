@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
 import { AggregationType, FilterType, OperationType, PinType, SortType } from './enums';
 import { EChartsCoreOption } from 'echarts';
@@ -123,9 +123,11 @@ export interface ToolBar {
     download: boolean;
     downloadExcel: boolean;
     grid: boolean;
+    pivot: boolean;
     filter: boolean;
     mode: boolean;
     restore: boolean;
+    custom: ReactNode;
 }
 
 export interface Chart {
@@ -149,6 +151,9 @@ export interface Pivot {
         rows: string[];
         columns: string[];
         values: PivotValue[];
+        rowTotals: boolean;
+        columnTotals: boolean;
+        rowGroups: boolean;
     };
 }
 

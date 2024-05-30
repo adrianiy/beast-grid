@@ -44,6 +44,7 @@ export enum ToolbarPosition {
 
 export enum SideBarConfig {
     GRID = 'grid',
+    PIVOT = 'pivot',
     FILTERS = 'filters',
     CHART = 'chart',
 }

@@ -65,7 +65,6 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
                         <Options options={options} columns={columns} searchValue={searchValue} />
                     </SimpleBar>
                 </div>
-                <PivotOptions enabled={config.pivot?.enabled} />
             </div>
         </div>
     );

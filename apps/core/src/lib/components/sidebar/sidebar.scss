@@ -21,6 +21,11 @@
 
         .bg-sidebar {
             width: 100%;
+
+            &--big {
+                width: 1000px;
+                height: 700px;
+            }
         }
     }
 }
@@ -35,6 +40,10 @@
         right: 0px;
         top: 0;
         height: 100%;
+    }
+
+    &.dimensions {
+        width: 300px;
     }
 }
 
@@ -63,6 +72,7 @@
         border-bottom: var(--bg-border--3);
         margin: var(--bg-size--2) 0;
     }
+
     .bg-sidebar__title {
         box-sizing: border-box;
         font-size: var(--bg-font-size--3);
@@ -78,6 +88,7 @@
             cursor: pointer;
         }
     }
+
     .bg-sidebar__input {
         box-sizing: border-box;
         border-bottom: var(--bg-border--3);
@@ -87,6 +98,7 @@
             cursor: pointer;
         }
     }
+
     input[type='text'] {
         outline: none;
         border: none;
@@ -95,6 +107,7 @@
         font-size: inherit;
         color: var(--bg-text-color--1);
     }
+
     button {
         all: unset;
 
@@ -104,10 +117,12 @@
             height: var(--size);
         }
     }
+
     .disabled {
         cursor: not-allowed;
         opacity: 0.5;
     }
+
     .bg-checkbox__root {
         --size: var(--bg-size--3);
         background-color: white;
@@ -121,6 +136,7 @@
         align-items: center;
         justify-content: center;
     }
+
     label {
         width: 100%;
         white-space: nowrap;
@@ -131,6 +147,15 @@
     .bg-option__container {
         gap: var(--bg-size--3);
         cursor: pointer;
+    }
+
+    .bg-dimension {
+        gap: var(--bg-size--3);
+        cursor: grab;
+        padding: var(--bg-size--3);
+        border: var(--bg-border--2);
+        background: var(--bg-background-color--1);
+        flex: 1;
     }
 
     .bg-sidebar__chart__item {
@@ -145,6 +170,7 @@
             margin: 0;
             cursor: pointer;
         }
+
         label {
             cursor: pointer;
         }
@@ -155,18 +181,40 @@
         min-width: 300px;
         height: 100%;
 
+        .bg-box__container {
+            padding: var(--bg-size--5);
+        }
+
+        label {
+            text-transform: uppercase;
+        }
+
+        .bg-checkbox__root {
+            margin-right: var(--bg-size--2);
+            cursor: pointer;
+        }
+
         .bg-box {
-            padding: var(--bg-size--3);
-            margin: var(--bg-size--3);
             border: var(--bg-border--3);
             min-height: 100px;
+            padding: var(--bg-size--3);
+            margin-top: var(--bg-size--2);
+            gap: var(--bg-size--3);
             cursor: pointer;
 
+            .button {
+                cursor: pointer;
+            }
             .bg-chip {
-                margin: var(--bg-size--1);
-                padding: var(--bg-size--2) var(--bg-size--3);
-                background-color: var(--bg-background-color--chip);
                 gap: var(--bg-size--3);
+                cursor: grab;
+                padding: var(--bg-size--3);
+                border: var(--bg-border--2);
+                background: var(--bg-background-color--1);
+            }
+
+            label {
+                width: min-content;
             }
 
             svg {
