@@ -13,7 +13,6 @@ import {
     selectAllFilters,
     setColumn,
     setPivot,
-    setPivotConfig,
     setSelectedEnd,
     setSelectedStart,
     setSideBarConfig,
