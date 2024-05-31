@@ -67,7 +67,7 @@ type OptionProps = {
     onClick: (e: Option) => void;
 };
 
-const Options = (props: OptionProps) => {
+export const Options = (props: OptionProps) => {
     return createPortal(<OptionsPortal {...props} />, document.body);
 };
 

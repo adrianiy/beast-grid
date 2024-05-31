@@ -205,12 +205,35 @@
             .button {
                 cursor: pointer;
             }
+
             .bg-chip {
                 gap: var(--bg-size--3);
                 cursor: grab;
                 padding: var(--bg-size--3);
                 border: var(--bg-border--2);
                 background: var(--bg-background-color--1);
+            }
+
+            .bg-submenu__container {
+                position: relative;
+            }
+
+            .bg-menu__item__submenu {
+                position: absolute;
+                width: 100px;
+                padding: var(--bg-size--1) 0;
+                border: var(--bg-border--3);
+                background-color: var(--bg-background-color--1);
+                top: 20px;
+                right: 0;
+                box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05),
+                    rgba(0, 0, 0, 0.05) 0 0.625rem 0.9375rem -0.3125rem,
+                    rgba(0, 0, 0, 0.04) 0 0.4375rem 0.4375rem -0.3125rem;
+
+                .bg-submenu__item {
+                    padding: var(--bg-size--2);
+                    cursor: pointer;
+                }
             }
 
             label {

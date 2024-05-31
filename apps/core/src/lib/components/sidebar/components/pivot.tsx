@@ -15,6 +15,8 @@ import { PivotState } from '../../../stores/grid-store/store';
 import { useBeastStore } from '../../../stores/beast-store';
 import { clone } from '../../../utils/functions';
 
+import { Options as SelectOptions } from '../../select/select';
+
 import cn from 'classnames';
 
 type Props<T> = {
@@ -177,15 +179,23 @@ const Box = ({
     column,
     index,
     isValue,
+    theme,
+    scrollContainer,
     onRemove,
     onHover,
+    onChanges
 }: {
     column: Column;
     index: number;
     isValue?: boolean;
+    theme: string;
+    scrollContainer: HTMLDivElement | null;
     onRemove: (column: Column) => () => void;
     onHover: (index: number, hoverIndex: number) => void;
+    onChanges: () => void;
 }) => {
+    const inputRef = useRef<HTMLDivElement>(null);
+    const [showSubmenu, setShowSubmenu] = useState(false);
     const [, drag] = useDrag(() => ({
         type: 'BOX',
         item: { id: column.id, index, onRemove },
@@ -214,15 +224,51 @@ const Box = ({
 
     drag(drop(ref));
 
+    const renderSubmenu = () => {
+        const options = [
+            { label: 'Sum', value: AggregationType.SUM },
+            { label: 'Count', value: AggregationType.COUNT },
+            { label: 'Average', value: AggregationType.AVG },
+            { label: 'Min', value: AggregationType.MIN },
+            { label: 'Max', value: AggregationType.MAX },
+        ];
+        if (!showSubmenu) {
+            return null;
+        }
+        const activeOption = options.find((o) => o.value === column.aggregation);
+
+        return (
+            <SelectOptions
+                open={showSubmenu}
+                theme={theme}
+                inputRef={inputRef.current}
+                container={scrollContainer}
+                options={options}
+                activeOption={activeOption}
+                onClick={(option) => {
+                    column.aggregation = option.value as AggregationType;
+                    setShowSubmenu(false);
+                    onChanges();
+                }}
+                onClose={() => setShowSubmenu(false)}
+            />
+        );
+    };
+
     return (
         <div className="row middle bg-chip" ref={ref}>
             <DragHandleDots2Icon />
             <div className="row middle left fl-1">
-                {isValue ? <label>{(column.aggregation as string) || 'sum'} of&nbsp; </label> : null}
+                {isValue ? <label>[{(column.aggregation as string) || 'sum'}] &nbsp; </label> : null}
                 <label>{column.headerName}</label>
             </div>
             <div className="row middle">
-                {column.aggregation ? <DotsVerticalIcon className="button" /> : null}
+                <div className="row middle bg-submenu__container" ref={inputRef}>
+                    {column.aggregation ? (
+                        <DotsVerticalIcon className="button" onClick={() => setShowSubmenu(!showSubmenu)} />
+                    ) : null}
+                    {renderSubmenu()}
+                </div>
                 <Cross2Icon onClick={onRemove(column)} className="button" />
             </div>
         </div>
@@ -230,9 +276,11 @@ const Box = ({
 };
 
 const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
-    const [columnStore, pivot, setPivot] = useBeastStore((state) => [
+    const [columnStore, pivot, theme, scrollContainer, setPivot] = useBeastStore((state) => [
         state.initialColumns,
         state.pivot,
+        state.theme,
+        state.scrollElement,
         state.setPivot,
     ]);
     const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
@@ -283,6 +331,10 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
         setPivot({ rowTotals: !pivot?.rowTotals });
     };
 
+    const onChangeColumn = () => {
+        onChanges(columns.current);
+    }
+
     return (
         <div className="bg-box__container column left">
             <div className="bg-box__title row middle">
@@ -314,6 +366,9 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
                         index={idx}
                         column={column}
                         isValue={pivotType === 'values'}
+                        theme={theme}
+                        scrollContainer={scrollContainer}
+                        onChanges={onChangeColumn}
                         onRemove={removeColumn}
                         onHover={onHover}
                     />

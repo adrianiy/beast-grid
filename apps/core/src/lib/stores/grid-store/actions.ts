@@ -385,7 +385,6 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         }
 
         const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data, !!pivot?.rowTotals);
-        console.log(groupedByRows, valueColumns);
 
         if (pivot.columns?.length) {
             if (pivot?.columnTotals) {

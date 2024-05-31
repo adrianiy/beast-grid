@@ -1,6 +1,29 @@
 import { AggregationType, Column, ColumnDef, Data, Row } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
+const aggregateData = (
+    data: Row,
+    row: Row,
+    calculatedColumn: Column,
+    valueField: string
+): void => {
+    if (calculatedColumn.aggregation === AggregationType.SUM) {
+        data[valueField] = +(data[valueField] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
+    } else if (calculatedColumn.aggregation === AggregationType.AVG) {
+        data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
+        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
+
+        data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
+    } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
+        data[valueField] = +(data[valueField] || 0) + 1;
+    } else if (calculatedColumn.aggregation === AggregationType.MIN) {
+        data[valueField] = Math.min(data[valueField] as number || Infinity, row[calculatedColumn.field as keyof Row] as number);
+    } else if (calculatedColumn.aggregation === AggregationType.MAX) {
+        data[valueField] = Math.max(data[valueField] as number || -Infinity, row[calculatedColumn.field as keyof Row] as number);
+    }
+
+}
+
 export const acumData = (
     data: Row,
     row: Row,
@@ -42,45 +65,30 @@ export const acumData = (
             lastColumn = columnDefs[field];
         }
 
-        if (isLastColumn) {
-            calculatedColumns.forEach((calculatedColumn) => {
-                const valueField = `${calculatedColumn.field}@${field}`;
+        calculatedColumns.forEach((calculatedColumn) => {
+            const valueField = `${calculatedColumn.field}@${field}`;
 
-                if (calculatedColumn.aggregation === AggregationType.SUM) {
-                    data[valueField] = +(data[valueField] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
-                    data[calculatedColumn.field as keyof Row] =
-                        +(data[calculatedColumn.field as keyof Row] || 0) +
-                        +(row[calculatedColumn.field as keyof Row] || 0);
+            aggregateData(data, row, calculatedColumn, valueField);
 
-                    field
-                        .split('@')
-                        .slice(1)
-                        .forEach((f) => {
-                            const vField = `${calculatedColumn.field}@${f}`;
-                            data[vField] = +(data[vField] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
-                        });
+            if (isLastColumn && lastColumn && !lastColumn.childrenMap?.[valueField]) {
+                const newValueColumn = {
+                    ...calculatedColumn,
+                    id: uuidv4(),
+                    headerName: `${calculatedColumn.aggregation} of ${calculatedColumn.headerName}`,
+                    pivotField: valueField,
+                    field,
+                    flex: 1,
+                    _firstLevel: false,
+                    children: [],
+                };
+
+                if (lastColumn.childrenMap) {
+                    lastColumn.childrenMap[valueField] = newValueColumn.id;
                 }
 
-                if (lastColumn && !lastColumn.childrenMap?.[valueField]) {
-                    const newValueColumn = {
-                        ...calculatedColumn,
-                        id: uuidv4(),
-                        headerName: `${calculatedColumn.aggregation} of ${calculatedColumn.headerName}`,
-                        pivotField: valueField,
-                        field,
-                        flex: 1,
-                        _firstLevel: false,
-                        children: [],
-                    };
-
-                    if (lastColumn.childrenMap) {
-                        lastColumn.childrenMap[valueField] = newValueColumn.id;
-                    }
-
-                    lastColumn.children?.push(newValueColumn);
-                }
-            });
-        }
+                lastColumn.children?.push(newValueColumn);
+            }
+        });
 
         data[column.field as string] = key;
     });
@@ -88,12 +96,13 @@ export const acumData = (
     return data;
 };
 
-const newRow = (showTotals: boolean): Row => ({
+const newRow = (showTotals: boolean, isTotal?: boolean): Row => ({
     _id: uuidv4(),
     _expanded: true,
+    _total: isTotal,
     _singleChild: !showTotals,
     children: [],
-    childrenMap: {}
+    childrenMap: {},
 });
 
 const addData = (
@@ -119,7 +128,7 @@ const addData = (
             row.children = [];
         }
 
-        if(!row.childrenMap) {
+        if (!row.childrenMap) {
             row.childrenMap = {};
         }
 
@@ -131,13 +140,24 @@ const addData = (
             row.childrenMap[nextKey] = childIndex;
         }
 
-        addData(row.children[childIndex], data, aggregationColumns, nextLevel, columns, values, columnDefs, showRowTotals);
+        row._total = true;
+
+        addData(
+            row.children[childIndex],
+            data,
+            aggregationColumns,
+            nextLevel,
+            columns,
+            values,
+            columnDefs,
+            showRowTotals
+        );
     }
 
     if (!showRowTotals) {
         aggregationColumns.forEach((column) => {
             row[column.field as string] = data[column.field as keyof Row];
-        })
+        });
     } else {
         row[aggregationColumn.field as string] = key;
     }
