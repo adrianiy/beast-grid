@@ -200,6 +200,9 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
 };
 
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
+    if (!data.length) {
+        return;
+    }
     Object.values(columns).forEach((column) => {
         if (typeof data[0][column.field as string] === 'boolean') {
             column.filterType = FilterType.BOOLEAN;

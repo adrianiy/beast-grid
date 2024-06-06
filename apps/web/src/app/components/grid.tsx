@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Row } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, Row } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -84,86 +84,91 @@ function SlideTransition(props: SlideProps) {
     return <Slide {...props} direction="up" />;
 }
 
+function Skeleton() {
+    return <div>Loading...</div>;
+}
+
 export default function Grid({ qty, theme, config: _customConfig }: Props) {
     const loading = useRef(false);
     const beastApi = useRef<BeastGridApi | undefined>();
     const [config, setConfig] = useState<BeastGridConfig<User[]> | undefined>();
-    const [data, setData] = useState<User[]>([]);
     const [error, setError] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await getData(qty - data.length);
-                setData((state) => [...state, ...res]);
-                loading.current = false;
-                beastApi?.current?.setLoading(false);
+                const res = await getData(qty);
+                beastApi?.current?.setData(res as unknown as Data);
             } catch (_) {
                 setError(true);
-                beastApi?.current?.setLoading(false);
             }
         };
         if (!loading.current) {
             loading.current = true;
-            beastApi?.current?.setLoading(true);
             fetchData();
         }
     }, [qty]);
 
     useEffect(() => {
-        if (data.length) {
-            setConfig({
-                data,
-                columnDefs,
-                style: {
-                    maxHeight: 600,
-                    border: true,
-                },
-                header: {
-                    border: true,
-                },
-                row: {
-                    border: true,
-                    events: {
-                        onHover: {
-                            highlight: true,
-                        },
+        setConfig({
+            data: [],
+            columnDefs,
+            style: {
+                maxHeight: 600,
+                border: true,
+            },
+            loadingState: {
+                skeleton: <Skeleton />,
+                rows: 15,
+            },
+            header: {
+                border: true,
+            },
+            row: {
+                border: true,
+                events: {
+                    onClick: {
+                        callback: () => console.log('test'),
+                    },
+                    onHover: {
+                        highlight: true,
                     },
                 },
-                sort: {
-                    enabled: true,
-                    multiple: true,
+            },
+            sort: {
+                enabled: true,
+                multiple: true,
+            },
+            topToolbar: {
+                mode: true,
+                grid: true,
+                pivot: true,
+                filter: true,
+            },
+            chart: {
+                defaultValues: {
+                    dataColumns: ['january', 'february'],
                 },
-                topToolbar: {
-                    mode: true,
-                    grid: true,
-                    pivot: true,
-                    filter: true,
-                },
-                chart: {
-                    defaultValues: {
-                        dataColumns: ['january', 'february'],
-                    },
-                    groupData: false,
-                },
-                contextualMenu: {
-                    chart: true,
-                },
-                bottomToolbar: {
-                    downloadExcel: true,
-                    restore: true,
-                },
-                defaultColumnDef: {
-                    menu: { pin: true, grid: true },
-                },
-                pivot: {
-                    enabled: true,
-                },
-                appendModalToBoy: true,
-                ..._customConfig,
-            });
-        }
-    }, [_customConfig, qty, theme, data]);
+                groupData: false,
+            },
+            contextualMenu: {
+                chart: true,
+            },
+            bottomToolbar: {
+                downloadExcel: true,
+                restore: true,
+            },
+            defaultColumnDef: {
+                menu: { pin: true, grid: true },
+            },
+            pivot: {
+                enabled: true,
+                applyButton: true,
+            },
+            appendModalToBoy: true,
+            ..._customConfig,
+        });
+    }, [_customConfig, qty, theme]);
 
     const handleClose = () => {
         setError(false);
@@ -183,7 +188,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     Error fetching data :(
                 </Alert>
             </Snackbar>
-            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" disableColumnSwap={true} />
+            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" />
         </>
     );
 }

@@ -12,6 +12,8 @@ import {
     restore,
     selectAllFilters,
     setColumn,
+    setColumnsVisibility,
+    setData,
     setPivot,
     setSelectedEnd,
     setSelectedStart,
@@ -102,6 +104,7 @@ export interface GridStore extends GridState {
     setMode: (mode: BeastMode) => void;
     setPivot: (pivot: Partial<PivotState> | null) => void;
     restore: () => void;
+    updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;
 }
 
@@ -198,7 +201,7 @@ export const createGridStore = <T>(
         mode: BeastMode.GRID,
         scrollElement: null as unknown as HTMLDivElement,
         sideBarConfig: null,
-        setData: (data: Data) => set({ data }),
+        setData: (data: Data) => set(setData(data)),
         setColumns: (columns: ColumnStore) => set({ columns }),
         setTheme: (theme: string) => set({ theme }),
         setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
@@ -224,8 +227,9 @@ export const createGridStore = <T>(
         setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
         setSelecting: (selecting: boolean) => set({ selecting }),
         setMode: (mode: BeastMode) => set({ mode }),
-        setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot)),
+        setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot, initialState)),
         restore: () => set(restore(initialState)),
+        updateColumnVisibility: (scrollLeft: number) => set(setColumnsVisibility(scrollLeft)),
         autoSizeColumns: () => set(autoSizeColumns()),
     }));
 };

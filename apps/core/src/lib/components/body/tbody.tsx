@@ -21,11 +21,8 @@ type TBodyProps<T> = {
     border?: boolean;
     filters?: Record<string, string[]>;
     events?: Partial<RowEvents>;
-    startIndex: number;
-    endIndex: number;
     scrollTop: number;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
-    onRowClick?: (row: T) => void;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
@@ -39,11 +36,8 @@ export default function TBody<T>({
     maxHeight,
     border,
     events,
-    startIndex,
-    endIndex,
     scrollTop,
     onSortChange,
-    onRowClick
 }: TBodyProps<T>) {
     const gaps = useRef<Record<string, number>>({});
     const [
@@ -211,9 +205,6 @@ export default function TBody<T>({
     const handleRowExpand = (row: Row) => () => {
         updateSelected(null);
 
-        if (onRowClick) {
-            onRowClick(row as T);
-        }
         if (row._expanded) {
             collapseRow(row);
         } else {
@@ -351,8 +342,6 @@ export default function TBody<T>({
                 selectable={!!beastConfig.contextualMenu}
                 idx={idx}
                 y={y}
-                startIndex={startIndex}
-                endIndex={endIndex}
                 border={border}
                 height={rowHeight}
                 level={level}
@@ -408,13 +397,44 @@ export default function TBody<T>({
         return renderArray.flat();
     };
 
+    const createLoadingSlice = () => {
+        const renderArray: ReactNode[] = [];
+        for (let i = 0; i < (beastConfig?.loadingState?.rows || 10); i++) {
+            const row = (
+                <RowContainer
+                    key={i}
+                    row={{} as Row}
+                    columns={lastLevel}
+                    columnStore={columns}
+                    config={config}
+                    loading
+                    skeleton={beastConfig?.loadingState?.skeleton}
+                    groupOrder={groupOrder}
+                    selectable={false}
+                    idx={i}
+                    y={i}
+                    border={border}
+                    height={rowHeight}
+                    level={0}
+                    events={events}
+                    gap={0}
+                    expandableSibling={false}
+                />
+            );
+            renderArray.push(row);
+        }
+
+        return renderArray.flat();
+    }
+
     const getStyleProps = () => {
         return {
-            height: (sortedData.length + expandedRows) * rowHeight,
+            height: sortedData.length ? (sortedData.length + expandedRows) * rowHeight : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };
 
-    const dataSlice = createDataSlice();
+    console.log(sortedData)
+    const dataSlice = sortedData.length ? createDataSlice() : createLoadingSlice();
 
     return (
         <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>

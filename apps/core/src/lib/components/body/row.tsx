@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Column, ColumnId, ColumnStore, PinType, Row, RowConfig, RowEvents } from '../../common';
 import { RowCell } from './row-cell';
 
@@ -11,8 +12,6 @@ type Props = {
     selectable: boolean;
     y: number;
     idx: number;
-    startIndex: number;
-    endIndex: number;
     config?: Partial<RowConfig>;
     border?: boolean;
     height: number;
@@ -20,6 +19,8 @@ type Props = {
     level: number;
     events?: Partial<RowEvents>;
     expandableSibling?: boolean;
+    loading?: boolean;
+    skeleton: ReactNode;
     onClick?: () => void;
 };
 
@@ -31,37 +32,33 @@ export default function RowContainer({
     selectable,
     config,
     idx,
-    startIndex,
-    endIndex,
     y,
     border,
     height,
     gap,
     level,
-    onClick,
     events,
     expandableSibling,
+    loading,
+    skeleton,
+    onClick,
 }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
     const rightWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
 
-    const handleClick = () => {
+    const handleRowClick = () => {
         if (events?.onClick?.callback) {
             events.onClick.callback(row, idx);
         }
-
-        if (onClick) {
-            onClick();
-        }
-    };
+    }
 
     const renderRow = (pinType: PinType | undefined) => {
         return columns
             .filter((column) => column.pinned === pinType)
             .map((column, cidx) => {
-                if (pinType === PinType.NONE && (column.finalPosition < startIndex || column.finalPosition >= (endIndex || columns.length))) {
+                if (pinType === PinType.NONE && column.hidden) {
                     return null;
                 }
 
@@ -79,7 +76,9 @@ export default function RowContainer({
                         config={config}
                         columnDef={column}
                         expandableSibling={expandableSibling}
-                        onClick={handleClick}
+                        loading={loading}
+                        skeleton={skeleton}
+                        onClick={onClick}
                     />
                 );
             });
@@ -94,6 +93,7 @@ export default function RowContainer({
                 withHighlight: events?.onHover?.highlight,
             })}
             style={{ top: height * idx + gap, height, width: totalWidth }}
+            onClick={handleRowClick}
         >
             {leftWidth > 0 && (
                 <div className="grid-left-pin" style={{ minWidth: leftWidth }}>

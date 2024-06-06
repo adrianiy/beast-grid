@@ -9,9 +9,8 @@ import SimpleBar from 'simplebar-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CheckIcon, Cross2Icon, DotsVerticalIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
 
-import { AggregationType, BeastGridConfig, Column, ColumnStore, HEADER_HEIGHT } from '../../../common';
+import { AggregationType, BeastGridConfig, Column, ColumnStore, HEADER_HEIGHT, PivotState } from '../../../common';
 
-import { PivotState } from '../../../stores/grid-store/store';
 import { useBeastStore } from '../../../stores/beast-store';
 import { clone } from '../../../utils/functions';
 
@@ -69,7 +68,7 @@ export default function PivotConfig<T>({ columns, config }: Props<T>) {
                         <Options options={options} columns={columns} searchValue={searchValue} />
                     </SimpleBar>
                 </div>
-                <PivotOptions enabled={config.pivot?.enabled} />
+                <PivotOptions enabled={config.pivot?.enabled} applyButton={config.pivot?.applyButton} />
             </div>
         </div>
     );
@@ -147,30 +146,78 @@ const Options = ({
     );
 };
 
-const PivotOptions = ({ enabled }: { enabled?: boolean }) => {
+const ApplyButton = ({ enabled, onClick }: { enabled?: boolean; onClick: () => void }) => {
+    if (!enabled) {
+        return null;
+    }
+
+    return (
+        <div className="bg-button__container row end">
+            <div className="bg-button bg-sidebar__apply row middle center" onClick={onClick}>
+                <label>Apply</label>
+            </div>
+        </div>
+    );
+};
+
+const PivotOptions = ({ enabled, applyButton }: { enabled?: boolean; applyButton?: boolean }) => {
     const [setPivot] = useBeastStore((state) => [state.setPivot, state.pivot]);
+    const [pivotState, setPivotState] = useState<PivotState | undefined>({} as PivotState);
 
     if (!enabled) {
         return null;
     }
 
-    const handleRowChange = (rows: Column[]) => {
-        setPivot({ rows });
+    const handleRowChange = (newState: Partial<PivotState>) => {
+        if (!applyButton) {
+            setPivot({ rows: newState.columns });
+        } else {
+            setPivotState((state) => ({ ...state, rows: newState.columns } as PivotState));
+        }
     };
 
-    const handleColumnChange = (columns: Column[]) => {
-        setPivot({ columns });
+    const handleColumnChange = (newState: Partial<PivotState>) => {
+        if (!applyButton) {
+            setPivot({ columns: newState.columns });
+        } else {
+            setPivotState((state) => ({ ...state, columns: newState.columns } as PivotState));
+        }
     };
 
-    const handleValueChange = (values: Column[]) => {
-        setPivot({ values });
+    const handleValueChange = (newState: Partial<PivotState>) => {
+        if (!applyButton) {
+            setPivot({ values: newState.columns });
+        } else {
+            setPivotState((state) => ({ ...state, values: newState.columns } as PivotState));
+        }
+    };
+
+    const handleRowTotalChanges = (newState: Partial<PivotState>) => {
+        if (!applyButton) {
+            setPivot({ rowTotals: newState.rowTotals });
+        } else {
+            setPivotState((state) => ({ ...state, rowTotals: newState.rowTotals } as PivotState));
+        }
+    };
+
+    const handleColumnTotalChanges = (newState: Partial<PivotState>) => {
+        if (!applyButton) {
+            setPivot({ columnTotals: newState.columnTotals });
+        } else {
+            setPivotState((state) => ({ ...state, columnTotals: newState.columnTotals } as PivotState));
+        }
+    };
+
+    const onApply = () => {
+        setPivot(pivotState as PivotState);
     };
 
     return (
         <SimpleBar className="bg-sidebar__pivot__container column fl-1">
-            <PivotBox pivotType="rows" onChanges={handleRowChange} />
-            <PivotBox pivotType="columns" onChanges={handleColumnChange} />
+            <PivotBox rowTotals={!!pivotState?.rowTotals} pivotType="rows" onChanges={handleRowChange} onTotalChanges={handleRowTotalChanges} />
+            <PivotBox columnTotals={!!pivotState?.columnTotals} pivotType="columns" onChanges={handleColumnChange} onTotalChanges={handleColumnTotalChanges} />
             <PivotBox pivotType="values" onChanges={handleValueChange} />
+            <ApplyButton enabled={applyButton} onClick={onApply} />
         </SimpleBar>
     );
 };
@@ -183,7 +230,7 @@ const Box = ({
     scrollContainer,
     onRemove,
     onHover,
-    onChanges
+    onChanges,
 }: {
     column: Column;
     index: number;
@@ -275,13 +322,24 @@ const Box = ({
     );
 };
 
-const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (columns: Column[]) => void }) => {
-    const [columnStore, pivot, theme, scrollContainer, setPivot] = useBeastStore((state) => [
+const PivotBox = ({
+    pivotType,
+    rowTotals,
+    columnTotals,
+    onChanges,
+    onTotalChanges,
+}: {
+    pivotType: string;
+    rowTotals?: boolean;
+    columnTotals?: boolean;
+    onChanges: (state: Partial<PivotState>) => void;
+    onTotalChanges?: (state: Partial<PivotState>) => void;
+}) => {
+    const [columnStore, pivot, theme, scrollContainer] = useBeastStore((state) => [
         state.initialColumns,
         state.pivot,
         state.theme,
         state.scrollElement,
-        state.setPivot,
     ]);
     const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
 
@@ -300,7 +358,8 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
             const newState = columns.current.concat(clone(column));
 
             columns.current = newState;
-            onChanges(columns.current);
+
+            onChanges({ columns: columns.current });
 
             if (item.onRemove) {
                 item.onRemove(column)();
@@ -310,7 +369,8 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
 
     const removeColumn = (column: Column) => () => {
         columns.current = columns.current.filter((c) => c.id !== column.id);
-        onChanges(columns.current);
+
+        onChanges({ columns: columns.current });
     };
 
     const onHover = (index: number, hoverIndex: number) => {
@@ -320,20 +380,20 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
         columns.current[index] = hoverColumn;
         columns.current[hoverIndex] = dragColumn;
 
-        onChanges(columns.current);
+        onChanges({ columns: columns.current });
     };
 
     const onColumnTotalsChange = () => {
-        setPivot({ columnTotals: !pivot?.columnTotals });
+        onTotalChanges?.({ columnTotals: !pivot?.columnTotals });
     };
 
     const onRowTotalsChange = () => {
-        setPivot({ rowTotals: !pivot?.rowTotals });
+        onTotalChanges?.({ rowTotals: !pivot?.rowTotals });
     };
 
     const onChangeColumn = () => {
-        onChanges(columns.current);
-    }
+        onChanges({ columns: columns.current });
+    };
 
     return (
         <div className="bg-box__container column left">
@@ -341,7 +401,7 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
                 <label>{pivotType}</label>
                 {pivotType === 'rows' ? (
                     <div className="row middle" onClick={onRowTotalsChange}>
-                        <Checkbox.Root className="bg-checkbox__root" checked={pivot?.rowTotals} id="rowTotals">
+                        <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
                             <Checkbox.Indicator className="bg-checbox__indicator row center middle">
                                 <CheckIcon />
                             </Checkbox.Indicator>
@@ -350,7 +410,7 @@ const PivotBox = ({ pivotType, onChanges }: { pivotType: string; onChanges: (col
                     </div>
                 ) : pivotType === 'columns' ? (
                     <div className="row middle center" onClick={onColumnTotalsChange}>
-                        <Checkbox.Root className="bg-checkbox__root" checked={pivot?.columnTotals} id="columnTotals">
+                        <Checkbox.Root className="bg-checkbox__root" checked={columnTotals} id="columnTotals">
                             <Checkbox.Indicator className="bg-checbox__indicator row center middle">
                                 <CheckIcon />
                             </Checkbox.Indicator>

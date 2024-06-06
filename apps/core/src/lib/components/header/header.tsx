@@ -13,12 +13,10 @@ type Props<T> = {
     multiSort?: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
-    leftEdge: number;
-    rightEdge: number;
     disableSwapColumns?: boolean;
 };
 
-export default function Header<T>({ height, border, multiSort, dragOptions, events, leftEdge, rightEdge, disableSwapColumns }: Props<T>) {
+export default function Header<T>({ height, border, multiSort, dragOptions, events, disableSwapColumns }: Props<T>) {
     const [columns] = useBeastStore((state) => [state.columns]);
 
     const levels = Object.values(columns).reduce((acc, column) => {
@@ -58,8 +56,6 @@ export default function Header<T>({ height, border, multiSort, dragOptions, even
                 multiSort={multiSort}
                 dragOptions={dragOptions}
                 events={events}
-                leftEdge={leftEdge}
-                rightEdge={rightEdge}
                 disableSwapColumns={disableSwapColumns}
             />
             <HeaderSection

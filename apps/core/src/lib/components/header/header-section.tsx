@@ -8,8 +8,6 @@ type Props<T> = {
     width: number;
     height: number;
     headers: Column[][];
-    leftEdge?: number;
-    rightEdge?: number;
     pinType?: PinType;
     border?: boolean;
     multiSort?: boolean;
@@ -22,8 +20,6 @@ export default function HeaderSection<T>({
     width,
     height,
     border,
-    leftEdge,
-    rightEdge,
     pinType,
     multiSort,
     dragOptions,
@@ -33,15 +29,7 @@ export default function HeaderSection<T>({
 }: Props<T>) {
     const HeaderRow = ({ level, levelIdx }: { level: Column[]; levelIdx: number }) => {
         const isInViewField = (column: Column): boolean => {
-            const columnInView = column.finalPosition < (rightEdge || level.length) && column.finalPosition >= (leftEdge || 0);
-
-            if (columnInView) {
-                return true;
-            }
-
-            const someChildInView = (column.minPosition || column.finalPosition) >= (leftEdge || 0) && (column.maxPosition || column.finalPosition) < (rightEdge || level.length);
-
-            return someChildInView;
+            return true;
         }
 
         return (

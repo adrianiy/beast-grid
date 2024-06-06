@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getItxData } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
+import { BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -72,7 +72,8 @@ const columnDefs: ColumnDef[] = [
         sortable: true,
         formatter: (value) => field.startsWith('VB') ? numeral(value).format('0,0 $') : value,
         menu: {
-            filter: field === 'VB_ORDERS'
+            filter: field === 'VB_ORDERS',
+            column: true
         }
     };
 });
@@ -92,7 +93,6 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
         const fetchData = async () => {
             try {
                 const res = await getItxData();
-                console.log(res)
                 setData((state) => [...state, ...res]);
                 loading.current = false;
                 beastApi?.current?.setLoading(false);

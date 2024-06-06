@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 
 import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
@@ -52,6 +52,8 @@ type Props = {
     level: number;
     groupOrder: ColumnId[];
     columns: ColumnStore;
+    loading?: boolean;
+    skeleton: ReactNode;
     onClick?: () => void;
 };
 export function RowCell({
@@ -65,6 +67,8 @@ export function RowCell({
     level,
     groupOrder,
     columns,
+    loading,
+    skeleton,
     onClick,
 }: Props) {
     const lastSelected = useRef<SelectedCells | null>(null);
@@ -190,7 +194,7 @@ export function RowCell({
                 level={level}
                 pivot={pivot}
             />
-            <div className="grid-row-value">{value}</div>
+            <div className="grid-row-value">{loading ? skeleton : value}</div>
         </div>
     );
 }
@@ -209,7 +213,7 @@ const Chevron = ({
     columnDef: Column;
     groupOrder: ColumnId[];
     enabled?: boolean;
-    pivot: Partial<PivotState> | null;
+    pivot?: Partial<PivotState> | null;
     level: number;
 }) => {
     if (!enabled && !pivot) {

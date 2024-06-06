@@ -8,15 +8,10 @@ import { BeastGridConfig, Column, Data } from './common';
 import Header from './components/header/header';
 import SideBar from './components/sidebar/sidebar';
 
-import cn from 'classnames';
-
 import 'simplebar-react/dist/simplebar.min.css';
 import TBody from './components/body/tbody';
 
-interface ColumnSliceProps {
-    limits: [number, number];
-    edges: [number, number];
-}
+import cn from 'classnames';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -24,48 +19,38 @@ type Props<T> = {
     theme: string;
     disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
-    onRowClick?: (row: T) => void;
 };
 
-export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange, onRowClick }: Props<T>) {
+export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [pivot, columns, setScrollElement, setTheme, autoSize] = useBeastStore((state) => [
+    const [pivot, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
         state.pivot,
-        state.columns,
         state.setScrollElement,
         state.setTheme,
         state.autoSizeColumns,
+        state.updateColumnVisibility
     ]);
     const [loading, setLoading] = useState(false);
     const [scrollTop, setScrollTop] = useState(0);
-    const [columnSliceProps, setColumnSliceProps] = useState<ColumnSliceProps | null>(null);
     const ref = useRef<SimpleBarCore>(null);
+    const lastScrollLeft = useRef(0);
 
     // Get visible column slice based on left position
     const handleScroll = useCallback(
         (scrollElement: HTMLElement) => () => {
-            // get Columns tagged as final.
-            const lastLevel = Object.values(columns).filter((column) => column.final).sort((a, b) => a.left - b.left);
+            const scrollLeft = scrollElement.scrollLeft;
+            const scrollDiff = Math.abs(scrollLeft - lastScrollLeft.current);
 
-            if (scrollElement) {
-                const leftEdge = scrollElement.scrollLeft;
-                const rightEdge = leftEdge + scrollElement.getBoundingClientRect().width;
-                const leftIndex = lastLevel.findIndex((column) => column.left >= leftEdge);
-                const rightIndex = lastLevel.findIndex((column) => column.left > rightEdge);
+            setScrollTop(scrollElement.scrollTop);
 
-                setColumnSliceProps({
-                    limits: [Math.max(0, leftIndex - 8), rightIndex > -1 ? rightIndex + 4 : lastLevel.length],
-                    edges: [leftEdge, rightEdge],
-                });
-                setScrollTop(scrollElement.scrollTop);
-            } else {
-                setColumnSliceProps({
-                    limits: [0, lastLevel.length],
-                    edges: [0, 0],
-                });
+            if (scrollDiff > 100) {
+                lastScrollLeft.current = scrollLeft;
+                updateColumnVisibility(scrollLeft)
+                return;
             }
+
         },
-        [columns]
+        [updateColumnVisibility]
     );
 
     // resize observer
@@ -98,6 +83,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
         if (scrollElement) {
             setScrollElement(scrollElement);
             handleScroll(scrollElement)();
+            updateColumnVisibility(0);
 
             scrollElement.addEventListener('scroll', handleScroll(scrollElement));
         }
@@ -164,8 +150,6 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                             border={config.header?.border ?? true}
                             multiSort={config.sort?.multiple}
                             dragOptions={config.dragOptions}
-                            leftEdge={columnSliceProps?.limits[0] || 0}
-                            rightEdge={columnSliceProps?.limits[1] || 0}
                             disableSwapColumns={disableColumnSwap}
                         />
                         <TBody
@@ -176,11 +160,8 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                             border={config.row?.border}
                             events={config.row?.events}
                             beastConfig={config}
-                            startIndex={columnSliceProps?.limits[0] || 0}
-                            endIndex={columnSliceProps?.limits[1] || 0}
                             scrollTop={scrollTop}
                             onSortChange={onSortChange}
-                            onRowClick={onRowClick}
                         />
                     </Fragment>
                 )}

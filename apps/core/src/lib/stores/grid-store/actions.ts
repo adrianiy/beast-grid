@@ -1,14 +1,16 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-import { Column, ColumnId, IFilter } from './../../common/interfaces';
+import { Column, ColumnId, IFilter, AsyncRow } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
     addSort,
     changePosition,
+    createVirtualIds,
     getColumnsFromDefs,
     getSwappableClone,
     groupDataByColumnDefs,
+    initialize,
     mergeColumns,
     moveColumns,
     removeSort,
@@ -22,6 +24,7 @@ import {
     ColumnDef,
     ColumnStore,
     Coords,
+    Data,
     FilterType,
     PinType,
     SelectedCells,
@@ -348,13 +351,13 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
 };
 
 
-export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
-    const { pivot: currentPivot, initialData, defaultColumnDef, onPivotChange } = state;
+export const setPivot = (newPivot: Partial<GridState['pivot']> | null, initialState?: Partial<GridState>) => (state: GridStore) => {
+    const { pivot: currentPivot, initialData, initialColumns, defaultColumnDef, onPivotChange } = state;
     const data = [...initialData];
 
     const pivot = { ...currentPivot, ...newPivot };
 
-    if (pivot.rows || pivot.columns || pivot.values) {
+    if (pivot.rows?.length || pivot.columns?.length || pivot.values?.length) {
         const rowColumnDefs: ColumnDef[] = [];
         const columnDefs: ColumnDef[] = [];
         const groupOrder: ColumnId[] = [];
@@ -406,7 +409,36 @@ export const setPivot = (newPivot: Partial<GridState['pivot']> | null) => (state
         }
 
         return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, edited: true };
+    } else if (initialState) {
+        return restore(initialState)(state) as GridStore;
     }
 
-    return { pivot, edited: true };
+    return { pivot, data: initialData, columns: initialColumns,  edited: true };
 };
+
+export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) => {
+    const {columns, scrollElement} = state;
+
+    const scrollWidth = scrollElement?.clientWidth || 0;
+
+    const threshold = scrollWidth * 0.4;
+
+    Object.keys(columns).forEach((columnId) => {
+        const column =columns[columnId];
+
+        if (column.pinned === PinType.NONE) {
+            column.hidden = (column.left + column.width) < (scrollLeft - threshold) || column.left > (scrollLeft + scrollWidth + threshold);
+        }
+    });
+
+    return { columns };
+}
+
+export const setData = (_data: Data) => (state: GridStore) => {
+    const { columns, groupOrder, tree, container } = state;
+    const initialData = createVirtualIds(_data as Data);
+    const data = initialize(columns, container, initialData, groupOrder, tree);
+    console.log('setData', data)
+
+    return { data, initialData }
+}

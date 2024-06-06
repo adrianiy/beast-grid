@@ -1,8 +1,8 @@
 # Beast Grid API
 
-We know you'll need to play with your data on your own, or know how the user has interacted with your app. 
+We know you'll need to play with your data on your own, or know how the user has interacted with your app.
 
-That's why we've created the Beast Grid API. 
+That's why we've created the Beast Grid API.
 
 Using the `useRef` hook, you can access the `grid` object and use the following methods:
 
@@ -28,6 +28,7 @@ export interface BeastGridApi {
   columns: ColumnStore;
   setColumns: (columns: ColumnStore) => void;
   setLoading: (loading: boolean) => void;
+  setData: (data: any[]) => void;
 }
 ````
 
@@ -47,3 +48,8 @@ The `setColumns` method allows you to update the columns that are being displaye
 #### `(loading: boolean) => void`
 
 The `setLoading` method allows you to set the loading state of the grid. This is useful when you're fetching data from an API and want to show a loading spinner to the user.
+
+### `setData`
+#### `(data: any[]) => void`
+
+The `setData` method allows you to update the data that is being displayed in the grid. This is useful when you're fetching data from an API and want to update the grid with the new data.

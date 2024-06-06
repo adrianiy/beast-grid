@@ -145,8 +145,26 @@ export interface PivotValue {
     operation: AggregationType;
 }
 
+export interface AsyncRow extends Row {
+    _id: string;
+    _total: boolean;
+}
+
+export interface PivotState {
+    columns: Column[];
+    rows: Column[];
+    values: Column[];
+    data: Data;
+    enabled: boolean;
+    columnTotals: boolean;
+    rowTotals: boolean;
+    rowGroups: boolean;
+}
+
 export interface Pivot {
     enabled: boolean;
+    asyncCallback: (pivot: Partial<PivotState | null>) => Promise<AsyncRow[]>
+    applyButton: boolean;
     pivotConfig?: {
         rows: string[];
         columns: string[];
@@ -155,6 +173,11 @@ export interface Pivot {
         columnTotals: boolean;
         rowGroups: boolean;
     };
+}
+
+export interface Loading {
+    skeleton: ReactNode;
+    rows: number;
 }
 
 export interface BeastGridConfig<T> extends Partial<TableStyles> {
@@ -173,6 +196,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     chart?: Partial<Chart>;
     contextualMenu?: Partial<ContextualMenuProps>;
     appendModalToBoy?: boolean;
+    loadingState?: Partial<Loading>;
 }
 
 export interface TableStyles {
@@ -224,6 +248,7 @@ export interface BeastGridApi {
     columns: ColumnStore;
     setColumns: (columns: ColumnStore) => void;
     setLoading: (loading: boolean) => void;
+    setData: (data: Data) => void;
 }
 
 export interface Coords {

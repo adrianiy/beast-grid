@@ -155,6 +155,7 @@
         padding: var(--bg-size--3);
         border: var(--bg-border--2);
         background: var(--bg-background-color--1);
+        width: 100%;
         flex: 1;
     }
 
@@ -183,6 +184,25 @@
 
         .bg-box__container {
             padding: var(--bg-size--5);
+        }
+
+        .bg-button__container {
+            border-top: var(--bg-border--3);
+            padding: var(--bg-size--3) var(--bg-size--5);
+            background: var(--bg-background-color--1);
+            position: sticky;
+            bottom: 0;
+        }
+
+        .bg-button {
+            border: var(--bg-border--3);
+            padding: var(--bg-size--3);
+            width: min-content;
+            cursor: pointer;
+
+            label {
+                cursor: pointer;
+            }
         }
 
         label {
@@ -217,6 +237,7 @@
             .bg-submenu__container {
                 position: relative;
             }
+
 
             .bg-menu__item__submenu {
                 position: absolute;
@@ -257,3 +278,4 @@
         width: fit-content;
     }
 }
+
