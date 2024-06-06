@@ -5,6 +5,7 @@ import HeaderCell from './cell';
 import cn from 'classnames';
 
 type Props<T> = {
+    leftWidth?: number;
     width: number;
     height: number;
     headers: Column[][];
@@ -17,6 +18,7 @@ type Props<T> = {
 };
 
 export default function HeaderSection<T>({
+    leftWidth,
     width,
     height,
     border,
@@ -47,6 +49,7 @@ export default function HeaderSection<T>({
                             dragOptions={dragOptions}
                             events={events}
                             disableSwapColumns={disableSwapColumns}
+                            leftWidth={leftWidth}
                         />
                     );
                 })}

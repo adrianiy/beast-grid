@@ -16,12 +16,13 @@ export const useDndHook = (
         isDropTarget: boolean;
         onDirectionChange: (direction: Direction) => void;
         onDragStart: (e: DragEvent) => void;
-        onDrag: (e: DragEvent, pointerCoords: Coords) => void;
+        onDrag: (e: DragEvent, pointerCoords: Coords, leftWidth?: number) => void;
         onDragEnd: (e: DragEvent, pointerCoords: Coords) => void;
         onAnimationFrame: (pointerCoords: Coords) => void;
     }>,
     parent?: HTMLDivElement,
-    disable?: boolean
+    disable?: boolean,
+    leftWidth?: number
 ) => {
     const ref = useRef<HTMLDivElement>(null);
     const reqAnimFrameNo = useRef<number>(0);
@@ -157,7 +158,7 @@ export const useDndHook = (
             pointer.current = _getPointerPositionInParent();
 
             if (options?.onDrag) {
-                options.onDrag(e, pointer.current);
+                options.onDrag(e, pointer.current, leftWidth);
             }
         };
 
@@ -202,7 +203,7 @@ export const useDndHook = (
                 dragRef.removeEventListener('dragend', onDragEnd);
             };
         }
-    }, [ref, scrollElement, disable]);
+    }, [ref, scrollElement, disable, leftWidth]);
 
     return [ref];
 };

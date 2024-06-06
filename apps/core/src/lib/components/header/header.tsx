@@ -40,6 +40,7 @@ export default function Header<T>({ height, levels, border, multiSort, dragOptio
                 events={events}
             />
             <HeaderSection
+                leftWidth={leftWidth}
                 width={totalWidth - leftWidth - rightWidth}
                 height={height}
                 headers={levels}

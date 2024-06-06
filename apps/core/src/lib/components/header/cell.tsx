@@ -22,6 +22,7 @@ type Props<T> = {
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
     disableSwapColumns?: boolean;
+    leftWidth?: number;
 };
 
 export default function HeaderCell<T>({
@@ -33,7 +34,8 @@ export default function HeaderCell<T>({
     dragOptions,
     multiSort,
     events,
-    disableSwapColumns
+    disableSwapColumns,
+    leftWidth
 }: Props<T>) {
     const menuRef = useRef<SVGSVGElement>(null);
     const lastX = useRef<number>(0);
@@ -65,7 +67,8 @@ export default function HeaderCell<T>({
             onDragEnd,
         },
         container,
-        disableSwapColumns
+        disableSwapColumns,
+        leftWidth
     );
     const [resize] = useDndHook({
         ...dragOptions,
@@ -88,7 +91,8 @@ export default function HeaderCell<T>({
         lastHitElement.current = null;
     }
 
-    function hitTest(_: DragEvent, pointer: Coords) {
+
+    function hitTest(_: DragEvent, pointer: Coords, _leftWidth?: number) {
         pointerPosition.current = pointer;
         const { left: containerLeft } = container.getBoundingClientRect();
         const scrollLeft = scrollContainer.scrollLeft;
@@ -107,7 +111,7 @@ export default function HeaderCell<T>({
             )
                 continue;
 
-            const left = columns[element.id].left + containerLeft - scrollLeft;
+            const left = columns[element.id].left + containerLeft - scrollLeft + (leftWidth || 0);
             const width = columns[element.id].width;
             const right = left + width;
             const { x } = pointer;

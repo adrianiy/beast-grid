@@ -463,7 +463,7 @@ export default function TBody<T>({
 
     const getStyleProps = () => {
         return {
-            height: sortedData.length ? (sortedData.length + expandedRows) * rowHeight : (beastConfig?.loadingState?.rows || 10) * rowHeight,
+            height: sortedData.length ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || 0)) * rowHeight : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };
 
