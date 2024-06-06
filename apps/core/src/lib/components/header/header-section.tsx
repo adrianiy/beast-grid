@@ -28,16 +28,9 @@ export default function HeaderSection<T>({
     headers,
 }: Props<T>) {
     const HeaderRow = ({ level, levelIdx }: { level: Column[]; levelIdx: number }) => {
-        const isInViewField = (column: Column): boolean => {
-            return true;
-        }
-
         return (
             <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
                 {level.map((column, idx) => {
-                    if (!isInViewField(column)) {
-                        return null;
-                    }
                     if (column.pinned !== pinType || column.hidden) {
                         return null;
                     }

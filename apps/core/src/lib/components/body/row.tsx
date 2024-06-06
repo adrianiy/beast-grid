@@ -21,6 +21,8 @@ type Props = {
     expandableSibling?: boolean;
     loading?: boolean;
     skeleton?: ReactNode;
+    isTopFixed?: boolean;
+    isBottomFixed?: boolean;
     onClick?: () => void;
 };
 
@@ -41,6 +43,8 @@ export default function RowContainer({
     expandableSibling,
     loading,
     skeleton,
+    isTopFixed,
+    isBottomFixed,
     onClick,
 }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
@@ -91,8 +95,9 @@ export default function RowContainer({
                 child: level > 0,
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
+                topFixed: isTopFixed
             })}
-            style={{ top: height * idx + gap, height, width: totalWidth }}
+            style={{ top: isTopFixed ? 'var(--header-height)' : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}
         >
             {leftWidth > 0 && (

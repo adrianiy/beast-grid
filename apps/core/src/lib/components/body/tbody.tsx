@@ -340,7 +340,7 @@ export default function TBody<T>({
                 config={config}
                 groupOrder={groupOrder}
                 selectable={!!beastConfig.contextualMenu}
-                idx={idx}
+                idx={idx + (beastConfig.topRows?.length || 0)}
                 y={y}
                 border={border}
                 height={rowHeight}
@@ -427,17 +427,52 @@ export default function TBody<T>({
         return renderArray.flat();
     }
 
+    const createTopRows = () => {
+        if (!beastConfig.topRows) {
+            return null;
+        }
+        const _data = beastConfig.topRows;
+        const renderArray: ReactNode[] = [];
+        for (let i = 0; i < _data.length; i++) {
+            const row = (
+                <RowContainer
+                    key={i}
+                    row={_data[i] as Row}
+                    columns={lastLevel}
+                    columnStore={columns}
+                    config={config}
+                    skeleton={beastConfig?.loadingState?.skeleton}
+                    groupOrder={groupOrder}
+                    selectable={false}
+                    idx={i}
+                    y={i}
+                    border={border}
+                    height={rowHeight}
+                    level={0}
+                    events={events}
+                    gap={0}
+                    expandableSibling={false}
+                    isTopFixed
+                />
+            );
+            renderArray.push(row);
+        }
+
+        return renderArray.flat();
+    }
+
     const getStyleProps = () => {
         return {
             height: sortedData.length ? (sortedData.length + expandedRows) * rowHeight : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };
 
-    console.log(sortedData)
     const dataSlice = sortedData.length ? createDataSlice() : createLoadingSlice();
+    const topRows = createTopRows();
 
     return (
         <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
+            {topRows}
             {dataSlice}
             <ContextMenu
                 x={contextMenu?.x || 0}

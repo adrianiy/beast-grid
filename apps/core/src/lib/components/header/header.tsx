@@ -9,6 +9,7 @@ import './header.scss';
 
 type Props<T> = {
     height: number;
+    levels: Column[][];
     border?: boolean;
     multiSort?: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
@@ -16,16 +17,7 @@ type Props<T> = {
     disableSwapColumns?: boolean;
 };
 
-export default function Header<T>({ height, border, multiSort, dragOptions, events, disableSwapColumns }: Props<T>) {
-    const [columns] = useBeastStore((state) => [state.columns]);
-
-    const levels = Object.values(columns).reduce((acc, column) => {
-        const level = column.level || 0;
-        acc[level] = acc[level] || [];
-        acc[level].push(columns[column.id]);
-        return acc;
-    }, [] as Column[][]);
-
+export default function Header<T>({ height, levels, border, multiSort, dragOptions, events, disableSwapColumns }: Props<T>) {
     if (!levels.length) return null;
 
     const levelZero = levels[0].filter((column) => !column.hidden);

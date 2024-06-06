@@ -35,6 +35,16 @@
             }
         }
     }
+    &.topFixed {
+        position: sticky;
+        z-index: 3;
+
+        .grid-row-cell {
+            &.bordered {
+                border-bottom: var(--bg-border--1);
+            }
+        }
+    }
 }
 
 .grid-row-content {
@@ -104,3 +114,4 @@
         }
     }
 }
+

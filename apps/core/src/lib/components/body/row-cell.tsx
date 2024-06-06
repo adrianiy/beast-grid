@@ -15,7 +15,7 @@ function getProperty<Key extends keyof Row>(
     columnDef: Column,
     columns: ColumnStore,
     groupOrder: ColumnId[]
-): string | null {
+): string | ReactNode | null {
     let field = columnDef.pivotField || columnDef.field;
 
     if (columnDef.tree) {
@@ -23,6 +23,10 @@ function getProperty<Key extends keyof Row>(
     }
 
     let value = row[field as Key];
+
+    if (React.isValidElement(value)) {
+        return value;
+    }
 
     const columnIdx = groupOrder.indexOf(columnDef.id);
 
@@ -72,17 +76,25 @@ export function RowCell({
     onClick,
 }: Props) {
     const lastSelected = useRef<SelectedCells | null>(null);
-    const [pivot, scrollElement, selectedCells, setSelectedStart, setSelectedEnd, updateSelected, selecting, setSelecting] =
-        useBeastStore((state) => [
-            state.pivot,
-            state.scrollElement,
-            state.selectedCells,
-            state.setSelectedStart,
-            state.setSelectedEnd,
-            state.updateSelectedCells,
-            state.selecting,
-            state.setSelecting,
-        ]);
+    const [
+        pivot,
+        scrollElement,
+        selectedCells,
+        setSelectedStart,
+        setSelectedEnd,
+        updateSelected,
+        selecting,
+        setSelecting,
+    ] = useBeastStore((state) => [
+        state.pivot,
+        state.scrollElement,
+        state.selectedCells,
+        state.setSelectedStart,
+        state.setSelectedEnd,
+        state.updateSelectedCells,
+        state.selecting,
+        state.setSelecting,
+    ]);
     const inY = selectedCells && idx >= selectedCells.start.y && idx <= selectedCells.end.y;
     const inX =
         selectedCells &&
@@ -174,7 +186,9 @@ export function RowCell({
                 left: columnDef.left,
                 paddingLeft:
                     LEVEL_PADDING +
-                    (expandableSibling && row._singleChild && columnDef.rowGroup && !columnDef.tree && !pivot?.rows ? LEVEL_PADDING + 2 : 0) +
+                    (expandableSibling && row._singleChild && columnDef.rowGroup && !columnDef.tree && !pivot?.rows
+                        ? LEVEL_PADDING + 2
+                        : 0) +
                     (columnDef.tree ? LEVEL_PADDING * level : 0) +
                     (columnDef.tree && !row.children && !pivot ? LEVEL_PADDING : 0),
                 width: columnDef.width,
@@ -185,16 +199,22 @@ export function RowCell({
             onMouseUp={handleMouseUp}
             onMouseEnter={handleMouseEnter}
         >
-            <Chevron
-                onClick={handleExpandClick}
-                row={row}
-                columnDef={columnDef}
-                groupOrder={groupOrder}
-                enabled={expandableSibling}
-                level={level}
-                pivot={pivot}
-            />
-            <div className="grid-row-value">{loading ? skeleton : value}</div>
+            {React.isValidElement(value) ? (
+                value
+            ) : (
+                <>
+                    <Chevron
+                        onClick={handleExpandClick}
+                        row={row}
+                        columnDef={columnDef}
+                        groupOrder={groupOrder}
+                        enabled={expandableSibling}
+                        level={level}
+                        pivot={pivot}
+                    />
+                    <div className="grid-row-value">{loading ? skeleton : value}</div>
+                </>
+            )}
         </div>
     );
 }
@@ -206,7 +226,7 @@ const Chevron = ({
     groupOrder,
     enabled,
     level,
-    pivot
+    pivot,
 }: {
     onClick: (e: React.MouseEvent) => void;
     row: Row;

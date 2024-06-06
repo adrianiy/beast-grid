@@ -1,67 +1,69 @@
 import { Column } from 'beast-grid';
 
 export interface User {
-  userId: number;
-  username: string;
-  country: string;
-  totalOrders: number;
-  january: number;
-  february: number;
-  march: number;
-  april: number;
-  may: number;
-  june: number;
-  july: number;
-  august: number;
-  september: number;
-  october: number;
-  november: number;
-  december: number;
+    id: number;
+    name: string;
+    country: unknown;
+    language: string;
+    age: number;
+    orders: number;
+    january: number;
+    february: number;
+    march: number;
+    april: number;
+    may: number;
+    june: number;
+    july: number;
+    august: number;
+    september: number;
+    october: number;
+    november: number;
+    december: number;
 }
 
 export const getData = async (count: number): Promise<User[]> => {
-  const response = await fetch(`/api/mock-data?count=${count}`);
-  const data = await response.json();
-  return data;
+    const response = await fetch(`/api/mock-data?count=${count}`);
+    const data = await response.json();
+    return data;
 };
 
 export const getDateData = async (count: number): Promise<User[]> => {
-  const response = await fetch(`/api/mock-date?count=${count}`);
-  const data = await response.json();
-  return data;
+    const response = await fetch(`/api/mock-date?count=${count}`);
+    const data = await response.json();
+    return data;
 };
 
 export const getItxData = async (): Promise<any> => {
     const response = await fetch('/api/mock-itx');
     const data = await response.json();
     return data;
-}
+};
 
 export const sortData = async (data: User[], columns: Column[]) => {
-  const response = await fetch('/api/sort', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ data, columns }),
-  });
-  const sortedData = await response.json();
-  return sortedData;
+    const response = await fetch('/api/sort', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data, columns }),
+    });
+    const sortedData = await response.json();
+    return sortedData;
 };
 
 export const months = [
-  'january',
-  'february',
-  'march',
-  'april',
-  'may',
-  'june',
-  'july',
-  'august',
-  'september',
-  'october',
-  'november',
-  'december',
+    'january',
+    'february',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
 ];
 
 export const codeBlock = `

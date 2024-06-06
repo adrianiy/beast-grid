@@ -438,7 +438,6 @@ export const setData = (_data: Data) => (state: GridStore) => {
     const { columns, groupOrder, tree, container } = state;
     const initialData = createVirtualIds(_data as Data);
     const data = initialize(columns, container, initialData, groupOrder, tree);
-    console.log('setData', data)
 
     return { data, initialData }
 }

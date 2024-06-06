@@ -23,7 +23,8 @@ type Props<T> = {
 
 export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [pivot, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
+    const [columns, pivot, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
+        state.columns,
         state.pivot,
         state.setScrollElement,
         state.setTheme,
@@ -34,6 +35,13 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
     const [scrollTop, setScrollTop] = useState(0);
     const ref = useRef<SimpleBarCore>(null);
     const lastScrollLeft = useRef(0);
+
+    const levels = Object.values(columns).reduce((acc, column) => {
+        const level = column.level || 0;
+        acc[level] = acc[level] || [];
+        acc[level].push(columns[column.id]);
+        return acc;
+    }, [] as Column[][]);
 
     // Get visible column slice based on left position
     const handleScroll = useCallback(
@@ -121,6 +129,8 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
         return toolbarHeight;
     };
 
+    const headerHeight = config.header?.height || (defaultConfig.headerHeight as number);
+
     return (
         <div
             className="beast-grid__wrapper"
@@ -129,7 +139,8 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                 maxHeight: config.style?.maxHeight,
                 height: !config.style?.maxHeight ? `calc(100% - ${getToolbarHeight()}px)` : undefined,
                 width: '100%',
-            }}
+                '--header-height': `${headerHeight * levels.length}px`,
+            } as React.CSSProperties}
         >
             <SimpleBar
                 style={{
@@ -146,7 +157,8 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                 {!loading && (
                     <Fragment>
                         <Header
-                            height={config.header?.height || (defaultConfig.headerHeight as number)}
+                            height={headerHeight}
+                            levels={levels}
                             border={config.header?.border ?? true}
                             multiSort={config.sort?.multiple}
                             dragOptions={config.dragOptions}
@@ -154,7 +166,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                         />
                         <TBody
                             rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
-                            headerHeight={config.header?.height || (defaultConfig.headerHeight as number)}
+                            headerHeight={headerHeight}
                             config={config.row}
                             maxHeight={config.style?.maxHeight}
                             border={config.row?.border}

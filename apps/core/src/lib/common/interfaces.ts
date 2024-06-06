@@ -184,6 +184,8 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     columnDefs: ColumnDef[];
     defaultColumnDef?: Partial<ColumnDef>;
     data: T;
+    topRows?: Data;
+    bottomRows?: Data;
     pivot?: Partial<Pivot>;
     sort?: Partial<SortConfig>;
     row?: Partial<RowConfig>;
