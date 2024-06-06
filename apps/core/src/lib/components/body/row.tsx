@@ -20,7 +20,7 @@ type Props = {
     events?: Partial<RowEvents>;
     expandableSibling?: boolean;
     loading?: boolean;
-    skeleton: ReactNode;
+    skeleton?: ReactNode;
     onClick?: () => void;
 };
 
