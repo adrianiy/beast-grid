@@ -23,6 +23,7 @@ type Props = {
     skeleton?: ReactNode;
     isTopFixed?: boolean;
     isBottomFixed?: boolean;
+    isLastRow?: boolean;
     onClick?: () => void;
 };
 
@@ -45,6 +46,7 @@ export default function RowContainer({
     skeleton,
     isTopFixed,
     isBottomFixed,
+    isLastRow,
     onClick,
 }: Props) {
     const visibleColumns = columns.filter((column) => !column.hidden);
@@ -95,7 +97,8 @@ export default function RowContainer({
                 child: level > 0,
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
-                topFixed: isTopFixed
+                topFixed: isTopFixed,
+                last: isLastRow
             })}
             style={{ top: isTopFixed ? 'var(--header-height)' : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}

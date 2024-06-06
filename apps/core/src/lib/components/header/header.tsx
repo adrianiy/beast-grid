@@ -1,5 +1,3 @@
-import { useBeastStore } from './../../stores/beast-store';
-
 import { BeastGridConfig, Column } from '../../common/interfaces';
 import { HeaderEvents, PinType } from '../../common';
 

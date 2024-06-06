@@ -427,7 +427,7 @@ export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) =
         const column =columns[columnId];
 
         if (column.pinned === PinType.NONE) {
-            column.hidden = (column.left + column.width) < (scrollLeft - threshold) || column.left > (scrollLeft + scrollWidth + threshold);
+            column.inView = (column.left + column.width) < (scrollLeft + scrollWidth + threshold) || column.left > (scrollLeft - threshold);
         }
     });
 

@@ -35,16 +35,18 @@
             }
         }
     }
+
     &.topFixed {
         position: sticky;
         z-index: 3;
 
-        .grid-row-cell {
-            &.bordered {
+        &.last {
+            .grid-row-cell {
                 border-bottom: var(--bg-border--1);
             }
         }
     }
+
 }
 
 .grid-row-content {
@@ -114,4 +116,3 @@
         }
     }
 }
-

@@ -86,6 +86,7 @@
 
     .bg-grid-header__cell__menu {
         position: relative;
+        cursor: pointer;
 
         svg {
             --size: var(--bg-size--4);

@@ -225,6 +225,7 @@ export interface Column extends ColumnDef, Position {
     width: number;
     pinned: PinType;
     finalPosition: number;
+    inView?: boolean;
     minPosition?: number;
     maxPosition?: number;
     childrenId?: ColumnId[];

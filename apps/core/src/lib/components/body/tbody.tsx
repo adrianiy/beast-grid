@@ -453,6 +453,7 @@ export default function TBody<T>({
                     gap={0}
                     expandableSibling={false}
                     isTopFixed
+                    isLastRow={i === _data.length - 1}
                 />
             );
             renderArray.push(row);
