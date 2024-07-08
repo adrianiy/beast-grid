@@ -63,6 +63,7 @@ export interface GridState {
     tree: Partial<TreeConstructor> | undefined;
     groupOrder: ColumnId[];
     initialData: Data;
+    unfilteredData: Data;
     initialColumns: ColumnStore;
     sortedColumns: Column[];
     hiddenColumns: ColumnId[];
@@ -137,6 +138,7 @@ export const createGridStore = <T>(
         defaultColumnDef,
         data,
         initialData: [...initialData],
+        unfilteredData: [...initialData],
         initialColumns: clone(columns),
         hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,

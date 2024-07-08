@@ -1,4 +1,4 @@
-import { AggregationType, Column, ColumnDef, Data, Row } from '../common';
+import { AggregationType, Column, ColumnDef, Data, FilterType, Row } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
 const aggregateData = (
@@ -76,6 +76,7 @@ export const acumData = (
                     id: uuidv4(),
                     parent: lastColumn.id,
                     headerName: `${calculatedColumn.aggregation} of ${calculatedColumn.headerName}`,
+                    filterType: FilterType.NUMBER,
                     pivotField: valueField,
                     field,
                     flex: 1,
@@ -118,7 +119,7 @@ const addData = (
 ): Row => {
     const aggregationColumn = aggregationColumns[currentLevel];
     const isLastRowLevel = currentLevel === aggregationColumns.length - 1;
-    const key = data[aggregationColumn.field as keyof Row] as string;
+    const key = aggregationColumn ? data[aggregationColumn.field as keyof Row] as string : 'total';
 
     if (!isLastRowLevel && showRowTotals) {
         const nextLevel = currentLevel + 1;
@@ -182,7 +183,7 @@ export const groupByPivot = (
     data.forEach((row) => {
         const key = showRowTotals
             ? (row[groupRows[0].field as keyof Row] as string)
-            : (groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') as string);
+            : (groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') as string) || 'total';
 
         if (groups[key] == null) {
             groups[key] = rows.length;
@@ -203,7 +204,7 @@ export const groupPivot = (
     showRowTotals: boolean,
     level = 0
 ): [Data, ColumnDef[]] => {
-    if (level === columns.length) {
+    if (columns.length && level === columns.length) {
         return [data, []];
     }
     return groupByPivot(data, columns, aggColumns, valueColumns, showRowTotals);

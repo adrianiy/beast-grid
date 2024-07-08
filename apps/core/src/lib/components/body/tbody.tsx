@@ -115,7 +115,7 @@ export default function TBody<T>({
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
-        const newSortedData = someActive ? (data.map(filterRow(columns, filters)).filter(Boolean) as Row[]) : data;
+        const newSortedData = someActive ? (data.filter(row => !row._hidden) as Row[]) : data;
 
         const sortColumns = Object.values(columns)
             .filter((c) => c.sort)

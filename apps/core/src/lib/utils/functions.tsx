@@ -164,11 +164,11 @@ export const filterRow =
             for (const filterKey of Object.keys(filters)) {
                 if (
                     columns[filterKey].filterType === FilterType.TEXT &&
-                    filters[filterKey].includes(`${row[columns[filterKey].field as string]}`)
+                    filters[filterKey].includes(`${row[columns[filterKey].pivotField || columns[filterKey].field as string]}`)
                 ) {
                     show = show && true;
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-                    const rowValue = row[columns[filterKey].field as string] as number;
+                    const rowValue = row[columns[filterKey].pivotField || columns[filterKey].field as string] as number;
                     const numberFilter = filters[filterKey] as NumberFilter[];
                     for (const filter of numberFilter) {
                         const op = filter.op;
@@ -196,9 +196,9 @@ export const filterRow =
                 children = row.children.map(filterRow(columns, filters)).filter(Boolean) as Row[];
                 show = children.length > 0;
             }
-            if (show) {
-                return { ...row, children };
-            }
+            row._hidden = !show;
+
+            return row;
         };
 
 export const useThrottle = () => {
@@ -294,6 +294,7 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
             formatter: value.formatter,
             headerName: `${value.aggregation} of ${value.headerName}`,
             field: `${value.field}@${parentField}`,
+            filterType: FilterType.NUMBER,
             flex: 1,
             parent: column.id,
             children: [],

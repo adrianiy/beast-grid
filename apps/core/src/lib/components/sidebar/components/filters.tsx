@@ -91,10 +91,10 @@ const renderOption = ({
         return (
             <Accordion
                 key={key}
-                id={`sidebar_filter_${option.id}`}
+                id={`sidebar_filter_${option.id}_${option.parent}`}
                 label={<OptionLabel option={option} />}
-                elements={option.childrenId ? option.childrenId.length : option.filterOptions?.length || 0}
-                height={option.childrenId ? undefined : option.filterType === FilterType.TEXT ? 400 : 200}
+                elements={option.childrenId?.length ? option.childrenId.length : option.filterOptions?.length || 0}
+                height={400}
                 style={style}
                 onExpand={(expanded) => {
                     handleRowExpand(expanded, index);
@@ -102,7 +102,7 @@ const renderOption = ({
                     list.current?.forceUpdate();
                 }}
             >
-                {option.childrenId ? (
+                {option.childrenId?.length ? (
                     <Options
                         columns={option.childrenId.map((id) => columnStore[id])}
                         scrollContainer={scrollContainer}
@@ -122,17 +122,18 @@ const Options = ({ columns, scrollContainer }: { columns: Column[]; scrollContai
 
     const handleRowExpand = (expanded: boolean, id: number) => {
         if (expanded) {
-            expandedRows.current.push(id);
+            if (!expandedRows.current.includes(id)) {
+                expandedRows.current.push(id);
+            }
         } else {
             expandedRows.current = expandedRows.current.filter((row) => row !== id);
         }
     };
 
     const rowHeight = ({ index }: { index: number }) => {
-        const option = columns[index];
         const expanded = expandedRows.current.includes(index);
 
-        return expanded ? (option.filterType === FilterType.TEXT ? 400 : 200) : 40;
+        return expanded ? 400 : 40;
     };
 
     return (

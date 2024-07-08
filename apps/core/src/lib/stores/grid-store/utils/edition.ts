@@ -93,7 +93,7 @@ export const mergeColumns = (columns: ColumnStore) => {
 
 const _moveColumns = (columns: Column[], columnStore: ColumnStore, left = 0) => {
     columns.forEach((column) => {
-        if (column.hidden) {
+        if (!column || column.hidden) {
             return;
         }
         column.left = left;

@@ -33,13 +33,9 @@ export default function Accordion(props: PropsWithChildren<Props>) {
             setChildrenHeight(0);
             setExpaned(false);
         } else if (height || elements) {
-            setChildrenHeight((height || 37 * elements) + 16);
+            setChildrenHeight(360);
+            setMinHeight(360);
             setExpaned(true);
-
-            setTimeout(() => {
-                setChildrenHeight('min-content');
-                setMinHeight((height || 37 * elements) + 16);
-            }, 300);
         }
     };
 
@@ -63,7 +59,7 @@ export default function Accordion(props: PropsWithChildren<Props>) {
             <div
                 className={cn('bg-accordion__children', { hidden: !expanded })}
                 id={`bg-accordion__children__${id}`}
-                style={{ height: childrenHeight, minHeight: minHeight }}
+                style={{ height: childrenHeight, minHeight: minHeight, maxWidth: '-webkit-fill-available' }}
             >
                 {expanded ? children : undefined}
             </div>

@@ -29,7 +29,7 @@ export default function TextFilters(props: Props) {
 
     const [filters, data, addFilter, selectAll] = useBeastStore((state) => [
         state.filters,
-        state.data,
+        state.unfilteredData,
         state.addFilter,
         state.selectAllFilters,
     ]);

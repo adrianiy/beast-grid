@@ -187,17 +187,17 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             pivot: {
                 enabled: true,
                 applyButton: true,
-                pivotConfig: {
-                    rows: ['country'],
-                    columns: ['language'],
-                    values: [
-                        { field: 'january', operation: AggregationType.SUM },
-                        { field: 'february', operation: AggregationType.SUM },
-                    ],
-                    rowTotals: false,
-                    columnTotals: false,
-                    rowGroups: false
-                }
+                // pivotConfig: {
+                //     rows: ['country'],
+                //     columns: ['language'],
+                //     values: [
+                //         { field: 'january', operation: AggregationType.SUM },
+                //         { field: 'february', operation: AggregationType.SUM },
+                //     ],
+                //     rowTotals: false,
+                //     columnTotals: false,
+                //     rowGroups: false
+                // }
             },
             appendModalToBoy: true,
             ..._customConfig,
