@@ -279,13 +279,13 @@ export function getAggregationType(column: Column | undefined, row: Row): Aggreg
     return AggregationType.COUNT;
 }
 
-const convertToTotal = (column: ColumnDef, headerName: string, parentField: string, values: Column[]): ColumnDef[] => {
+const convertToTotal = (column: Column, headerName: string, parentField: string, values: Column[]): ColumnDef[] => {
     if (column.children && column.children?.length) {
         column.id = uuidv4();
         column.headerName = headerName;
         column.field = parentField;
         column.childrenMap = {};
-        column.children = convertToTotal({...column.children[0]}, '', parentField, values);
+        column.children = convertToTotal({...column.children[0], parent: column.id } as Column, '', parentField, values);
 
         return [column];
     } else {
@@ -295,6 +295,7 @@ const convertToTotal = (column: ColumnDef, headerName: string, parentField: stri
             headerName: `${value.aggregation} of ${value.headerName}`,
             field: `${value.field}@${parentField}`,
             flex: 1,
+            parent: column.id,
             children: [],
             childrenMap: {},
             _total: true,
@@ -307,7 +308,7 @@ const convertToTotal = (column: ColumnDef, headerName: string, parentField: stri
 const loopColumn = (column: ColumnDef, values: Column[]) => {
     const isLeaf = column.children?.some((child) => !child.children?.length);
     if (column.children?.length && !isLeaf) {
-        column.children?.push(...convertToTotal({ ...column.children[0] }, 'TOTAL', column.field as string, values))
+        column.children?.push(...convertToTotal({ ...column.children[0], parent: column.id } as Column, 'TOTAL', column.field as string, values))
 
         column.children?.forEach((child) => {
             loopColumn(child, values);

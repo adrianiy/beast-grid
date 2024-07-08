@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import Chart from './chart';
 import { BeastGridConfig, BeastMode, Column, Data } from './common';
 import Grid from './grid';
@@ -13,7 +13,15 @@ type Props<T> = {
 };
 
 export default function Beast<T>(props: Props<T>) {
-    const [mode] = useBeastStore((state) => [state.mode]);
+    const [mode, initialized, setInitialPivot] = useBeastStore((state) => [state.mode, state.initialized, state.setInitialPivot]);
+
+    useEffect(() => {
+        if (initialized) {
+            if (props.config.pivot?.pivotConfig) {
+                setInitialPivot(props.config.pivot.pivotConfig);
+            }
+        }
+    }, [initialized, props.config.pivot?.pivotConfig, setInitialPivot])
 
     return <Fragment>
         {mode === BeastMode.GRID && <Grid {...props} />}

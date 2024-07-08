@@ -34,7 +34,7 @@ export default function PivotConfig<T>({ columns, config }: Props<T>) {
         setSearchValue(searchValue);
     };
 
-    const options = Object.values(columns).filter((column) => column.final);
+    const options = Object.values(columns).filter((column) => column.final && !column.hidden);
 
     return (
         <div className={cn('bg-sidebar bg-sidebar--big column', { border: config.style?.border })}>
@@ -68,7 +68,7 @@ export default function PivotConfig<T>({ columns, config }: Props<T>) {
                         <Options options={options} columns={columns} searchValue={searchValue} />
                     </SimpleBar>
                 </div>
-                <PivotOptions enabled={config.pivot?.enabled} applyButton={config.pivot?.applyButton} />
+                <PivotOptions enabled={config.pivot?.enabled} applyButton={config.pivot?.applyButton} totalizable={config.pivot?.totalizable} />
             </div>
         </div>
     );
@@ -160,8 +160,8 @@ const ApplyButton = ({ enabled, onClick }: { enabled?: boolean; onClick: () => v
     );
 };
 
-const PivotOptions = ({ enabled, applyButton }: { enabled?: boolean; applyButton?: boolean }) => {
-    const [setPivot] = useBeastStore((state) => [state.setPivot, state.pivot]);
+const PivotOptions = ({ enabled, applyButton, totalizable }: { enabled?: boolean; applyButton?: boolean, totalizable?: boolean }) => {
+    const [setPivot] = useBeastStore((state) => [state.setPivot]);
     const [pivotState, setPivotState] = useState<PivotState | undefined>({} as PivotState);
 
     if (!enabled) {
@@ -195,6 +195,7 @@ const PivotOptions = ({ enabled, applyButton }: { enabled?: boolean; applyButton
     const handleRowTotalChanges = (newState: Partial<PivotState>) => {
         if (!applyButton) {
             setPivot({ rowTotals: newState.rowTotals });
+            setPivotState((state) => ({ ...state, rowTotals: newState.rowTotals } as PivotState));
         } else {
             setPivotState((state) => ({ ...state, rowTotals: newState.rowTotals } as PivotState));
         }
@@ -203,6 +204,7 @@ const PivotOptions = ({ enabled, applyButton }: { enabled?: boolean; applyButton
     const handleColumnTotalChanges = (newState: Partial<PivotState>) => {
         if (!applyButton) {
             setPivot({ columnTotals: newState.columnTotals });
+            setPivotState((state) => ({ ...state, columnTotals: newState.columnTotals } as PivotState));
         } else {
             setPivotState((state) => ({ ...state, columnTotals: newState.columnTotals } as PivotState));
         }
@@ -214,8 +216,8 @@ const PivotOptions = ({ enabled, applyButton }: { enabled?: boolean; applyButton
 
     return (
         <SimpleBar className="bg-sidebar__pivot__container column fl-1">
-            <PivotBox rowTotals={!!pivotState?.rowTotals} pivotType="rows" onChanges={handleRowChange} onTotalChanges={handleRowTotalChanges} />
-            <PivotBox columnTotals={!!pivotState?.columnTotals} pivotType="columns" onChanges={handleColumnChange} onTotalChanges={handleColumnTotalChanges} />
+            <PivotBox rowTotals={!!pivotState?.rowTotals} pivotType="rows" totalizable={totalizable} onChanges={handleRowChange} onTotalChanges={handleRowTotalChanges} />
+            <PivotBox columnTotals={!!pivotState?.columnTotals} pivotType="columns" totalizable={totalizable} onChanges={handleColumnChange} onTotalChanges={handleColumnTotalChanges} />
             <PivotBox pivotType="values" onChanges={handleValueChange} />
             <ApplyButton enabled={applyButton} onClick={onApply} />
         </SimpleBar>
@@ -326,12 +328,14 @@ const PivotBox = ({
     pivotType,
     rowTotals,
     columnTotals,
+    totalizable,
     onChanges,
     onTotalChanges,
 }: {
     pivotType: string;
     rowTotals?: boolean;
     columnTotals?: boolean;
+    totalizable?: boolean;
     onChanges: (state: Partial<PivotState>) => void;
     onTotalChanges?: (state: Partial<PivotState>) => void;
 }) => {
@@ -399,7 +403,7 @@ const PivotBox = ({
         <div className="bg-box__container column left">
             <div className="bg-box__title row middle">
                 <label>{pivotType}</label>
-                {pivotType === 'rows' ? (
+                {totalizable && pivotType === 'rows' ? (
                     <div className="row middle" onClick={onRowTotalsChange}>
                         <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
                             <Checkbox.Indicator className="bg-checbox__indicator row center middle">
@@ -408,7 +412,7 @@ const PivotBox = ({
                         </Checkbox.Root>
                         <label>Totals</label>
                     </div>
-                ) : pivotType === 'columns' ? (
+                ) : totalizable && pivotType === 'columns' ? (
                     <div className="row middle center" onClick={onColumnTotalsChange}>
                         <Checkbox.Root className="bg-checkbox__root" checked={columnTotals} id="columnTotals">
                             <Checkbox.Indicator className="bg-checbox__indicator row center middle">

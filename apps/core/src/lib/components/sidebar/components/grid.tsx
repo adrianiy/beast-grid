@@ -24,6 +24,7 @@ type Props<T> = {
 };
 
 export default function GridConfig<T>({ columns, config }: Props<T>) {
+    const ref = useRef<HTMLDivElement>(null);
     const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
 
     const [searchValue, setSearchValue] = useState('');
@@ -37,7 +38,7 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
     const options = Object.values(columns).filter((column) => column.level === 0);
 
     return (
-        <div className={cn('bg-sidebar column', { border: config.style?.border })}>
+        <div className={cn('bg-sidebar column', { border: config.style?.border })} ref={ref}>
             <div
                 className="bg-sidebar__title row middle between"
                 style={{ minHeight: config.headerHeight || HEADER_HEIGHT }}
@@ -62,7 +63,12 @@ export default function GridConfig<T>({ columns, config }: Props<T>) {
                         {searchValue && <Cross2Icon onClick={() => setSearchValue('')} />}
                     </div>
                     <SimpleBar className="bg-sidebar__container column">
-                        <Options options={options} columns={columns} searchValue={searchValue} />
+                        <Options
+                            options={options}
+                            columns={columns}
+                            searchValue={searchValue}
+                            container={ref.current}
+                        />
                     </SimpleBar>
                 </div>
             </div>
@@ -104,6 +110,7 @@ function renderOption({
     someHasChildren,
     hiddenColumns,
     list,
+    container,
     handleGridChange,
     handleExpand,
 }: {
@@ -114,6 +121,7 @@ function renderOption({
     someHasChildren: boolean;
     hiddenColumns: string[];
     list: React.MutableRefObject<List | null>;
+    container: HTMLElement | null;
     handleGridChange: (column: Column) => (e: React.MouseEvent<HTMLDivElement>) => void;
     handleExpand: (expanded: boolean, index: number) => void;
 }) {
@@ -154,7 +162,7 @@ function renderOption({
                     list.current?.forceUpdate();
                 }}
             >
-                <Options options={children} parentMatch={matchSearch} columns={columns} searchValue={searchValue} />
+                <Options options={children} parentMatch={matchSearch} columns={columns} searchValue={searchValue} container={container} />
             </Accordion>
         );
     };
@@ -165,12 +173,14 @@ const Options = ({
     parentMatch,
     columns,
     searchValue,
+    container,
 }: {
     options: Column[];
     parentMatch?: boolean;
     paddingLeft?: string;
     columns: ColumnStore;
     searchValue: string;
+    container: HTMLElement | null;
 }) => {
     const ref = useRef<List | null>(null);
     const expandedIndexes = useRef<number[]>([]);
@@ -205,12 +215,15 @@ const Options = ({
         }
     };
 
+    if (!container) {
+        return null;
+    }
 
     return (
         <List
             ref={ref}
             height={400}
-            width={300}
+            width={container.getBoundingClientRect().width - 10}
             rowHeight={rowHeight}
             rowCount={options.length}
             rowRenderer={renderOption({
@@ -221,8 +234,9 @@ const Options = ({
                 someHasChildren,
                 hiddenColumns,
                 list: ref,
+                container,
                 handleGridChange,
-                handleExpand
+                handleExpand,
             })}
         />
     );

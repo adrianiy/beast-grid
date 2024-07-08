@@ -67,7 +67,7 @@ export interface SortConfig {
     multiple: boolean;
 }
 export interface StyleConfig {
-    maxHeight: number;
+    maxHeight: number | string;
     border: boolean;
 }
 export interface RowEvents {
@@ -161,18 +161,22 @@ export interface PivotState {
     rowGroups: boolean;
 }
 
+export interface PivotConfig {
+    rows: string[];
+    columns: string[];
+    values: PivotValue[];
+    rowTotals: boolean;
+    columnTotals: boolean;
+    rowGroups: boolean;
+
+}
+
 export interface Pivot {
     enabled: boolean;
     asyncCallback: (pivot: Partial<PivotState | null>) => Promise<AsyncRow[]>
     applyButton: boolean;
-    pivotConfig?: {
-        rows: string[];
-        columns: string[];
-        values: PivotValue[];
-        rowTotals: boolean;
-        columnTotals: boolean;
-        rowGroups: boolean;
-    };
+    totalizable: boolean;
+    pivotConfig?: PivotConfig;
 }
 
 export interface Loading {

@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, Row } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, OperationType, PinType, Row } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -20,6 +20,7 @@ const columnDefs: ColumnDef[] = [
         field: 'country',
         width: 200,
         sortable: true,
+        pinned: PinType.LEFT,
         menu: {
             pin: true,
             filter: true,
@@ -70,7 +71,6 @@ const columnDefs: ColumnDef[] = [
                         }
                         return {};
                     },
-                    aggregation: AggregationType.SUM,
                     sortable: true,
                     flex: 1,
                     formatter: (value) => numeral(value).format('0,0 $'),
@@ -114,6 +114,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             data: [],
             topRows: [
                 {
+                    _total: true,
                     id: 9,
                     name: 'Xzavier_Casper86',
                     country: <span style={{ color: 'red' }}>Spain</span>,
@@ -136,12 +137,12 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             ],
             columnDefs,
             style: {
-                maxHeight: 600,
+                maxHeight: 'calc(100vh - 100px)',
                 border: true,
             },
             loadingState: {
                 skeleton: <Skeleton />,
-                rows: 15,
+                rows: 5,
             },
             header: {
                 border: true,
@@ -186,6 +187,17 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             pivot: {
                 enabled: true,
                 applyButton: true,
+                pivotConfig: {
+                    rows: ['country'],
+                    columns: ['language'],
+                    values: [
+                        { field: 'january', operation: AggregationType.SUM },
+                        { field: 'february', operation: AggregationType.SUM },
+                    ],
+                    rowTotals: false,
+                    columnTotals: false,
+                    rowGroups: false
+                }
             },
             appendModalToBoy: true,
             ..._customConfig,

@@ -74,6 +74,7 @@ export const acumData = (
                 const newValueColumn = {
                     ...calculatedColumn,
                     id: uuidv4(),
+                    parent: lastColumn.id,
                     headerName: `${calculatedColumn.aggregation} of ${calculatedColumn.headerName}`,
                     pivotField: valueField,
                     field,

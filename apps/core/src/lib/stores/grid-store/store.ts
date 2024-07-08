@@ -14,6 +14,7 @@ import {
     setColumn,
     setColumnsVisibility,
     setData,
+    setInitialPivot,
     setPivot,
     setSelectedEnd,
     setSelectedStart,
@@ -29,6 +30,7 @@ import {
     ColumnDef,
     Coords,
     PinType,
+    PivotConfig,
     SelectedCells,
     SideBarConfig,
     SortType,
@@ -50,6 +52,7 @@ export interface PivotState {
 
 export interface GridState {
     edited: boolean;
+    initialized: boolean;
     data: Data;
     columns: ColumnStore;
     theme: string;
@@ -103,72 +106,31 @@ export interface GridStore extends GridState {
     setSelecting: (selecting: boolean) => void;
     setMode: (mode: BeastMode) => void;
     setPivot: (pivot: Partial<PivotState> | null) => void;
+    setInitialPivot: (pivot: PivotConfig) => void;
     restore: () => void;
     updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;
 }
 
 export const createGridStore = <T>(
-    { data: _data, columnDefs, defaultColumnDef, sort, tree, pivot }: BeastGridConfig<T>,
+    { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
     container: HTMLDivElement,
     theme: string,
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void,
     onPivotChange?: (pivot: Partial<PivotState>) => void
 ) => {
-    let columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
+    const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
-    let groupOrder = Object.values(columns)
+    const groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
     const initialData = createVirtualIds(_data as Data);
 
-    let data = initialize(columns, container, initialData, groupOrder, tree);
-    let sortedColumns = sortColumns(columns, onSwapChange);
+    const data = initialize(columns, container, initialData, groupOrder, tree);
+    const sortedColumns = sortColumns(columns, onSwapChange);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
-
-    if (pivot?.pivotConfig) {
-        const _columns = pivot?.pivotConfig?.columns.map((columnField) =>
-            sortedColumns.find((column) => column.field === columnField)
-        ) as Column[];
-        const rows = pivot?.pivotConfig?.rows.map((rowField) =>
-            sortedColumns.find((column) => column.field === rowField)
-        ) as Column[];
-        const values = pivot?.pivotConfig?.values.map((valueField) =>
-            sortedColumns.find((column) => column.field === valueField.field)
-        ) as Column[];
-
-        const pivotResult = setPivot({
-            columns: _columns,
-            rows,
-            values,
-        })({
-            initialData: [...initialData],
-            defaultColumnDef,
-            pivot: {
-                columnTotals: pivot.pivotConfig.columnTotals,
-                rowTotals: pivot.pivotConfig.rowTotals,
-                rowGroups: pivot.pivotConfig.rowGroups,
-            },
-        } as GridStore);
-
-        if (pivotResult.columns) {
-            columns = pivotResult.columns;
-        }
-
-        if (pivotResult.data) {
-            data = pivotResult.data;
-        }
-
-        if (pivotResult.groupOrder) {
-            groupOrder = pivotResult.groupOrder;
-        }
-
-        if (pivotResult.sortedColumns) {
-            sortedColumns = pivotResult.sortedColumns;
-        }
-    }
 
     const initialState = {
         edited: false,
@@ -197,6 +159,7 @@ export const createGridStore = <T>(
 
     return create<GridStore>((set) => ({
         ...initialState,
+        initialized: data.length > 0,
         container,
         mode: BeastMode.GRID,
         scrollElement: null as unknown as HTMLDivElement,
@@ -228,6 +191,7 @@ export const createGridStore = <T>(
         setSelecting: (selecting: boolean) => set({ selecting }),
         setMode: (mode: BeastMode) => set({ mode }),
         setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot, initialState)),
+        setInitialPivot: (pivot: PivotConfig) => set(setInitialPivot(pivot)),
         restore: () => set(restore(initialState)),
         updateColumnVisibility: (scrollLeft: number) => set(setColumnsVisibility(scrollLeft)),
         autoSizeColumns: () => set(autoSizeColumns()),

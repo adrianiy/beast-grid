@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
@@ -14,29 +14,44 @@ import './tbody.scss';
 
 type TBodyProps<T> = {
     rowHeight: number;
-    headerHeight: number;
     beastConfig: BeastGridConfig<T>;
     config?: Partial<RowConfig>;
-    maxHeight?: number;
     border?: boolean;
     filters?: Record<string, string[]>;
     events?: Partial<RowEvents>;
     scrollTop: number;
+    scrollElement: HTMLElement;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
 };
 
 const PERFORMANCE_LIMIT = 1000000;
 const THRESHOLD = 5;
 
+const getMaxMin = (
+    scrollElement: HTMLElement,
+    rowHeight: number,
+    scrollTop: number,
+    dataLength: number,
+    expandedRows: number
+): [number, number] => {
+        const containerHeight = scrollElement?.getBoundingClientRect().height;
+        const visibleRows = Math.floor(containerHeight / rowHeight);
+        const topRow = Math.floor(scrollTop / rowHeight);
+        const bottomRow = topRow + visibleRows;
+        const maxValue = Math.min(dataLength + expandedRows, bottomRow + THRESHOLD);
+        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
+
+    return [maxValue, minValue]
+}
+
 export default function TBody<T>({
     rowHeight,
-    headerHeight,
     config,
     beastConfig,
-    maxHeight,
     border,
     events,
     scrollTop,
+    scrollElement,
     onSortChange,
 }: TBodyProps<T>) {
     const gaps = useRef<Record<string, number>>({});
@@ -45,7 +60,6 @@ export default function TBody<T>({
         columns,
         sortedColumns,
         theme,
-        container,
         sort,
         filters,
         setSorting,
@@ -58,7 +72,6 @@ export default function TBody<T>({
         state.columns,
         state.sortedColumns,
         state.theme,
-        state.container,
         state.sort,
         state.filters,
         state.setSorting,
@@ -75,31 +88,28 @@ export default function TBody<T>({
     const [chartData, setChartData] = useState<Data>([]);
     const [chartVisible, setChartVisible] = useState<boolean>(false);
 
-    const levels = Object.values(columns).reduce((acc, column) => {
-        const level = column.level || 0;
-        acc[level] = acc[level] || [];
-        acc[level].push(column);
-        return acc;
-    }, [] as Column[][]);
 
     useEffect(() => {
         updateSelected(null);
     }, [sortedColumns, updateSelected]);
 
+    useLayoutEffect(() => {
+        if (sortedData.length) {
+            setTimeout(() => setMaxMin(getMaxMin(scrollElement, rowHeight, scrollTop, sortedData.length, expandedRows)), 200);
+        }
+    }, [sortedData.length]);
+
+    useLayoutEffect(() => {
+        if (sortedData.length) {
+            setMaxMin(getMaxMin(scrollElement, rowHeight, scrollTop, sortedData.length, expandedRows));
+        }
+    }, [scrollTop, expandedRows, filters]);
 
     useEffect(() => {
-        const containerHeight =
-            (maxHeight ? maxHeight : container.getBoundingClientRect().height) - headerHeight * levels.length;
-        const visibleRows = Math.floor(containerHeight / rowHeight);
-        const topRow = Math.floor(scrollTop / rowHeight);
-        const bottomRow = topRow + visibleRows;
-        const maxValue = Math.min(data.length + expandedRows, bottomRow + THRESHOLD);
-        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
+        if (!data.length) {
+            return;
+        }
 
-        setMaxMin([maxValue, minValue]);
-    }, [scrollTop, expandedRows, data.length, filters]);
-
-    useEffect(() => {
         gaps.current = {};
 
         const someActive = Object.entries(filters).some(
@@ -325,7 +335,7 @@ export default function TBody<T>({
         y: number,
         level: number,
         gap: number,
-        expandableSibling: boolean,
+        expandableSibling: boolean
     ): [number, number] => {
         if (!renderArray[level]) {
             renderArray[level] = [];
@@ -363,7 +373,7 @@ export default function TBody<T>({
                     y + i,
                     level + 1,
                     gap,
-                    row.children.some((r) => (r.children?.length || 0) > 1),
+                    row.children.some((r) => (r.children?.length || 0) > 1)
                 );
 
                 gap += child?._expanded ? (child.children?.length || 0) * rowHeight : 0;
@@ -425,7 +435,7 @@ export default function TBody<T>({
         }
 
         return renderArray.flat();
-    }
+    };
 
     const createTopRows = () => {
         if (!beastConfig.topRows) {
@@ -460,11 +470,13 @@ export default function TBody<T>({
         }
 
         return renderArray.flat();
-    }
+    };
 
     const getStyleProps = () => {
         return {
-            height: sortedData.length ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || 0)) * rowHeight : (beastConfig?.loadingState?.rows || 10) * rowHeight,
+            height: sortedData.length
+                ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || 0)) * rowHeight
+                : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };
 

@@ -70,11 +70,11 @@ const columnDefs: ColumnDef[] = [
         field,
         width: 200,
         sortable: true,
-        formatter: (value) => field.startsWith('VB') ? numeral(value).format('0,0 $') : value,
+        formatter: (value) => (field.startsWith('VB') ? numeral(value).format('0,0 $') : value),
         menu: {
             filter: field === 'VB_ORDERS',
-            column: true
-        }
+            column: true,
+        },
     };
 });
 

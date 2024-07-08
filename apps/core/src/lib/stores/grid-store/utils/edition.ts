@@ -27,16 +27,19 @@ const _updateParent = (parent: Column, columns: ColumnStore) => {
 const _mergeIn = (main: Column, column: Column, columns: ColumnStore) => {
     main.childrenId?.push(...(column.childrenId || []).filter((id) => columns[id]));
     if (columns[column.parent as string]) {
-        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) => (id === column.id ? main.id : id));
+        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) =>
+            id === column.id ? main.id : id
+        );
     }
     _updateParent(main, columns);
 };
 const _mergeTo = (main: Column, column: Column, columns: ColumnStore) => {
     main.childrenId = [...(column.childrenId || []).filter((id) => columns[id]), ...(main.childrenId || [])];
     if (columns[column.parent as string]) {
-        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) => (id === column.id ? main.id : id));
+        columns[column.parent as string].childrenId = columns[column.parent as string]?.childrenId?.map((id) =>
+            id === column.id ? main.id : id
+        );
     }
-
 
     _updateParent(main, columns);
 };
@@ -98,16 +101,36 @@ const _moveColumns = (columns: Column[], columnStore: ColumnStore, left = 0) => 
 
         if (column.childrenId) {
             const sortedChildren = column.childrenId.sort((a, b) => columnStore[a].position - columnStore[b].position);
-            _moveColumns(sortedChildren.map(id => columnStore[id]), columnStore, column.left);
+            _moveColumns(
+                sortedChildren.map((id) => columnStore[id]),
+                columnStore,
+                column.left
+            );
         }
     });
-}
+};
 
 export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinType: PinType) => {
     const levelZero = sortedColumns.filter((column) => column.level === 0 && column.pinned === pinType);
 
     _moveColumns(levelZero, columns, 0);
 };
+
+export const resizeColumnChildren = (column: Column, diff: number, columns: ColumnStore) => {
+    columns[column.id].width = (columns[column.id].width || 0) + diff
+
+    if (column.children) {
+        column.children?.forEach((child) => resizeColumnChildren(child as Column, diff, columns));
+    }
+};
+
+export const resizeColumnParent = (column: Column, diff: number, columns: ColumnStore) => {
+    columns[column.id].width += diff;
+
+    if (column.parent) {
+        resizeColumnParent(columns[column.parent], diff, columns);
+    }
+}
 
 const PIN_ORDER = { [PinType.LEFT]: 0, [PinType.NONE]: 1, [PinType.RIGHT]: 2 };
 
@@ -130,8 +153,10 @@ export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, fi
     return finalPosition;
 };
 
-
-export const sortColumns = (columns: ColumnStore, onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void) => {
+export const sortColumns = (
+    columns: ColumnStore,
+    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
+) => {
     const sortedColumns = Object.values(columns).sort(
         (a, b) =>
             PIN_ORDER[a.pinned] - PIN_ORDER[b.pinned] ||
@@ -183,4 +208,33 @@ export const removeSort = (column: Column, columnsWithSort: Column[]) => {
         }
     });
     delete column.sort;
+};
+
+export const updateColumnVisibility = (
+    scrollElement: HTMLElement,
+    scrollLeft: number,
+    columns: ColumnStore
+): ColumnStore => {
+    const scrollWidth = scrollElement?.clientWidth || 0;
+
+    const threshold = scrollWidth * 0.3;
+
+    Object.keys(columns).forEach((columnId) => {
+        const column = columns[columnId];
+
+        if (column.pinned === PinType.NONE) {
+            const left = column.left;
+            const right = column.left + column.width;
+            const leftEdge = scrollLeft - threshold * 2;
+            const rightEdge = scrollLeft + scrollWidth + threshold;
+
+            const leftVisible = left > leftEdge && left < rightEdge;
+            const rightVisible = right < rightEdge && right > leftEdge;
+            const allVisible = leftVisible && rightVisible;
+            const onlyInsideVisible = left < leftEdge && right > rightEdge;
+            column.inView = leftVisible || rightVisible || allVisible || onlyInsideVisible;
+        }
+    });
+
+    return columns;
 };

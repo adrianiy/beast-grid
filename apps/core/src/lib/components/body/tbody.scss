@@ -94,8 +94,10 @@
     }
 
     &.totalRow {
-        background-color: var(--bg-background-color--total);
         font-weight: bold;
+    }
+    &.totalColumn {
+        background-color: var(--bg-background-color--total);
     }
 
     .grid-row-value {

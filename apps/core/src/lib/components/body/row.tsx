@@ -58,13 +58,15 @@ export default function RowContainer({
         if (events?.onClick?.callback) {
             events.onClick.callback(row, idx);
         }
-    }
+    };
 
     const renderRow = (pinType: PinType | undefined) => {
         return columns
             .filter((column) => column.pinned === pinType)
             .map((column, cidx) => {
-                if (pinType === PinType.NONE && column.hidden) {
+                const inView = column.pinned !== PinType.NONE || column.inView;
+
+                if (column.pinned !== pinType || column.hidden || !inView) {
                     return null;
                 }
 
@@ -98,7 +100,7 @@ export default function RowContainer({
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
                 topFixed: isTopFixed,
-                last: isLastRow
+                last: isLastRow,
             })}
             style={{ top: isTopFixed ? 'var(--header-height)' : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}

@@ -14,10 +14,13 @@ import {
     mergeColumns,
     moveColumns,
     removeSort,
+    resizeColumnChildren,
+    resizeColumnParent,
     setColumnsStyleProps,
     sortColumns,
     swapPositions,
     toggleHide,
+    updateColumnVisibility,
 } from './utils';
 import { GridState, GridStore } from './store';
 import {
@@ -27,6 +30,7 @@ import {
     Data,
     FilterType,
     PinType,
+    PivotConfig,
     SelectedCells,
     SideBarConfig,
     SortType,
@@ -121,12 +125,12 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
 
     if (column.parent) {
         const diff = column.width - prevWidth;
-        columns[column.parent].width += diff;
+        resizeColumnParent(columns[column.parent], diff, columns);
     }
     if (column.children) {
         const diff = (column.width - prevWidth) / column.children.length;
-        column.childrenId?.forEach((child) => {
-            columns[child].width = (columns[child].width || 0) + diff;
+        column.children?.forEach((child) => {
+            resizeColumnChildren(child as Column, diff, columns);
         });
     }
 
@@ -350,94 +354,139 @@ export const setSideBarConfig = (config: SideBarConfig | null) => (state: GridSt
     return { sideBarConfig: config };
 };
 
+export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) => {
+    const { sortedColumns, pivot } = state;
 
-export const setPivot = (newPivot: Partial<GridState['pivot']> | null, initialState?: Partial<GridState>) => (state: GridStore) => {
-    const { pivot: currentPivot, initialData, initialColumns, defaultColumnDef, onPivotChange } = state;
-    const data = [...initialData];
+    if (pivot) {
+        return state;
+    }
 
-    const pivot = { ...currentPivot, ...newPivot };
+    const _columns = pivotConfig?.columns.map((columnField) =>
+        sortedColumns.find((column) => column.field === columnField)
+    ) as Column[];
+    const rows = pivotConfig?.rows.map((rowField) =>
+        sortedColumns.find((column) => column.field === rowField)
+    ) as Column[];
+    const values = pivotConfig?.values.map((valueField) => {
+        const column = sortedColumns.find((column) => column.field === valueField.field);
 
-    if (pivot.rows?.length || pivot.columns?.length || pivot.values?.length) {
-        const rowColumnDefs: ColumnDef[] = [];
-        const columnDefs: ColumnDef[] = [];
-        const groupOrder: ColumnId[] = [];
+        return {
+            ...column,
+            aggregation: valueField.operation,
+        };
+    }) as Column[];
 
-        if (pivot.rows?.length) {
-            pivot.rows.forEach((row, index) => {
-                const column = {
-                    id: uuidv4(),
-                    headerName: row.headerName,
-                    field: row.field,
-                    width: MIN_COL_WIDTH,
-                    rowGroup: index < (pivot.rows?.length || 0) - 1,
-                    tree: false,
-                } as Column;
+    const pivotResult = setPivot({
+        columns: _columns,
+        rows,
+        values,
+    })({
+        ...state,
+        pivot: {
+            columnTotals: pivotConfig.columnTotals,
+            rowTotals: pivotConfig.rowTotals,
+            rowGroups: pivotConfig.rowGroups,
+        },
+    } as GridStore);
 
-                rowColumnDefs.push(column);
-            });
-        }
+    console.log(pivotResult);
 
-        const columns = getColumnsFromDefs(rowColumnDefs, defaultColumnDef);
+    return pivotResult;
+};
 
-        if (pivot.rows?.length) {
-            rowColumnDefs.forEach((row) => {
-                const column = columns[row.id as ColumnId];
+export const setPivot =
+    (newPivot: Partial<GridState['pivot']> | null, initialState?: Partial<GridState>) => (state: GridStore) => {
+        const { pivot: currentPivot, initialData, initialColumns, defaultColumnDef, onPivotChange } = state;
+        const data = [...initialData];
 
-                groupOrder.push(column.id);
-            });
-        }
+        const pivot = { ...currentPivot, ...newPivot };
 
-        const [groupedByRows, valueColumns] = groupPivot(pivot.rows || [], pivot.columns || [{ field: 'total' } as Column], pivot.values || [],  data, !!pivot?.rowTotals);
+        if (pivot.rows?.length || pivot.columns?.length || pivot.values?.length) {
+            const rowColumnDefs: ColumnDef[] = [];
+            const columnDefs: ColumnDef[] = [];
+            const groupOrder: ColumnId[] = [];
 
-        if (pivot.columns?.length) {
-            if (pivot?.columnTotals) {
-                columnDefs.push(...getSumatoryColumns(valueColumns.filter(c => c._firstLevel), pivot.values || []));
-            } else {
-                columnDefs.push(...valueColumns.filter(c => c._firstLevel))
+            if (pivot.rows?.length) {
+                pivot.rows.forEach((row, index) => {
+                    const column = {
+                        id: uuidv4(),
+                        headerName: row.headerName,
+                        field: row.field,
+                        width: MIN_COL_WIDTH,
+                        rowGroup: index < (pivot.rows?.length || 0) - 1,
+                        tree: false,
+                    } as Column;
+
+                    rowColumnDefs.push(column);
+                });
             }
-        } else if (pivot.values?.length) {
-            const valueHeaders = getValueHeaders(pivot.values, 'total:');
-            columnDefs.push(...valueHeaders);
+
+            const columns = getColumnsFromDefs(rowColumnDefs, defaultColumnDef);
+
+            if (pivot.rows?.length) {
+                rowColumnDefs.forEach((row) => {
+                    const column = columns[row.id as ColumnId];
+
+                    groupOrder.push(column.id);
+                });
+            }
+
+            const [groupedByRows, valueColumns] = groupPivot(
+                pivot.rows || [],
+                pivot.columns || [{ field: 'total' } as Column],
+                pivot.values || [],
+                data,
+                !!pivot?.rowTotals
+            );
+
+            if (pivot.columns?.length) {
+                if (pivot?.columnTotals) {
+                    columnDefs.push(
+                        ...getSumatoryColumns(
+                            valueColumns.filter((c) => c._firstLevel),
+                            pivot.values || []
+                        )
+                    );
+                } else {
+                    columnDefs.push(...valueColumns.filter((c) => c._firstLevel));
+                }
+            } else if (pivot.values?.length) {
+                const valueHeaders = getValueHeaders(pivot.values, 'total:');
+                columnDefs.push(...valueHeaders);
+            }
+
+            const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
+
+            const sortedColumns = sortColumns(finalColumns);
+
+            moveColumns(finalColumns, sortedColumns, PinType.NONE);
+
+            if (onPivotChange) {
+                onPivotChange(pivot);
+            }
+
+            return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, edited: true };
         }
-
-        const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
-
-        const sortedColumns = sortColumns(finalColumns);
 
         if (onPivotChange) {
             onPivotChange(pivot);
         }
 
-        return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, edited: true };
-    } else if (initialState) {
-        return restore(initialState)(state) as GridStore;
-    }
-
-    return { pivot, data: initialData, columns: initialColumns,  edited: true };
-};
+        return { pivot, data: [...initialData], columns: clone(initialColumns), edited: true };
+    };
 
 export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) => {
-    const {columns, scrollElement} = state;
+    const { columns, scrollElement } = state;
 
-    const scrollWidth = scrollElement?.clientWidth || 0;
-
-    const threshold = scrollWidth * 0.4;
-
-    Object.keys(columns).forEach((columnId) => {
-        const column =columns[columnId];
-
-        if (column.pinned === PinType.NONE) {
-            column.inView = (column.left + column.width) < (scrollLeft + scrollWidth + threshold) || column.left > (scrollLeft - threshold);
-        }
-    });
+    updateColumnVisibility(scrollElement, scrollLeft, columns);
 
     return { columns };
-}
+};
 
 export const setData = (_data: Data) => (state: GridStore) => {
     const { columns, groupOrder, tree, container } = state;
     const initialData = createVirtualIds(_data as Data);
     const data = initialize(columns, container, initialData, groupOrder, tree);
 
-    return { data, initialData }
-}
+    return { data, initialData, initialized: true };
+};

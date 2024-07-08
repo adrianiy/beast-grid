@@ -196,6 +196,11 @@ export default function HeaderCell<T>({
         );
     };
 
+    // const getHeaderTranslation = (): React.CSSProperties => {
+    //     console.log(scrollContainer.scrollLeft, column.left, drag.current)
+    //     return { transform: `translateX(0px)` }
+    // }
+
     return (
         <div
             className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
@@ -213,7 +218,7 @@ export default function HeaderCell<T>({
             data-clone={column.original}
         >
             <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-                <span className="bg-grid-header-drop bg-grid-header__cell__name" title={column.headerName}>
+                <span className="bg-grid-header-drop bg-grid-header__cell__name" title={column.headerName} >
                     {column.headerName}
                 </span>
                 {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}

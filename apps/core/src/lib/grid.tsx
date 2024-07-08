@@ -109,6 +109,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
     // Set loading on pivot change
     useEffect(() => {
         setLoading(true);
+        updateColumnVisibility(0);
 
         setTimeout(() => {
             setLoading(false);
@@ -166,13 +167,12 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                         />
                         <TBody
                             rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
-                            headerHeight={headerHeight}
                             config={config.row}
-                            maxHeight={config.style?.maxHeight}
                             border={config.row?.border}
                             events={config.row?.events}
                             beastConfig={config}
                             scrollTop={scrollTop}
+                            scrollElement={ref.current?.getScrollElement() as HTMLElement}
                             onSortChange={onSortChange}
                         />
                     </Fragment>
