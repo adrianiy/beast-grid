@@ -142,8 +142,9 @@ export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.sli
 
 export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
-        const valueA = a[column.field as keyof Row] as number;
-        const valueB = b[column.field as keyof Row] as number;
+        const field = column.pivotField || column.field;
+        const valueA = a[field as keyof Row] as number || 0;
+        const valueB = b[field as keyof Row] as number || 0;
 
         if (valueA > valueB) {
             return column.sort?.order === SortType.ASC ? 1 : -1;

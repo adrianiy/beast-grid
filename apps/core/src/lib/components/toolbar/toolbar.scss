@@ -11,7 +11,12 @@
         cursor: pointer;
         gap: var(--bg-size--3);
 
-        &:hover {
+        &.disabled {
+            cursor: not-allowed;
+            opacity: .5;
+        }
+
+        &:hover:not(.disabled) {
             border: var(--bg-border--1);
         }
 

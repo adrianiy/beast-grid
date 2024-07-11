@@ -12,21 +12,29 @@ When `toolbar` is configured a toolbar will be displayed at the disired position
 ## Properties
 
 ```tsx
+export interface ToolBarButton {
+    enabled: boolean;
+    active: boolean;
+}
 export interface ToolBar {
-    download: boolean;
-    downloadExcel: boolean;
-    grid: boolean;
-    filter: boolean;
-    mode: boolean;
-    restore: boolean;
+    download: Partial<ToolBarButton> | boolean;
+    downloadExcel: Partial<ToolBarButton> | boolean;
+    grid: Partial<ToolBarButton> | boolean;
+    pivot: Partial<ToolBarButton> | boolean;
+    filter: Partial<ToolBarButton> | boolean;
+    mode: Partial<ToolBarButton> | boolean;
+    restore: Partial<ToolBarButton> | boolean;
+    custom: ReactNode;
 }
 ```
+
+By default `active` property is true, if this property is false the button will be shown as disabled
 
 ### Download
 
 | Property | Type    | Default | Description |
 |----------|---------|---------|-------------|
-| download | boolean | true    | Enable download button in the toolbar. |
+| download | Partial<ToolbarButton> | boolean | true    | Enable download button in the toolbar. |
 
 This option enables download with CSV format.
 
@@ -34,7 +42,7 @@ This option enables download with CSV format.
 
 | Property     | Type    | Default | Description |
 |--------------|---------|---------|-------------|
-| downloadExcel | boolean | true    | Enable download Excel button in the toolbar. |
+| downloadExcel | Partial<ToolbarButton> | boolean | true    | Enable download Excel button in the toolbar. |
 
 This option enables download with Excel format.
 
@@ -42,7 +50,7 @@ This option enables download with Excel format.
 
 | Property | Type    | Default | Description |
 |----------|---------|---------|-------------|
-| grid     | boolean | true    | Enable configure grid button in the toolbar. |
+| grid     | Partial<ToolbarButton> | boolean | true    | Enable configure grid button in the toolbar. |
 
 This option enables the configuration of the grid.
 
@@ -50,7 +58,7 @@ This option enables the configuration of the grid.
 
 | Property | Type    | Default | Description |
 |----------|---------|---------|-------------|
-| filter   | boolean | true    | Enable filter button in the toolbar. |
+| filter   | Partial<ToolbarButton> | boolean | true    | Enable filter button in the toolbar. |
 
 This option enables the filter.
 
@@ -58,7 +66,7 @@ This option enables the filter.
 
 | Property | Type    | Default | Description |
 |----------|---------|---------|-------------|
-| mode     | boolean | true    | Enable grid mode button in the toolbar. |
+| mode     | Partial<ToolbarButton> | boolean | true    | Enable grid mode button in the toolbar. |
 
 This option enables the grid mode change.
 
@@ -66,6 +74,6 @@ This option enables the grid mode change.
 
 | Property | Type    | Default | Description |
 |----------|---------|---------|-------------|
-| restore  | boolean | true    | Enable restore button in the toolbar. |
+| restore  | Partial<ToolbarButton> | boolean | true    | Enable restore button in the toolbar. |
 
 This option enables the restore button.

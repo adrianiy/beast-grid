@@ -327,7 +327,7 @@ export const autoSizeColumns = () => (state: GridStore) => {
 };
 
 export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
-    const { container, initialData, onSwapChange } = state;
+    const { container, initialData, onSwapChange, onRestore } = state;
     const columns: ColumnStore = {};
 
     Object.values(initialState.columns || {}).forEach((column) => {
@@ -343,6 +343,10 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
     moveColumns(columns, sortedColumns, PinType.RIGHT);
+
+    if (onRestore) {
+        onRestore();
+    }
 
     return { ...clone(initialState), data: [...initialData], unfilteredData: [...initialData], sortedColumns, columns, groupOrder, edited: false };
 };
@@ -370,6 +374,7 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
     const rows = pivotConfig?.rows.map((rowField) =>
         sortedColumns.find((column) => column.field === rowField)
     ) as Column[];
+
     const values = pivotConfig?.values.map((valueField) => {
         const column = sortedColumns.find((column) => column.field === valueField.field);
 

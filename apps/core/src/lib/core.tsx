@@ -40,6 +40,7 @@ export function BeastGrid<T>({
     onSortChange,
     onSwapChange,
     onPivotChange,
+    onRestore
 }: {
     config?: BeastGridConfig<T>;
     theme?: string;
@@ -50,6 +51,7 @@ export function BeastGrid<T>({
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
     onPivotChange?: (pivot: Partial<PivotState>) => void;
+    onRestore?: () => void
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
@@ -85,7 +87,7 @@ export function BeastGrid<T>({
 
     useEffect(() => {
         if (ref.current && config?.columnDefs) {
-            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange, onPivotChange);
+            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange, onPivotChange, onRestore);
             const dndStore = () => createDndStore();
 
             setStores([gridStore, dndStore]);
