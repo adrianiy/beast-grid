@@ -397,10 +397,12 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 
 export const setPivot =
     (newPivot: Partial<GridState['pivot']> | null, initialState?: Partial<GridState>) => (state: GridStore) => {
-        const { pivot: currentPivot, initialData, initialColumns, defaultColumnDef, onPivotChange } = state;
+        const { pivot: currentPivot, initialData, defaultColumnDef, onPivotChange } = state;
         const data = [...initialData].filter(row => !row._hidden) as Data;
 
-        const pivot = { ...currentPivot, ...newPivot };
+        const nonEmptyPivot = Object.keys(newPivot || {}).length;
+
+        const pivot = nonEmptyPivot ? { ...currentPivot, ...newPivot } : (newPivot || {});
 
         if (pivot.rows?.length || pivot.columns?.length || pivot.values?.length) {
             const rowColumnDefs: ColumnDef[] = [];
@@ -476,7 +478,7 @@ export const setPivot =
             onPivotChange(pivot);
         }
 
-        const newState = restore(initialState || {})(state);
+        const newState = restore({...initialState, initialData } || {})(state);
         return { pivot, ...newState };
     };
 

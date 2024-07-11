@@ -118,7 +118,7 @@ const addData = (
     showRowTotals: boolean
 ): Row => {
     const aggregationColumn = aggregationColumns[currentLevel];
-    const isLastRowLevel = currentLevel === aggregationColumns.length - 1;
+    const isLastRowLevel = !aggregationColumns.length || currentLevel === aggregationColumns.length - 1;
     const key = aggregationColumn ? data[aggregationColumn.field as keyof Row] as string : 'total';
 
     if (!isLastRowLevel && showRowTotals) {

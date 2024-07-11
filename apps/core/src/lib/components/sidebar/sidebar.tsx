@@ -42,7 +42,7 @@ function SideBarSwitch<T>({
         case SideBarConfig.CHART:
             return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
         case SideBarConfig.PIVOT:
-            return <PivotConfig config={config} columns={columns}k />;
+            return <PivotConfig config={config} columns={columns} />;
         default:
             return null;
     }

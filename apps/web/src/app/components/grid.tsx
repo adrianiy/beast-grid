@@ -182,7 +182,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 restore: true,
             },
             defaultColumnDef: {
-                menu: { pin: true, grid: true },
+                menu: { pin: true, grid: false },
             },
             pivot: {
                 enabled: true,

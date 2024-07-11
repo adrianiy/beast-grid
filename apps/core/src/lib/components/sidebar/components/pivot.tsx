@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useDrag, useDrop } from 'react-dnd';
 
@@ -68,7 +68,11 @@ export default function PivotConfig<T>({ columns, config }: Props<T>) {
                         <Options options={options} columns={columns} searchValue={searchValue} />
                     </SimpleBar>
                 </div>
-                <PivotOptions enabled={config.pivot?.enabled} applyButton={config.pivot?.applyButton} totalizable={config.pivot?.totalizable} />
+                <PivotOptions
+                    enabled={config.pivot?.enabled}
+                    applyButton={config.pivot?.applyButton}
+                    totalizable={config.pivot?.totalizable}
+                />
             </div>
         </div>
     );
@@ -132,7 +136,7 @@ const Options = ({
     return (
         <List
             ref={ref}
-            height={600}
+            height={620}
             width={300}
             style={{ padding: 'var(--bg-size--2) var(--bg-size--4)' }}
             rowHeight={rowHeight}
@@ -146,21 +150,43 @@ const Options = ({
     );
 };
 
-const ApplyButton = ({ enabled, onClick }: { enabled?: boolean; onClick: () => void }) => {
+const ActionButtons = ({
+    enabled,
+    onApply,
+    onReset,
+}: {
+    enabled?: boolean;
+    onApply: () => void;
+    onReset: () => void;
+}) => {
     if (!enabled) {
         return null;
     }
 
     return (
-        <div className="bg-button__container row end">
-            <div className="bg-button bg-sidebar__apply row middle center" onClick={onClick}>
+        <div className="bg-button__container row between">
+            <div className="bg-button bg-sidebar__apply row middle center" onClick={onReset}>
+                <label>Reset</label>
+            </div>
+            <div className="bg-button bg-sidebar__apply row middle center" onClick={onApply}>
                 <label>Apply</label>
             </div>
         </div>
     );
 };
 
-const PivotOptions = ({ enabled, applyButton, totalizable }: { enabled?: boolean; applyButton?: boolean, totalizable?: boolean }) => {
+const PivotOptions = ({
+    enabled,
+    applyButton,
+    totalizable,
+}: {
+    enabled?: boolean;
+    applyButton?: boolean;
+    totalizable?: boolean;
+}) => {
+    const rowBox = useRef<PivotBoxHandle>(null);
+    const columnBox = useRef<PivotBoxHandle>(null);
+    const valueBox = useRef<PivotBoxHandle>(null);
     const [setPivot] = useBeastStore((state) => [state.setPivot]);
     const [pivotState, setPivotState] = useState<PivotState | undefined>({} as PivotState);
 
@@ -214,12 +240,34 @@ const PivotOptions = ({ enabled, applyButton, totalizable }: { enabled?: boolean
         setPivot(pivotState as PivotState);
     };
 
+    const onReset = () => {
+        console.log('reset');
+        setPivotState({} as PivotState);
+        rowBox.current?.resetBox();
+        columnBox.current?.resetBox();
+        valueBox.current?.resetBox();
+    };
+
     return (
         <SimpleBar className="bg-sidebar__pivot__container column fl-1">
-            <PivotBox rowTotals={!!pivotState?.rowTotals} pivotType="rows" totalizable={totalizable} onChanges={handleRowChange} onTotalChanges={handleRowTotalChanges} />
-            <PivotBox columnTotals={!!pivotState?.columnTotals} pivotType="columns" totalizable={totalizable} onChanges={handleColumnChange} onTotalChanges={handleColumnTotalChanges} />
-            <PivotBox pivotType="values" onChanges={handleValueChange} />
-            <ApplyButton enabled={applyButton} onClick={onApply} />
+            <PivotBox
+                ref={rowBox}
+                rowTotals={!!pivotState?.rowTotals}
+                pivotType="rows"
+                totalizable={totalizable}
+                onChanges={handleRowChange}
+                onTotalChanges={handleRowTotalChanges}
+            />
+            <PivotBox
+                ref={columnBox}
+                columnTotals={!!pivotState?.columnTotals}
+                pivotType="columns"
+                totalizable={totalizable}
+                onChanges={handleColumnChange}
+                onTotalChanges={handleColumnTotalChanges}
+            />
+            <PivotBox ref={valueBox} pivotType="values" onChanges={handleValueChange} />
+            <ActionButtons enabled={applyButton} onApply={onApply} onReset={onReset} />
         </SimpleBar>
     );
 };
@@ -324,120 +372,138 @@ const Box = ({
     );
 };
 
-const PivotBox = ({
-    pivotType,
-    rowTotals,
-    columnTotals,
-    totalizable,
-    onChanges,
-    onTotalChanges,
-}: {
+interface PivotBoxHandle {
+    resetBox: () => void
+}
+
+interface PivotProps {
     pivotType: string;
     rowTotals?: boolean;
     columnTotals?: boolean;
     totalizable?: boolean;
     onChanges: (state: Partial<PivotState>) => void;
     onTotalChanges?: (state: Partial<PivotState>) => void;
-}) => {
-    const [columnStore, pivot, theme, scrollContainer] = useBeastStore((state) => [
-        state.initialColumns,
-        state.pivot,
-        state.theme,
-        state.scrollElement,
-    ]);
-    const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
+}
 
-    const [, drop] = useDrop(() => ({
-        accept: ['COLUMN', 'BOX'],
-        drop: (item: { id: string; onRemove: (column: Column) => () => void }) => {
-            if (columns.current.find((c) => c.id === item.id)) {
-                return;
-            }
-            const column = clone(columnStore[item.id]);
+const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
+    (
+        {
+            pivotType,
+            rowTotals,
+            columnTotals,
+            totalizable,
+            onChanges,
+            onTotalChanges,
+        },
+        ref
+    ) => {
+        const [columnStore, pivot, theme, scrollContainer] = useBeastStore((state) => [
+            state.initialColumns,
+            state.pivot,
+            state.theme,
+            state.scrollElement,
+        ]);
+        const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
 
-            if (pivotType === 'values' && !column.aggregation) {
-                column.aggregation = AggregationType.SUM;
-            }
+        const [, drop] = useDrop(() => ({
+            accept: ['COLUMN', 'BOX'],
+            drop: (item: { id: string; onRemove: (column: Column) => () => void }) => {
+                if (columns.current.find((c) => c.id === item.id)) {
+                    return;
+                }
+                const column = clone(columnStore[item.id]);
 
-            const newState = columns.current.concat(clone(column));
+                if (pivotType === 'values' && !column.aggregation) {
+                    column.aggregation = AggregationType.SUM;
+                }
 
-            columns.current = newState;
+                const newState = columns.current.concat(clone(column));
+
+                columns.current = newState;
+
+                onChanges({ columns: columns.current });
+
+                if (item.onRemove) {
+                    item.onRemove(column)();
+                }
+            },
+        }));
+
+
+        const removeColumn = (column: Column) => () => {
+            columns.current = columns.current.filter((c) => c.id !== column.id);
 
             onChanges({ columns: columns.current });
+        };
 
-            if (item.onRemove) {
-                item.onRemove(column)();
-            }
-        },
-    }));
+        const onHover = (index: number, hoverIndex: number) => {
+            const dragColumn = columns.current[index];
+            const hoverColumn = columns.current[hoverIndex];
 
-    const removeColumn = (column: Column) => () => {
-        columns.current = columns.current.filter((c) => c.id !== column.id);
+            columns.current[index] = hoverColumn;
+            columns.current[hoverIndex] = dragColumn;
 
-        onChanges({ columns: columns.current });
-    };
+            onChanges({ columns: columns.current });
+        };
 
-    const onHover = (index: number, hoverIndex: number) => {
-        const dragColumn = columns.current[index];
-        const hoverColumn = columns.current[hoverIndex];
+        const onColumnTotalsChange = () => {
+            onTotalChanges?.({ columnTotals: !pivot?.columnTotals });
+        };
 
-        columns.current[index] = hoverColumn;
-        columns.current[hoverIndex] = dragColumn;
+        const onRowTotalsChange = () => {
+            onTotalChanges?.({ rowTotals: !pivot?.rowTotals });
+        };
 
-        onChanges({ columns: columns.current });
-    };
+        const onChangeColumn = () => {
+            onChanges({ columns: columns.current });
+        };
 
-    const onColumnTotalsChange = () => {
-        onTotalChanges?.({ columnTotals: !pivot?.columnTotals });
-    };
+        useImperativeHandle(ref, () => ({
+            resetBox() {
+                columns.current = [];
+            },
+        }));
 
-    const onRowTotalsChange = () => {
-        onTotalChanges?.({ rowTotals: !pivot?.rowTotals });
-    };
-
-    const onChangeColumn = () => {
-        onChanges({ columns: columns.current });
-    };
-
-    return (
-        <div className="bg-box__container column left">
-            <div className="bg-box__title row middle">
-                <label>{pivotType}</label>
-                {totalizable && pivotType === 'rows' ? (
-                    <div className="row middle" onClick={onRowTotalsChange}>
-                        <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
-                            <Checkbox.Indicator className="bg-checbox__indicator row center middle">
-                                <CheckIcon />
-                            </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <label>Totals</label>
-                    </div>
-                ) : totalizable && pivotType === 'columns' ? (
-                    <div className="row middle center" onClick={onColumnTotalsChange}>
-                        <Checkbox.Root className="bg-checkbox__root" checked={columnTotals} id="columnTotals">
-                            <Checkbox.Indicator className="bg-checbox__indicator row center middle">
-                                <CheckIcon />
-                            </Checkbox.Indicator>
-                        </Checkbox.Root>
-                        <label>Totals</label>
-                    </div>
-                ) : null}
+        return (
+            <div className="bg-box__container column left">
+                <div className="bg-box__title row middle">
+                    <label>{pivotType}</label>
+                    {totalizable && pivotType === 'rows' ? (
+                        <div className="row middle" onClick={onRowTotalsChange}>
+                            <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
+                                <Checkbox.Indicator className="bg-checbox__indicator row center middle">
+                                    <CheckIcon />
+                                </Checkbox.Indicator>
+                            </Checkbox.Root>
+                            <label>Totals</label>
+                        </div>
+                    ) : totalizable && pivotType === 'columns' ? (
+                        <div className="row middle center" onClick={onColumnTotalsChange}>
+                            <Checkbox.Root className="bg-checkbox__root" checked={columnTotals} id="columnTotals">
+                                <Checkbox.Indicator className="bg-checbox__indicator row center middle">
+                                    <CheckIcon />
+                                </Checkbox.Indicator>
+                            </Checkbox.Root>
+                            <label>Totals</label>
+                        </div>
+                    ) : null}
+                </div>
+                <div className="bg-box column left" ref={drop}>
+                    {columns.current.map((column, idx) => (
+                        <Box
+                            key={`${pivotType}-${column.id}`}
+                            index={idx}
+                            column={column}
+                            isValue={pivotType === 'values'}
+                            theme={theme}
+                            scrollContainer={scrollContainer}
+                            onChanges={onChangeColumn}
+                            onRemove={removeColumn}
+                            onHover={onHover}
+                        />
+                    ))}
+                </div>
             </div>
-            <div className="bg-box column left" ref={drop}>
-                {columns.current.map((column, idx) => (
-                    <Box
-                        key={`${pivotType}-${column.id}`}
-                        index={idx}
-                        column={column}
-                        isValue={pivotType === 'values'}
-                        theme={theme}
-                        scrollContainer={scrollContainer}
-                        onChanges={onChangeColumn}
-                        onRemove={removeColumn}
-                        onHover={onHover}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-};
+        );
+    }
+);
