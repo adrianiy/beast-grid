@@ -23,5 +23,5 @@ export default function LoaderLayer<T>({ config }: { config: BeastGridConfig<T> 
 
     container.classList.add('beast-grid--loading');
 
-    return <Loader sorting={sorting} top={container?.scrollTop} maxHeight={config.style?.maxHeight} />;
+    return <Loader sorting={sorting} top={container?.scrollTop} maxHeight={config.style?.maxHeight as number} />;
 }

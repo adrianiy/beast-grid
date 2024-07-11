@@ -119,14 +119,19 @@ export interface ContextualMenuProps {
     chart: boolean;
 }
 
+export interface ToolBarButton {
+    enabled: boolean;
+    active: boolean;
+}
+
 export interface ToolBar {
-    download: boolean;
-    downloadExcel: boolean;
-    grid: boolean;
-    pivot: boolean;
-    filter: boolean;
-    mode: boolean;
-    restore: boolean;
+    download: Partial<ToolBarButton> | boolean;
+    downloadExcel: Partial<ToolBarButton> | boolean;
+    grid: Partial<ToolBarButton> | boolean;
+    pivot: Partial<ToolBarButton> | boolean;
+    filter: Partial<ToolBarButton> | boolean;
+    mode: Partial<ToolBarButton> | boolean;
+    restore: Partial<ToolBarButton> | boolean;
     custom: ReactNode;
 }
 

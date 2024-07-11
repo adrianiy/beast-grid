@@ -178,8 +178,14 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 chart: true,
             },
             bottomToolbar: {
-                downloadExcel: true,
-                restore: true,
+                downloadExcel: {
+                    enabled: true,
+                    active: false
+                },
+                restore: {
+                    enabled: true,
+                    active: true
+                },
             },
             defaultColumnDef: {
                 menu: { pin: true, grid: false },

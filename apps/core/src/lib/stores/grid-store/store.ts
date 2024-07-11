@@ -78,6 +78,7 @@ export interface GridState {
     pivot: Partial<PivotState> | null;
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
     onPivotChange?: (pivot: Partial<PivotState>) => void;
+    onRestore?: () => void;
 }
 
 export interface GridStore extends GridState {
@@ -118,7 +119,8 @@ export const createGridStore = <T>(
     container: HTMLDivElement,
     theme: string,
     onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void,
-    onPivotChange?: (pivot: Partial<PivotState>) => void
+    onPivotChange?: (pivot: Partial<PivotState>) => void,
+    onRestore?: () => void
 ) => {
     const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
@@ -157,6 +159,7 @@ export const createGridStore = <T>(
         pivotConfig: null,
         onSwapChange,
         onPivotChange,
+        onRestore
     };
 
     return create<GridStore>((set) => ({

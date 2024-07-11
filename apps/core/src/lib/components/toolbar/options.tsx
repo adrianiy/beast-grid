@@ -1,11 +1,13 @@
 import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, TableIcon, UpdateIcon } from '@radix-ui/react-icons';
-import { BeastMode, SideBarConfig, ToolBar } from '../../common';
+import { BeastMode, SideBarConfig, ToolBar, ToolBarButton } from '../../common';
 import { FormattedMessage } from 'react-intl';
 import { useBeastStore } from '../../stores/beast-store';
-import { CSVDownload, CSVLink } from 'react-csv';
+import { CSVDownload } from 'react-csv';
 import { LabelKeyObject } from 'react-csv/lib/core';
 import { useState } from 'react';
 import { exportToExcel } from '../../utils/excel';
+
+import cn from 'classnames';
 
 type Props = {
     toolbar: Partial<ToolBar>;
@@ -18,9 +20,13 @@ export const Filter = ({ toolbar }: Props) => {
     if (!toolbar.filter) {
         return null;
     }
+    const isActive = (toolbar.filter as ToolBarButton).active ?? true;
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.FILTERS)}>
+        <div
+            className={cn('bg-toolbar__button row middle', { disabled: !isActive })}
+            onClick={() => setSidebarConfig(SideBarConfig.FILTERS)}
+        >
             <MixerHorizontalIcon />
             <FormattedMessage id="toolbar.filter" defaultMessage="Filters" />
         </div>
@@ -34,13 +40,18 @@ export const Download = ({ toolbar }: Props) => {
     if (!toolbar.download) {
         return null;
     }
+    const isActive = (toolbar.download as ToolBarButton).active ?? true;
 
     const initializeDownload = () => {
+        if (!isActive) {
+            return;
+        }
+
         setDownloading(!downloading);
     };
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={initializeDownload}>
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={initializeDownload}>
             {!downloading ? (
                 <>
                     <DownloadIcon />
@@ -65,13 +76,18 @@ export const DownloadExcel = ({ toolbar }: Props) => {
     if (!toolbar.downloadExcel) {
         return null;
     }
+    const isActive = (toolbar.downloadExcel as ToolBarButton).active ?? true;
 
     const initializeDownload = () => {
+        if (!isActive) {
+            return;
+        }
+
         exportToExcel(data, columns, `data-${new Date().toISOString()}`);
     };
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={initializeDownload}>
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={initializeDownload}>
             <DownloadIcon />
             <FormattedMessage id="toolbar.download" defaultMessage="Download" />
         </div>
@@ -84,9 +100,18 @@ export const Grid = ({ toolbar }: Props) => {
     if (!toolbar.grid || mode !== BeastMode.GRID) {
         return null;
     }
+    const isActive = (toolbar.grid as ToolBarButton).active ?? true;
+
+    const handleClick = () => {
+        if (!isActive) {
+            return;
+        }
+
+        setSidebarConfig(SideBarConfig.GRID);
+    };
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.GRID)}>
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={handleClick}>
             <TableIcon />
             <FormattedMessage id="toolbar.grid" defaultMessage="Grid" />
         </div>
@@ -98,11 +123,7 @@ export const Custom = ({ toolbar }: Props) => {
         return null;
     }
 
-    return (
-        <div className="bg-toolbar__button row middle">
-            {toolbar.custom}
-        </div>
-    );
+    return <div className={cn('bg-toolbar__button row middle')}>{toolbar.custom}</div>;
 };
 
 export const Pivot = ({ toolbar }: Props) => {
@@ -112,8 +133,21 @@ export const Pivot = ({ toolbar }: Props) => {
         return null;
     }
 
+    const isActive = (toolbar.pivot as ToolBarButton).active ?? true;
+
+    const handleClick = () => {
+        if (!isActive) {
+            return;
+        }
+
+        setSidebarConfig(SideBarConfig.PIVOT);
+    };
+
     return (
-        <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.PIVOT)}>
+        <div
+            className={cn('bg-toolbar__button row middle', { disabled: !isActive })}
+            onClick={handleClick}
+        >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     fillRule="evenodd"
@@ -133,15 +167,19 @@ export const Mode = ({ toolbar }: Props) => {
     if (!toolbar.mode) {
         return null;
     }
+    const isActive = (toolbar.mode as ToolBarButton).active ?? true;
 
     const opositeMode = mode === BeastMode.GRID ? BeastMode.CHART : BeastMode.GRID;
 
     const toggleMode = () => {
+        if (!isActive) {
+            return;
+        }
         setMode(opositeMode);
     };
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={toggleMode}>
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={toggleMode}>
             {mode === BeastMode.CHART ? <TableIcon /> : <BarChartIcon />}
             <FormattedMessage id={`toolbar.mode.${opositeMode}`} defaultMessage="Mode" />
         </div>
@@ -154,9 +192,22 @@ export const ChartConfig = ({ toolbar }: Props) => {
     if (!toolbar.mode || mode === BeastMode.GRID) {
         return null;
     }
+    const isActive = (toolbar.mode as ToolBarButton).active ?? true;
+
+    const handleClick = () => {
+        if (!isActive) {
+            return;
+        }
+
+        setSidebarConfig(SideBarConfig.CHART);
+    }
+
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={() => setSidebarConfig(SideBarConfig.CHART)}>
+        <div
+            className={cn('bg-toolbar__button row middle', { disabled: !isActive })}
+            onClick={handleClick}
+        >
             <MixerHorizontalIcon />
             <FormattedMessage id="toolbar.chartConfig" defaultMessage="Chart Config" />
         </div>
@@ -169,14 +220,19 @@ export const Restore = ({ toolbar, callback }: Props) => {
     if (!edited || !toolbar.restore) {
         return null;
     }
+    const isActive = (toolbar.restore as ToolBarButton).active ?? true;
 
     const restoreChanges = () => {
+        if (!isActive) {
+            return;
+        }
+
         callback?.();
         restore();
     };
 
     return (
-        <div className="bg-toolbar__button row middle" onClick={restoreChanges}>
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={restoreChanges}>
             <UpdateIcon />
             <FormattedMessage id="toolbar.restore" defaultMessage="Restore" />
         </div>
