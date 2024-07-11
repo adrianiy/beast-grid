@@ -56,6 +56,7 @@ export interface BaseColumnDef {
     menu?: Partial<MenuProps>;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
+    sort?: SortState;
     _firstLevel?: boolean;
     _total?: boolean;
 }
@@ -224,6 +225,7 @@ export interface Position {
 export interface SortState {
     order: SortType;
     priority: number;
+    mandatory?: boolean;
 }
 
 export interface Column extends ColumnDef, Position {
@@ -238,7 +240,6 @@ export interface Column extends ColumnDef, Position {
     minPosition?: number;
     maxPosition?: number;
     childrenId?: ColumnId[];
-    sort?: SortState;
     parent?: ColumnId;
     original?: ColumnId;
     originalParent?: ColumnId;

@@ -180,19 +180,22 @@ export const addSort = (
     column: Column,
     columnsWithSort: Column[],
     multipleColumnSort: boolean,
-    order: SortType = SortType.ASC
+    order: SortType = SortType.ASC,
+    mandatory?: boolean
 ) => {
     if (multipleColumnSort) {
-        const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number), 0);
+        const lastPriority = columnsWithSort.filter(col => !col.sort?.mandatory).reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
 
         column.sort = {
             order,
             priority: lastPriority + 1,
+            mandatory
         };
     } else {
         column.sort = {
             order,
             priority: 1,
+            mandatory
         };
 
         if (columnsWithSort.length > 0) {

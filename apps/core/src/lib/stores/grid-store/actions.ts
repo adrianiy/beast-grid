@@ -1,5 +1,5 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-import { Column, ColumnId, IFilter, AsyncRow } from './../../common/interfaces';
+import { Column, ColumnId, IFilter } from './../../common/interfaces';
 import { MIN_COL_WIDTH } from './../../common/globals';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -330,7 +330,7 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
     const { container, initialData, onSwapChange, onRestore } = state;
     const columns: ColumnStore = {};
 
-    Object.values(initialState.columns || {}).forEach((column) => {
+    Object.values(initialState.initialColumns || {}).forEach((column) => {
         columns[column.id] = clone(column);
     });
 
@@ -468,7 +468,12 @@ export const setPivot =
             setColumnFilters(finalColumns, groupedByRows);
 
             const sortedColumns = sortColumns(finalColumns);
+            const columnsWithSort: Column[] = [];
 
+            rowColumnDefs.slice(0, -1).forEach(column => {
+                addSort(finalColumns[column.id as ColumnId], columnsWithSort, true, SortType.ASC, true);
+                columnsWithSort.push(finalColumns[column.id as ColumnId]);
+            })
 
             moveColumns(finalColumns, sortedColumns, PinType.NONE);
 
