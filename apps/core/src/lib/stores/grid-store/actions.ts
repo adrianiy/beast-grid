@@ -198,7 +198,7 @@ export const addFilter =
             delete filters[id];
         }
 
-        const newData = data.map(filterRow(columns, filters));
+        const newData = data.map(filterRow(columns, filters)) as Data;
 
         return { columns, filters: { ...filters }, data: newData, edited: true };
     };
