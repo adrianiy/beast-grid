@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
-import { filterRow, sortData } from '../../utils/functions';
+import { filterRow, resetSortColumns, sortData } from '../../utils/functions';
 
 import RowContainer from './row';
 import ContextMenu from '../contextMenu/context-menu';
@@ -136,6 +136,7 @@ export default function TBody<T>({
                 }
                 setTimeout(() => {
                     newSortedData.sort(sortData(sortColumns));
+                    resetSortColumns(sortColumns);
                     updateGaps(0, newSortedData);
 
                     setSortedData([...newSortedData]);

@@ -181,21 +181,21 @@ export const addSort = (
     columnsWithSort: Column[],
     multipleColumnSort: boolean,
     order: SortType = SortType.ASC,
-    mandatory?: boolean
+    temporal?: boolean
 ) => {
     if (multipleColumnSort) {
-        const lastPriority = columnsWithSort.filter(col => !col.sort?.mandatory).reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
+        const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
 
         column.sort = {
             order,
             priority: lastPriority + 1,
-            mandatory
+            temporal
         };
     } else {
         column.sort = {
             order,
             priority: 1,
-            mandatory
+            temporal
         };
 
         if (columnsWithSort.length > 0) {

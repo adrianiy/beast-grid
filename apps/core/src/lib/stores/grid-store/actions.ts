@@ -470,8 +470,8 @@ export const setPivot =
             const sortedColumns = sortColumns(finalColumns);
             const columnsWithSort: Column[] = [];
 
-            rowColumnDefs.forEach((column, index) => {
-                addSort(finalColumns[column.id as ColumnId], columnsWithSort, true, SortType.ASC, index < rowColumnDefs.length - 1);
+            rowColumnDefs.forEach(column => {
+                addSort(finalColumns[column.id as ColumnId], columnsWithSort, true, SortType.ASC, true);
                 columnsWithSort.push(finalColumns[column.id as ColumnId]);
             })
 

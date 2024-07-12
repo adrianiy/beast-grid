@@ -51,6 +51,7 @@ export const acumData = (
                     flex: 1,
                     children: [],
                     childrenMap: {},
+                    menu: false,
                     _firstLevel: !index,
                 };
             }

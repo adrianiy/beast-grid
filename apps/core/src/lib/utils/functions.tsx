@@ -106,7 +106,6 @@ const getGroupRows = (
     });
 };
 
-
 export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
     const groups = data.reduce((acc, row) => {
         const key = `${row[column.field as keyof Row]}`;
@@ -143,8 +142,8 @@ export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.sli
 export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
         const field = column.pivotField || column.field;
-        const valueA = a[field as keyof Row] as number || 0;
-        const valueB = b[field as keyof Row] as number || 0;
+        const valueA = (a[field as keyof Row] as number) || 0;
+        const valueB = (b[field as keyof Row] as number) || 0;
 
         if (valueA > valueB) {
             return column.sort?.order === SortType.ASC ? 1 : -1;
@@ -156,6 +155,14 @@ export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
     return (a._originalIdx as number) - (b._originalIdx as number);
 };
 
+export const resetSortColumns = (sortColumns: Column[]) => {
+    for (const column of sortColumns) {
+        if (column.sort?.temporal) {
+            column.sort = undefined;
+        }
+    }
+}
+
 export const filterRow =
     (columns: ColumnStore, filters: Record<string, IFilter[]>) =>
         (row: Row): Row | undefined => {
@@ -165,11 +172,13 @@ export const filterRow =
             for (const filterKey of Object.keys(filters)) {
                 if (
                     columns[filterKey].filterType === FilterType.TEXT &&
-                    filters[filterKey].includes(`${row[columns[filterKey].pivotField || columns[filterKey].field as string]}`)
+                    filters[filterKey].includes(
+                        `${row[columns[filterKey].pivotField || (columns[filterKey].field as string)]}`
+                    )
                 ) {
                     show = show && true;
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-                    const rowValue = row[columns[filterKey].pivotField || columns[filterKey].field as string] as number;
+                    const rowValue = row[columns[filterKey].pivotField || (columns[filterKey].field as string)] as number;
                     const numberFilter = filters[filterKey] as NumberFilter[];
                     for (const filter of numberFilter) {
                         const op = filter.op;
@@ -286,7 +295,12 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
         column.headerName = headerName;
         column.field = parentField;
         column.childrenMap = {};
-        column.children = convertToTotal({...column.children[0], parent: column.id } as Column, '', parentField, values);
+        column.children = convertToTotal(
+            { ...column.children[0], parent: column.id } as Column,
+            '',
+            parentField,
+            values
+        );
 
         return [column];
     } else {
@@ -304,18 +318,23 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
             _firstLevel: false,
         }));
     }
-
-}
+};
 
 const loopColumn = (column: ColumnDef, values: Column[]) => {
     const isLeaf = column.children?.some((child) => !child.children?.length);
     if (column.children?.length && !isLeaf) {
-        column.children?.push(...convertToTotal({ ...column.children[0], parent: column.id } as Column, 'TOTAL', column.field as string, values))
+        column.children?.push(
+            ...convertToTotal(
+                { ...column.children[0], parent: column.id } as Column,
+                'TOTAL',
+                column.field as string,
+                values
+            )
+        );
 
         column.children?.forEach((child) => {
             loopColumn(child, values);
         });
-
     }
 };
 
