@@ -1,4 +1,4 @@
-import { Column, MenuHorizontalPosition, PinType } from '../../../common';
+import { Column, MenuHorizontalPosition, MenuProps, PinType } from '../../../common';
 
 import { FormattedMessage } from 'react-intl';
 import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
@@ -23,7 +23,7 @@ export default function PinSection({
 }>) {
     const [pinColumn] = useBeastStore((state) => [state.pinColumn]);
 
-    if (!column.menu?.pin || column.parent) {
+    if (!(column.menu as Partial<MenuProps>)?.pin || column.parent) {
         return null;
     }
 

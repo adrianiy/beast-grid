@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, OperationType, PinType, Row } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, OperationType, PinType, Row, SortType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -20,7 +20,10 @@ const columnDefs: ColumnDef[] = [
         field: 'country',
         width: 200,
         sortable: true,
-        pinned: PinType.LEFT,
+        sort: {
+            order: SortType.DESC,
+            priority: 1
+        },
         menu: {
             pin: true,
             filter: true,

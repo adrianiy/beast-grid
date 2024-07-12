@@ -180,19 +180,22 @@ export const addSort = (
     column: Column,
     columnsWithSort: Column[],
     multipleColumnSort: boolean,
-    order: SortType = SortType.ASC
+    order: SortType = SortType.ASC,
+    temporal?: boolean
 ) => {
     if (multipleColumnSort) {
-        const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number), 0);
+        const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
 
         column.sort = {
             order,
             priority: lastPriority + 1,
+            temporal
         };
     } else {
         column.sort = {
             order,
             priority: 1,
+            temporal
         };
 
         if (columnsWithSort.length > 0) {

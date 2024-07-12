@@ -53,9 +53,10 @@ export interface BaseColumnDef {
     childrenMap?: Record<string, string>;
     formatter?: (value: string & number, row: Row) => string;
     styleFormatter?: (value: string & number, row: Row) => CSSProperties;
-    menu?: Partial<MenuProps>;
+    menu?: Partial<MenuProps> | boolean;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
+    sort?: SortState;
     _firstLevel?: boolean;
     _total?: boolean;
 }
@@ -224,6 +225,7 @@ export interface Position {
 export interface SortState {
     order: SortType;
     priority: number;
+    temporal?: boolean;
 }
 
 export interface Column extends ColumnDef, Position {
@@ -238,7 +240,6 @@ export interface Column extends ColumnDef, Position {
     minPosition?: number;
     maxPosition?: number;
     childrenId?: ColumnId[];
-    sort?: SortState;
     parent?: ColumnId;
     original?: ColumnId;
     originalParent?: ColumnId;
