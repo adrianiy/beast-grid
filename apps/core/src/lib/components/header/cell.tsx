@@ -159,7 +159,7 @@ export default function HeaderCell<T>({
     }
 
     const handleChangeSort = () => {
-        if (column.sortable === false || !column.final || column.sort?.mandatory) return;
+        if (column.sortable === false || !column.final) return;
 
         changeSort(column.id, !!multiSort);
     };
@@ -170,9 +170,6 @@ export default function HeaderCell<T>({
     };
 
     const renderSortIcon = (sort: SortState) => {
-        if (sort.mandatory) {
-            return null;
-        }
         return (
             <div className="bg-sort-icon row middle">
                 {sort.order === 'asc' ? <ArrowUpIcon /> : <ArrowDownIcon />}
