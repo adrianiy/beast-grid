@@ -25,6 +25,7 @@ import {
 } from './utils';
 import { GridState, GridStore } from './store';
 import {
+    ChangeType,
     ColumnDef,
     ColumnStore,
     Coords,
@@ -79,7 +80,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
-    const { columns, onSwapChange } = state;
+    const { columns, onChanges } = state;
     let { sortedColumns } = state;
     let column1 = columns[id1];
     let column2 = columns[id2];
@@ -96,7 +97,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     swapPositions(column1, column2);
     mergeColumns(columns);
 
-    sortedColumns = sortColumns(columns, onSwapChange);
+    sortedColumns = sortColumns(columns, onChanges);
 
     moveColumns(columns, sortedColumns, column1.pinned);
 
@@ -143,7 +144,7 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
 
 // Changes the sort tye of a column
 export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?: SortType) => (state: GridStore) => {
-    const { columns } = state;
+    const { columns, onChanges } = state;
 
     let columnsWithSort = Object.values(columns).filter((col) => col.sort?.priority);
 
@@ -162,46 +163,50 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
     columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
 
+    if (onChanges) {
+        onChanges(ChangeType.SORT, { sortColumns: columnsWithSort });
+    }
+
     return { columns, sort: columnsWithSort.map((col) => col.id), edited: true };
 };
 
 export const addFilter =
     (id: ColumnId, value: IFilter | null, idx = 0) =>
-    (state: GridStore) => {
-        const { columns, filters, data } = state;
-        const column = columns[id];
+        (state: GridStore) => {
+            const { columns, filters, data } = state;
+            const column = columns[id];
 
-        if (column.filterType === FilterType.TEXT) {
-            if (filters[id]?.includes(value as string)) {
-                filters[id] = filters[id]?.filter((val) => val !== value);
-            } else {
-                filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-            }
-        }
-        if (column.filterType === FilterType.NUMBER) {
-            if (!filters[id]) {
-                filters[id] = [];
-            }
-            if (!value) {
-                if (!idx) {
-                    filters[id] = [];
+            if (column.filterType === FilterType.TEXT) {
+                if (filters[id]?.includes(value as string)) {
+                    filters[id] = filters[id]?.filter((val) => val !== value);
                 } else {
-                    filters[id] = filters[id]?.filter((_, i) => i !== idx);
+                    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
                 }
-            } else if (filters[id][idx]) {
-                filters[id][idx] = value;
-            } else {
-                filters[id][idx] = value;
             }
-        }
-        if (!filters[id].length) {
-            delete filters[id];
-        }
+            if (column.filterType === FilterType.NUMBER) {
+                if (!filters[id]) {
+                    filters[id] = [];
+                }
+                if (!value) {
+                    if (!idx) {
+                        filters[id] = [];
+                    } else {
+                        filters[id] = filters[id]?.filter((_, i) => i !== idx);
+                    }
+                } else if (filters[id][idx]) {
+                    filters[id][idx] = value;
+                } else {
+                    filters[id][idx] = value;
+                }
+            }
+            if (!filters[id].length) {
+                delete filters[id];
+            }
 
-        const newData = data.map(filterRow(columns, filters)) as Data;
+            const newData = data.map(filterRow(columns, filters)) as Data;
 
-        return { columns, filters: { ...filters }, data: newData, edited: true };
-    };
+            return { columns, filters: { ...filters }, data: newData, edited: true };
+        };
 
 export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
     const { filters } = state;
@@ -235,7 +240,7 @@ export const pinColumn = (id: ColumnId, pin: PinType) => (state: GridStore) => {
 };
 
 export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, tree, container, groupOrder, initialData, onSwapChange } = state;
+    const { columns, tree, container, groupOrder, initialData, onChanges } = state;
     const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const column = columns[id];
 
@@ -251,7 +256,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 
     const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-    const sortedColumns = sortColumns(columns, onSwapChange);
+    const sortedColumns = sortColumns(columns, onChanges);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
@@ -261,7 +266,7 @@ export const groupByColumn = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, container, initialData, onSwapChange } = state;
+    const { columns, container, initialData, onChanges } = state;
     let { groupOrder } = state;
     const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const column = columns[id];
@@ -282,7 +287,7 @@ export const unGroupColumn = (id: ColumnId) => (state: GridStore) => {
 
     const data = groupDataByColumnDefs(columns, aggColumns, initialData, groupOrder);
 
-    const sortedColumns = sortColumns(columns, onSwapChange);
+    const sortedColumns = sortColumns(columns, onChanges);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
@@ -327,14 +332,14 @@ export const autoSizeColumns = () => (state: GridStore) => {
 };
 
 export const restore = (initialState: Partial<GridState>) => (state: GridStore) => {
-    const { container, initialData, onSwapChange, onRestore } = state;
+    const { container, initialData, onChanges } = state;
     const columns: ColumnStore = {};
 
     Object.values(initialState.initialColumns || {}).forEach((column) => {
         columns[column.id] = clone(column);
     });
 
-    const sortedColumns = sortColumns(columns, onSwapChange);
+    const sortedColumns = sortColumns(columns, onChanges);
     const groupOrder = Object.values(columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
@@ -344,8 +349,8 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
     moveColumns(columns, sortedColumns, PinType.NONE);
     moveColumns(columns, sortedColumns, PinType.RIGHT);
 
-    if (onRestore) {
-        onRestore();
+    if (onChanges) {
+        onChanges(ChangeType.RESTORE, {});
     }
 
     return { ...clone(initialState), data: [...initialData], unfilteredData: [...initialData], sortedColumns, columns, groupOrder, edited: false };
@@ -402,7 +407,7 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 
 export const setPivot =
     (newPivot: Partial<GridState['pivot']> | null, initialState?: Partial<GridState>) => (state: GridStore) => {
-        const { pivot: currentPivot, initialData, defaultColumnDef, onPivotChange } = state;
+        const { pivot: currentPivot, initialData, defaultColumnDef, onChanges } = state;
         const data = [...initialData].filter(row => !row._hidden) as Data;
 
         const nonEmptyPivot = Object.keys(newPivot || {}).length;
@@ -477,18 +482,18 @@ export const setPivot =
 
             moveColumns(finalColumns, sortedColumns, PinType.NONE);
 
-            if (onPivotChange) {
-                onPivotChange(pivot);
+            if (onChanges) {
+                onChanges(ChangeType.PIVOT, { pivot });
             }
 
             return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], edited: true };
         }
 
-        if (onPivotChange) {
-            onPivotChange(pivot);
+        if (onChanges) {
+            onChanges(ChangeType.PIVOT, { pivot });
         }
 
-        const newState = restore({...initialState, initialData } || {})(state);
+        const newState = restore({ ...initialState, initialData } || {})(state);
         return { pivot, ...newState };
     };
 

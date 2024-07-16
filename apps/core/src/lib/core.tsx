@@ -5,13 +5,13 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { BeastGridApi, BeastGridConfig, Column, Data } from './common/interfaces';
 import { HEADER_HEIGHT, ROW_HEIGHT } from './common/globals';
-import { ColumnStore, ToolbarPosition } from './common';
+import { OnChanges, ToolbarPosition } from './common';
 
 import { BeastGridProvider, BeastApi } from './stores/beast-store';
 
 import { DndStoreProvider } from './stores/dnd-store';
 
-import { PivotState, TGridStore, createGridStore } from './stores/grid-store/store';
+import { TGridStore, createGridStore } from './stores/grid-store/store';
 import { TDndStore, createDndStore } from './stores/dnd-store/store';
 
 import LoaderLayer, { Loader } from './components/loader/loader';
@@ -38,9 +38,7 @@ export function BeastGrid<T>({
     disableColumnSwap = false,
     api,
     onSortChange,
-    onSwapChange,
-    onPivotChange,
-    onRestore
+    onChanges
 }: {
     config?: BeastGridConfig<T>;
     theme?: string;
@@ -49,9 +47,7 @@ export function BeastGrid<T>({
     injectStyles?: boolean;
     disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
-    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void;
-    onPivotChange?: (pivot: Partial<PivotState>) => void;
-    onRestore?: () => void
+    onChanges: OnChanges
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
@@ -87,7 +83,7 @@ export function BeastGrid<T>({
 
     useEffect(() => {
         if (ref.current && config?.columnDefs) {
-            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onSwapChange, onPivotChange, onRestore);
+            const gridStore: TGridStore = () => createGridStore(config, ref.current as HTMLDivElement, theme, onChanges);
             const dndStore = () => createDndStore();
 
             setStores([gridStore, dndStore]);
