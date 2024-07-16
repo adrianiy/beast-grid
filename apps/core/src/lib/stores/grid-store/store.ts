@@ -27,8 +27,6 @@ import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/int
 import {
     BeastGridConfig,
     BeastMode,
-    Changes,
-    ChangeType,
     ColumnDef,
     Coords,
     OnChanges,
@@ -79,7 +77,7 @@ export interface GridState {
     selecting: boolean;
     mode: BeastMode;
     pivot: Partial<PivotState> | null;
-    onChanges: OnChanges;
+    onChanges?: OnChanges;
 }
 
 export interface GridStore extends GridState {
@@ -119,7 +117,7 @@ export const createGridStore = <T>(
     { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
     container: HTMLDivElement,
     theme: string,
-    onChanges: OnChanges
+    onChanges?: OnChanges
 ) => {
     const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 

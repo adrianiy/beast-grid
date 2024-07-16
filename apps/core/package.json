@@ -1,19 +1,19 @@
 {
-  "name": "beast-grid",
-  "version": "0.6.26",
-  "main": "./index.js",
-  "types": "./index.d.ts",
-  "style": "./style.css",
-  "files": [
-    "shepherd.css",
-    "index.mjs",
-    "index.d.ts",
-    "index.js",
-    "lib",
-    "style.css"
-  ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "license": "MIT"
+    "name": "beast-grid",
+    "version": "0.7.0",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "style": "./style.css",
+    "files": [
+        "shepherd.css",
+        "index.mjs",
+        "index.d.ts",
+        "index.js",
+        "lib",
+        "style.css"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "license": "MIT"
 }

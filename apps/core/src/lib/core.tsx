@@ -47,7 +47,7 @@ export function BeastGrid<T>({
     injectStyles?: boolean;
     disableColumnSwap?: boolean;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
-    onChanges: OnChanges
+    onChanges?: OnChanges
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const [[beastGridStore, beastDndStore], setStores] = useState<[TGridStore | null, TDndStore | null]>([null, null]);
