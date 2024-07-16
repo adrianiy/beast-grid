@@ -221,6 +221,7 @@ export const updateColumnVisibility = (
     const scrollWidth = scrollElement?.clientWidth || 0;
 
     const threshold = scrollWidth * 0.3;
+    console.log(scrollWidth, threshold);
 
     Object.keys(columns).forEach((columnId) => {
         const column = columns[columnId];

@@ -110,11 +110,11 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
     // Set loading on pivot change
     useEffect(() => {
         setLoading(true);
-        updateColumnVisibility(0);
 
         setTimeout(() => {
+            updateColumnVisibility(0);
             setLoading(false);
-        }, 0);
+        }, 200);
     }, [pivot]);
 
     // reload on edited restore
