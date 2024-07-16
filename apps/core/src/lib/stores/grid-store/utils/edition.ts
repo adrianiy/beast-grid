@@ -1,4 +1,4 @@
-import { ColumnStore, Column, SortType, ColumnId, PinType } from '../../../common';
+import { ColumnStore, Column, SortType, ColumnId, PinType, OnChanges, ChangeType } from '../../../common';
 
 export const toggleHide = (column: Column, columns: ColumnStore) => {
     column.hidden = !column.hidden;
@@ -155,7 +155,7 @@ export const setFinalPosition = (columnIds: ColumnId[], columns: ColumnStore, fi
 
 export const sortColumns = (
     columns: ColumnStore,
-    onSwapChange?: (columns: ColumnStore, sortedColumns: Column[]) => void
+    onChanges?: OnChanges
 ) => {
     const sortedColumns = Object.values(columns).sort(
         (a, b) =>
@@ -171,7 +171,7 @@ export const sortColumns = (
         columns
     );
 
-    onSwapChange?.(columns, sortedColumns);
+    onChanges?.(ChangeType.SWAP, { columns, sortedColumns });
 
     return sortedColumns;
 };
