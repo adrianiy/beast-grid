@@ -1,6 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, FilterType, OperationType, PinType, SortType } from './enums';
+import { AggregationType, ChangeType, FilterType, OperationType, PinType, SortType } from './enums';
 import { EChartsCoreOption } from 'echarts';
 
 export interface Row {
@@ -276,3 +276,20 @@ export interface SelectedCells {
     start: Coords;
     end: Coords;
 }
+
+export interface SortChanges {
+    sortColumns: Column[];
+}
+
+export interface SwapChanges {
+    columns: ColumnStore;
+    sortedColumns: Column[];
+}
+
+export interface PivotChanges {
+    pivot: Partial<PivotState>;
+}
+
+export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges> { }
+
+export type OnChanges = (changeType: ChangeType, changes: Changes) => void;

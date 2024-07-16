@@ -81,3 +81,11 @@ export enum ChartType {
     LINE = 'line',
     PIE = 'pie',
 }
+
+export enum ChangeType {
+    SWAP = 'swap',
+    PIVOT = 'pivot',
+    SORT = 'sort',
+    RESTORE = 'restore',
+    PIN = 'pin'
+}
