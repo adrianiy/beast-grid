@@ -139,17 +139,48 @@ export const groupByMultiple = (
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
-    if (row._pivotIndexes) {
-        row = data[row._pivotIndexes[0]];
-    }
-    if (column._filters) {
-        const filter = column._filters;
-        const match = Object.keys(filter).every((key) => row[key] === filter[key]);
+export const aggregateData = (
+    data: Row,
+    row: Row,
+    calculatedColumn: Column,
+    valueField: string
+): Row => {
+    if (calculatedColumn.aggregation === AggregationType.SUM) {
+        data[valueField] = +(data[valueField] || 0) + +(row[valueField as keyof Row] || 0);
+    } else if (calculatedColumn.aggregation === AggregationType.AVG) {
+        data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
+        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + +(row[valueField as keyof Row] || 0);
 
-        if (!match) {
-            return 0;
+        data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
+    } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
+        data[valueField] = +(data[valueField] || 0) + 1;
+    } else if (calculatedColumn.aggregation === AggregationType.MIN) {
+        data[valueField] = Math.min(data[valueField] as number || Infinity, row[valueField as keyof Row] as number);
+    } else if (calculatedColumn.aggregation === AggregationType.MAX) {
+        data[valueField] = Math.max(data[valueField] as number || -Infinity, row[valueField as keyof Row] as number);
+    }
+
+    return data;
+}
+
+export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
+    if (row._pivotIndexes && column.pivotField) {
+        const field = column.pivotField || column.field;
+        let rows = row._pivotIndexes.map((index) => data[index]);
+
+        if (column._filters) {
+            const filter = column._filters;
+
+            rows = rows.filter((row) => Object.keys(filter).every((key) => row[key] === filter[key]));
+
+            if (!rows.length) {
+                return 0;
+            }
+
         }
+        const reduced = rows.reduce((acc, curr) => aggregateData(acc, curr, column, field!), {});
+
+        return reduced[field as string] as number;
     }
 
     const field = column.pivotField || column.field;

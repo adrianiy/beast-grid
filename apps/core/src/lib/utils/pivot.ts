@@ -109,7 +109,7 @@ const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row 
     childrenMap: {},
 });
 
-const newColumn = (key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>) => ({
+const newColumn = (key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>, filterType?: FilterType, aggregation?: Column['aggregation']) => ({
     id: uuidv4(),
     headerName: key,
     pivotField: field,
@@ -118,6 +118,8 @@ const newColumn = (key: string, field: string, parentId: string | undefined, ind
     children: [],
     childrenMap: {},
     menu: false,
+    filterType,
+    aggregation,
     _filters: filters,
     _firstLevel: !index,
 })
@@ -214,6 +216,8 @@ export const groupByPivot = (
                 row: newRow(showRowTotals, [index]),
                 index
             };
+        } else {
+            rowSize[key].row._pivotIndexes?.push(index);
         }
 
         calculatedColumns.forEach((column) => {
@@ -236,7 +240,7 @@ export const groupByPivot = (
             const valueField = `${column.field as string}@${lastField}`;
 
             if (!columnDefs[valueField]) {
-                columnDefs[valueField] = newColumn(column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters);
+                columnDefs[valueField] = newColumn(column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters, FilterType.NUMBER, column.aggregation);
 
                 if (lastField) {
                     columnDefs[lastField]?.children?.push(columnDefs[valueField]);
@@ -246,7 +250,6 @@ export const groupByPivot = (
     })
 
     console.log(Object.keys(rowSize).length, Object.keys(columnDefs).length);
-    console.log(columnDefs)
 
     Object.keys(rowSize).forEach((key) => {
         const { index, row } = rowSize[key];
@@ -257,8 +260,6 @@ export const groupByPivot = (
 
         rows.push(row);
     });
-
-    console.log(rows);
 
     // data.forEach((row) => {
     //     const key = showRowTotals

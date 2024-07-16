@@ -110,7 +110,7 @@ export function RowCell({
     const borderBottom = idx === selectedCells?.end.y;
     const borderRight = columnDef.finalPosition === selectedCells?.end.x;
 
-    if (columnDef.hidden || !Object.keys(row).length) {
+    if (columnDef.hidden || !Object.keys(row).length || !columnDef.inView) {
         return null;
     }
 
