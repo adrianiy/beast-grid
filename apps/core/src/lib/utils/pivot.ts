@@ -99,14 +99,28 @@ export const acumData = (
     return data;
 };
 
-const newRow = (showTotals: boolean, isTotal?: boolean): Row => ({
+const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row => ({
     _id: uuidv4(),
     _expanded: true,
     _total: isTotal,
+    _pivotIndexes: indexes,
     _singleChild: !showTotals,
     children: [],
     childrenMap: {},
 });
+
+const newColumn = (key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>) => ({
+    id: uuidv4(),
+    headerName: key,
+    pivotField: field,
+    flex: 1,
+    parent: parentId,
+    children: [],
+    childrenMap: {},
+    menu: false,
+    _filters: filters,
+    _firstLevel: !index,
+})
 
 const addData = (
     row: Row & { childrenMap?: Record<string, number> },
@@ -170,6 +184,11 @@ const addData = (
     return row;
 };
 
+interface RowConfig {
+    row: Row;
+    index: number;
+}
+
 export const groupByPivot = (
     data: Data,
     groupRows: Column[],
@@ -177,22 +196,82 @@ export const groupByPivot = (
     calculatedColumns: Column[],
     showRowTotals: boolean
 ): [Row[], ColumnDef[]] => {
+    const rowSize: Record<string, RowConfig> = {};
+    const columnSize: Record<string, boolean> = {};
     const rows: Row[] = [];
     const groups: Record<string, number> = {};
     const columnDefs: Record<string, ColumnDef> = {};
 
-    data.forEach((row) => {
-        const key = showRowTotals
-            ? (row[groupRows[0].field as keyof Row] as string)
-            : (groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') as string) || 'total';
+    if (!calculatedColumns.length) {
+        calculatedColumns.push({ field: 'total:', aggregation: AggregationType.SUM } as Column);
+    }
 
-        if (groups[key] == null) {
-            groups[key] = rows.length;
-            rows.push(newRow(showRowTotals));
+    data.forEach((row, index) => {
+        const key = groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
+
+        if (!rowSize[key]) {
+            rowSize[key] = {
+                row: newRow(showRowTotals, [index]),
+                index
+            };
         }
 
-        addData(rows[groups[key]], row, groupRows, 0, columns, calculatedColumns, columnDefs, showRowTotals);
+        calculatedColumns.forEach((column) => {
+            let lastField = ``;
+            const filters: Record<string, string> = {};
+
+            columns.forEach((column, index) => {
+                const field = `${column.field}:${row[column.field as keyof Row] as string}@${lastField}`;
+                filters[column.field as string] = row[column.field as keyof Row] as string;
+
+                if (!columnDefs[field]) {
+                    columnDefs[field] = newColumn(row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, index, {});
+
+                    if (lastField) {
+                        columnDefs[lastField]?.children?.push(columnDefs[field]);
+                    }
+                }
+                lastField = field;
+            })
+            const valueField = `${column.field as string}@${lastField}`;
+
+            if (!columnDefs[valueField]) {
+                columnDefs[valueField] = newColumn(column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters);
+
+                if (lastField) {
+                    columnDefs[lastField]?.children?.push(columnDefs[valueField]);
+                }
+            }
+        });
+    })
+
+    console.log(Object.keys(rowSize).length, Object.keys(columnDefs).length);
+    console.log(columnDefs)
+
+    Object.keys(rowSize).forEach((key) => {
+        const { index, row } = rowSize[key];
+
+        groupRows.forEach((groupRow) => {
+            row[groupRow.field as string] = data[index][groupRow.field as keyof Row];
+        });
+
+        rows.push(row);
     });
+
+    console.log(rows);
+
+    // data.forEach((row) => {
+    //     const key = showRowTotals
+    //         ? (row[groupRows[0].field as keyof Row] as string)
+    //         : (groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') as string) || 'total';
+    //
+    //     if (groups[key] == null) {
+    //         groups[key] = rows.length;
+    //         rows.push(newRow(showRowTotals));
+    //     }
+    //
+    //     addData(rows[groups[key]], row, groupRows, 0, columns, calculatedColumns, columnDefs, showRowTotals);
+    // });
 
     return [rows, Object.values(columnDefs)];
 };
@@ -210,3 +289,4 @@ export const groupPivot = (
     }
     return groupByPivot(data, columns, aggColumns, valueColumns, showRowTotals);
 };
+

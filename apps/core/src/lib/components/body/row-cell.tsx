@@ -1,20 +1,22 @@
-import React, { ReactNode, useRef } from 'react';
+import React, { ReactNode, useMemo, useRef } from 'react';
 
 import { Column, ColumnId, ColumnStore, Row, RowConfig } from './../../common/interfaces';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 
-import { LEVEL_PADDING, SelectedCells } from '../../common';
+import { Data, LEVEL_PADDING, SelectedCells } from '../../common';
 import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
 import { PivotState } from '../../stores/grid-store/store';
+import { getPivotedData } from '../../utils/functions';
 
 function getProperty<Key extends keyof Row>(
     row: Row,
     level: number,
     columnDef: Column,
     columns: ColumnStore,
-    groupOrder: ColumnId[]
+    groupOrder: ColumnId[],
+    data: Data
 ): string | ReactNode | null {
     let field = columnDef.pivotField || columnDef.field;
 
@@ -22,7 +24,7 @@ function getProperty<Key extends keyof Row>(
         field = columns[groupOrder[level]]?.field || field;
     }
 
-    let value = row[field as Key];
+    let value = getPivotedData(row, columnDef, data);
 
     if (React.isValidElement(value)) {
         return value;
@@ -77,6 +79,7 @@ export function RowCell({
 }: Props) {
     const lastSelected = useRef<SelectedCells | null>(null);
     const [
+        data,
         pivot,
         scrollElement,
         selectedCells,
@@ -86,6 +89,7 @@ export function RowCell({
         selecting,
         setSelecting,
     ] = useBeastStore((state) => [
+        state.data,
         state.pivot,
         state.scrollElement,
         state.selectedCells,
@@ -105,11 +109,15 @@ export function RowCell({
     const borderLeft = columnDef.finalPosition === selectedCells?.start.x;
     const borderBottom = idx === selectedCells?.end.y;
     const borderRight = columnDef.finalPosition === selectedCells?.end.x;
-    const value = getProperty(row, level, columnDef, columns, groupOrder);
 
-    if (columnDef.hidden) {
+    if (columnDef.hidden || !Object.keys(row).length) {
         return null;
     }
+
+    const value = useMemo(() => {
+        return getProperty(row, level, columnDef, columns, groupOrder, data);
+    }, [row, level, columnDef, columns, groupOrder]);
+
 
     const handleMouseDown = (e: React.MouseEvent) => {
         const clickOnYScrollbar = e.clientY > scrollElement?.getBoundingClientRect().bottom - 11;

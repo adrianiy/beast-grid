@@ -10,6 +10,7 @@ export interface Row {
     _hidden?: boolean;
     _level?: number;
     _singleChild?: boolean;
+    _pivotIndexes?: number[];
     children?: Row[];
 }
 
@@ -247,6 +248,7 @@ export interface Column extends ColumnDef, Position {
     logicDelete?: boolean;
     lastPinned?: boolean;
     tree?: boolean;
+    _filters?: Record<string, string>;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;

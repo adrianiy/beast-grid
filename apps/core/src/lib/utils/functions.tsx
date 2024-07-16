@@ -139,11 +139,28 @@ export const groupByMultiple = (
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
+export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
+    if (row._pivotIndexes) {
+        row = data[row._pivotIndexes[0]];
+    }
+    if (column._filters) {
+        const filter = column._filters;
+        const match = Object.keys(filter).every((key) => row[key] === filter[key]);
+
+        if (!match) {
+            return 0;
+        }
+    }
+
+    const field = column.pivotField || column.field;
+
+    return row[field as keyof Row] as number;
+}
+
+export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
-        const field = column.pivotField || column.field;
-        const valueA = (a[field as keyof Row] as number) || 0;
-        const valueB = (b[field as keyof Row] as number) || 0;
+        const valueA = getPivotedData(a, column, data)
+        const valueB = getPivotedData(b, column, data)
 
         if (valueA > valueB) {
             return column.sort?.order === SortType.ASC ? 1 : -1;

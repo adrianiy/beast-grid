@@ -167,41 +167,41 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
 
 export const addFilter =
     (id: ColumnId, value: IFilter | null, idx = 0) =>
-    (state: GridStore) => {
-        const { columns, filters, data } = state;
-        const column = columns[id];
+        (state: GridStore) => {
+            const { columns, filters, data } = state;
+            const column = columns[id];
 
-        if (column.filterType === FilterType.TEXT) {
-            if (filters[id]?.includes(value as string)) {
-                filters[id] = filters[id]?.filter((val) => val !== value);
-            } else {
-                filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
-            }
-        }
-        if (column.filterType === FilterType.NUMBER) {
-            if (!filters[id]) {
-                filters[id] = [];
-            }
-            if (!value) {
-                if (!idx) {
-                    filters[id] = [];
+            if (column.filterType === FilterType.TEXT) {
+                if (filters[id]?.includes(value as string)) {
+                    filters[id] = filters[id]?.filter((val) => val !== value);
                 } else {
-                    filters[id] = filters[id]?.filter((_, i) => i !== idx);
+                    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
                 }
-            } else if (filters[id][idx]) {
-                filters[id][idx] = value;
-            } else {
-                filters[id][idx] = value;
             }
-        }
-        if (!filters[id].length) {
-            delete filters[id];
-        }
+            if (column.filterType === FilterType.NUMBER) {
+                if (!filters[id]) {
+                    filters[id] = [];
+                }
+                if (!value) {
+                    if (!idx) {
+                        filters[id] = [];
+                    } else {
+                        filters[id] = filters[id]?.filter((_, i) => i !== idx);
+                    }
+                } else if (filters[id][idx]) {
+                    filters[id][idx] = value;
+                } else {
+                    filters[id][idx] = value;
+                }
+            }
+            if (!filters[id].length) {
+                delete filters[id];
+            }
 
-        const newData = data.map(filterRow(columns, filters)) as Data;
+            const newData = data.map(filterRow(columns, filters)) as Data;
 
-        return { columns, filters: { ...filters }, data: newData, edited: true };
-    };
+            return { columns, filters: { ...filters }, data: newData, edited: true };
+        };
 
 export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
     const { filters } = state;
@@ -481,14 +481,14 @@ export const setPivot =
                 onPivotChange(pivot);
             }
 
-            return { data: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], edited: true };
+            return { pivotData: groupedByRows, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], edited: true };
         }
 
         if (onPivotChange) {
             onPivotChange(pivot);
         }
 
-        const newState = restore({...initialState, initialData } || {})(state);
+        const newState = restore({ ...initialState, initialData } || {})(state);
         return { pivot, ...newState };
     };
 

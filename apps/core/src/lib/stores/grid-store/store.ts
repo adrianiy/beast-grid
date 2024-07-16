@@ -54,6 +54,7 @@ export interface GridState {
     edited: boolean;
     initialized: boolean;
     data: Data;
+    pivotData?: Data;
     columns: ColumnStore;
     theme: string;
     container: HTMLDivElement;

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
@@ -34,12 +34,12 @@ const getMaxMin = (
     dataLength: number,
     expandedRows: number
 ): [number, number] => {
-        const containerHeight = scrollElement?.getBoundingClientRect().height;
-        const visibleRows = Math.floor(containerHeight / rowHeight);
-        const topRow = Math.floor(scrollTop / rowHeight);
-        const bottomRow = topRow + visibleRows;
-        const maxValue = Math.min(dataLength + expandedRows, bottomRow + THRESHOLD);
-        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
+    const containerHeight = scrollElement?.getBoundingClientRect().height;
+    const visibleRows = Math.floor(containerHeight / rowHeight);
+    const topRow = Math.floor(scrollTop / rowHeight);
+    const bottomRow = topRow + visibleRows;
+    const maxValue = Math.min(dataLength + expandedRows, bottomRow + THRESHOLD);
+    const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
 
     return [maxValue, minValue]
 }
@@ -57,6 +57,7 @@ export default function TBody<T>({
     const gaps = useRef<Record<string, number>>({});
     const [
         data,
+        pivotData,
         columns,
         sortedColumns,
         theme,
@@ -69,6 +70,7 @@ export default function TBody<T>({
         updateSelected,
     ] = useBeastStore((state) => [
         state.data,
+        state.pivotData,
         state.columns,
         state.sortedColumns,
         state.theme,
@@ -105,8 +107,16 @@ export default function TBody<T>({
         }
     }, [scrollTop, expandedRows, filters]);
 
+    const currentData = useMemo(() => {
+        if (pivotData) {
+            return pivotData;
+        }
+
+        return data;
+    }, [data, pivotData]);
+
     useEffect(() => {
-        if (!data.length) {
+        if (!currentData.length) {
             return;
         }
 
@@ -115,7 +125,7 @@ export default function TBody<T>({
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
-        const newSortedData = someActive ? (data.filter(row => !row._hidden) as Row[]) : data;
+        const newSortedData = someActive ? (currentData.filter(row => !row._hidden) as Row[]) : currentData;
 
         const sortColumns = Object.values(columns)
             .filter((c) => c.sort)
@@ -135,13 +145,13 @@ export default function TBody<T>({
                     setSorting(true);
                 }
                 setTimeout(() => {
-                    newSortedData.sort(sortData(sortColumns));
+                    newSortedData.sort(sortData(sortColumns, data));
                     resetSortColumns(sortColumns);
                     updateGaps(0, newSortedData);
 
                     setSortedData([...newSortedData]);
 
-                    if (data.length > PERFORMANCE_LIMIT) {
+                    if (currentData.length > PERFORMANCE_LIMIT) {
                         setTimeout(() => setSorting(false), 100);
                     }
                 }, 0);
@@ -160,7 +170,7 @@ export default function TBody<T>({
         setExpandedRows(expanded);
 
         updateSelected(null);
-    }, [data, filters, sort]);
+    }, [currentData, filters, sort]);
 
     useBus(BusActions.EXPAND, () => sortedData.forEach((row) => forceRowExpand(row, true)), [sortedData]);
 
