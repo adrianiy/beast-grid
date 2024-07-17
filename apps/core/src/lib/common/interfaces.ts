@@ -288,6 +288,10 @@ export interface PivotChanges {
     pivot: Partial<PivotState>;
 }
 
-export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges> { }
+export interface VisibilityChanges {
+    hiddenColumns: Column[]
+}
+
+export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges>, Partial<VisibilityChanges> { }
 
 export type OnChanges = (changeType: ChangeType, changes: Changes) => void;
