@@ -51,7 +51,7 @@ const getGroupRows = (
             (acc, column) => {
                 if (aggregationColumns) {
                     const setChildrenFieldsByAggregation = (aggColumn: Column) => {
-                        const [, rest] = (aggColumn.pivotField || '').split('@');
+                        const [, rest] = (aggColumn.field || '').split('@');
                         children.forEach((child) => {
                             if (rest) {
                                 const match = rest?.split('&').map((filterField) => {
@@ -164,8 +164,8 @@ export const aggregateData = (
 }
 
 export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
-    if (row._pivotIndexes && column.pivotField) {
-        const field = column.pivotField || column.field;
+    if (row._pivotIndexes) {
+        const field = column.field;
         let rows = row._pivotIndexes.map((index) => data[index]);
 
         if (column._filters) {
@@ -183,7 +183,7 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
         return reduced[field as string] as number;
     }
 
-    const field = column.pivotField || column.field;
+    const field = column.field;
 
     return row[field as keyof Row] as number;
 }
@@ -221,12 +221,12 @@ export const filterRow =
                 if (
                     columns[filterKey].filterType === FilterType.TEXT &&
                     filters[filterKey].includes(
-                        `${row[columns[filterKey].pivotField || (columns[filterKey].field as string)]}`
+                        `${row[columns[filterKey].field]}`
                     )
                 ) {
                     show = show && true;
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-                    const rowValue = row[columns[filterKey].pivotField || (columns[filterKey].field as string)] as number;
+                    const rowValue = row[columns[filterKey].field as keyof Row] as number;
                     const numberFilter = filters[filterKey] as NumberFilter[];
                     for (const filter of numberFilter) {
                         const op = filter.op;

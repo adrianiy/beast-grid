@@ -34,7 +34,7 @@ export const Filter = ({ toolbar }: Props) => {
 };
 
 export const Download = ({ toolbar }: Props) => {
-    const [data, columns] = useBeastStore((state) => [state.initialData, state.sortedColumns]);
+    const [data, columns] = useBeastStore((state) => [state.data, state.sortedColumns]);
     const [downloading, setDownloading] = useState(false);
 
     if (!toolbar.download) {

@@ -47,8 +47,7 @@ export interface BaseColumnDef {
     id?: ColumnId;
     headerName: string;
     pinned?: PinType;
-    field?: string;
-    pivotField?: string;
+    field: string;
     sortable?: boolean;
     children?: ColumnDef[];
     childrenMap?: Record<string, string>;

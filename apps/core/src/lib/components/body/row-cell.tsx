@@ -18,7 +18,7 @@ function getProperty<Key extends keyof Row>(
     groupOrder: ColumnId[],
     data: Data
 ): string | ReactNode | null {
-    let field = columnDef.pivotField || columnDef.field;
+    let field = columnDef.field;
 
     if (columnDef.tree) {
         field = columns[groupOrder[level]]?.field || field;

@@ -11,7 +11,7 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
             newColumn = {
                 headerName: tree.name || '',
                 tree: true,
-                field: tree.field,
+                field: tree.field as string,
                 id: uuidv4(),
                 pinned: PinType.NONE,
                 top: 0,
@@ -45,7 +45,7 @@ export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[]
             ...val,
             id: uuidv4(),
             headerName: `${aggregation} of ${val.headerName}`,
-            pivotField: `${val.field}@${parentField}`,
+            field: `${val.field}@${parentField}`,
             flex: 1,
         });
     });

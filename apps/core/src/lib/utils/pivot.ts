@@ -1,4 +1,4 @@
-import { AggregationType, Column, ColumnDef, Data, FilterType, Row } from '../common';
+import { AggregationType, Column, ColumnDef, Data, Row } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
 const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row => ({
@@ -11,54 +11,45 @@ const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row 
     childrenMap: {},
 });
 
-const newColumn = (key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>, filterType?: FilterType, aggregation?: Column['aggregation']) => ({
+const newColumn = (baseColumn: Column, key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>) => ({
+    ...baseColumn,
     id: uuidv4(),
+    field,
     headerName: key,
-    pivotField: field,
     flex: 1,
     parent: parentId,
     children: [],
     childrenMap: {},
     menu: false,
-    filterType,
-    aggregation,
     _filters: filters,
     _firstLevel: !index,
 })
 
-interface RowConfig {
-    row: Row;
-    index: number;
-}
-
 export const groupByPivot = (
     data: Data,
-    groupRows: Column[],
+    rows: Column[],
     columns: Column[],
-    calculatedColumns: Column[],
+    values: Column[],
     showRowTotals: boolean
 ): [Row[], ColumnDef[]] => {
-    const rowSize: Record<string, RowConfig> = {};
-    const rows: Row[] = [];
+    const rowSize: Record<string, Row> = {};
+    const _rows: Row[] = [];
     const columnDefs: Record<string, ColumnDef> = {};
 
-    if (!calculatedColumns.length) {
-        calculatedColumns.push({ field: 'total:', aggregation: AggregationType.SUM } as Column);
+    if (!values.length) {
+        values.push({ field: 'total:', aggregation: AggregationType.SUM } as Column);
     }
 
     data.forEach((row, index) => {
-        const key = groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
+        const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
 
         if (!rowSize[key]) {
-            rowSize[key] = {
-                row: newRow(showRowTotals, [index]),
-                index
-            };
+            rowSize[key] = newRow(showRowTotals, [index]);
         } else {
-            rowSize[key].row._pivotIndexes?.push(index);
+            rowSize[key]._pivotIndexes?.push(index);
         }
 
-        calculatedColumns.forEach((column) => {
+        values.forEach((column) => {
             let lastField = ``;
             const filters: Record<string, string> = {};
 
@@ -67,7 +58,7 @@ export const groupByPivot = (
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 
                 if (!columnDefs[field]) {
-                    columnDefs[field] = newColumn(row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, index, {});
+                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, index, {});
 
                     if (lastField) {
                         columnDefs[lastField]?.children?.push(columnDefs[field]);
@@ -78,7 +69,7 @@ export const groupByPivot = (
             const valueField = `${column.field as string}@${lastField}`;
 
             if (!columnDefs[valueField]) {
-                columnDefs[valueField] = newColumn(column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters, FilterType.NUMBER, column.aggregation);
+                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters);
 
                 if (lastField) {
                     columnDefs[lastField]?.children?.push(columnDefs[valueField]);
@@ -90,16 +81,19 @@ export const groupByPivot = (
     console.log(Object.keys(rowSize).length, Object.keys(columnDefs).length);
 
     Object.keys(rowSize).forEach((key) => {
-        const { index, row } = rowSize[key];
+        const row = rowSize[key];
+        const index = row._pivotIndexes?.[0];
 
-        groupRows.forEach((groupRow) => {
-            row[groupRow.field as string] = data[index][groupRow.field as keyof Row];
-        });
+        if (index != undefined) {
+            rows.forEach((groupRow) => {
+                row[groupRow.field as string] = data[index][groupRow.field as keyof Row];
+            });
 
-        rows.push(row);
+            _rows.push(row);
+        }
     });
 
-    return [rows, Object.values(columnDefs)];
+    return [_rows, Object.values(columnDefs)];
 };
 
 export const groupPivot = (
