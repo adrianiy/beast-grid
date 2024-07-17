@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { MenuHorizontalPosition } from '../../common';
@@ -79,6 +79,18 @@ export default function HeaderCell<T>({
             setResizing(false);
         },
     });
+
+    const translateX = useMemo((): number => {
+        return Math.min(scrollContainer.scrollLeft - column.left + 10, column.width - 150);
+    }, [scrollContainer.scrollLeft, column.left, drag.current]);
+
+    const headerTranslation = useMemo(() => {
+        if (translateX > 0 && !column.final) {
+            console.log(translateX)
+            return { transform: `translateX(${translateX}px)` }
+        }
+        return { transform: `translateX(0px)` }
+    }, [translateX, column])
 
     function onDragStart() {
         lastX.current = 0;
@@ -196,10 +208,6 @@ export default function HeaderCell<T>({
         );
     };
 
-    // const getHeaderTranslation = (): React.CSSProperties => {
-    //     console.log(scrollContainer.scrollLeft, column.left, drag.current)
-    //     return { transform: `translateX(0px)` }
-    // }
 
     return (
         <div
@@ -218,7 +226,9 @@ export default function HeaderCell<T>({
             data-clone={column.original}
         >
             <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-                <span className="bg-grid-header-drop bg-grid-header__cell__name" title={column.headerName} >
+                <span className="bg-grid-header-drop bg-grid-header__cell__name"
+                    style={headerTranslation}
+                    title={column.headerName} >
                     {column.headerName}
                 </span>
                 {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
