@@ -1,4 +1,5 @@
 import { ColumnStore, Column, SortType, ColumnId, PinType, OnChanges, ChangeType } from '../../../common';
+import { DynamicState, GridStore } from '../store';
 
 export const toggleHide = (column: Column, columns: ColumnStore) => {
     column.hidden = !column.hidden;
@@ -241,3 +242,30 @@ export const updateColumnVisibility = (
 
     return columns;
 };
+
+export const saveSnapshot = (state: GridStore): DynamicState[] => {
+    const {
+        snapshots,
+        columns,
+        sort,
+        groupOrder,
+        sortedColumns,
+        hiddenColumns,
+        filters,
+        pivotData,
+        groupData
+    } = state;
+
+    snapshots.push({
+        columns,
+        sort,
+        groupOrder,
+        sortedColumns,
+        hiddenColumns,
+        filters,
+        pivotData: pivotData?.length ? undefined : pivotData,
+        groupData: pivotData?.length ? undefined : groupData
+    });
+
+    return snapshots;
+}

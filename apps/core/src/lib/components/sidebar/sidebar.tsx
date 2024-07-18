@@ -32,7 +32,7 @@ function SideBarSwitch<T>({
     config,
     ...chartProps
 }: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> } & Partial<ChartProps>) {
-    const [columns] = useBeastStore((state) => [state.initialColumns]);
+    const [columns] = useBeastStore((state) => [state.columns]);
 
     switch (sideBarConfig) {
         case SideBarConfig.GRID:

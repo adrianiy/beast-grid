@@ -72,7 +72,7 @@ export const Download = ({ toolbar }: Props) => {
 };
 
 export const DownloadExcel = ({ toolbar }: Props) => {
-    const [data, columns] = useBeastStore((state) => [state.initialData, state.sortedColumns]);
+    const [data, columns] = useBeastStore((state) => [state.data, state.sortedColumns]);
     if (!toolbar.downloadExcel) {
         return null;
     }
@@ -215,9 +215,9 @@ export const ChartConfig = ({ toolbar }: Props) => {
 };
 
 export const Restore = ({ toolbar, callback }: Props) => {
-    const [edited, restore] = useBeastStore((state) => [state.edited, state.restore]);
+    const [snapshots, restore] = useBeastStore((state) => [state.snapshots, state.restore]);
 
-    if (!edited || !toolbar.restore) {
+    if (!snapshots.length || !toolbar.restore) {
         return null;
     }
     const isActive = (toolbar.restore as ToolBarButton).active ?? true;

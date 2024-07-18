@@ -38,7 +38,6 @@ import {
     TreeConstructor,
 } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
-import { clone } from '../../utils/functions';
 
 export interface PivotState {
     columns: Column[];
@@ -51,33 +50,35 @@ export interface PivotState {
     rowGroups: boolean;
 }
 
-export interface GridState {
+export interface DynamicState {
+    sort: ColumnId[];
+    groupOrder: ColumnId[];
+    columns: ColumnStore;
+    pivotData?: Data;
+    groupData?: Data;
+    sortedColumns: Column[];
+    hiddenColumns: ColumnId[];
+    filters: Record<ColumnId, IFilter[]>;
+}
+
+export interface GridState extends DynamicState {
     edited: boolean;
     initialized: boolean;
     data: Data;
-    pivotData?: Data;
-    columns: ColumnStore;
     theme: string;
     container: HTMLDivElement;
     defaultColumnDef: Partial<ColumnDef> | undefined;
     allowMultipleColumnSort: boolean;
-    sort: ColumnId[];
     tree: Partial<TreeConstructor> | undefined;
-    groupOrder: ColumnId[];
-    initialData: Data;
-    unfilteredData: Data;
-    initialColumns: ColumnStore;
-    sortedColumns: Column[];
-    hiddenColumns: ColumnId[];
     loading: boolean;
     sorting: boolean;
     scrollElement: HTMLDivElement;
-    filters: Record<ColumnId, IFilter[]>;
     sideBarConfig: SideBarConfig | null;
     selectedCells: SelectedCells | null;
     selecting: boolean;
     mode: BeastMode;
     pivot: Partial<PivotState> | null;
+    snapshots: DynamicState[];
     onChanges?: OnChanges;
 }
 
@@ -137,9 +138,6 @@ export const createGridStore = <T>(
         edited: false,
         defaultColumnDef,
         data,
-        initialData: [...initialData],
-        unfilteredData: [...initialData],
-        initialColumns: clone(columns),
         hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,
         groupOrder,
@@ -147,6 +145,7 @@ export const createGridStore = <T>(
         sortedColumns,
         allowMultipleColumnSort: !!sort?.multiple,
         theme,
+        snapshots: [],
         sort: [],
         selectedCells: null,
         filters: {},
@@ -193,7 +192,7 @@ export const createGridStore = <T>(
         setMode: (mode: BeastMode) => set({ mode }),
         setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot, initialState)),
         setInitialPivot: (pivot: PivotConfig) => set(setInitialPivot(pivot)),
-        restore: () => set(restore(initialState)),
+        restore: () => set(restore()),
         updateColumnVisibility: (scrollLeft: number) => set(setColumnsVisibility(scrollLeft)),
         autoSizeColumns: () => set(autoSizeColumns()),
     }));
