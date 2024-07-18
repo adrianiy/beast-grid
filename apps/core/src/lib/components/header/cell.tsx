@@ -11,6 +11,7 @@ import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
 import cn from 'classnames';
+import { useScrollInViewHook } from '../../hooks/scrollInView';
 
 type Props<T> = {
     levelIdx: number;
@@ -44,6 +45,7 @@ export default function HeaderCell<T>({
     const [showMenu, setShowMenu] = useState(false);
     const [dragging, setDragging] = useState(false);
     const [resizing, setResizing] = useState(false);
+    const [translateX, setTranslateX] = useState(0);
     const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort] =
         useBeastStore((state) => [
             state.columns,
@@ -80,17 +82,14 @@ export default function HeaderCell<T>({
         },
     });
 
-    const translateX = useMemo((): number => {
-        return Math.min(scrollContainer.scrollLeft - column.left + 10, column.width - 150);
-    }, [scrollContainer.scrollLeft, column.left, drag.current]);
+    const [translate] = useScrollInViewHook({
+        column,
+        onAnimationFrame: handleTranslate
+    })
 
-    const headerTranslation = useMemo(() => {
-        if (translateX > 0 && !column.final) {
-            console.log(translateX)
-            return { transform: `translateX(${translateX}px)` }
-        }
-        return { transform: `translateX(0px)` }
-    }, [translateX, column])
+    function handleTranslate(translate: number) {
+        setTranslateX(translate);
+    }
 
     function onDragStart() {
         lastX.current = 0;
@@ -227,7 +226,8 @@ export default function HeaderCell<T>({
         >
             <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
                 <span className="bg-grid-header-drop bg-grid-header__cell__name"
-                    style={headerTranslation}
+                    ref={translate}
+                    style={{ transform: `translateX(${translateX}px)` }}
                     title={column.headerName} >
                     {column.headerName}
                 </span>
