@@ -347,6 +347,7 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
     const hiddenColumns = sortedColumns.filter(c => c.hidden).map(c => c.id);
 
     setColumnsStyleProps(columns, container.offsetWidth);
+    setColumnFilters(columns, initialData);
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
     moveColumns(columns, sortedColumns, PinType.RIGHT);
@@ -355,7 +356,7 @@ export const restore = (initialState: Partial<GridState>) => (state: GridStore) 
         onChanges(ChangeType.RESTORE, {});
     }
 
-    return { ...clone(initialState), data: [...initialData], unfilteredData: [...initialData], sortedColumns, columns, hiddenColumns, groupOrder, edited: false };
+    return { ...clone(initialState), data: [...initialData], unfilteredData: [...initialData], sortedColumns, columns, hiddenColumns, groupOrder, filters: {}, edited: false };
 
 };
 

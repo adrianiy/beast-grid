@@ -7,9 +7,10 @@
         padding: 0 var(--bg-size--5);
         display: grid;
         background-color: var(--bg-accordion-children-background-color);
-        grid-template-rows: 0;
+        grid-template-rows: 0fr;
 
         & > div {
+            display: block;
             overflow: hidden;
         }
 
