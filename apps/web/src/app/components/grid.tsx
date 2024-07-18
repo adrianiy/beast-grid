@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ColumnDef, Data, OperationType, PinType, Row, SortType } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, Changes, ColumnDef, Data, Row, SortType, ChangeType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -217,6 +217,12 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         setError(false);
     };
 
+    const handleChanges = (changeType: ChangeType, config: Changes) => {
+        if (changeType === ChangeType.SORT) {
+            console.log(config)
+        }
+    }
+
     return (
         <>
             <Snackbar
@@ -231,7 +237,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     Error fetching data :(
                 </Alert>
             </Snackbar>
-            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" />
+            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
         </>
     );
 }

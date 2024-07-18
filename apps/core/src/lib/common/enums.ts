@@ -87,5 +87,6 @@ export enum ChangeType {
     PIVOT = 'pivot',
     SORT = 'sort',
     RESTORE = 'restore',
-    PIN = 'pin'
+    PIN = 'pin',
+    VISIBILITY = 'visibility'
 }
