@@ -20,6 +20,7 @@ type Props = {
 };
 
 export default function TextFilters(props: Props) {
+    const container = useRef<HTMLDivElement>(null);
     const { column } = props;
     const intl = useIntl();
     const [searchValue, setSearchValue] = useState('');
@@ -52,9 +53,9 @@ export default function TextFilters(props: Props) {
 
     const handleFilterChange =
         (value: IFilter): MouseEventHandler<HTMLDivElement> =>
-        () => {
-            addFilter(column.id, value);
-        };
+            () => {
+                addFilter(column.id, value);
+            };
 
     const handleSelectAll: MouseEventHandler<HTMLDivElement> = () => {
         selectAll(column.id, filterOptions);
@@ -111,7 +112,7 @@ export default function TextFilters(props: Props) {
     };
 
     return (
-        <div className="bg-filter bg-filter__text" onClick={handleClick}>
+        <div className="bg-filter bg-filter__text" onClick={handleClick} ref={container}>
             <Input
                 placeholder={intl.formatMessage({ id: 'filter.placeholder' })}
                 className="bg-filter__search"
@@ -122,7 +123,7 @@ export default function TextFilters(props: Props) {
             <List
                 ref={list}
                 height={200}
-                width={245}
+                width={container.current?.clientWidth || 0}
                 rowCount={filterOptions.length}
                 rowHeight={rowHeight}
                 rowRenderer={renderOption}

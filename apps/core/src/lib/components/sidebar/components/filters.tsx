@@ -12,7 +12,6 @@ import SimpleBar from 'simplebar-react';
 import SimpleBarCore from 'simplebar-core';
 
 import cn from 'classnames';
-import { AutoSizer, List } from 'react-virtualized';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -38,7 +37,7 @@ export default function Filters<T>({ config }: Props<T>) {
                 <FormattedMessage id="toolbar.filter" />
                 <Cross2Icon onClick={() => setSidebar(null)} />
             </div>
-            <SimpleBar className="bg-sidebar__content" ref={ref}>
+            <SimpleBar className="bg-sidebar__content" ref={ref} style={{ height: 400 }}>
                 <Options
                     columns={Object.values(columns).filter((column) => column.level === 0)}
                     scrollContainer={scrollElement}
@@ -72,55 +71,42 @@ const OptionLabel = ({ option }: { option: Column }) => {
     );
 };
 
-const renderOption = ({
-    columns,
+const RenderOption = ({
+    option,
     columnStore,
     scrollContainer,
-    list,
     handleRowExpand,
 }: {
-    columns: Column[];
+    option: Column;
     columnStore: ColumnStore;
     scrollContainer: HTMLDivElement | null;
-    list: React.MutableRefObject<List | null>;
-    handleRowExpand: (expanded: boolean, id: number) => void;
+    handleRowExpand: (expanded: boolean) => void;
 }) => {
-    return function _renderOption({ index, key, style }: { key: string; index: number; style: React.CSSProperties }) {
-        const option = columns[index];
-
-        return (
-            <Accordion
-                key={key}
-                id={`sidebar_filter_${option.id}_${option.parent}`}
-                label={<OptionLabel option={option} />}
-                elements={option.childrenId?.length ? option.childrenId.length : option.filterOptions?.length || 0}
-                height={400}
-                style={style}
-                onExpand={(expanded) => {
-                    handleRowExpand(expanded, index);
-                    list.current?.recomputeRowHeights();
-                    list.current?.forceUpdate();
-                }}
-            >
-                {option.childrenId?.length ? (
-                    <Options
-                        columns={option.childrenId.map((id) => columnStore[id])}
-                        scrollContainer={scrollContainer}
-                    />
-                ) : (
-                    <Filter column={option} scrollContainer={scrollContainer} />
-                )}
-            </Accordion>
-        );
-    };
+    return <Accordion
+        id={`sidebar_filter_${option.id}_${option.parent}`}
+        label={<OptionLabel option={option} />}
+        elements={option.childrenId?.length ? option.childrenId.length : option.filterOptions?.length || 0}
+        height={400}
+        onExpand={(expanded) => {
+            handleRowExpand(expanded);
+        }}
+    >
+        {option.childrenId?.length ? (
+            <Options
+                columns={option.childrenId.map((id) => columnStore[id])}
+                scrollContainer={scrollContainer}
+            />
+        ) : (
+            <Filter column={option} scrollContainer={scrollContainer} />
+        )}
+    </Accordion>
 };
 
 const Options = ({ columns, scrollContainer }: { columns: Column[]; scrollContainer: HTMLDivElement | null }) => {
     const [columnStore] = useBeastStore((state) => [state.columns]);
-    const list = useRef<List | null>(null);
     const expandedRows = useRef<number[]>([]);
 
-    const handleRowExpand = (expanded: boolean, id: number) => {
+    const handleRowExpand = (id: number) => (expanded: boolean) => {
         if (expanded) {
             if (!expandedRows.current.includes(id)) {
                 expandedRows.current.push(id);
@@ -130,24 +116,11 @@ const Options = ({ columns, scrollContainer }: { columns: Column[]; scrollContai
         }
     };
 
-    const rowHeight = ({ index }: { index: number }) => {
-        const expanded = expandedRows.current.includes(index);
-
-        return expanded ? 400 : 40;
-    };
-
     return (
-        <AutoSizer>
-            {({ width }) => (
-                <List
-                    ref={list}
-                    height={400}
-                    width={width}
-                    rowCount={columns.length}
-                    rowHeight={rowHeight}
-                    rowRenderer={renderOption({ columns, columnStore, scrollContainer, list, handleRowExpand })}
-                />
-            )}
-        </AutoSizer>
+        <div className="bg-filter__options column">
+            {
+                columns.map((column, idx) => <RenderOption key={idx} option={column} columnStore={columnStore} scrollContainer={scrollContainer} handleRowExpand={handleRowExpand(idx)} />)
+            }
+        </div>
     );
 };
