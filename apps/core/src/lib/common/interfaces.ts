@@ -262,6 +262,7 @@ export interface BeastGridApi {
     setColumns: (columns: ColumnStore) => void;
     setLoading: (loading: boolean) => void;
     setData: (data: Data) => void;
+    setEdited: (edited: boolean) => void;
 }
 
 export interface Coords {

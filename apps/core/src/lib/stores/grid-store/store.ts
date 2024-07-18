@@ -108,6 +108,7 @@ export interface GridStore extends GridState {
     setMode: (mode: BeastMode) => void;
     setPivot: (pivot: Partial<PivotState> | null) => void;
     setInitialPivot: (pivot: PivotConfig) => void;
+    setEdited: (edited: boolean) => void;
     restore: () => void;
     updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;
@@ -195,6 +196,8 @@ export const createGridStore = <T>(
         restore: () => set(restore(initialState)),
         updateColumnVisibility: (scrollLeft: number) => set(setColumnsVisibility(scrollLeft)),
         autoSizeColumns: () => set(autoSizeColumns()),
+        setEdited: (edited: boolean) => set({ edited }),
+
     }));
 };
 
