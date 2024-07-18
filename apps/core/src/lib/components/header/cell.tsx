@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ArrowDownIcon, ArrowUpIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import { BeastGridConfig, Column, Coords, HeaderEvents, SortState } from './../../common/interfaces';
 import { MenuHorizontalPosition } from '../../common';
@@ -11,6 +11,7 @@ import { useDndStore } from './../../stores/dnd-store';
 import { useDndHook } from '../../hooks/dnd';
 
 import cn from 'classnames';
+import { useScrollInViewHook } from '../../hooks/scrollInView';
 
 type Props<T> = {
     levelIdx: number;
@@ -44,6 +45,7 @@ export default function HeaderCell<T>({
     const [showMenu, setShowMenu] = useState(false);
     const [dragging, setDragging] = useState(false);
     const [resizing, setResizing] = useState(false);
+    const [translateX, setTranslateX] = useState(0);
     const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort] =
         useBeastStore((state) => [
             state.columns,
@@ -79,6 +81,15 @@ export default function HeaderCell<T>({
             setResizing(false);
         },
     });
+
+    const [translate] = useScrollInViewHook({
+        column,
+        onAnimationFrame: handleTranslate
+    })
+
+    function handleTranslate(translate: number) {
+        setTranslateX(translate);
+    }
 
     function onDragStart() {
         lastX.current = 0;
@@ -196,10 +207,6 @@ export default function HeaderCell<T>({
         );
     };
 
-    // const getHeaderTranslation = (): React.CSSProperties => {
-    //     console.log(scrollContainer.scrollLeft, column.left, drag.current)
-    //     return { transform: `translateX(0px)` }
-    // }
 
     return (
         <div
@@ -218,7 +225,10 @@ export default function HeaderCell<T>({
             data-clone={column.original}
         >
             <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-                <span className="bg-grid-header-drop bg-grid-header__cell__name" title={column.headerName} >
+                <span className="bg-grid-header-drop bg-grid-header__cell__name"
+                    ref={translate}
+                    style={{ transform: `translateX(${translateX}px)` }}
+                    title={column.headerName} >
                     {column.headerName}
                 </span>
                 {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
