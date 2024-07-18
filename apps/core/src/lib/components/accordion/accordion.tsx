@@ -19,8 +19,6 @@ type Props = {
 export default function Accordion(props: PropsWithChildren<Props>) {
     const { label, id, elements, hideArrow, withoutArrow, height, children } = props;
     const [expanded, setExpaned] = useState(false);
-    const [childrenHeight, setChildrenHeight] = useState<number | string>(0);
-    const [minHeight, setMinHeight] = useState(0);
 
     const toggleRow = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -29,12 +27,8 @@ export default function Accordion(props: PropsWithChildren<Props>) {
             props.onExpand(!expanded);
         }
         if (expanded) {
-            setMinHeight(0);
-            setChildrenHeight(0);
             setExpaned(false);
         } else if (height || elements) {
-            setChildrenHeight(360);
-            setMinHeight(360);
             setExpaned(true);
         }
     };
@@ -57,11 +51,12 @@ export default function Accordion(props: PropsWithChildren<Props>) {
                 {label}
             </div>
             <div
-                className={cn('bg-accordion__children', { hidden: !expanded })}
+                className={cn('bg-accordion__children', { expanded })}
                 id={`bg-accordion__children__${id}`}
-                style={{ height: childrenHeight, minHeight: minHeight, maxWidth: '-webkit-fill-available' }}
             >
-                {expanded ? children : undefined}
+                <div>
+                    {children}
+                </div>
             </div>
         </div>
     );
