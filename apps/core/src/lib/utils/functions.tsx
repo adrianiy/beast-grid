@@ -9,14 +9,20 @@ import {
     ColumnStore,
     Data,
     FilterType,
+    Formula,
     IFilter,
+    MathCell,
+    MathType,
     NumberFilter,
+    Operand,
+    Operation,
     OperationType,
     Row,
     SortType,
 } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
+import { parseFormula } from './math';
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
     switch (column.aggregation) {
@@ -146,22 +152,61 @@ export const aggregateData = (
     calculatedColumn: Column,
     valueField: string
 ): Row => {
+    const value = getFieldValue(row, valueField);
     if (calculatedColumn.aggregation === AggregationType.SUM) {
-        data[valueField] = +(data[valueField] || 0) + +(row[valueField as keyof Row] || 0);
+        data[valueField] = +(data[valueField] || 0) + value;
     } else if (calculatedColumn.aggregation === AggregationType.AVG) {
         data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
-        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + +(row[valueField as keyof Row] || 0);
+        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + value;
 
         data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
     } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
         data[valueField] = +(data[valueField] || 0) + 1;
     } else if (calculatedColumn.aggregation === AggregationType.MIN) {
-        data[valueField] = Math.min(data[valueField] as number || Infinity, row[valueField as keyof Row] as number);
+        data[valueField] = Math.min(data[valueField] as number || Infinity, value);
     } else if (calculatedColumn.aggregation === AggregationType.MAX) {
-        data[valueField] = Math.max(data[valueField] as number || -Infinity, row[valueField as keyof Row] as number);
+        data[valueField] = Math.max(data[valueField] as number || -Infinity, value);
     }
 
     return data;
+}
+
+const doPivotOperation = (formula: Operand | null, column: Column, rows: Row[]): number => {
+    if (!formula) {
+        return 0;
+    }
+    if (formula.type === MathType.CELL) {
+        const cell = formula as MathCell;
+
+        if (!isNaN(+cell.cell)) {
+            return +cell.cell;
+        }
+
+        return rows.reduce((acc, curr) => aggregateData(acc, curr, column, cell.cell), {})[cell.cell] as number;
+    }
+
+    const operation = formula as Formula;
+
+    switch (operation.operation) {
+        case Operation.ADD:
+            return doPivotOperation(operation.left, column, rows) + doPivotOperation(operation.right, column, rows);
+        case Operation.SUBTRACT:
+            return doPivotOperation(operation.left, column, rows) - doPivotOperation(operation.right, column, rows);
+        case Operation.MULTIPLY:
+            return doPivotOperation(operation.left, column, rows) * doPivotOperation(operation.right, column, rows);
+        case Operation.DIVIDE:
+            return doPivotOperation(operation.left, column, rows) / doPivotOperation(operation.right, column, rows);
+        case Operation.POWER:
+            return doPivotOperation(operation.left, column, rows) ** doPivotOperation(operation.right, column, rows);
+        default:
+            return 0;
+    }
+}
+
+const getPivotFormula = (field: string, column: Column, rows: Row[]) => {
+    const jsonFormula = parseFormula(field);
+
+    return doPivotOperation(jsonFormula as Operand, column, rows);
 }
 
 export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
@@ -179,6 +224,14 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
             }
 
         }
+
+        // NOTE: Test this with a real case
+        const mathField = field.startsWith('#{');
+
+        if (mathField) {
+            return getPivotFormula(field, column, rows);
+        }
+
         const reduced = rows.reduce((acc, curr) => aggregateData(acc, curr, column, field!), {});
 
         return reduced[field as string] as number;
@@ -186,7 +239,7 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
 
     const field = column.field;
 
-    return row[field as keyof Row] as number;
+    return getFieldValue(row, field as string) as number | string;
 }
 
 export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
@@ -393,4 +446,49 @@ export function getSumatoryColumns(columns: ColumnDef[], values: Column[]): Colu
     });
 
     return columns;
+}
+
+const doOperation = (formula: Operand | null, row: Row): number => {
+    if (!formula) {
+        return 0;
+    }
+    if (formula.type === MathType.CELL) {
+        const cell = formula as MathCell;
+
+        if (!isNaN(+cell.cell)) {
+            return +cell.cell;
+        }
+        return row[(formula as MathCell).cell] as number;
+    }
+
+    const operation = formula as Formula;
+
+    switch (operation.operation) {
+        case Operation.ADD:
+            return doOperation(operation.left, row) + doOperation(operation.right, row);
+        case Operation.SUBTRACT:
+            return doOperation(operation.left, row) - doOperation(operation.right, row);
+        case Operation.MULTIPLY:
+            return doOperation(operation.left, row) * doOperation(operation.right, row);
+        case Operation.DIVIDE:
+            return doOperation(operation.left, row) / doOperation(operation.right, row);
+        case Operation.POWER:
+            return doOperation(operation.left, row) ** doOperation(operation.right, row);
+        default:
+            return 0;
+    }
+}
+
+const getMathValue = (row: Row, field: string): number => {
+    const jsonFormula = parseFormula(field);
+
+    return doOperation(jsonFormula as Operand, row);
+}
+
+export const getFieldValue = (row: Row, field: string): number => {
+    if (field.startsWith('#{')) {
+        return getMathValue(row, field) || 0;
+    } else {
+        return row[field as keyof Row] as number || 0
+    }
 }

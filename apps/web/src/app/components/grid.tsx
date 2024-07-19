@@ -59,6 +59,12 @@ const columnDefs: ColumnDef[] = [
         formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}`,
     },
     {
+        headerName: '1ST_QUARTER',
+        field: '#{january + february + march + april}',
+        flex: 1,
+        formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
         headerName: 'MONTHS',
         children: [
             ...months.map(
@@ -220,6 +226,12 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         setError(false);
     };
 
+    const handleChanges = (changeType: ChangeType, config: Changes) => {
+        if (changeType === ChangeType.SORT) {
+            console.log(config)
+        }
+    }
+
     return (
         <>
             <Snackbar
@@ -234,7 +246,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     Error fetching data :(
                 </Alert>
             </Snackbar>
-            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" />
+            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
         </>
     );
 }

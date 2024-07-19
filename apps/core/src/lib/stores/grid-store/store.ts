@@ -116,6 +116,7 @@ export interface GridStore extends GridState {
     setMode: (mode: BeastMode) => void;
     setPivot: (pivot: Partial<PivotState> | null) => void;
     setInitialPivot: (pivot: PivotConfig) => void;
+    setEdited: (edited: boolean) => void;
     restore: () => void;
     updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;

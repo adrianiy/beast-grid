@@ -60,7 +60,7 @@ export const resetColumnConfig = (id: ColumnId) => (state: GridStore) => {
 };
 
 export const hideColumn = (id: ColumnId) => (state: GridStore) => {
-    const { columns, hiddenColumns, sortedColumns, container } = state;
+    const { columns, hiddenColumns, sortedColumns, container, onChanges } = state;
 
     const column = columns[id];
 
@@ -79,6 +79,10 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
 
 
     return updateSnapshotAndSetState(state, { columns, hiddenColumns });
+    if (onChanges) {
+        onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]) })
+    }
+    return { columns, hiddenColumns, edited: true };
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -163,7 +167,7 @@ export const changeSort = (id: ColumnId, multipleColumnSort: boolean, sortType?:
         removeSort(column, sortedColumns);
     }
 
-    columnsWithSort = columnsWithSort.filter((col) => col.id !== id);
+    columnsWithSort = Object.values(columns).filter((col) => col.sort?.priority);
 
     if (onChanges) {
         onChanges(ChangeType.SORT, { sortColumns: columnsWithSort });

@@ -127,6 +127,7 @@ function renderOption({
 
         const children = Object.values(columns).filter((c) => item.childrenId?.includes(c.id));
         const matchSearch = !searchValue || item.headerName.toLowerCase().includes(searchValue.toLowerCase());
+        console.log(matchSearch, searchValue, item.headerName);
         const hasChildren = item.childrenId?.length || 0;
         const hasMatchedChildren = children.some((c) => c.headerName.toLowerCase().includes(searchValue.toLowerCase()));
 
@@ -212,15 +213,11 @@ const Options = ({
         }
     };
 
-    if (!container) {
-        return null;
-    }
-
     return (
         <List
             ref={ref}
             height={400}
-            width={container.getBoundingClientRect().width - 10}
+            width={(container?.clientWidth || 100) - 10}
             rowHeight={rowHeight}
             rowCount={options.length}
             rowRenderer={renderOption({
