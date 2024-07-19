@@ -1,4 +1,5 @@
 import { ColumnStore, Column, SortType, ColumnId, PinType, OnChanges, ChangeType } from '../../../common';
+import { clone } from '../../../utils/functions';
 import { DynamicState, GridStore } from '../store';
 
 export const toggleHide = (column: Column, columns: ColumnStore) => {
@@ -120,8 +121,8 @@ export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinTy
 export const resizeColumnChildren = (column: Column, diff: number, columns: ColumnStore) => {
     columns[column.id].width = (columns[column.id].width || 0) + diff
 
-    if (column.children) {
-        column.children?.forEach((child) => resizeColumnChildren(child as Column, diff, columns));
+    if (column.childrenId) {
+        column.childrenId?.forEach((child) => resizeColumnChildren(columns[child], diff, columns));
     }
 };
 
@@ -243,7 +244,7 @@ export const updateColumnVisibility = (
     return columns;
 };
 
-export const saveSnapshot = (state: GridStore): DynamicState[] => {
+export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
     const {
         snapshots,
         columns,
@@ -253,19 +254,46 @@ export const saveSnapshot = (state: GridStore): DynamicState[] => {
         hiddenColumns,
         filters,
         pivotData,
-        groupData
+        pivot,
+        groupData,
+        historyPoint
     } = state;
 
-    snapshots.push({
-        columns,
+    if (historyPoint < snapshots.length - 1) {
+        snapshots.splice(historyPoint + 1);
+    }
+
+    const newHistoryPoint = historyPoint + 1;
+
+    const newSnapshot: DynamicState = {
+        columns: clone(columns),
         sort,
         groupOrder,
         sortedColumns,
         hiddenColumns,
+        pivot,
         filters,
-        pivotData: pivotData?.length ? undefined : pivotData,
-        groupData: pivotData?.length ? undefined : groupData
-    });
+        historyPoint: newHistoryPoint
+    }
 
-    return snapshots;
+    if (!pivotData?.length) {
+        newSnapshot.pivotData = pivotData;
+    }
+
+    if (!groupData?.length) {
+        newSnapshot.groupData = groupData;
+    }
+
+    snapshots.push(newSnapshot);
+
+    return [snapshots, newHistoryPoint];
+}
+
+export const updateSnapshotAndSetState = (state: GridStore, newState: Partial<GridStore>): Partial<GridStore> => {
+    const [snapshots, historyPoint] = saveSnapshot({ ...state, ...newState });
+
+    newState.snapshots = snapshots;
+    newState.historyPoint = historyPoint;
+
+    return newState;
 }

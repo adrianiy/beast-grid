@@ -14,7 +14,7 @@ import {
 } from 'echarts/components';
 import { useBeastStore } from './stores/beast-store';
 import { filterRow, getCategories, getDates, getSeries, groupBy, groupByMultiple } from './utils/functions';
-import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './common';
+import { BeastGridConfig, ChartType, Column, ColumnStore, Data, SideBarConfig } from './common';
 import deepmerge from 'deepmerge';
 import { EChartsCoreOption } from 'echarts';
 import SideBar from './components/sidebar/sidebar';
@@ -108,6 +108,7 @@ export default function Chart<T>(props: Props<T>) {
                     <ChartWrapper
                         config={props.config}
                         columns={props.columns ?? sortedColumns}
+                        columnStore={columns}
                         activeColumns={props.activeColumns}
                         data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
                     />
@@ -122,6 +123,7 @@ export default function Chart<T>(props: Props<T>) {
                 columns={props.columns ?? sortedColumns}
                 activeColumns={props.activeColumns}
                 data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+                columnStore={columns}
                 category={category}
                 values={values}
                 groups={groups}
@@ -138,6 +140,7 @@ export default function Chart<T>(props: Props<T>) {
 type WrapperProps<T> = {
     config: BeastGridConfig<T>;
     columns: Column[];
+    columnStore: ColumnStore;
     activeColumns?: Column[];
     data: Data;
     category?: Column;
@@ -151,7 +154,7 @@ type WrapperProps<T> = {
 };
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
-    const { columns, data } = props;
+    const { columns, columnStore, data } = props;
 
     const configurableCategories = getCategories(columns, data);
     const configurableValues = getSeries(columns, data);
@@ -183,7 +186,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
     useEffect(() => {
         const aggColumns = values.filter((col) => col.aggregation);
-        const groupedData = category ? groupBy(data, category, aggColumns) : data;
+        const groupedData = category ? groupBy(data, category, aggColumns, columnStore) : data;
         const categories = category
             ? groupedData.map((row) => row[category.field as string])
             : new Array(data.length).fill(0).map((_, idx) => idx);

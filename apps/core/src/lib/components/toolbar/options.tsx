@@ -1,4 +1,4 @@
-import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, TableIcon, UpdateIcon } from '@radix-ui/react-icons';
+import { BarChartIcon, DownloadIcon, MixerHorizontalIcon, ResetIcon, TableIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { BeastMode, SideBarConfig, ToolBar, ToolBarButton } from '../../common';
 import { FormattedMessage } from 'react-intl';
 import { useBeastStore } from '../../stores/beast-store';
@@ -217,7 +217,7 @@ export const ChartConfig = ({ toolbar }: Props) => {
 export const Restore = ({ toolbar, callback }: Props) => {
     const [snapshots, restore] = useBeastStore((state) => [state.snapshots, state.restore]);
 
-    if (!snapshots.length || !toolbar.restore) {
+    if (snapshots.length === 1 || !toolbar.restore) {
         return null;
     }
     const isActive = (toolbar.restore as ToolBarButton).active ?? true;
@@ -238,3 +238,55 @@ export const Restore = ({ toolbar, callback }: Props) => {
         </div>
     );
 };
+
+export const Undo = ({ toolbar, callback }: Props) => {
+    const [snapshots, historyPoint, undo] = useBeastStore((state) => [state.snapshots, state.historyPoint, state.undo]);
+
+    if (snapshots.length === 1 || !toolbar.history) {
+        return null;
+    }
+
+    const isActive = historyPoint > 0 && ((toolbar.history as ToolBarButton).active ?? true);
+
+    const undoChanges = () => {
+        if (!isActive) {
+            return;
+        }
+
+        callback?.();
+        undo();
+    }
+
+    return (
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={undoChanges}>
+            <ResetIcon />
+            <FormattedMessage id="toolbar.undo" defaultMessage="Undo" />
+        </div>
+    );
+}
+
+export const Redo = ({ toolbar, callback }: Props) => {
+    const [historyPoint, snapshots, redo] = useBeastStore((state) => [state.historyPoint, state.snapshots, state.redo]);
+
+    if (snapshots.length === 1 || !toolbar.history) {
+        return null;
+    }
+
+    const isActive = historyPoint < snapshots.length - 1 && ((toolbar.history as ToolBarButton).active ?? true);
+
+    const redoChanges = () => {
+        if (!isActive) {
+            return;
+        }
+
+        callback?.();
+        redo();
+    }
+
+    return (
+        <div className={cn('bg-toolbar__button row middle', { disabled: !isActive })} onClick={redoChanges}>
+            <ResetIcon style={{ transform: 'scaleX(-1)' }} />
+            <FormattedMessage id="toolbar.redo" defaultMessage="Redo" />
+        </div>
+    );
+}

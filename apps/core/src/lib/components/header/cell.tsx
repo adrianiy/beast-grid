@@ -46,7 +46,7 @@ export default function HeaderCell<T>({
     const [dragging, setDragging] = useState(false);
     const [resizing, setResizing] = useState(false);
     const [translateX, setTranslateX] = useState(0);
-    const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort] =
+    const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort, saveState] =
         useBeastStore((state) => [
             state.columns,
             state.filters,
@@ -57,6 +57,7 @@ export default function HeaderCell<T>({
             state.container,
             state.scrollElement,
             state.changeSort,
+            state.saveState
         ]);
     const [dropTargets] = useDndStore((state) => [state.dropTargets]);
     const [drag] = useDndHook(
@@ -79,6 +80,7 @@ export default function HeaderCell<T>({
         onDragEnd: () => {
             lastX.current = 0;
             setResizing(false);
+            saveState();
         },
     });
 
@@ -167,6 +169,7 @@ export default function HeaderCell<T>({
             }
         }
         setDragging(false);
+        saveState();
     }
 
     const handleChangeSort = () => {
@@ -213,7 +216,7 @@ export default function HeaderCell<T>({
             className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
             key={`${levelIdx}-${idx}-${column.id}`}
             style={{
-                marginTop: !column.children && levelIdx === 0 ? height * (headers.length - 1) : 0,
+                marginTop: !column.childrenId && levelIdx === 0 ? height * (headers.length - 1) : 0,
                 height,
                 width: column.width,
                 left: column.left,

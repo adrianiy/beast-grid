@@ -58,6 +58,7 @@ export default function TBody<T>({
     const [
         data,
         pivotData,
+        groupData,
         columns,
         sortedColumns,
         theme,
@@ -71,6 +72,7 @@ export default function TBody<T>({
     ] = useBeastStore((state) => [
         state.data,
         state.pivotData,
+        state.groupData,
         state.columns,
         state.sortedColumns,
         state.theme,
@@ -108,12 +110,15 @@ export default function TBody<T>({
     }, [scrollTop, expandedRows, filters]);
 
     const currentData = useMemo(() => {
-        if (pivotData) {
+        if (groupData?.length) {
+            return groupData;
+        }
+        if (pivotData?.length) {
             return pivotData;
         }
 
         return data;
-    }, [data, pivotData]);
+    }, [data, pivotData, groupData]);
 
     useEffect(() => {
         if (!currentData.length) {

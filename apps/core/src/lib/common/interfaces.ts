@@ -133,6 +133,7 @@ export interface ToolBar {
     filter: Partial<ToolBarButton> | boolean;
     mode: Partial<ToolBarButton> | boolean;
     restore: Partial<ToolBarButton> | boolean;
+    history: Partial<ToolBarButton> | boolean;
     custom: ReactNode;
 }
 
@@ -204,7 +205,9 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     dragOptions?: Partial<DragOptions>;
     tree?: Partial<TreeConstructor>;
     topToolbar?: Partial<ToolBar>;
+    topLeftToolbar?: Partial<ToolBar>;
     bottomToolbar?: Partial<ToolBar>;
+    bottomLeftToolbar?: Partial<ToolBar>;
     chart?: Partial<Chart>;
     contextualMenu?: Partial<ContextualMenuProps>;
     appendModalToBoy?: boolean;
@@ -263,6 +266,7 @@ export interface BeastGridApi {
     setColumns: (columns: ColumnStore) => void;
     setLoading: (loading: boolean) => void;
     setData: (data: Data) => void;
+    clearHistory: () => void;
 }
 
 export interface Coords {

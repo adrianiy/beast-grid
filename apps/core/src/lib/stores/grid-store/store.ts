@@ -3,13 +3,16 @@ import {
     addFilter,
     autoSizeColumns,
     changeSort,
+    clearHistory,
     deleteEmptyParents,
     groupByColumn,
     hideColumn,
     pinColumn,
+    redo,
     resetColumnConfig,
     resizeColumn,
     restore,
+    saveState,
     selectAllFilters,
     setColumn,
     setColumnsVisibility,
@@ -20,6 +23,7 @@ import {
     setSelectedStart,
     setSideBarConfig,
     swapColumns,
+    undo,
     unGroupColumn,
     updateSelectedCells,
 } from './actions';
@@ -37,7 +41,7 @@ import {
     SortType,
     TreeConstructor,
 } from '../../common';
-import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, sortColumns } from './utils';
+import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, saveSnapshot, sortColumns } from './utils';
 
 export interface PivotState {
     columns: Column[];
@@ -48,6 +52,7 @@ export interface PivotState {
     columnTotals: boolean;
     rowTotals: boolean;
     rowGroups: boolean;
+    snapshotBeforePivot: number;
 }
 
 export interface DynamicState {
@@ -59,6 +64,8 @@ export interface DynamicState {
     sortedColumns: Column[];
     hiddenColumns: ColumnId[];
     filters: Record<ColumnId, IFilter[]>;
+    pivot?: Partial<PivotState>;
+    historyPoint: number;
 }
 
 export interface GridState extends DynamicState {
@@ -77,7 +84,6 @@ export interface GridState extends DynamicState {
     selectedCells: SelectedCells | null;
     selecting: boolean;
     mode: BeastMode;
-    pivot: Partial<PivotState> | null;
     snapshots: DynamicState[];
     onChanges?: OnChanges;
 }
@@ -113,6 +119,10 @@ export interface GridStore extends GridState {
     restore: () => void;
     updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;
+    saveState: () => void;
+    clearHistory: () => void;
+    undo: () => void;
+    redo: () => void;
 }
 
 export const createGridStore = <T>(
@@ -134,7 +144,7 @@ export const createGridStore = <T>(
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
 
-    const initialState = {
+    const initialState: GridState = {
         edited: false,
         defaultColumnDef,
         data,
@@ -152,18 +162,22 @@ export const createGridStore = <T>(
         loading: false,
         sorting: false,
         selecting: false,
-        pivot: null,
-        pivotConfig: null,
-        onChanges
-    };
-
-    return create<GridStore>((set) => ({
-        ...initialState,
         initialized: data.length > 0,
         container,
         mode: BeastMode.GRID,
         scrollElement: null as unknown as HTMLDivElement,
         sideBarConfig: null,
+        historyPoint: 0,
+        onChanges
+    };
+
+    const [snapshots, historyPoint] = saveSnapshot(initialState as any as GridStore);
+
+    initialState.snapshots = snapshots;
+    initialState.historyPoint = historyPoint;
+
+    return create<GridStore>((set) => ({
+        ...initialState,
         setData: (data: Data) => set(setData(data)),
         setColumns: (columns: ColumnStore) => set({ columns }),
         setTheme: (theme: string) => set({ theme }),
@@ -190,11 +204,15 @@ export const createGridStore = <T>(
         setSelectedEnd: (selected: Coords) => set(setSelectedEnd(selected)),
         setSelecting: (selecting: boolean) => set({ selecting }),
         setMode: (mode: BeastMode) => set({ mode }),
-        setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot, initialState)),
+        setPivot: (pivot: Partial<PivotState> | null) => set(setPivot(pivot)),
         setInitialPivot: (pivot: PivotConfig) => set(setInitialPivot(pivot)),
         restore: () => set(restore()),
         updateColumnVisibility: (scrollLeft: number) => set(setColumnsVisibility(scrollLeft)),
         autoSizeColumns: () => set(autoSizeColumns()),
+        saveState: () => set(saveState()),
+        clearHistory: () => set(clearHistory()),
+        undo: () => set(undo()),
+        redo: () => set(redo()),
     }));
 };
 

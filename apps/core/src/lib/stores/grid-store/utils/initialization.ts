@@ -38,6 +38,7 @@ const loopColumns = (
         const id = columnDef.id ?? uuidv4();
         const column: Column = {
             ...deepmerge(defaultColumnDef || {}, columnDef),
+            children: [],
             width: columnDef.width || 0,
             position: levelIndexes[level],
             finalPosition: levelIndexes[level],
@@ -106,22 +107,22 @@ export const createVirtualIds = (data: Data): Data => {
 
 export const groupDataByColumnDefs = (
     columns: ColumnStore,
-    aggColumns: Column[],
     data: Data,
     groupOrder: ColumnId[],
     level = 0,
     pivoting = false
 ): Data => {
+    const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const aggregationLevel = columns[groupOrder[level]];
 
     if (!aggregationLevel) {
         return data;
     }
 
-    const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
+    const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns, columns);
 
     finalData.forEach((row) => {
-        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1, pivoting);
+        row.children = groupDataByColumnDefs(columns, row.children || [], groupOrder, level + 1, pivoting);
         row.children.forEach((child) => {
             child._level = level + 1;
         });
@@ -252,8 +253,7 @@ export const initialize = (
         });
         setColumnsStyleProps(columns, container.offsetWidth);
     }
-    const aggColumns = Object.values(columns).filter((c) => c.aggregation);
-    const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
+    const finalData = groupDataByColumnDefs(columns, data, groupOrder);
     setColumnsStyleProps(columns, container.offsetWidth);
     setColumnFilters(columns, data);
 

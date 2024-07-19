@@ -41,7 +41,8 @@ const getGroupRows = (
     groups: Record<string, Row[]>,
     field: string,
     calculatedColumns: Column[],
-    aggregationColumns?: Column[]
+    columns: ColumnStore,
+    aggregationColumns?: Column[],
 ): Row[] => {
     const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
@@ -69,9 +70,9 @@ const getGroupRows = (
 
                         acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
 
-                        if (aggColumn.children) {
-                            aggColumn.children.forEach((aggChildColumn) => {
-                                setChildrenFieldsByAggregation(aggChildColumn as Column);
+                        if (aggColumn.childrenId) {
+                            aggColumn.childrenId.forEach((aggChildColumn) => {
+                                setChildrenFieldsByAggregation(columns[aggChildColumn]);
                             });
                         }
                     };
@@ -106,7 +107,7 @@ const getGroupRows = (
     });
 };
 
-export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
+export const groupBy = (data: Data, column: Column, calculatedColumns: Column[], columns: ColumnStore): Row[] => {
     const groups = data.reduce((acc, row) => {
         const key = `${row[column.field as keyof Row]}`;
         if (!acc[key]) {
@@ -116,7 +117,7 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, column.field as string, calculatedColumns, undefined);
+    return getGroupRows(groups, column.field as string, calculatedColumns, columns, undefined);
 };
 
 export const groupByMultiple = (
@@ -221,7 +222,7 @@ export const filterRow =
                 if (
                     columns[filterKey].filterType === FilterType.TEXT &&
                     filters[filterKey].includes(
-                        `${row[columns[filterKey].field]}`
+                        `${row[columns[filterKey].field as string]}`
                     )
                 ) {
                     show = show && true;

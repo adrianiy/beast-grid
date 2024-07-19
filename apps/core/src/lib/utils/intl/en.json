@@ -22,6 +22,8 @@
     "toolbar.grid": "Columns",
     "toolbar.pivot": "Pivot",
     "toolbar.filter": "Filters",
+    "toolbar.undo": "Undo",
+    "toolbar.redo": "Redo",
     "filter.selectAll": "Select all",
     "filter.placeholder": "Search...",
     "filter.operation": "Operation",

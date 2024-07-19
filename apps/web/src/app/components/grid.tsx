@@ -171,6 +171,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 pivot: true,
                 filter: true,
             },
+            topLeftToolbar: {
+                history: true
+            },
             chart: {
                 defaultValues: {
                     dataColumns: ['january', 'february'],
