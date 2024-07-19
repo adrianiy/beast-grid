@@ -59,6 +59,12 @@ const columnDefs: ColumnDef[] = [
         formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}`,
     },
     {
+        headerName: '1ST_QUARTER',
+        field: '#{january + february + march + april}',
+        flex: 1,
+        formatter: (value) => numeral(value).format('0,0 $'),
+    },
+    {
         headerName: 'MONTHS',
         children: [
             ...months.map(

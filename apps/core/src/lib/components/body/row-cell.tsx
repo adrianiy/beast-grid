@@ -8,6 +8,7 @@ import { useBeastStore } from '../../stores/beast-store';
 
 import cn from 'classnames';
 import { PivotState } from '../../stores/grid-store/store';
+import { getFieldValue } from '../../utils/functions';
 
 function getProperty<Key extends keyof Row>(
     row: Row,
@@ -22,7 +23,7 @@ function getProperty<Key extends keyof Row>(
         field = columns[groupOrder[level]]?.field || field;
     }
 
-    let value = row[field as Key];
+    let value = getFieldValue(row, field as string);
 
     if (React.isValidElement(value)) {
         return value;
