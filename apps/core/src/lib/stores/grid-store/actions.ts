@@ -77,12 +77,11 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
         hiddenColumns.push(id);
     }
 
-
-    return updateSnapshotAndSetState(state, { columns, hiddenColumns });
     if (onChanges) {
         onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]) })
     }
-    return { columns, hiddenColumns, edited: true };
+
+    return updateSnapshotAndSetState(state, { columns, hiddenColumns });
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
