@@ -87,5 +87,25 @@ export enum ChangeType {
     PIVOT = 'pivot',
     SORT = 'sort',
     RESTORE = 'restore',
-    PIN = 'pin'
+    PIN = 'pin',
+    VISIBILITY = 'visibility'
+}
+
+export enum MathType {
+    OPERATION = 'operation',
+    CELL = 'cell',
+}
+
+export enum Operation {
+    ADD = '+',
+    SUBTRACT = '-',
+    MULTIPLY = '*',
+    DIVIDE = '/',
+    POWER = '^',
+}
+
+export enum MathErrors {
+    INVALID_FORMULA = 'Invalid formula',
+    LESS_PRIORITY = 'Less priority',
+    END_OF_FORMULA = 'End of formula',
 }

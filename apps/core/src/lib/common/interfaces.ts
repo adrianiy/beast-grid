@@ -1,6 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, ChangeType, FilterType, OperationType, PinType, SortType } from './enums';
+import { AggregationType, ChangeType, FilterType, MathType, Operation, OperationType, PinType, SortType } from './enums';
 import { EChartsCoreOption } from 'echarts';
 
 export interface Row {
@@ -263,6 +263,7 @@ export interface BeastGridApi {
     setColumns: (columns: ColumnStore) => void;
     setLoading: (loading: boolean) => void;
     setData: (data: Data) => void;
+    setEdited: (edited: boolean) => void;
 }
 
 export interface Coords {
@@ -289,6 +290,24 @@ export interface PivotChanges {
     pivot: Partial<PivotState>;
 }
 
-export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges> { }
+export interface VisibilityChanges {
+    hiddenColumns: Column[]
+}
+
+export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges>, Partial<VisibilityChanges> { }
 
 export type OnChanges = (changeType: ChangeType, changes: Changes) => void;
+
+export interface MathCell {
+    type: MathType;
+    cell: string;
+}
+
+export type Operand = MathCell | Formula;
+
+export interface Formula {
+    left: Operand | null;
+    right: Operand | null;
+    operation: Operation | null;
+    type: MathType;
+}

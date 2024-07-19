@@ -9,14 +9,20 @@ import {
     ColumnStore,
     Data,
     FilterType,
+    Formula,
     IFilter,
+    MathCell,
+    MathType,
     NumberFilter,
+    Operand,
+    Operation,
     OperationType,
     Row,
     SortType,
 } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
+import { parseFormula } from './math';
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
     switch (column.aggregation) {
@@ -392,4 +398,49 @@ export function getSumatoryColumns(columns: ColumnDef[], values: Column[]): Colu
     });
 
     return columns;
+}
+
+const doOperation = (formula: Operand | null, row: Row): number => {
+    if (!formula) {
+        return 0;
+    }
+    if (formula.type === MathType.CELL) {
+        const cell = formula as MathCell;
+
+        if (!isNaN(+cell.cell)) {
+            return +cell.cell;
+        }
+        return row[(formula as MathCell).cell] as number;
+    }
+
+    const operation = formula as Formula;
+
+    switch (operation.operation) {
+        case Operation.ADD:
+            return doOperation(operation.left, row) + doOperation(operation.right, row);
+        case Operation.SUBTRACT:
+            return doOperation(operation.left, row) - doOperation(operation.right, row);
+        case Operation.MULTIPLY:
+            return doOperation(operation.left, row) * doOperation(operation.right, row);
+        case Operation.DIVIDE:
+            return doOperation(operation.left, row) / doOperation(operation.right, row);
+        case Operation.POWER:
+            return doOperation(operation.left, row) ** doOperation(operation.right, row);
+        default:
+            return 0;
+    }
+}
+
+const getMathValue = (row: Row, field: string): number => {
+    const jsonFormula = parseFormula(field);
+
+    return doOperation(jsonFormula as Operand, row);
+}
+
+export const getFieldValue = (row: Row, field: string): string | number => {
+    if (field.startsWith('#{')) {
+        return getMathValue(row, field);
+    } else {
+        return row[field as keyof Row] as string | number
+    }
 }

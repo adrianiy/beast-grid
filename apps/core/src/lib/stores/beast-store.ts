@@ -34,18 +34,19 @@ export const useBeastStore: UseBeastStore = (selector) => {
 };
 
 export const BeastApi = ({ store }: { store?: MutableRefObject<BeastGridApi | undefined> }) => {
-    const [columns, setColumns, setLoading, setData] = useBeastStore((state) => [
+    const [columns, setColumns, setLoading, setData, setEdited] = useBeastStore((state) => [
         state.columns,
         state.setColumns,
         state.setLoading,
         state.setData,
+        state.setEdited,
     ]);
 
     if (!store) {
         return null;
     }
 
-    store.current = { columns, setColumns, setLoading, setData };
+    store.current = { columns, setColumns, setLoading, setData, setEdited };
 
     return null;
 };

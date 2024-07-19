@@ -23,10 +23,11 @@ type Props<T> = {
 
 export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [columns, pivot, edited, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
+    const [columns, pivot, edited, hiddenColumns, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
         state.columns,
         state.pivot,
         state.edited,
+        state.hiddenColumns,
         state.setScrollElement,
         state.setTheme,
         state.autoSizeColumns,
@@ -124,6 +125,9 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
         }
     }, [edited]);
 
+    useEffect(() => {
+        updateColumnVisibility(0);
+    }, [hiddenColumns.length]);
 
     const getToolbarHeight = () => {
         let toolbarHeight = 0;
