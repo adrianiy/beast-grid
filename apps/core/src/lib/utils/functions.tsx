@@ -191,7 +191,7 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
 
     const field = column.field;
 
-    return row[field as keyof Row] as number;
+    return getFieldValue(row, field as string) as number | string;
 }
 
 export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
