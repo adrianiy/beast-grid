@@ -485,10 +485,10 @@ const getMathValue = (row: Row, field: string): number => {
     return doOperation(jsonFormula as Operand, row);
 }
 
-export const getFieldValue = (row: Row, field: string): number => {
+export const getFieldValue = (row: Row, field: string): string | number | React.ReactElement => {
     if (field.startsWith('#{')) {
         return getMathValue(row, field) || 0;
     } else {
-        return row[field as keyof Row] as number || 0
+        return row[field as keyof Row] as string | number | React.ReactElement
     }
 }
