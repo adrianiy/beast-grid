@@ -21,9 +21,10 @@ import cn from 'classnames';
 type Props<T> = {
     columns: ColumnStore;
     config: BeastGridConfig<T>;
+    onClose: () => void;
 };
 
-export default function PivotConfig<T>({ columns, config }: Props<T>) {
+export default function PivotConfig<T>({ columns, config, onClose }: Props<T>) {
     const [setSidebar] = useBeastStore((state) => [state.setSideBarConfig]);
 
     const [searchValue, setSearchValue] = useState('');
@@ -72,6 +73,7 @@ export default function PivotConfig<T>({ columns, config }: Props<T>) {
                     enabled={config.pivot?.enabled}
                     applyButton={config.pivot?.applyButton}
                     totalizable={config.pivot?.totalizable}
+                    onClose={onClose}
                 />
             </div>
         </div>
@@ -179,10 +181,12 @@ const PivotOptions = ({
     enabled,
     applyButton,
     totalizable,
+    onClose
 }: {
     enabled?: boolean;
     applyButton?: boolean;
     totalizable?: boolean;
+    onClose: () => void;
 }) => {
     const rowBox = useRef<PivotBoxHandle>(null);
     const columnBox = useRef<PivotBoxHandle>(null);
@@ -238,10 +242,10 @@ const PivotOptions = ({
 
     const onApply = () => {
         setPivot(pivotState as PivotState);
+        onClose();
     };
 
     const onReset = () => {
-        console.log('reset');
         setPivotState({} as PivotState);
         rowBox.current?.resetBox();
         columnBox.current?.resetBox();

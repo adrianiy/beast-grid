@@ -30,8 +30,9 @@ type ChartProps = {
 function SideBarSwitch<T>({
     sideBarConfig,
     config,
+    onClose,
     ...chartProps
-}: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> } & Partial<ChartProps>) {
+}: { sideBarConfig: SideBarConfig; onClose: () => void, config: BeastGridConfig<T> } & Partial<ChartProps>) {
     const [columns] = useBeastStore((state) => [state.columns]);
 
     switch (sideBarConfig) {
@@ -42,14 +43,14 @@ function SideBarSwitch<T>({
         case SideBarConfig.CHART:
             return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
         case SideBarConfig.PIVOT:
-            return <PivotConfig config={config} columns={columns} />;
+            return <PivotConfig config={config} columns={columns} onClose={onClose} />;
         default:
             return null;
     }
 }
 
 export default function SideBar<T>({ config, theme, ...chartProps }: { config: BeastGridConfig<T>, theme?: string } & Partial<ChartProps>) {
-    const [sideBarConfig, setSidebarConfig] = useBeastStore((state) => [state.sideBarConfig, state.setSideBarConfig]);
+    const [sideBarConfig, setSidebarConfig, saveState] = useBeastStore((state) => [state.sideBarConfig, state.setSideBarConfig, state.saveState]);
     const [useModal, setUseModal] = useState<boolean>(false);
 
     useEffect(() => {
@@ -64,6 +65,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
     const closeSidebar = () => {
         setSidebarConfig(null);
         setUseModal(false);
+        saveState();
     };
 
     const stopClick = (e: React.MouseEvent) => {
@@ -81,7 +83,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
                 onClick={closeSidebar}
             >
                 <div className="bg-sidebar__modal" onClick={stopClick}>
-                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
                 </div>
             </div>,
             document.body
@@ -93,7 +95,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
                 onClick={closeSidebar}
             >
                 <div className="bg-sidebar__modal" onClick={stopClick}>
-                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
                 </div>
             </div>
         );

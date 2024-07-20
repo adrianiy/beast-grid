@@ -81,7 +81,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
         onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]) })
     }
 
-    return updateSnapshotAndSetState(state, { columns, hiddenColumns });
+    return { columns, hiddenColumns }
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -89,7 +89,6 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     let { sortedColumns } = state;
     let column1 = columns[id1];
     let column2 = columns[id2];
-    console.log(JSON.parse(JSON.stringify(column1)), JSON.parse(JSON.stringify(column2)));
 
     if (!column1 || !column2) {
         return state;
@@ -213,9 +212,7 @@ export const addFilter =
 
             const newData = data.map(filterRow(columns, filters)) as Data;
 
-            const newState = { columns, filters: { ...filters }, data: newData } as GridStore;
-
-            return updateSnapshotAndSetState(state, newState);
+            return { columns, filters: { ...filters }, data: newData } as GridStore;
         };
 
 export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
@@ -373,12 +370,9 @@ export const clearHistory = () => (state: GridStore) => {
 }
 
 export const saveState = () => (state: GridStore) => {
-    const [snapshots, historyPoint] = saveSnapshot(state);
-
-    return { snapshots, historyPoint };
+    return updateSnapshotAndSetState(state, {});
 }
 
-// NOTE: Test history movement
 export const moveHistory = (direction: number) => (state: GridStore) => {
     const { snapshots, historyPoint, scrollElement } = state;
     const currentState = snapshots[historyPoint];
@@ -387,7 +381,7 @@ export const moveHistory = (direction: number) => (state: GridStore) => {
     let newState = { ...state, ...nextState }
 
     if (nextState.pivotData !== currentState.pivotData && !nextState.pivotData) {
-        newState = setPivot(nextState.pivot, false)(newState) as GridStore;
+        newState = setPivot(nextState.pivot)(newState) as GridStore;
     }
 
     if (nextState.groupData !== currentState.groupData && !nextState.groupData) {
@@ -469,7 +463,7 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 };
 
 export const setPivot =
-    (newPivot: Partial<GridState['pivot']> | null, saveAtEnd = true) => (state: GridStore) => {
+    (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
         const { pivot: currentPivot, data: currentData, defaultColumnDef, snapshots, onChanges } = state;
         const data = currentData.filter(row => !row._hidden) as Data;
 
@@ -553,18 +547,15 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            const newState = { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot };
 
-            return saveAtEnd ? updateSnapshotAndSetState(state, newState) : newState;
+            return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot };
         }
 
         if (onChanges) {
             onChanges(ChangeType.PIVOT, { pivot });
         }
 
-        const newState = restore(snapshotBeforePivot)(state);
-
-        return newState;
+        return restore(snapshotBeforePivot)(state);
     };
 
 export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) => {
