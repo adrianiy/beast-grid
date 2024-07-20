@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
-import { filterRow, resetSortColumns, sortData } from '../../utils/functions';
+import { resetSortColumns, sortData } from '../../utils/functions';
 
 import RowContainer from './row';
 import ContextMenu from '../contextMenu/context-menu';

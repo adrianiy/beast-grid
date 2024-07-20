@@ -37,7 +37,7 @@ export const useDndHook = (
         state.setPointer,
         state.setCoords,
     ]);
-    const [scrollElement, columns] = useBeastStore((state) => [state.scrollElement, state.columns]);
+    const [scrollElement, columns, historyPoint] = useBeastStore((state) => [state.scrollElement, state.columns, state.historyPoint]);
 
     useEffect(() => {
         if (disable) {
@@ -203,7 +203,7 @@ export const useDndHook = (
                 dragRef.removeEventListener('dragend', onDragEnd);
             };
         }
-    }, [ref, scrollElement, disable, leftWidth]);
+    }, [ref, scrollElement, disable, leftWidth, historyPoint]);
 
     return [ref];
 };

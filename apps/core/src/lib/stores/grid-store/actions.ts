@@ -89,6 +89,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
     let { sortedColumns } = state;
     let column1 = columns[id1];
     let column2 = columns[id2];
+    console.log(JSON.parse(JSON.stringify(column1)), JSON.parse(JSON.stringify(column2)));
 
     if (!column1 || !column2) {
         return state;
@@ -381,12 +382,7 @@ export const saveState = () => (state: GridStore) => {
 export const moveHistory = (direction: number) => (state: GridStore) => {
     const { snapshots, historyPoint, scrollElement } = state;
     const currentState = snapshots[historyPoint];
-    const nextState = snapshots[historyPoint + direction];
-
-    console.log(nextState)
-
-    nextState.columns = clone(nextState.columns);
-
+    const nextState = clone(snapshots[historyPoint + direction]);
 
     let newState = { ...state, ...nextState }
 
@@ -395,12 +391,12 @@ export const moveHistory = (direction: number) => (state: GridStore) => {
     }
 
     if (nextState.groupData !== currentState.groupData && !nextState.groupData) {
-        newState.groupData = groupDataByColumnDefs(nextState.columns, state.data, nextState.groupOrder);
+        newState.groupData = groupDataByColumnDefs(newState.columns, state.data, newState.groupOrder);
     }
 
-    updateColumnVisibility(scrollElement, 0, nextState.columns);
+    updateColumnVisibility(scrollElement, 0, newState.columns);
 
-    return nextState
+    return newState;
 }
 
 export const undo = () => (state: GridStore) => {

@@ -265,8 +265,8 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
 
     const newHistoryPoint = historyPoint + 1;
 
-    const newSnapshot: DynamicState = {
-        columns: clone(columns),
+    const newSnapshot: DynamicState = clone({
+        columns,
         sort,
         groupOrder,
         sortedColumns,
@@ -274,7 +274,7 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
         pivot,
         filters,
         historyPoint: newHistoryPoint
-    }
+    });
 
     if (!pivotData?.length) {
         newSnapshot.pivotData = pivotData;

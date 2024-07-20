@@ -379,6 +379,19 @@ export function clone<T>(obj: T): T {
     return cloneDeep(obj);
 }
 
+export function cloneColumns(columnStore: ColumnStore): ColumnStore {
+    const newObject: ColumnStore = {};
+
+    Object.keys(columnStore).forEach((key) => {
+        newObject[key] = JSON.parse(JSON.stringify(columnStore[key]));
+        newObject[key].formatter = columnStore[key].formatter;
+        newObject[key].styleFormatter = columnStore[key].styleFormatter;
+        newObject[key].aggregation = columnStore[key].aggregation;
+    })
+
+    return newObject;
+}
+
 export function getAggregationType(column: Column | undefined, row: Row): AggregationType | AggregationFunction {
     if (column?.aggregation && typeof column.aggregation === 'string') {
         return column.aggregation;
