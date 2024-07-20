@@ -11,7 +11,7 @@ const OPERATION_PRIORITY = {
 }
 
 export const parseFormula = (formula: string) => {
-    const formulaParts = formula.match(/\#{(.*)}/);
+    const formulaParts = formula.match(/#{(.*)}/);
     if (!formulaParts) {
         return null;
     }
@@ -21,7 +21,7 @@ export const parseFormula = (formula: string) => {
 }
 
 const getOperation = (formula: string): Operation => {
-    const operation = formula.match(/(\+|\-|\*|\^|\/)/);
+    const operation = formula.match(/(\+|-|\*|\^|\/)/);
 
     if (!operation) {
         throw new Error(MathErrors.INVALID_FORMULA);

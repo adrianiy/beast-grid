@@ -122,7 +122,7 @@ export default function TextFilters(props: Props) {
             <div className="bg-filter__separator" />
             <List
                 ref={list}
-                height={200}
+                height={Math.min(200, filterOptions.length * 40)}
                 width={container.current?.clientWidth || 0}
                 rowCount={filterOptions.length}
                 rowHeight={rowHeight}
