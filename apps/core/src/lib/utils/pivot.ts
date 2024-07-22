@@ -59,11 +59,12 @@ export const groupByPivot = (
             _rows[rowMap[key]]._pivotIndexes?.push(index);
         }
 
+        // TODO: pivot with totals and subtotals
         values.forEach((column) => {
             let lastField = summaryId;
             const filters: Record<string, string> = {};
 
-            columns.forEach((column, index) => {
+            columns.forEach((column) => {
                 const field = `${column.field}:${row[column.field as keyof Row] as string}@${lastField}`;
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 

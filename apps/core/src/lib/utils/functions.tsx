@@ -203,7 +203,10 @@ const doPivotOperation = (formula: Operand | null, column: Column, rows: Row[]):
     }
 }
 
-const getPivotFormula = (field: string, column: Column, rows: Row[]) => {
+const getPivotFormula = (field: string | undefined, column: Column, rows: Row[]) => {
+    if (!field) {
+        return 0;
+    }
     const jsonFormula = parseFormula(field);
 
     return doPivotOperation(jsonFormula as Operand, column, rows);
@@ -225,8 +228,7 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
 
         }
 
-        // TODO: Test this with a real case
-        const mathField = field.startsWith('#{');
+        const mathField = field?.startsWith('#{');
 
         if (mathField) {
             return getPivotFormula(field, column, rows);
