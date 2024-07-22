@@ -225,7 +225,7 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
 
         }
 
-        // NOTE: Test this with a real case
+        // TODO: Test this with a real case
         const mathField = field.startsWith('#{');
 
         if (mathField) {

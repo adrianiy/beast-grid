@@ -253,10 +253,10 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
         sortedColumns,
         hiddenColumns,
         filters,
-        pivotData,
         pivot,
-        groupData,
-        historyPoint
+        historyPoint,
+        isPivoted,
+        isGrouped
     } = state;
 
     if (historyPoint < snapshots.length - 1) {
@@ -273,16 +273,10 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
         hiddenColumns,
         pivot,
         filters,
-        historyPoint: newHistoryPoint
+        historyPoint: newHistoryPoint,
+        isPivoted,
+        isGrouped
     });
-
-    if (!pivotData?.length) {
-        newSnapshot.pivotData = pivotData;
-    }
-
-    if (!groupData?.length) {
-        newSnapshot.groupData = groupData;
-    }
 
     snapshots.push(newSnapshot);
 

@@ -61,6 +61,8 @@ export interface DynamicState {
     columns: ColumnStore;
     pivotData?: Data;
     groupData?: Data;
+    isGrouped?: boolean;
+    isPivoted?: boolean;
     sortedColumns: Column[];
     hiddenColumns: ColumnId[];
     filters: Record<ColumnId, IFilter[]>;
@@ -116,7 +118,6 @@ export interface GridStore extends GridState {
     setMode: (mode: BeastMode) => void;
     setPivot: (pivot: Partial<PivotState> | null) => void;
     setInitialPivot: (pivot: PivotConfig) => void;
-    setEdited: (edited: boolean) => void;
     restore: () => void;
     updateColumnVisibility: (scrollLeft: number) => void;
     autoSizeColumns: () => void;
