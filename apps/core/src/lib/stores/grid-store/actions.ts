@@ -487,6 +487,8 @@ export const setPivot =
                         width: MIN_COL_WIDTH,
                         rowGroup: index < (pivot.rows?.length || 0) - 1,
                         tree: false,
+                        final: true,
+                        level: 0
                     } as Column;
 
                     rowColumnDefs.push(column);
@@ -547,6 +549,7 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
+            console.log(sortedColumns);
 
             return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot };
         }

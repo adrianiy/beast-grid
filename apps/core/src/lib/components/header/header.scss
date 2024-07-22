@@ -82,6 +82,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: var(--bg-font-weight--header);
+
+        &.summary {
+            font-size: var(--bg-size--2)
+        }
     }
 
     .bg-grid-header__cell__menu {

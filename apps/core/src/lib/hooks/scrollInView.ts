@@ -13,7 +13,7 @@ export const useScrollInViewHook = (
     const [scrollElement] = useBeastStore((state) => [state.scrollElement]);
 
     useEffect(() => {
-        const _handleScroll = (ev: Event) => () => {
+        const _handleScroll = () => () => {
             if (!options.column) {
                 cancelAnimationFrame(reqAnimFrameNo.current)
 
@@ -22,7 +22,7 @@ export const useScrollInViewHook = (
 
             const transform = Math.min((scrollElement.scrollLeft - options.column.left) + 20, options.column.width - (ref.current?.clientWidth || 0) - 86);
 
-            if (transform > 0 && !options.column.final) {
+            if (transform > 0 && !options.column.final && (options.column.childrenId?.length || 0) > 1) {
                 options.onAnimationFrame?.(transform);
             } else {
                 options.onAnimationFrame?.(0);
@@ -30,8 +30,8 @@ export const useScrollInViewHook = (
         }
 
         if (ref.current && options.column) {
-            scrollElement?.addEventListener('scroll', (ev) => {
-                reqAnimFrameNo.current = requestAnimationFrame(_handleScroll(ev))
+            scrollElement?.addEventListener('scroll', () => {
+                reqAnimFrameNo.current = requestAnimationFrame(_handleScroll())
             });
         }
 

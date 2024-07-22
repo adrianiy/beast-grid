@@ -1,7 +1,7 @@
 import { AggregationType, Column, ColumnDef, Data, Row } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
-const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row => ({
+const newRow = (row: Row, rows: Column[], showTotals: boolean, indexes: number[], isTotal?: boolean): Row => ({
     _id: uuidv4(),
     _expanded: true,
     _total: isTotal,
@@ -9,9 +9,10 @@ const newRow = (showTotals: boolean, indexes: number[], isTotal?: boolean): Row 
     _singleChild: !showTotals,
     children: [],
     childrenMap: {},
+    ...rows.reduce((acc, column) => ({ ...acc, [column.field as keyof Row]: row[column.field as keyof Row] }), {}),
 });
 
-const newColumn = (baseColumn: Column, key: string, field: string, parentId: string | undefined, index: number, filters: Record<string, string>) => ({
+const newColumn = (baseColumn: Column, key: string, field: string, parentId: string | undefined, firstLevel: boolean, filters: Record<string, string>) => ({
     ...baseColumn,
     id: uuidv4(),
     field,
@@ -22,7 +23,8 @@ const newColumn = (baseColumn: Column, key: string, field: string, parentId: str
     childrenMap: {},
     menu: false,
     _filters: filters,
-    _firstLevel: !index,
+    _firstLevel: firstLevel,
+    _summary: firstLevel
 })
 
 export const groupByPivot = (
@@ -32,25 +34,33 @@ export const groupByPivot = (
     values: Column[],
     showRowTotals: boolean
 ): [Row[], ColumnDef[]] => {
-    const rowSize: Record<string, Row> = {};
-    const _rows: Row[] = [];
+    const rowMap: Record<string, number> = {};
     const columnDefs: Record<string, ColumnDef> = {};
+    const _rows: Row[] = [];
 
+    // If not values, add a total column
     if (!values.length) {
         values.push({ field: 'total:', aggregation: AggregationType.SUM } as Column);
     }
 
+    const summaryId = 'summary';
+    const summaryColumn = newColumn({} as Column, columns.map((column) => column.headerName).join(' > '), 'summary', undefined, true, {});
+    columnDefs[summaryId] = summaryColumn;
+
     data.forEach((row, index) => {
+        // Get row group key
         const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
 
-        if (!rowSize[key]) {
-            rowSize[key] = newRow(showRowTotals, [index]);
+        if (!rowMap[key]) {
+            _rows.push(newRow(row, rows, showRowTotals, [index]));
+
+            rowMap[key] = _rows.length - 1;
         } else {
-            rowSize[key]._pivotIndexes?.push(index);
+            _rows[rowMap[key]]._pivotIndexes?.push(index);
         }
 
         values.forEach((column) => {
-            let lastField = ``;
+            let lastField = summaryId;
             const filters: Record<string, string> = {};
 
             columns.forEach((column, index) => {
@@ -58,10 +68,10 @@ export const groupByPivot = (
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 
                 if (!columnDefs[field]) {
-                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, index, {});
+                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, false, {});
 
                     if (lastField) {
-                        columnDefs[lastField]?.children?.push(columnDefs[field]);
+                        columnDefs[lastField].children?.push(columnDefs[field]);
                     }
                 }
                 lastField = field;
@@ -69,7 +79,7 @@ export const groupByPivot = (
             const valueField = `${column.field as string}@${lastField}`;
 
             if (!columnDefs[valueField]) {
-                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField]?.id, columns.length, filters);
+                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField]?.id, false, filters);
 
                 if (lastField) {
                     columnDefs[lastField]?.children?.push(columnDefs[valueField]);
@@ -78,20 +88,7 @@ export const groupByPivot = (
         });
     })
 
-    console.log(Object.keys(rowSize).length, Object.keys(columnDefs).length);
-
-    Object.keys(rowSize).forEach((key) => {
-        const row = rowSize[key];
-        const index = row._pivotIndexes?.[0];
-
-        if (index != undefined) {
-            rows.forEach((groupRow) => {
-                row[groupRow.field as string] = data[index][groupRow.field as keyof Row];
-            });
-
-            _rows.push(row);
-        }
-    });
+    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
 
     return [_rows, Object.values(columnDefs)];
 };

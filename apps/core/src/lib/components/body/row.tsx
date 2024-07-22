@@ -22,7 +22,7 @@ type Props = {
     loading?: boolean;
     skeleton?: ReactNode;
     isTopFixed?: boolean;
-    // NOTE: implement bottom fixed
+    // TODO: implement bottom fixed
     isBottomFixed?: boolean;
     isLastRow?: boolean;
     onClick?: () => void;

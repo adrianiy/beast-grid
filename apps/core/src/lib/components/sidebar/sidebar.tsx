@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BeastGridConfig, ChartType, Column, SideBarConfig } from '../../common';
 
 import GridConfig from './components/grid';
@@ -33,7 +33,12 @@ function SideBarSwitch<T>({
     onClose,
     ...chartProps
 }: { sideBarConfig: SideBarConfig; onClose: () => void, config: BeastGridConfig<T> } & Partial<ChartProps>) {
-    const [columns] = useBeastStore((state) => [state.columns]);
+    const [snapshots, columns] = useBeastStore((state) => [state.snapshots, state.columns]);
+
+    const originalColumns = useMemo(() => {
+        return snapshots[0]?.columns || [];
+    }, [snapshots[0]?.columns]);
+
 
     switch (sideBarConfig) {
         case SideBarConfig.GRID:
@@ -43,7 +48,7 @@ function SideBarSwitch<T>({
         case SideBarConfig.CHART:
             return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
         case SideBarConfig.PIVOT:
-            return <PivotConfig config={config} columns={columns} onClose={onClose} />;
+            return <PivotConfig config={config} columns={originalColumns} onClose={onClose} />;
         default:
             return null;
     }

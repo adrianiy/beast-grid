@@ -216,7 +216,7 @@ export default function HeaderCell<T>({
             className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
             key={`${levelIdx}-${idx}-${column.id}`}
             style={{
-                marginTop: !column.childrenId && levelIdx === 0 ? height * (headers.length - 1) : 0,
+                marginTop: !column.childrenId?.length && levelIdx === 0 ? height * (headers.length - 1) : 0,
                 height,
                 width: column.width,
                 left: column.left,
@@ -228,7 +228,7 @@ export default function HeaderCell<T>({
             data-clone={column.original}
         >
             <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-                <span className="bg-grid-header-drop bg-grid-header__cell__name"
+                <span className={cn('bg-grid-header-drop bg-grid-header__cell__name', { summary: column._summary })}
                     ref={translate}
                     style={{ transform: `translateX(${translateX}px)` }}
                     title={column.headerName} >

@@ -251,6 +251,7 @@ export interface Column extends ColumnDef, Position {
     lastPinned?: boolean;
     tree?: boolean;
     _filters?: Record<string, string>;
+    _summary?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;
