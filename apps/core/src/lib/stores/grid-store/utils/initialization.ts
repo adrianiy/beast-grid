@@ -152,12 +152,20 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
     return columns;
 };
 
+const _getColumnHeaderWidth = (column: Column): number | undefined => {
+    if (!column.headerName) {
+        return undefined;
+    }
+
+    return (column.headerName.length * 10) + 100;
+}
+
 const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     if (column.hidden) {
         return;
     }
     if (!column.childrenId?.length) {
-        column.width = column.width || MIN_COL_WIDTH;
+        column.width = column.width || _getColumnHeaderWidth(column) || MIN_COL_WIDTH;
     }
 
     if (column.childrenId?.length) {
@@ -169,6 +177,7 @@ const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     }
 };
 
+
 export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: number): ColumnStore => {
     const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
     const notFinalColumns = Object.values(columnStore).filter((column) => !column.final && !column.hidden);
@@ -177,7 +186,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
 
     // Calculate width for user defined columns
     const fixedWidth = finalColumns.reduce(
-        (acc, column) => acc + (!column.flex ? column.width || MIN_COL_WIDTH : 0),
+        (acc, column) => acc + (!column.flex ? column.width || _getColumnHeaderWidth(column) || MIN_COL_WIDTH : 0),
         0
     );
 
@@ -187,7 +196,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
     // Set width for flex columns
     dynamicColumns.forEach((column) => {
         const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
-        column.width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
+        column.width = Math.max(flexWidth, column.minWidth || _getColumnHeaderWidth(column) || MIN_COL_WIDTH);
     });
 
     // Calculate parent widths based on children

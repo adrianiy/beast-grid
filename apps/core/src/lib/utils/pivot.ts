@@ -131,7 +131,9 @@ export const groupByPivot = (
         });
     })
 
-    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length, _rows);
+    console.log(_rows);
+
+    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
 
     return [_rows, Object.values(columnDefs)];
 };

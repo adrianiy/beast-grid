@@ -17,55 +17,44 @@ type Props<T> = {
     disableSwapColumns?: boolean;
 };
 
-export default function HeaderSection<T>({
-    leftWidth,
-    width,
-    height,
-    border,
-    pinType,
-    multiSort,
-    dragOptions,
-    events,
-    disableSwapColumns,
-    headers,
-}: Props<T>) {
-    const HeaderRow = ({ level, levelIdx }: { level: Column[]; levelIdx: number }) => {
-        return (
-            <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
-                {level.map((column, idx) => {
-                    const inView = column.pinned !== PinType.NONE || column.inView;
+function HeaderRow<T>({ level, levelIdx, border, height, width, pinType, multiSort, headers, dragOptions, events, disableSwapColumns, leftWidth }: { level: Column[]; levelIdx: number } & Props<T>) {
+    return (
+        <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
+            {level.map((column, idx) => {
+                const inView = column.pinned !== PinType.NONE || column.inView;
 
-                    if (column.pinned !== pinType || column.hidden || !inView) {
-                        return null;
-                    }
+                if (column.pinned !== pinType || column.hidden || !inView) {
+                    return null;
+                }
 
-                    return (
-                        <HeaderCell
-                            key={idx}
-                            levelIdx={levelIdx}
-                            idx={idx}
-                            multiSort={!!multiSort}
-                            height={height}
-                            headers={headers}
-                            column={column}
-                            dragOptions={dragOptions}
-                            events={events}
-                            disableSwapColumns={disableSwapColumns}
-                            leftWidth={leftWidth}
-                        />
-                    );
-                })}
-            </div>
-        );
-    };
+                return (
+                    <HeaderCell
+                        key={idx}
+                        levelIdx={levelIdx}
+                        idx={idx}
+                        multiSort={!!multiSort}
+                        height={height}
+                        headers={headers}
+                        column={column}
+                        dragOptions={dragOptions}
+                        events={events}
+                        disableSwapColumns={disableSwapColumns}
+                        leftWidth={leftWidth}
+                    />
+                );
+            })}
+        </div>
+    );
+}
 
-    if (!width) {
+export default function HeaderSection<T>(props: Props<T>) {
+    if (!props.width) {
         return null;
     }
 
     return (
-        <div className={cn('grid-header-content', `grid-${pinType}-pin`)}>
-            {headers.map((level, idx) => HeaderRow({ level, levelIdx: idx }))}
+        <div className={cn('grid-header-content', `grid-${props.pinType}-pin`)}>
+            {props.headers.map((level, idx) => HeaderRow({ ...props, level, levelIdx: idx }))}
         </div>
     );
 }
