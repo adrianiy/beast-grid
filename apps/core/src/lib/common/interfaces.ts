@@ -11,6 +11,7 @@ export interface Row {
     _level?: number;
     _singleChild?: boolean;
     _pivotIndexes?: number[];
+    _childrenMap?: Record<string, number>;
     children?: Row[];
 }
 

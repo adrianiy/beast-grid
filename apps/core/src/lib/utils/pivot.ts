@@ -8,7 +8,7 @@ const newRow = (row: Row, rows: Column[], showTotals: boolean, indexes: number[]
     _pivotIndexes: indexes,
     _singleChild: !showTotals,
     children: [],
-    childrenMap: {},
+    _childrenMap: {} as Record<string, number>,
     ...rows.reduce((acc, column) => ({ ...acc, [column.field as keyof Row]: row[column.field as keyof Row] }), {}),
 });
 
@@ -26,6 +26,52 @@ const newColumn = (baseColumn: Column, key: string, field: string, parentId: str
     _firstLevel: firstLevel,
     _summary: firstLevel
 })
+
+const createSingleRows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
+    const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
+
+    if (!rowMap[key]) {
+        // Si agrupo totales de fila, necesito crear un padre por cada nivel de filas y concatenar los hijos a cada
+        // padre
+        result.push(newRow(row, rows, false, [index]));
+
+        rowMap[key] = result.length - 1;
+    } else {
+        result[rowMap[key]]._pivotIndexes?.push(index);
+    }
+}
+
+const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
+    let parentRow: Row | undefined;
+
+    rows.forEach((groupRow, i) => {
+        console.log(groupRow, parentRow)
+        const key = row[groupRow.field as keyof Row] as string;
+        const isLast = i === rows.length - 1;
+
+        if (!parentRow) { // there is not a parent row
+            if (!rowMap[key]) {
+                result.push(newRow(row, rows, !isLast, [index]));
+                rowMap[key] = result.length - 1;
+            } else {
+                result[rowMap[key]]._pivotIndexes?.push(index);
+            }
+
+            parentRow = result[rowMap[key]];
+        } else if (parentRow._childrenMap && parentRow.children) { // there is a parent row
+            console.log(parentRow)
+            if (!parentRow._childrenMap[key]) {
+                parentRow.children.push(newRow(row, rows, !isLast, [index]));
+                parentRow._childrenMap[key] = parentRow.children.length - 1;
+            } else {
+                parentRow.children[parentRow._childrenMap[key]]._pivotIndexes?.push(index);
+            }
+
+            parentRow = parentRow.children[parentRow._childrenMap[key]];
+        }
+
+    });
+}
 
 export const groupByPivot = (
     data: Data,
@@ -48,18 +94,14 @@ export const groupByPivot = (
     columnDefs[summaryId] = summaryColumn;
 
     data.forEach((row, index) => {
-        // Get row group key
-        const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
-
-        if (!rowMap[key]) {
-            _rows.push(newRow(row, rows, showRowTotals, [index]));
-
-            rowMap[key] = _rows.length - 1;
+        // for single rows
+        if (!showRowTotals) {
+            createSingleRows(_rows, rows, row, rowMap, index);
         } else {
-            _rows[rowMap[key]]._pivotIndexes?.push(index);
+            // TODO: Pivot with total rows are not working
+            createNestedrows(_rows, rows, row, rowMap, index);
         }
 
-        // TODO: pivot with totals and subtotals
         values.forEach((column) => {
             let lastField = summaryId;
             const filters: Record<string, string> = {};
@@ -89,7 +131,7 @@ export const groupByPivot = (
         });
     })
 
-    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
+    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length, _rows);
 
     return [_rows, Object.values(columnDefs)];
 };

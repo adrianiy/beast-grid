@@ -554,8 +554,6 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            console.log(sortedColumns);
-
             return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot, isPivoted: true };
         }
 
