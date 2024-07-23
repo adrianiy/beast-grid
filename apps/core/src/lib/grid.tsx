@@ -114,7 +114,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
         setTimeout(() => {
             updateColumnVisibility(0);
             setLoading(false);
-        }, 1);
+        }, 200);
     }, [pivot]);
 
     useEffect(() => {

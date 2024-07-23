@@ -469,7 +469,7 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 
 export const setPivot =
     (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
-        const { pivot: currentPivot, data: currentData, defaultColumnDef, snapshots, onChanges } = state;
+        const { pivot: currentPivot, data: currentData, defaultColumnDef, snapshots, container, onChanges } = state;
         const data = currentData.filter(row => !row._hidden) as Data;
 
         const nonEmptyPivot = Object.keys(newPivot || {}).length;
@@ -536,6 +536,7 @@ export const setPivot =
 
             const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
 
+            setColumnsStyleProps(finalColumns, container.offsetWidth);
             setColumnFilters(finalColumns, groupedByRows);
 
             const sortedColumns = sortColumns(finalColumns);
@@ -553,8 +554,6 @@ export const setPivot =
             }
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
-
-            console.log(sortedColumns);
 
             return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot, isPivoted: true };
         }
