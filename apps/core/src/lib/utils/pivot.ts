@@ -22,6 +22,7 @@ const newColumn = (baseColumn: Column, key: string, field: string, parentId: str
     children: [],
     childrenMap: {},
     menu: false,
+    sort: undefined,
     _filters: filters,
     _firstLevel: firstLevel,
     _summary: firstLevel
@@ -82,14 +83,13 @@ const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Recor
     });
 }
 
-// TODO: test column subtotals
-// TODO: Add row and column totals
+// TODO: Add row totals
 export const groupByPivot = (
     data: Data,
     rows: Column[],
     columns: Column[],
     values: Column[],
-    showRowTotals: boolean
+    showRowTotals: boolean,
 ): [Row[], ColumnDef[]] => {
     const rowMap: Record<string, number> = {};
     const columnDefs: Record<string, ColumnDef> = {};
@@ -112,6 +112,7 @@ export const groupByPivot = (
             createNestedrows(_rows, rows, row, rowMap, index);
         }
 
+        // for each value build column hierarchy
         values.forEach((column) => {
             let lastField = summaryId;
             const filters: Record<string, string> = {};
@@ -121,7 +122,7 @@ export const groupByPivot = (
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 
                 if (!columnDefs[field]) {
-                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, false, {});
+                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, false, { ...filters });
 
                     if (lastField) {
                         columnDefs[lastField].children?.push(columnDefs[field]);
@@ -139,7 +140,7 @@ export const groupByPivot = (
                 }
             }
         });
-    })
+    });
 
     console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
 

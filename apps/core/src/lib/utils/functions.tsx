@@ -6,6 +6,7 @@ import {
     Chart,
     Column,
     ColumnDef,
+    ColumnId,
     ColumnStore,
     Data,
     FilterType,
@@ -406,16 +407,15 @@ export function getAggregationType(column: Column | undefined, row: Row): Aggreg
     return AggregationType.COUNT;
 }
 
-const convertToTotal = (column: Column, headerName: string, parentField: string, values: Column[]): ColumnDef[] => {
-    if (column.children && column.children?.length) {
+const convertToTotal = (column: ColumnDef, headerName: string, filters: Record<string, string>, values: Column[]): ColumnDef[] => {
+    if (column.children?.length) {
         column.id = uuidv4();
         column.headerName = headerName;
-        column.field = parentField;
         column.childrenMap = {};
         column.children = convertToTotal(
-            { ...column.children[0], parent: column.id } as Column,
+            { ...column.children[0] },
             '',
-            parentField,
+            filters,
             values
         );
 
@@ -424,13 +424,14 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
         return values.map((value) => ({
             id: uuidv4(),
             formatter: value.formatter,
+            aggregation: value.aggregation,
             headerName: `${value.aggregation} of ${value.headerName}`,
-            field: `${value.field}@${parentField}`,
-            filterType: FilterType.NUMBER,
+            field: value.field,
             flex: 1,
             parent: column.id,
             children: [],
             childrenMap: {},
+            _filters: filters,
             _total: true,
             _firstLevel: false,
         }));
@@ -438,20 +439,23 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
 };
 
 const loopColumn = (column: ColumnDef, values: Column[]) => {
-    const isLeaf = column.children?.some((child) => !child.children?.length);
-    if (column.children?.length && !isLeaf) {
+    if (!column.children) {
+        return;
+    }
+
+    const isAggregable = column.children?.length > 1; // has more than one child
+
+    if (isAggregable) {
+        column.children.forEach((child) => loopColumn(child, values));
+
         column.children?.push(
             ...convertToTotal(
-                { ...column.children[0], parent: column.id } as Column,
+                { ...column.children[0] },
                 'TOTAL',
-                column.field as string,
-                values
+                column._filters || {},
+                values,
             )
         );
-
-        column.children?.forEach((child) => {
-            loopColumn(child, values);
-        });
     }
 };
 

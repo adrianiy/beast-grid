@@ -59,7 +59,9 @@ export interface BaseColumnDef {
     aggregation?: AggregationType | AggregationFunction;
     sort?: SortState;
     _firstLevel?: boolean;
+    _filters?: Record<string, string>;
     _total?: boolean;
+    _summary?: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;

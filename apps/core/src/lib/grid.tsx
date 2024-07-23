@@ -109,6 +109,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
 
     // Set loading on pivot change
     useEffect(() => {
+        console.log('pivot change');
         setLoading(true);
 
         setTimeout(() => {

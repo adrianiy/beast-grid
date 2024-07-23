@@ -227,10 +227,11 @@ export default function HeaderCell<T>({
             data-level={column.level}
             data-clone={column.original}
         >
-            <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
+            <div className="bg-grid-header__cell__left row middle"
+                style={{ transform: `translateX(${translateX}px)` }}
+                onClick={handleChangeSort}>
                 <span className={cn('bg-grid-header-drop bg-grid-header__cell__name', { summary: column._summary })}
                     ref={translate}
-                    style={{ transform: `translateX(${translateX}px)` }}
                     title={column.headerName} >
                     {column.headerName}
                 </span>

@@ -555,7 +555,7 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, unfilteredData: [...groupedByRows], snapshotBeforePivot, isPivoted: true };
+            return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true };
         }
 
         if (onChanges) {
