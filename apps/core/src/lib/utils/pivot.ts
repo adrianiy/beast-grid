@@ -45,34 +45,45 @@ const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Recor
     let parentRow: Row | undefined;
 
     rows.forEach((groupRow, i) => {
-        console.log(groupRow, parentRow)
         const key = row[groupRow.field as keyof Row] as string;
+        const isFirst = i === 0;
         const isLast = i === rows.length - 1;
 
-        if (!parentRow) { // there is not a parent row
+        if (isFirst) {
+            // Parent Row
             if (!rowMap[key]) {
-                result.push(newRow(row, rows, !isLast, [index]));
+                // Register parent row if not present in the map
+                result.push(newRow(row, rows, !isLast, [index], !isLast));
                 rowMap[key] = result.length - 1;
             } else {
+                // Add pivot index to parent row
                 result[rowMap[key]]._pivotIndexes?.push(index);
             }
 
+            // save parent row
             parentRow = result[rowMap[key]];
-        } else if (parentRow._childrenMap && parentRow.children) { // there is a parent row
-            console.log(parentRow)
-            if (!parentRow._childrenMap[key]) {
-                parentRow.children.push(newRow(row, rows, !isLast, [index]));
-                parentRow._childrenMap[key] = parentRow.children.length - 1;
-            } else {
-                parentRow.children[parentRow._childrenMap[key]]._pivotIndexes?.push(index);
+        } else if (parentRow) {
+            // Children row
+            if (!parentRow._childrenMap || !parentRow.children) {
+                throw new Error('Parent row is not properly initialized');
             }
 
-            parentRow = parentRow.children[parentRow._childrenMap[key]];
+            if (!parentRow._childrenMap[key]) {
+                // Register child row if not present in the map
+                parentRow.children.push(newRow(row, rows, !isLast, [index], !isLast));
+                parentRow._childrenMap[key] = parentRow.children.length - 1;
+            } else {
+                // Add pivot index to child row
+                parentRow.children[parentRow._childrenMap[key]]._pivotIndexes?.push(index);
+            }
+        } else {
+            throw new Error('Parent row is not defined');
         }
-
     });
 }
 
+// TODO: test column subtotals
+// TODO: Add row and column totals
 export const groupByPivot = (
     data: Data,
     rows: Column[],
@@ -98,7 +109,6 @@ export const groupByPivot = (
         if (!showRowTotals) {
             createSingleRows(_rows, rows, row, rowMap, index);
         } else {
-            // TODO: Pivot with total rows are not working
             createNestedrows(_rows, rows, row, rowMap, index);
         }
 
@@ -130,8 +140,6 @@ export const groupByPivot = (
             }
         });
     })
-
-    console.log(_rows);
 
     console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
 

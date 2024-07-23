@@ -20,13 +20,9 @@ export default function Header<T>({ height, levels, border, multiSort, dragOptio
 
     const levelZero = levels[0].filter((column) => !column.hidden);
 
-    console.log(levelZero);
-
     const totalWidth = levelZero.reduce((acc, curr) => acc + curr.width, 0);
     const leftWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const rightWidth = levelZero.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
-
-    console.log(levels);
 
     return (
         <div className="grid-header row" style={{ height: height * levels.length, width: totalWidth }}>
