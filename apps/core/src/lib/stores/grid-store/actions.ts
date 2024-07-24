@@ -81,7 +81,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
         onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]) })
     }
 
-    return { columns, hiddenColumns }
+    return { columns, hiddenColumns, haveChanges: true }
 };
 
 export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) => {
@@ -212,7 +212,7 @@ export const addFilter =
 
             const newData = data.map(filterRow(columns, filters)) as Data;
 
-            return { columns, filters: { ...filters }, data: newData } as GridStore;
+            return { columns, filters: { ...filters }, data: newData, haveChanges: true } as GridStore;
         };
 
 export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
@@ -363,7 +363,7 @@ export const restore = (at = 0) => (state: GridStore) => {
 
     const [newSnapshots, historyPoint] = saveSnapshot({ ...state, ...firstSnapshot, snapshots: [], historyPoint: -1 });
 
-    return { ...firstSnapshot, snapshots: newSnapshots, historyPoint };
+    return { ...firstSnapshot, snapshots: newSnapshots, historyPoint, haveChanges: false };
 };
 
 export const clearHistory = () => (state: GridStore) => {
@@ -375,7 +375,13 @@ export const clearHistory = () => (state: GridStore) => {
 }
 
 export const saveState = () => (state: GridStore) => {
-    return updateSnapshotAndSetState(state, {});
+    const { haveChanges } = state;
+
+    if (haveChanges) {
+        return updateSnapshotAndSetState(state, {});
+    } else {
+        return state;
+    }
 }
 
 export const moveHistory = (direction: number) => (state: GridStore) => {
@@ -555,7 +561,7 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            return { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true };
+            return { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true, haveChanges: true };
         }
 
         if (onChanges) {
