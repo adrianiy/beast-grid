@@ -107,7 +107,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
     } else {
         return (
             <div className="bg-sidebar__container">
-                <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
             </div>
         );
     }

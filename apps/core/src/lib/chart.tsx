@@ -195,7 +195,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
         groupedData.forEach((row, idx) => {
             const childGroups = validGroups.length
-                ? groupByMultiple(row.children || [], validGroups, aggColumns)
+                ? groupByMultiple(row.children || [], validGroups, aggColumns, columnStore)
                 : [row];
             const field = validGroups.map((g) => g.headerName).join('_');
 

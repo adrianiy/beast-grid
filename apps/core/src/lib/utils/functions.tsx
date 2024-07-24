@@ -6,7 +6,6 @@ import {
     Chart,
     Column,
     ColumnDef,
-    ColumnId,
     ColumnStore,
     Data,
     FilterType,
@@ -131,6 +130,7 @@ export const groupByMultiple = (
     data: Data,
     columns: Column[],
     calculatedColumns: Column[],
+    columnStore: ColumnStore,
     aggregationColumns?: Column[]
 ): Row[] => {
     const groups = data.reduce((acc, row) => {
@@ -142,7 +142,7 @@ export const groupByMultiple = (
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns, aggregationColumns);
+    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns, columnStore, aggregationColumns);
 };
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -153,7 +153,7 @@ export const aggregateData = (
     calculatedColumn: Column,
     valueField: string
 ): Row => {
-    const value = getFieldValue(row, valueField);
+    const value = getFieldValue(row, valueField) as number;
     if (calculatedColumn.aggregation === AggregationType.SUM) {
         data[valueField] = +(data[valueField] || 0) + value;
     } else if (calculatedColumn.aggregation === AggregationType.AVG) {
