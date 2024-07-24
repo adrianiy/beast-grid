@@ -11,6 +11,7 @@ export interface Row {
     _level?: number;
     _singleChild?: boolean;
     _pivotIndexes?: number[];
+    _childrenMap?: Record<string, number>;
     children?: Row[];
 }
 
@@ -58,7 +59,9 @@ export interface BaseColumnDef {
     aggregation?: AggregationType | AggregationFunction;
     sort?: SortState;
     _firstLevel?: boolean;
+    _filters?: Record<string, string>;
     _total?: boolean;
+    _summary?: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;

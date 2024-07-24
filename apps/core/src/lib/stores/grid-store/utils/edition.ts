@@ -255,6 +255,8 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
         filters,
         pivot,
         historyPoint,
+        bottomRows,
+        topRows,
         isPivoted,
         isGrouped
     } = state;
@@ -274,6 +276,8 @@ export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
         pivot,
         filters,
         historyPoint: newHistoryPoint,
+        bottomRows,
+        topRows,
         isPivoted,
         isGrouped
     });

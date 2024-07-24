@@ -61,6 +61,8 @@ export interface DynamicState {
     columns: ColumnStore;
     pivotData?: Data;
     groupData?: Data;
+    topRows?: Data;
+    bottomRows?: Data;
     isGrouped?: boolean;
     isPivoted?: boolean;
     sortedColumns: Column[];
