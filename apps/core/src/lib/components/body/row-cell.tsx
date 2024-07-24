@@ -110,13 +110,13 @@ export function RowCell({
     const borderBottom = idx === selectedCells?.end.y;
     const borderRight = columnDef.finalPosition === selectedCells?.end.x;
 
-    if (columnDef.hidden || !columnDef.inView) {
-        return null;
-    }
-
     const value = useMemo(() => {
         return getProperty(row, level, columnDef, columns, groupOrder, data);
     }, [row, level, columnDef, columns, groupOrder]);
+
+    if (columnDef.hidden || !columnDef.inView) {
+        return null;
+    }
 
 
     const handleMouseDown = (e: React.MouseEvent) => {
