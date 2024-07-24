@@ -22,7 +22,6 @@ type Props = {
     loading?: boolean;
     skeleton?: ReactNode;
     isTopFixed?: boolean;
-    // TODO: implement bottom fixed
     isBottomFixed?: boolean;
     isLastRow?: boolean;
     onClick?: () => void;
@@ -46,6 +45,7 @@ export default function RowContainer({
     loading,
     skeleton,
     isTopFixed,
+    isBottomFixed,
     isLastRow,
     onClick,
 }: Props) {
@@ -100,9 +100,11 @@ export default function RowContainer({
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
                 topFixed: isTopFixed,
+                bottomFixed: isBottomFixed,
+                first: idx === 0,
                 last: isLastRow,
             })}
-            style={{ top: isTopFixed ? 'var(--header-height)' : height * idx + gap, height, width: totalWidth }}
+            style={{ top: isTopFixed ? 'var(--header-height)' : isBottomFixed ? `calc(100% - ${height}px)` : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}
         >
             {leftWidth > 0 && (

@@ -59,6 +59,8 @@ export default function TBody<T>({
         data,
         pivotData,
         groupData,
+        bottomRows,
+        topRows,
         columns,
         sortedColumns,
         theme,
@@ -73,6 +75,8 @@ export default function TBody<T>({
         state.data,
         state.pivotData,
         state.groupData,
+        state.bottomRows,
+        state.topRows,
         state.columns,
         state.sortedColumns,
         state.theme,
@@ -454,10 +458,10 @@ export default function TBody<T>({
     };
 
     const createTopRows = () => {
-        if (!beastConfig.topRows) {
+        if (!beastConfig.topRows && !topRows) {
             return null;
         }
-        const _data = beastConfig.topRows;
+        const _data = beastConfig.topRows || topRows || [];
         const renderArray: ReactNode[] = [];
         for (let i = 0; i < _data.length; i++) {
             const row = (
@@ -488,6 +492,42 @@ export default function TBody<T>({
         return renderArray.flat();
     };
 
+    const createBottomRows = () => {
+        if (!beastConfig.bottomRows && !bottomRows) {
+            return null;
+        }
+        const _data = beastConfig.bottomRows || bottomRows || [];
+
+        const renderArray: ReactNode[] = [];
+        for (let i = 0; i < _data.length; i++) {
+            const row = (
+                <RowContainer
+                    key={i}
+                    row={_data[i] as Row}
+                    columns={lastLevel}
+                    columnStore={columns}
+                    config={config}
+                    skeleton={beastConfig?.loadingState?.skeleton}
+                    groupOrder={groupOrder}
+                    selectable={false}
+                    idx={i}
+                    y={i}
+                    border={border}
+                    height={rowHeight}
+                    level={0}
+                    events={events}
+                    gap={0}
+                    expandableSibling={false}
+                    isBottomFixed
+                    isLastRow={i === _data.length - 1}
+                />
+            );
+            renderArray.push(row);
+        }
+
+        return renderArray.flat();
+    };
+
     const getStyleProps = () => {
         return {
             height: sortedData.length
@@ -497,12 +537,14 @@ export default function TBody<T>({
     };
 
     const dataSlice = sortedData.length ? createDataSlice() : createLoadingSlice();
-    const topRows = createTopRows();
+    const topRowsSlice = createTopRows();
+    const bottomRowsSlice = createBottomRows();
 
     return (
         <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
-            {topRows}
+            {topRowsSlice}
             {dataSlice}
+            {bottomRowsSlice}
             <ContextMenu
                 x={contextMenu?.x || 0}
                 y={contextMenu?.y || 0}

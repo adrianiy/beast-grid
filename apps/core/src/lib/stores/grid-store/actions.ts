@@ -510,7 +510,7 @@ export const setPivot =
                 });
             }
 
-            const [groupedByRows, valueColumns] = groupPivot(
+            const [groupedByRows, bottomRows, valueColumns] = groupPivot(
                 pivot.rows || [],
                 pivot.columns || [{ field: 'total' } as Column],
                 pivot.values || [],
@@ -555,7 +555,7 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            return { pivotData: groupedByRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true };
+            return { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true };
         }
 
         if (onChanges) {

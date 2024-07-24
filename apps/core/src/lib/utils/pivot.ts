@@ -83,17 +83,17 @@ const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Recor
     });
 }
 
-// TODO: Add row totals
 export const groupByPivot = (
     data: Data,
     rows: Column[],
     columns: Column[],
     values: Column[],
     showRowTotals: boolean,
-): [Row[], ColumnDef[]] => {
+): [Row[], Row[], ColumnDef[]] => {
     const rowMap: Record<string, number> = {};
     const columnDefs: Record<string, ColumnDef> = {};
     const _rows: Row[] = [];
+    const _bottomRows: Row[] = [];
 
     // If not values, add a total column
     if (!values.length) {
@@ -142,9 +142,17 @@ export const groupByPivot = (
         });
     });
 
+    if (showRowTotals) {
+        // Add bottom row totals
+        const totalRow = { [rows[0].field as string]: 'Total' } as Row;
+        const allIndexes = data.map((_, i) => i);
+
+        _bottomRows.push(newRow(totalRow, rows, false, allIndexes, true));
+    }
+
     console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
 
-    return [_rows, Object.values(columnDefs)];
+    return [_rows, _bottomRows, Object.values(columnDefs)];
 };
 
 export const groupPivot = (
@@ -154,9 +162,9 @@ export const groupPivot = (
     data: Data,
     showRowTotals: boolean,
     level = 0
-): [Data, ColumnDef[]] => {
+): [Data, Data, ColumnDef[]] => {
     if (columns.length && level === columns.length) {
-        return [data, []];
+        return [data, [], []];
     }
     return groupByPivot(data, columns, aggColumns, valueColumns, showRowTotals);
 };
