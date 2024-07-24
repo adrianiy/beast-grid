@@ -89,6 +89,7 @@ export interface GridState extends DynamicState {
     selecting: boolean;
     mode: BeastMode;
     snapshots: DynamicState[];
+    haveChanges: boolean;
     onChanges?: OnChanges;
 }
 
@@ -172,6 +173,7 @@ export const createGridStore = <T>(
         scrollElement: null as unknown as HTMLDivElement,
         sideBarConfig: null,
         historyPoint: 0,
+        haveChanges: false,
         onChanges
     };
 

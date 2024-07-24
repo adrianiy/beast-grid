@@ -292,6 +292,7 @@ export const updateSnapshotAndSetState = (state: GridStore, newState: Partial<Gr
 
     newState.snapshots = snapshots;
     newState.historyPoint = historyPoint;
+    newState.haveChanges = false;
 
     return newState;
 }
