@@ -67,7 +67,6 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
         }
     }, [sideBarConfig, config.style?.maxHeight]);
 
-    // TODO: save only with changes
     const closeSidebar = () => {
         setSidebarConfig(null);
         setUseModal(false);
