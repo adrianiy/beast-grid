@@ -22,6 +22,7 @@ type Props = {
     loading?: boolean;
     skeleton?: ReactNode;
     isTopFixed?: boolean;
+    // NOTE: implement bottom fixed
     isBottomFixed?: boolean;
     isLastRow?: boolean;
     onClick?: () => void;
@@ -104,7 +105,7 @@ export default function RowContainer({
                 first: idx === 0,
                 last: isLastRow,
             })}
-            style={{ top: isTopFixed ? 'var(--header-height)' : isBottomFixed ? `calc(100% - ${height}px)` : height * idx + gap, height, width: totalWidth }}
+            style={{ top: isTopFixed ? `calc(var(--header-height) + ${height * idx}px)` : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}
         >
             {leftWidth > 0 && (
