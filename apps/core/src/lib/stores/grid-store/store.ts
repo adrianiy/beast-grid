@@ -136,7 +136,6 @@ export const createGridStore = <T>(
     theme: string,
     onChanges?: OnChanges
 ) => {
-    // TODO: initial table width is not correct
     const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
     const groupOrder = Object.values(columns)
