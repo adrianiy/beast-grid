@@ -389,14 +389,22 @@ export const moveHistory = (direction: number) => (state: GridStore) => {
     const currentState = snapshots[historyPoint];
     const nextState = clone(snapshots[historyPoint + direction]);
 
-    let newState = { ...state, ...nextState }
+    const newState = { ...state, ...nextState }
 
-    if (nextState.isPivoted != currentState.isPivoted && nextState.isPivoted) {
-        newState = setPivot(nextState.pivot)(newState) as GridStore;
+    if (nextState.isPivoted != currentState.isPivoted) {
+        if (nextState.isPivoted) {
+            newState.pivotData = setPivot(nextState.pivot)(newState).pivotData;
+        } else {
+            newState.pivotData = undefined;
+        }
     }
 
-    if (nextState.isGrouped != currentState.isGrouped && nextState.isGrouped) {
-        newState.groupData = groupDataByColumnDefs(newState.columns, state.data, newState.groupOrder);
+    if (nextState.isGrouped != currentState.isGrouped) {
+        if (nextState.isGrouped) {
+            newState.groupData = groupDataByColumnDefs(newState.columns, state.data, newState.groupOrder);
+        } else {
+            newState.groupData = undefined;
+        }
     }
 
     updateColumnVisibility(scrollElement, 0, newState.columns);
@@ -561,7 +569,9 @@ export const setPivot =
 
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            return { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true, haveChanges: true };
+            const newState = { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true, haveChanges: true };
+
+            return newState;
         }
 
         if (onChanges) {
