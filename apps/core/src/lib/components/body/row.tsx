@@ -102,7 +102,7 @@ export default function RowContainer({
                 topFixed: isTopFixed,
                 last: isLastRow,
             })}
-            style={{ top: isTopFixed ? 'var(--header-height)' : height * idx + gap, height, width: totalWidth }}
+            style={{ top: isTopFixed ? `calc(var(--header-height) + ${height * idx}px)` : height * idx + gap, height, width: totalWidth }}
             onClick={handleRowClick}
         >
             {leftWidth > 0 && (
