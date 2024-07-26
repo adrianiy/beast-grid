@@ -384,6 +384,7 @@ export const saveState = () => (state: GridStore) => {
     }
 }
 
+// TODO: change history from pivot state
 export const moveHistory = (direction: number) => (state: GridStore) => {
     const { snapshots, historyPoint, scrollElement } = state;
     const currentState = snapshots[historyPoint];
