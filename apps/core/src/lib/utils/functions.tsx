@@ -213,8 +213,9 @@ const getPivotFormula = (field: string | undefined, column: Column, rows: Row[])
     return doPivotOperation(jsonFormula as Operand, column, rows);
 }
 
+// TODO: Arreglar sort con fechas
 export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
-    if (row._pivotIndexes) {
+    if (row._pivotIndexes && !row[column.field as string]) {
         const field = column.field;
         let rows = row._pivotIndexes.map((index) => data[index]);
 
@@ -249,6 +250,7 @@ export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: 
     for (const column of sortColumns) {
         const valueA = getPivotedData(a, column, data)
         const valueB = getPivotedData(b, column, data)
+        console.log(valueA, valueB)
 
         if (valueA > valueB) {
             return column.sort?.order === SortType.ASC ? 1 : -1;
