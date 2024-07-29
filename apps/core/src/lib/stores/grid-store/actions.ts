@@ -505,6 +505,7 @@ export const setPivot =
                         field: row.field,
                         width: MIN_COL_WIDTH,
                         rowGroup: index < (pivot.rows?.length || 0) - 1,
+                        dateFormat: row.dateFormat,
                         tree: false,
                         final: true,
                         level: 0
@@ -551,14 +552,15 @@ export const setPivot =
             const finalColumns = getColumnsFromDefs([...Object.values(columns), ...columnDefs], defaultColumnDef);
 
             setColumnsStyleProps(finalColumns, container.offsetWidth);
-            setColumnFilters(finalColumns, groupedByRows);
+            setColumnFilters(finalColumns, data);
 
             const sortedColumns = sortColumns(finalColumns);
             const columnsWithSort: Column[] = [];
 
-            rowColumnDefs.forEach(column => {
-                addSort(finalColumns[column.id as ColumnId], columnsWithSort, true, SortType.ASC, true);
-                columnsWithSort.push(finalColumns[column.id as ColumnId]);
+            rowColumnDefs.forEach(columnDef => {
+                const column = finalColumns[columnDef.id as ColumnId];
+                addSort(column, columnsWithSort, true, SortType.ASC, true);
+                columnsWithSort.push(column);
             })
 
             moveColumns(finalColumns, sortedColumns, PinType.NONE);
@@ -567,9 +569,11 @@ export const setPivot =
                 onChanges(ChangeType.PIVOT, { pivot });
             }
 
+            const sort = columnsWithSort.map((col) => col.id);
+
             pivot.snapshotBeforePivot = snapshots.length - 1;
 
-            const newState = { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true, haveChanges: true };
+            const newState = { pivotData: groupedByRows, bottomRows, groupData: undefined, columns: finalColumns, sortedColumns, sort, groupOrder, pivot, filters: {}, snapshotBeforePivot, isPivoted: true, haveChanges: true };
 
             return newState;
         }

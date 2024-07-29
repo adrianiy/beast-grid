@@ -154,6 +154,7 @@ export default function TBody<T>({
                     setSorting(true);
                 }
                 setTimeout(() => {
+                    console.log(sortColumns);
                     newSortedData.sort(sortData(sortColumns, data));
                     resetSortColumns(sortColumns);
                     updateGaps(0, newSortedData);

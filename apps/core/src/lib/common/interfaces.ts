@@ -54,6 +54,7 @@ export interface BaseColumnDef {
     childrenMap?: Record<string, string>;
     formatter?: (value: string & number, row: Row) => string;
     styleFormatter?: (value: string & number, row: Row) => CSSProperties;
+    dateFormat?: string;
     menu?: Partial<MenuProps> | boolean;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;

@@ -56,7 +56,7 @@ export const Filter = ({ column, scrollContainer }: { column: Column; scrollCont
         case FilterType.NUMBER:
             return <NumberFilter column={column} scrollContainer={scrollContainer} filters={filters} />;
         default:
-            return null;
+            return <TextFilters column={column} />;
     }
 };
 

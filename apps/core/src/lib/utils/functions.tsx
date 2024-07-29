@@ -21,8 +21,12 @@ import {
     SortType,
 } from '../common';
 import { v4 as uuidv4 } from 'uuid';
-import dayjs from 'dayjs';
 import { parseFormula } from './math';
+
+import dayjs from 'dayjs';
+import CustomParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(CustomParseFormat);
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
     switch (column.aggregation) {
@@ -213,7 +217,6 @@ const getPivotFormula = (field: string | undefined, column: Column, rows: Row[])
     return doPivotOperation(jsonFormula as Operand, column, rows);
 }
 
-// TODO: Arreglar sort con fechas
 export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
     if (row._pivotIndexes && !row[column.field as string]) {
         const field = column.field;
@@ -248,15 +251,28 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
 
 export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
+        const isAscending = column.sort?.order === SortType.ASC;
         const valueA = getPivotedData(a, column, data)
         const valueB = getPivotedData(b, column, data)
-        console.log(valueA, valueB)
+
+        // order as date if both values are dates
+        if (column.filterType === FilterType.DATE) {
+            const dateA = dayjs(valueA as string, column.dateFormat);
+            const dateB = dayjs(valueB as string, column.dateFormat);
+
+            if (dateA.isBefore(dateB)) {
+                return isAscending ? -1 : 1;
+            }
+            if (dateA.isAfter(dateB)) {
+                return isAscending ? 1 : -1;
+            }
+        }
 
         if (valueA > valueB) {
-            return column.sort?.order === SortType.ASC ? 1 : -1;
+            return isAscending ? 1 : -1;
         }
         if (valueA < valueB) {
-            return column.sort?.order === SortType.ASC ? -1 : 1;
+            return isAscending ? -1 : 1;
         }
     }
     return (a._originalIdx as number) - (b._originalIdx as number);

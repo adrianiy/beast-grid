@@ -71,6 +71,7 @@ const columnDefs: ColumnDef[] = [
         width: 200,
         sortable: true,
         formatter: (value) => (field.startsWith('VB') ? numeral(value).format('0,0 $') : value),
+        dateFormat: 'D/M/YY',
         menu: {
             filter: field === 'VB_ORDERS',
             column: true,

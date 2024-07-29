@@ -58,6 +58,7 @@ export enum FilterType {
     TEXT = 'text',
     NUMBER = 'number',
     BOOLEAN = 'boolean',
+    DATE = 'date',
 }
 
 export enum OperationType {

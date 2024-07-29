@@ -18,6 +18,7 @@ import { groupBy } from '../../../utils/functions';
 import deepmerge from 'deepmerge';
 import { createGroupColumn } from './group';
 import { toggleHide } from './edition';
+import dayjs from 'dayjs';
 
 const loopColumns = (
     levelIndexes: Record<number, number>,
@@ -214,6 +215,10 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
         return;
     }
     Object.values(columns).forEach((column) => {
+        if (dayjs(data[0][column.field as string] as string).isValid()) {
+            column.filterType = FilterType.DATE;
+            return;
+        }
         if (typeof data[0][column.field as string] === 'boolean') {
             column.filterType = FilterType.BOOLEAN;
             return;

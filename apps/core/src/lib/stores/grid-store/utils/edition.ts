@@ -184,7 +184,7 @@ export const addSort = (
     multipleColumnSort: boolean,
     order: SortType = SortType.ASC,
     temporal?: boolean
-) => {
+): Column => {
     if (multipleColumnSort) {
         const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
 
@@ -204,6 +204,10 @@ export const addSort = (
             delete columnsWithSort[0].sort;
         }
     }
+
+    console.log(column, multipleColumnSort)
+
+    return column;
 };
 
 export const removeSort = (column: Column, columnsWithSort: Column[]) => {
