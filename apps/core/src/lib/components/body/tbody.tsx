@@ -154,7 +154,6 @@ export default function TBody<T>({
                     setSorting(true);
                 }
                 setTimeout(() => {
-                    console.log(sortColumns);
                     newSortedData.sort(sortData(sortColumns, data));
                     resetSortColumns(sortColumns);
                     updateGaps(0, newSortedData);
@@ -532,7 +531,7 @@ export default function TBody<T>({
     const getStyleProps = () => {
         return {
             height: sortedData.length
-                ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || 0)) * rowHeight
+                ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || topRows?.length || 0) + (beastConfig?.bottomRows?.length || bottomRows?.length || 0)) * rowHeight
                 : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };

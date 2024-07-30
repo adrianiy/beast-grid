@@ -147,7 +147,6 @@ export const groupByPivot = (
         const totalRow = { [rows[0].field as string]: 'Total' } as Row;
         const allIndexes = data.map((_, i) => i);
 
-        // TODO: Arreglar margen visual en la ultima fila
         _bottomRows.push(newRow(totalRow, rows, false, allIndexes, true));
     }
 
