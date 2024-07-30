@@ -133,6 +133,7 @@ export default function HeaderCell<T>({
             if (x > 0 && hit && lastHitElement.current !== element) {
                 lastHitElement.current = element;
                 swapColumns(column.id, element.id);
+                saveState();
                 break;
             }
         }

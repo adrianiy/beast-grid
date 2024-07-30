@@ -204,7 +204,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 filter: true,
             },
             topLeftToolbar: {
-                history: true
+                history: true,
             },
             chart: {
                 defaultValues: {

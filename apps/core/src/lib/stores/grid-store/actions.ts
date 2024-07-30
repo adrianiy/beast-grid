@@ -106,7 +106,7 @@ export const swapColumns = (id1: ColumnId, id2: ColumnId) => (state: GridStore) 
 
     moveColumns(columns, sortedColumns, column1.pinned);
 
-    return { columns, sortedColumns };
+    return { columns, sortedColumns, haveChanges: true };
 };
 
 export const deleteEmptyParents = () => (state: GridStore) => {
