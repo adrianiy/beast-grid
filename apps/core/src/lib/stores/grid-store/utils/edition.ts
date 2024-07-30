@@ -205,8 +205,6 @@ export const addSort = (
         }
     }
 
-    console.log(column, multipleColumnSort)
-
     return column;
 };
 
