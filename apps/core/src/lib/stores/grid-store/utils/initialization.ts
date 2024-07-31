@@ -215,6 +215,10 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
         return;
     }
     Object.values(columns).forEach((column) => {
+        if (typeof data[0][column.field as string] === 'number') {
+            column.filterType = FilterType.NUMBER;
+            return;
+        }
         if (dayjs(data[0][column.field as string] as string).isValid()) {
             column.filterType = FilterType.DATE;
             return;
@@ -225,10 +229,6 @@ export const setColumnFilters = (columns: ColumnStore, data: Data) => {
         }
         if (typeof data[0][column.field as string] === 'string') {
             column.filterType = FilterType.TEXT;
-            return;
-        }
-        if (typeof data[0][column.field as string] === 'number') {
-            column.filterType = FilterType.NUMBER;
             return;
         }
     });
