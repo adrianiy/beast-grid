@@ -158,7 +158,7 @@ const _getColumnHeaderWidth = (column: Column): number | undefined => {
         return undefined;
     }
 
-    return (column.headerName.length * 10) + 100;
+    return ((column.headerName.length * 10) + 100) || 0;
 }
 
 const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {

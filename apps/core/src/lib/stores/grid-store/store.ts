@@ -25,6 +25,7 @@ import {
     swapColumns,
     undo,
     unGroupColumn,
+    updateColumnDefs,
     updateSelectedCells,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
@@ -94,8 +95,9 @@ export interface GridState extends DynamicState {
 }
 
 export interface GridStore extends GridState {
-    setData: (data: Data) => void;
+    setData: (data: Data, pivot?: PivotConfig) => void;
     setColumns: (columns: ColumnStore) => void;
+    updateColumnDefs: (columnDefs: ColumnDef[], pivotConfig?: PivotConfig) => void;
     setTheme: (theme: string) => void;
     setScrollElement: (container: HTMLDivElement) => void;
     setColumn: (args: { id: string; column: Column }) => void;
@@ -184,8 +186,9 @@ export const createGridStore = <T>(
 
     return create<GridStore>((set) => ({
         ...initialState,
-        setData: (data: Data) => set(setData(data)),
+        setData: (data: Data, pivot?: PivotConfig) => set(setData(data, pivot)),
         setColumns: (columns: ColumnStore) => set({ columns }),
+        updateColumnDefs: (columnDefs: ColumnDef[], pivotConfig: PivotConfig | undefined) => set(updateColumnDefs(columnDefs, pivotConfig)),
         setTheme: (theme: string) => set({ theme }),
         setScrollElement: (scrollElement: HTMLDivElement) => set({ scrollElement }),
         setColumn: (payload) => set(setColumn(payload.id, payload.column)),

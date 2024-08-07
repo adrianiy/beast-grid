@@ -545,7 +545,7 @@ export const setPivot =
                     columnDefs.push(...valueColumns.filter((c) => c._firstLevel));
                 }
             } else if (pivot.values?.length) {
-                const valueHeaders = getValueHeaders(pivot.values, 'total:');
+                const valueHeaders = getValueHeaders(pivot.values);
                 columnDefs.push(...valueHeaders);
             }
 
@@ -593,12 +593,35 @@ export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) =
     return { columns };
 };
 
-export const setData = (_data: Data) => (state: GridStore) => {
+export const setData = (_data: Data, pivot?: PivotConfig) => (state: GridStore) => {
     const { columns, groupOrder, tree, container } = state;
     const initialData = createVirtualIds(_data as Data);
     const data = initialize(columns, container, initialData, groupOrder, tree);
+
+    if (pivot) {
+        return setInitialPivot(pivot)({ ...state, data });
+    }
 
     const newState = { data, unfilteredData: [...data], initialized: true, snapshots: [], historyPoint: -1 };
 
     return updateSnapshotAndSetState(state, newState);
 };
+
+export const updateColumnDefs = (columnDefs: ColumnDef[], pivotConfig?: PivotConfig) => (state: GridStore) => {
+    const { container, onChanges } = state;
+    const newColumns = getColumnsFromDefs(columnDefs, state.defaultColumnDef);
+
+    const sortedColumns = sortColumns(newColumns, onChanges);
+
+    moveColumns(newColumns, sortedColumns, PinType.LEFT);
+    moveColumns(newColumns, sortedColumns, PinType.NONE);
+    moveColumns(newColumns, sortedColumns, PinType.RIGHT);
+
+    setColumnsStyleProps(newColumns, container.offsetWidth);
+
+    if (pivotConfig) {
+        return setInitialPivot(pivotConfig)({ ...state, columns: newColumns, sortedColumns });
+    }
+
+    return { columns: newColumns, sortedColumns, edited: true };
+}

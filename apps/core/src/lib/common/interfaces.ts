@@ -269,8 +269,10 @@ export interface HeaderDrag extends DragItem {
 export interface BeastGridApi {
     columns: ColumnStore;
     setColumns: (columns: ColumnStore) => void;
+    updateColumnDefs: (columnDefs: ColumnDef[], pivotConfig?: PivotConfig) => void;
     setLoading: (loading: boolean) => void;
-    setData: (data: Data) => void;
+    setPivot: (pivot: PivotConfig) => void;
+    setData: (data: Data, pivot?: PivotConfig) => void;
     clearHistory: () => void;
 }
 

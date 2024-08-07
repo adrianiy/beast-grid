@@ -112,6 +112,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         const fetchData = async () => {
             try {
                 const res = await getData(qty);
+                beastApi?.current?.updateColumnDefs(columnDefs);
                 beastApi?.current?.setData(res as unknown as Data);
             } catch (_) {
                 setError(true);
@@ -170,7 +171,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     december: 41062,
                 },
             ],
-            columnDefs,
+            columnDefs: [],
             style: {
                 maxHeight: 'calc(100vh - 100px)',
                 border: true,

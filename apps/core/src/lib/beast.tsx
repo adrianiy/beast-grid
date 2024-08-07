@@ -13,15 +13,15 @@ type Props<T> = {
 };
 
 export default function Beast<T>(props: Props<T>) {
-    const [mode, initialized, setInitialPivot] = useBeastStore((state) => [state.mode, state.initialized, state.setInitialPivot]);
+    const [mode, initialized, updateColumnDefs] = useBeastStore((state) => [state.mode, state.initialized, state.updateColumnDefs]);
 
     useEffect(() => {
         if (initialized) {
-            if (props.config.pivot?.pivotConfig) {
-                setInitialPivot(props.config.pivot.pivotConfig);
+            if (props.config.columnDefs || props.config.pivot?.pivotConfig) {
+                updateColumnDefs(props.config.columnDefs, props.config.pivot?.pivotConfig);
             }
         }
-    }, [initialized, props.config.pivot?.pivotConfig, setInitialPivot])
+    }, [initialized, props.config.columnDefs, props.config.pivot?.pivotConfig, updateColumnDefs])
 
     return <Fragment>
         {mode === BeastMode.GRID && <Grid {...props} />}

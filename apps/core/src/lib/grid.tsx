@@ -52,9 +52,10 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
 
             setScrollTop(scrollElement.scrollTop);
 
+            updateColumnVisibility(scrollLeft)
+
             if (scrollDiff > 100) {
                 lastScrollLeft.current = scrollLeft;
-                updateColumnVisibility(scrollLeft)
                 return;
             }
 
@@ -109,7 +110,6 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
 
     // Set loading on pivot change
     useEffect(() => {
-        console.log('pivot change');
         setLoading(true);
 
         setTimeout(() => {

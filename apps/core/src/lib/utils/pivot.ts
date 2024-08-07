@@ -31,7 +31,7 @@ const newColumn = (baseColumn: Column, key: string, field: string, parentId: str
 const createSingleRows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
     const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
 
-    if (!rowMap[key]) {
+    if (rowMap[key] == null) {
         // Si agrupo totales de fila, necesito crear un padre por cada nivel de filas y concatenar los hijos a cada
         // padre
         result.push(newRow(row, rows, false, [index]));
@@ -52,7 +52,7 @@ const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Recor
 
         if (isFirst) {
             // Parent Row
-            if (!rowMap[key]) {
+            if (rowMap[key] != null) {
                 // Register parent row if not present in the map
                 result.push(newRow(row, rows, !isLast, [index], !isLast));
                 rowMap[key] = result.length - 1;

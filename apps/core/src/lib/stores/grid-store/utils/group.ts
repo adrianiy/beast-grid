@@ -36,16 +36,14 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
     return newColumn;
 };
 
-export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[] => {
+export const getValueHeaders = (values: Column[]): ColumnDef[] => {
     const columnDefs: ColumnDef[] = [];
     values.forEach((val) => {
-        const aggregation = val.aggregation;
-
         columnDefs.push({
             ...val,
             id: uuidv4(),
-            headerName: `${aggregation} of ${val.headerName}`,
-            field: `${val.field}@${parentField}`,
+            headerName: val.headerName,
+            field: val.field,
             flex: 1,
         });
     });
