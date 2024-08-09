@@ -127,7 +127,7 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
 
     const prevWidth = column.width;
 
-    column.width = Math.max(width, column.minWidth || MIN_COL_WIDTH);
+    column.width = Math.max(width, column.minWidth || 25);
     column.flex = undefined;
 
     if (column.parent) {

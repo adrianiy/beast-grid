@@ -51,7 +51,6 @@
     user-select: none;
     position: absolute;
     gap: var(--bg-size--3);
-    padding: 0 var(--bg-size--4);
     transition: all linear var(--bg-transition--1);
     box-sizing: border-box;
     background-color: var(--bg-background-color--1);
@@ -63,16 +62,18 @@
 
         .bg-grid-header__menu {
             opacity: 1;
+
         }
 
-        .bg-grid-header__resize:hover::after {
-            background-color: var(--bg-hover-color--resize);
+        .bg-grid-header__resize {
+            border-color: var(--bg-hover-color--resize);
         }
     }
 
     &__left {
         width: 100%;
         overflow: hidden;
+        margin: 0 var(--bg-size--4);
         gap: var(--bg-size--3);
     }
 
@@ -90,8 +91,17 @@
     }
 
     .bg-grid-header__cell__menu {
+        margin-right: var(--bg-size--2);
         position: relative;
         cursor: pointer;
+
+        .bg-dot--active {
+            position:absolute;
+            right: 100%;
+            top: 50%;
+            margin-top: calc(var(--bg-size--2) / -2);
+            transition: all linear 300ms;
+        }
 
         svg {
             --size: var(--bg-size--4);
@@ -112,27 +122,15 @@
     .bg-grid-header__resize {
         position: absolute;
         display: flex;
-        right: -2px;
+        right: 0px;
         width: 16px;
         height: 100%;
         cursor: ew-resize;
         z-index: 2;
-
-        &::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 4px;
-            width: 1px;
-            height: 75%;
-            background-color: var(--bg-background-color--resize);
-            transform: translateY(-50%);
-        }
+        border-right: 1px solid transparent;
 
         &.resizing {
-            &::after {
-                background-color: var(--bg-hover-color--resize);
-            }
+            border-color: var(--bg-hover-color--resize);
         }
     }
 
