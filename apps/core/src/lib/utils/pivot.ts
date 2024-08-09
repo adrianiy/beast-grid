@@ -52,7 +52,7 @@ const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Recor
 
         if (isFirst) {
             // Parent Row
-            if (rowMap[key] != null) {
+            if (rowMap[key] == null) {
                 // Register parent row if not present in the map
                 result.push(newRow(row, rows, !isLast, [index], !isLast));
                 rowMap[key] = result.length - 1;
