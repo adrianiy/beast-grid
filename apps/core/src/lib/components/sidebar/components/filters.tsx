@@ -12,6 +12,7 @@ import SimpleBar from 'simplebar-react';
 import SimpleBarCore from 'simplebar-core';
 
 import cn from 'classnames';
+import { getColumnFilter } from '../../../stores/grid-store/utils';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -48,7 +49,11 @@ export default function Filters<T>({ config }: Props<T>) {
 }
 
 export const Filter = ({ column, scrollContainer }: { column: Column; scrollContainer: HTMLDivElement | null }) => {
-    const [filters] = useBeastStore((state) => [state.filters]);
+    const [filters, data] = useBeastStore((state) => [state.filters, state.data]);
+
+    if (!column.filterType) {
+        getColumnFilter(column, data);
+    }
 
     switch (column.filterType) {
         case FilterType.TEXT:

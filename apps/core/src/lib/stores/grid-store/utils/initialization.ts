@@ -210,27 +210,31 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
     return columnStore;
 };
 
+export const getColumnFilter = (column: Column, data: Data): void => {
+    if (typeof data[0][column.field as string] === 'number') {
+        column.filterType = FilterType.NUMBER;
+        return;
+    }
+    if (dayjs(data[0][column.field as string] as string).isValid()) {
+        column.filterType = FilterType.DATE;
+        return;
+    }
+    if (typeof data[0][column.field as string] === 'boolean') {
+        column.filterType = FilterType.BOOLEAN;
+        return;
+    }
+    if (typeof data[0][column.field as string] === 'string') {
+        column.filterType = FilterType.TEXT;
+        return;
+    }
+}
+
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
     if (!data.length) {
         return;
     }
     Object.values(columns).forEach((column) => {
-        if (typeof data[0][column.field as string] === 'number') {
-            column.filterType = FilterType.NUMBER;
-            return;
-        }
-        if (dayjs(data[0][column.field as string] as string).isValid()) {
-            column.filterType = FilterType.DATE;
-            return;
-        }
-        if (typeof data[0][column.field as string] === 'boolean') {
-            column.filterType = FilterType.BOOLEAN;
-            return;
-        }
-        if (typeof data[0][column.field as string] === 'string') {
-            column.filterType = FilterType.TEXT;
-            return;
-        }
+        getColumnFilter(column, data);
     });
 };
 
@@ -254,7 +258,7 @@ export const initialize = (
     data: Data,
     groupOrder: ColumnId[],
     tree?: Partial<TreeConstructor>
-): Data => {
+): [Data, ColumnStore] => {
     if (tree) {
         groupOrder.forEach((id) => {
             const column = columns[id];
@@ -271,5 +275,5 @@ export const initialize = (
     setColumnsStyleProps(columns, container.offsetWidth);
     setColumnFilters(columns, data);
 
-    return finalData;
+    return [finalData, columns];
 };

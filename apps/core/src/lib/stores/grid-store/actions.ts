@@ -212,7 +212,9 @@ export const addFilter =
 
             const newData = data.map(filterRow(columns, filters)) as Data;
 
-            return { columns, filters: { ...filters }, data: newData, haveChanges: true } as GridStore;
+            const newState = { columns, filters: { ...filters }, data: newData, haveChanges: true } as GridStore;
+
+            return updateSnapshotAndSetState(state, newState);
         };
 
 export const selectAllFilters = (id: ColumnId, options: IFilter[]) => (state: GridStore) => {
@@ -596,13 +598,13 @@ export const setColumnsVisibility = (scrollLeft: number) => (state: GridStore) =
 export const setData = (_data: Data, pivot?: PivotConfig) => (state: GridStore) => {
     const { columns, groupOrder, tree, container } = state;
     const initialData = createVirtualIds(_data as Data);
-    const data = initialize(columns, container, initialData, groupOrder, tree);
+    const [data, finalColumns] = initialize(columns, container, initialData, groupOrder, tree);
 
     if (pivot) {
         return setInitialPivot(pivot)({ ...state, data });
     }
 
-    const newState = { data, unfilteredData: [...data], initialized: true, snapshots: [], historyPoint: -1 };
+    const newState = { data, columns: finalColumns, unfilteredData: [...data], initialized: true, snapshots: [], historyPoint: -1 };
 
     return updateSnapshotAndSetState(state, newState);
 };

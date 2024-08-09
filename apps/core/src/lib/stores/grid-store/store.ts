@@ -138,14 +138,14 @@ export const createGridStore = <T>(
     theme: string,
     onChanges?: OnChanges
 ) => {
-    const columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
+    const _columns = getColumnsFromDefs(columnDefs, defaultColumnDef);
 
-    const groupOrder = Object.values(columns)
+    const groupOrder = Object.values(_columns)
         .filter((col) => col.rowGroup)
         .map((col) => col.id);
     const initialData = createVirtualIds(_data as Data);
 
-    const data = initialize(columns, container, initialData, groupOrder, tree);
+    const [data, columns] = initialize(_columns, container, initialData, groupOrder, tree);
     const sortedColumns = sortColumns(columns, onChanges);
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
