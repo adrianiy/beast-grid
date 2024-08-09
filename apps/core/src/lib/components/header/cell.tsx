@@ -198,6 +198,7 @@ export default function HeaderCell<T>({
 
         return (
             <div className="bg-grid-header__cell__menu row middle">
+                {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
                 <DotsVerticalIcon
                     ref={menuRef}
                     className={cn('bg-grid-header__menu', { active: showMenu })}
@@ -231,7 +232,6 @@ export default function HeaderCell<T>({
                     title={column.headerName} >
                     {column.headerName}
                 </span>
-                {filters[column.id]?.length > 0 && <div className="bg-dot--active" />}
                 {column.sort && renderSortIcon(column.sort)}
             </div>
 
