@@ -43,6 +43,7 @@ import {
     TreeConstructor,
 } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, saveSnapshot, sortColumns } from './utils';
+import { config } from 'process';
 
 export interface PivotState {
     columns: Column[];
@@ -133,7 +134,7 @@ export interface GridStore extends GridState {
 }
 
 export const createGridStore = <T>(
-    { data: _data, columnDefs, defaultColumnDef, sort, tree }: BeastGridConfig<T>,
+    { data: _data, columnDefs, defaultColumnDef, sort, tree, mode = BeastMode.GRID }: BeastGridConfig<T>,
     container: HTMLDivElement,
     theme: string,
     onChanges?: OnChanges
@@ -171,7 +172,7 @@ export const createGridStore = <T>(
         selecting: false,
         initialized: data.length > 0,
         container,
-        mode: BeastMode.GRID,
+        mode,
         scrollElement: null as unknown as HTMLDivElement,
         sideBarConfig: null,
         historyPoint: 0,

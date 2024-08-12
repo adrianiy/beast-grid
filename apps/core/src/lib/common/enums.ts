@@ -79,6 +79,7 @@ export enum BeastMode {
 
 export enum ChartType {
     BAR = 'bar',
+    BAR_HORIZONTAL = 'h_bar',
     LINE = 'line',
     PIE = 'pie',
 }

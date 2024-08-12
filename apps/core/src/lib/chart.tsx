@@ -172,15 +172,14 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         props.activeColumns?.filter((ac) => configurableCategories.find((cc) => cc.id === ac.id)) ||
         (categoryColumns.length ? categoryColumns : configurableCategories);
     const includeDate = activeCategories.find((c) => dateColumns.find((dc) => dc.id === c.id));
+    const activeChartType = props.chartType || props.config.chart?.defaultValues?.chartType || (includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
 
     const [category, setCategory] = useState<Column>(props.category || activeCategories[0]);
     const [values, setValues] = useState<Column[]>(props.values || activeColumns);
     const [groups, setGroups] = useState<Column[]>(
         props.groups || props.config.chart?.groupData === false ? [] : activeCategories.slice(1)
     );
-    const [chartType, setChartType] = useState<ChartType>(
-        props.chartType || (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
-    );
+    const [chartType, setChartType] = useState<ChartType>(activeChartType);
 
     const [options, setOptions] = useState<EChartsCoreOption>();
 
@@ -218,11 +217,12 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
         const isPie = chartType === ChartType.PIE;
         const isLine = chartType === ChartType.LINE;
+        const isHBar = chartType === ChartType.BAR_HORIZONTAL;
 
         const series = Object.entries(seriesRecord).map(([name, data], idx) => {
             return {
                 name,
-                type: chartType,
+                type: chartType === ChartType.BAR_HORIZONTAL ? ChartType.BAR : chartType,
                 radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
                 tooltip: {
                     valueFormatter: data.column.formatter,
@@ -247,7 +247,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
             };
         });
 
-        const _lineBarOptions = {
+        const _lineBarOptions = !isHBar ? {
             xAxis: {
                 type: 'category',
                 ...(!isLine && {
@@ -259,11 +259,24 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
             },
             yAxis: {
                 type: 'value',
+                data: undefined,
+                axisLabel: {
+                    formatter: (value: number) => (value >= 1000 ? numeral(value).format('0,0 a') : value),
+                },
+            },
+        } : {
+            yAxis: {
+                type: 'category',
+                data: categories,
+            },
+            xAxis: {
+                type: 'value',
                 axisLabel: {
                     formatter: (value: number) => (value >= 1000 ? numeral(value).format('0,0 a') : value),
                 },
             },
         };
+
 
         const _options: EChartsCoreOption = deepmerge(
             {

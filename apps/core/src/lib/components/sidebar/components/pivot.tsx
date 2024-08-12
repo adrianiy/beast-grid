@@ -191,8 +191,8 @@ const PivotOptions = ({
     const rowBox = useRef<PivotBoxHandle>(null);
     const columnBox = useRef<PivotBoxHandle>(null);
     const valueBox = useRef<PivotBoxHandle>(null);
-    const [setPivot] = useBeastStore((state) => [state.setPivot]);
-    const [pivotState, setPivotState] = useState<PivotState | undefined>({} as PivotState);
+    const [pivot, setPivot] = useBeastStore((state) => [state.pivot, state.setPivot]);
+    const [pivotState, setPivotState] = useState<Partial<PivotState> | undefined>(pivot);
 
     if (!enabled) {
         return null;
