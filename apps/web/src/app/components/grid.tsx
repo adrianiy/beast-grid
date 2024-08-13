@@ -254,7 +254,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     };
 
     const handleChanges = (changeType: ChangeType, config: Changes) => {
-        if (changeType === ChangeType.SORT) {
+        if (changeType === ChangeType.VISIBILITY) {
             console.log(config)
         }
     }

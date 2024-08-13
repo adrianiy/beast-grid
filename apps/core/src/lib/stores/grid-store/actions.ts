@@ -78,7 +78,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
     }
 
     if (onChanges) {
-        onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]) })
+        onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]).filter(Boolean) })
     }
 
     return { columns, hiddenColumns, haveChanges: true }
