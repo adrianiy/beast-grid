@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useBeastStore } from "../stores/beast-store";
 import { Column } from "../common";
 
+// TODO: el scroll provoca que se sume el ancho de la tabla
 export const useScrollInViewHook = (
     options: Partial<{
         column: Column;
