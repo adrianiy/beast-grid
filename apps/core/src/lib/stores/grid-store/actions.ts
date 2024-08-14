@@ -624,7 +624,7 @@ export const updateColumnDefs = (columnDefs: ColumnDef[], pivotConfig?: PivotCon
     const hiddenColumns = sortedColumns.filter((col) => col.hidden).map((col) => col.id);
 
     if (pivotConfig) {
-        return setInitialPivot(pivotConfig)({ ...state, columns: newColumns, sortedColumns, hiddenColumns });
+        return setInitialPivot(pivotConfig)({ ...state, columns: newColumns, sortedColumns, hiddenColumns, isPivoted: true });
     }
 
     return { columns: newColumns, sortedColumns, hiddenColumns, edited: true };

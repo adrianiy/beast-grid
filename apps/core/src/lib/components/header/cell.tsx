@@ -113,21 +113,62 @@ export default function HeaderCell<T>({
         for (const element of dropTargets) {
             const elementColumn = columns[element?.id];
 
-            if (
-                !elementColumn ||
-                !elementColumn.path ||
-                !column.path ||
-                (isPivoted && elementColumn.path[elementColumn.path.length - 2] !== column.path[column.path.length - 2]) ||
-                elementColumn.logicDelete ||
-                elementColumn.pinned !== column.pinned ||
-                element.id === column.id ||
-                elementColumn.parent === column.id ||
-                elementColumn.level > column.level ||
-                (elementColumn.level < column.level && !elementColumn.final) ||
-                element.id === column.parent ||
-                element.id === lastHitElement.current?.id
-            )
+            const notValidElemnts = !elementColumn || !elementColumn.path || !column.path || elementColumn.pinned !== column.pinned || element.id === lastHitElement.current?.id;
+
+            if (notValidElemnts) {
                 continue;
+            }
+
+            const sameElement =
+                element.id === column.id ||
+                elementColumn.parent === column.id;
+
+            if (sameElement) {
+                continue;
+            }
+
+            if (isPivoted) {
+                // swap pivotado
+                //  - mismo nivel mismo padre: ok
+                //  - distinto nivel:
+                //      - si alguno de los padres es distinto y tiene mas de un hijo: no
+                //      - si todos los padres tienen un solo hijo: ok
+                //      - si todos los padres son iguales: ok
+                const isPivotValid =
+                    (elementColumn.level === column.level &&
+                        elementColumn.parent === column.parent) ||
+                    (elementColumn.level === column.level &&
+                        elementColumn.path?.every((id, idx) => {
+                            const columnParent = column.path?.[idx];
+                            const singleChildElement = columns[id].childrenId?.length === 1;
+                            const singleChildColumn = columns[columnParent as string].childrenId?.length === 1;
+                            const sameParent = id === columnParent;
+
+                            return sameParent || (singleChildElement && singleChildColumn);
+                        }))
+
+                if (!isPivotValid) {
+                    continue;
+                }
+            }
+
+            // swap comun
+            // - mismo nivel: ok
+            // - distinto nivel:
+            //  - si el elemento es final: no
+            //  - si el elemento es padre del elemento actual: no
+            //  - si el elemento es el mismo que el anterior: no
+
+            const isCommonSwapValid =
+                elementColumn.level === column.level ||
+                (elementColumn.level !== column.level &&
+                    elementColumn.final);
+
+
+
+            if (!isCommonSwapValid) {
+                continue;
+            }
 
             const left = columns[element.id].left + containerLeft - scrollLeft + (leftWidth || 0);
             const width = columns[element.id].width;
