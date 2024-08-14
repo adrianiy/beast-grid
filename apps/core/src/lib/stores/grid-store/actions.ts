@@ -78,7 +78,7 @@ export const hideColumn = (id: ColumnId) => (state: GridStore) => {
     }
 
     if (onChanges) {
-        onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]).filter(Boolean) })
+        onChanges(ChangeType.VISIBILITY, { hiddenColumns: hiddenColumns.map((id) => columns[id]).filter(Boolean) });
     }
 
     return { columns, hiddenColumns, haveChanges: true }
@@ -621,9 +621,11 @@ export const updateColumnDefs = (columnDefs: ColumnDef[], pivotConfig?: PivotCon
 
     setColumnsStyleProps(newColumns, container.offsetWidth);
 
+    const hiddenColumns = sortedColumns.filter((col) => col.hidden).map((col) => col.id);
+
     if (pivotConfig) {
-        return setInitialPivot(pivotConfig)({ ...state, columns: newColumns, sortedColumns });
+        return setInitialPivot(pivotConfig)({ ...state, columns: newColumns, sortedColumns, hiddenColumns });
     }
 
-    return { columns: newColumns, sortedColumns, edited: true };
+    return { columns: newColumns, sortedColumns, hiddenColumns, edited: true };
 }

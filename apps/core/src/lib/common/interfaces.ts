@@ -255,6 +255,7 @@ export interface Column extends ColumnDef, Position {
     logicDelete?: boolean;
     lastPinned?: boolean;
     tree?: boolean;
+    path?: string[];
     _filters?: Record<string, string>;
     _summary?: boolean;
 }

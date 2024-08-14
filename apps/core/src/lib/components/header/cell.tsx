@@ -46,11 +46,12 @@ export default function HeaderCell<T>({
     const [dragging, setDragging] = useState(false);
     const [resizing, setResizing] = useState(false);
     const [translateX, setTranslateX] = useState(0);
-    const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort, saveState] =
+    const [columns, filters, theme, isPivoted, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort, saveState] =
         useBeastStore((state) => [
             state.columns,
             state.filters,
             state.theme,
+            state.isPivoted,
             state.hideColumn,
             state.swapColumns,
             state.resizeColumn,
@@ -111,8 +112,12 @@ export default function HeaderCell<T>({
         const scrollLeft = scrollContainer.scrollLeft;
         for (const element of dropTargets) {
             const elementColumn = columns[element?.id];
+
             if (
                 !elementColumn ||
+                !elementColumn.path ||
+                !column.path ||
+                (isPivoted && elementColumn.path[elementColumn.path.length - 2] !== column.path[column.path.length - 2]) ||
                 elementColumn.logicDelete ||
                 elementColumn.pinned !== column.pinned ||
                 element.id === column.id ||
@@ -133,7 +138,6 @@ export default function HeaderCell<T>({
             if (x > 0 && hit && lastHitElement.current !== element) {
                 lastHitElement.current = element;
                 swapColumns(column.id, element.id);
-                saveState();
                 break;
             }
         }

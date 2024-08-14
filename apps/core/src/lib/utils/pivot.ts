@@ -12,21 +12,26 @@ const newRow = (row: Row, rows: Column[], showTotals: boolean, indexes: number[]
     ...rows.reduce((acc, column) => ({ ...acc, [column.field as keyof Row]: row[column.field as keyof Row] }), {}),
 });
 
-const newColumn = (baseColumn: Column, key: string, field: string, parentId: string | undefined, firstLevel: boolean, filters: Record<string, string>) => ({
-    ...baseColumn,
-    id: uuidv4(),
-    field,
-    headerName: key,
-    flex: 1,
-    parent: parentId,
-    children: [],
-    childrenMap: {},
-    menu: false,
-    sort: undefined,
-    _filters: filters,
-    _firstLevel: firstLevel,
-    _summary: firstLevel
-})
+const newColumn = (baseColumn: Column, key: string, field: string, parent: Partial<Column> | undefined, firstLevel: boolean, filters: Record<string, string>) => {
+    const id = uuidv4();
+
+    return {
+        ...baseColumn,
+        id,
+        field,
+        headerName: key,
+        flex: 1,
+        parent: parent?.id,
+        children: [],
+        childrenMap: {},
+        menu: false,
+        sort: undefined,
+        path: parent?.path ? [...parent.path, parent.id] : [],
+        _filters: filters,
+        _firstLevel: firstLevel,
+        _summary: firstLevel
+    }
+}
 
 const createSingleRows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
     const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
@@ -122,7 +127,7 @@ export const groupByPivot = (
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 
                 if (!columnDefs[field]) {
-                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField]?.id, false, { ...filters });
+                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField], false, { ...filters });
 
                     if (lastField) {
                         columnDefs[lastField].children?.push(columnDefs[field]);
@@ -133,7 +138,7 @@ export const groupByPivot = (
             const valueField = `${column.field as string}@${lastField}`;
 
             if (!columnDefs[valueField]) {
-                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField]?.id, false, filters);
+                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField], false, filters);
 
                 if (lastField) {
                     columnDefs[lastField]?.children?.push(columnDefs[valueField]);

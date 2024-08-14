@@ -51,6 +51,7 @@ const loopColumns = (
             final: !columnDef.children || columnDef.children.length === 0,
             id,
             parent: parent?.id,
+            path: parent?.path ? [...parent.path, parent.id] : [],
             level,
         };
         columns[id] = column;
