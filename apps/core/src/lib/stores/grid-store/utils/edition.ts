@@ -240,6 +240,8 @@ export const updateColumnVisibility = (
             const allVisible = leftVisible && rightVisible;
             const onlyInsideVisible = left < leftEdge && right > rightEdge;
             column.inView = leftVisible || rightVisible || allVisible || onlyInsideVisible;
+        } else {
+            column.inView = true;
         }
     });
 

@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ChangeType, ColumnDef, Data, Row, SortType } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ChangeType, ColumnDef, Data, PinType, Row, SortType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -21,6 +21,7 @@ const columnDefs: ColumnDef[] = [
         field: 'country',
         width: 200,
         sortable: true,
+        headerStyleFormatter: () => ({ backgroundColor: 'red' }),
         sort: {
             order: SortType.DESC,
             priority: 1
@@ -66,6 +67,13 @@ const columnDefs: ColumnDef[] = [
         formatter: (value) => numeral(value).format('0,0 $'),
     },
     {
+        headerName: 'Image test',
+        field: 'image_test',
+        pinned: PinType.LEFT,
+        hideInDownload: true,
+        flex: 1,
+    },
+    {
         headerName: 'MONTHS',
         children: [
             ...months.map(
@@ -95,7 +103,7 @@ function SlideTransition(props: SlideProps) {
 }
 
 function Skeleton() {
-    return <div>Loading...</div>;
+    return <div className="skeleton"></div>;
 }
 
 function Test() {
@@ -112,7 +120,9 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         const fetchData = async () => {
             try {
                 const res = await getData(qty);
-                beastApi?.current?.setData(res as unknown as Data);
+                setTimeout(() => {
+                    beastApi?.current?.setData(res.map(r => ({ ...r, image_test: <img src="https://static.zara.net/photos/2024/I/0/1/p/4360/246/832/5/w/400/4360246832_1_1_1.jpg?ts=1727440558880" width="50" alt="test" /> })));
+                }, 5000)
             } catch (_) {
                 setError(true);
             }
@@ -126,35 +136,14 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     useEffect(() => {
         setConfig({
             data: [],
-            topRows: [
+            bottomRows: [
                 {
                     _total: true,
                     id: 9,
                     name: 'Xzavier_Casper86',
                     country: <Test />,
                     language: 'paulatim',
-                    age: 66,
-                    orders: 69415,
-                    january: 79684,
-                    february: 96576,
-                    march: 96082,
-                    april: 13873,
-                    may: 39414,
-                    june: 70879,
-                    july: 64054,
-                    august: 33908,
-                    september: 44870,
-                    october: 47387,
-                    november: 17569,
-                    december: 41062,
-                },
-                {
-                    _total: true,
-                    id: 9,
-                    name: 'Xzavier_Casper86',
-                    country: <span style={{ color: 'red' }}>Spain</span>,
-                    language: 'paulatim',
-                    age: 66,
+                    age: '--',
                     orders: 69415,
                     january: 79684,
                     february: 96576,
@@ -218,12 +207,13 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             bottomToolbar: {
                 downloadExcel: {
                     enabled: true,
-                    active: false
+                    active: true
                 },
                 restore: {
                     enabled: true,
                     active: true
                 },
+                custom: <div>Toggle</div>
             },
             defaultColumnDef: {
                 menu: { pin: true, grid: false },
@@ -232,17 +222,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 enabled: true,
                 applyButton: true,
                 totalizable: true
-                // pivotConfig: {
-                //     rows: ['country'],
-                //     columns: ['language'],
-                //     values: [
-                //         { field: 'january', operation: AggregationType.SUM },
-                //         { field: 'february', operation: AggregationType.SUM },
-                //     ],
-                //     rowTotals: false,
-                //     columnTotals: false,
-                //     rowGroups: false
-                // }
             },
             appendModalToBoy: true,
             ..._customConfig,

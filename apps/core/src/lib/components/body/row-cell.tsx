@@ -201,7 +201,7 @@ export function RowCell({
                     (columnDef.tree ? LEVEL_PADDING * level : 0) +
                     (columnDef.tree && !row.children && !pivot ? LEVEL_PADDING : 0),
                 width: columnDef.width,
-                ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row),
+                ...columnDef.styleFormatter?.(row[columnDef.field as string] as string & number, row, idx),
             }}
             onClick={handleMouseClick}
             onMouseDown={handleMouseDown}

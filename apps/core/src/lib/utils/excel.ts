@@ -5,7 +5,7 @@ import { Column, Data } from '../common';
 export const exportToExcel = async (data: Data, columns: Column[], fileName: string) => {
     const workBook = new Excel.Workbook();
     const sheet = workBook.addWorksheet('Sheet 1');
-    const finalColumns = columns.filter((col) => col.final);
+    const finalColumns = columns.filter((col) => col.final && !col.hideInDownload);
 
     sheet.columns = finalColumns.map((col) => ({
         header: col.headerName,

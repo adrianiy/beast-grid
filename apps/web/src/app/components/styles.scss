@@ -7,6 +7,23 @@
   margin-top: 0;
   padding-top: var(--bg-demo-size--6);
 }
+.skeleton {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-demo-color--6);
+    position: absolute;
+    animation: skeleton-loading 1s infinite linear;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .header {
   position: fixed;
   top: 0;
@@ -192,7 +209,7 @@ section {
   .button-row {
     gap: var(--bg-demo-size--2);
     margin-bottom: var(--bg-demo-size--3);
-    
+
     button {
       padding: var(--bg-demo-size--1) var(--bg-demo-size--2);
     }
@@ -211,7 +228,7 @@ section {
         color: var(--bg-demo-color--1);
       }
     }
-    
+
     hr {
       margin: 0 var(--bg-demo-size--2);
     }
@@ -273,7 +290,7 @@ section {
         color: var(--bg-demo-color--gradient--2);
       }
     }
-    
+
 
     .section-title {
       gap: var(--bg-demo-size--2);
@@ -282,6 +299,6 @@ section {
       margin: 0;
       padding: 0;
     }
-    
+
   }
 }

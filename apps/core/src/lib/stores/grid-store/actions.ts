@@ -507,6 +507,8 @@ export const setPivot =
                         field: row.field,
                         width: MIN_COL_WIDTH,
                         rowGroup: index < (pivot.rows?.length || 0) - 1,
+                        styleFormatter: row.styleFormatter,
+                        headerStyleFormatter: row.headerStyleFormatter,
                         dateFormat: row.dateFormat,
                         tree: false,
                         final: true,

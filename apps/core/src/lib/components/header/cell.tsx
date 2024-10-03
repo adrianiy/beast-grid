@@ -267,6 +267,7 @@ export default function HeaderCell<T>({
                 height,
                 width: column.width,
                 left: column.left,
+                ...column.headerStyleFormatter?.()
             }}
             ref={drag}
             id={column.id}

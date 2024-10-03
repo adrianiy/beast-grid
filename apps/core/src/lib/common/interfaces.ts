@@ -53,12 +53,14 @@ export interface BaseColumnDef {
     children?: ColumnDef[];
     childrenMap?: Record<string, string>;
     formatter?: (value: string & number, row: Row) => string;
-    styleFormatter?: (value: string & number, row: Row) => CSSProperties;
+    styleFormatter?: (value: string & number, row: Row, idx: number) => CSSProperties;
+    headerStyleFormatter?: () => CSSProperties;
     dateFormat?: string;
     menu?: Partial<MenuProps> | boolean;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
     sort?: SortState;
+    hideInDownload?: boolean;
     _firstLevel?: boolean;
     _filters?: Record<string, string>;
     _total?: boolean;

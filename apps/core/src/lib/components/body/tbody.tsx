@@ -511,7 +511,7 @@ export default function TBody<T>({
                     groupOrder={groupOrder}
                     selectable={false}
                     idx={i}
-                    y={i}
+                    y={_data.length - i}
                     border={border}
                     height={rowHeight}
                     level={0}

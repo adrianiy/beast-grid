@@ -127,7 +127,7 @@ export const groupByPivot = (
                 filters[column.field as string] = row[column.field as keyof Row] as string;
 
                 if (!columnDefs[field]) {
-                    columnDefs[field] = newColumn(column, row[column.field as keyof Row] as string, field, columnDefs[lastField], false, { ...filters });
+                    columnDefs[field] = newColumn(column, column.formatter?.(row[column.field as keyof Row] as string & number, row) || row[column.field as keyof Row] as string, field, columnDefs[lastField], false, { ...filters });
 
                     if (lastField) {
                         columnDefs[lastField].children?.push(columnDefs[field]);
