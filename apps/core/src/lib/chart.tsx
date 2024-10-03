@@ -14,7 +14,7 @@ import {
 } from 'echarts/components';
 import { useBeastStore } from './stores/beast-store';
 import { filterRow, getCategories, getDates, getSeries, groupBy, groupByMultiple } from './utils/functions';
-import { BeastGridConfig, ChartType, Column, Data, SideBarConfig } from './common';
+import { BeastGridConfig, ChartType, Column, ColumnStore, Data, SideBarConfig } from './common';
 import deepmerge from 'deepmerge';
 import { EChartsCoreOption } from 'echarts';
 import SideBar from './components/sidebar/sidebar';
@@ -108,6 +108,7 @@ export default function Chart<T>(props: Props<T>) {
                     <ChartWrapper
                         config={props.config}
                         columns={props.columns ?? sortedColumns}
+                        columnStore={columns}
                         activeColumns={props.activeColumns}
                         data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
                     />
@@ -122,6 +123,7 @@ export default function Chart<T>(props: Props<T>) {
                 columns={props.columns ?? sortedColumns}
                 activeColumns={props.activeColumns}
                 data={(props.data ?? data).map(filterRow(columns, filters)).filter(Boolean) as Data}
+                columnStore={columns}
                 category={category}
                 values={values}
                 groups={groups}
@@ -138,6 +140,7 @@ export default function Chart<T>(props: Props<T>) {
 type WrapperProps<T> = {
     config: BeastGridConfig<T>;
     columns: Column[];
+    columnStore: ColumnStore;
     activeColumns?: Column[];
     data: Data;
     category?: Column;
@@ -151,7 +154,7 @@ type WrapperProps<T> = {
 };
 
 function ChartWrapper<T>(props: WrapperProps<T>) {
-    const { columns, data } = props;
+    const { columns, columnStore, data } = props;
 
     const configurableCategories = getCategories(columns, data);
     const configurableValues = getSeries(columns, data);
@@ -169,21 +172,20 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
         props.activeColumns?.filter((ac) => configurableCategories.find((cc) => cc.id === ac.id)) ||
         (categoryColumns.length ? categoryColumns : configurableCategories);
     const includeDate = activeCategories.find((c) => dateColumns.find((dc) => dc.id === c.id));
+    const activeChartType = props.chartType || props.config.chart?.defaultValues?.chartType || (includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
 
     const [category, setCategory] = useState<Column>(props.category || activeCategories[0]);
     const [values, setValues] = useState<Column[]>(props.values || activeColumns);
     const [groups, setGroups] = useState<Column[]>(
         props.groups || props.config.chart?.groupData === false ? [] : activeCategories.slice(1)
     );
-    const [chartType, setChartType] = useState<ChartType>(
-        props.chartType || (props.config.chart?.defaultValues?.chartType ?? includeDate ? ChartType.LINE : ChartType.BAR) as ChartType
-    );
+    const [chartType, setChartType] = useState<ChartType>(activeChartType);
 
     const [options, setOptions] = useState<EChartsCoreOption>();
 
     useEffect(() => {
         const aggColumns = values.filter((col) => col.aggregation);
-        const groupedData = category ? groupBy(data, category, aggColumns) : data;
+        const groupedData = category ? groupBy(data, category, aggColumns, columnStore) : data;
         const categories = category
             ? groupedData.map((row) => row[category.field as string])
             : new Array(data.length).fill(0).map((_, idx) => idx);
@@ -192,7 +194,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
         groupedData.forEach((row, idx) => {
             const childGroups = validGroups.length
-                ? groupByMultiple(row.children || [], validGroups, aggColumns)
+                ? groupByMultiple(row.children || [], validGroups, aggColumns, columnStore)
                 : [row];
             const field = validGroups.map((g) => g.headerName).join('_');
 
@@ -215,11 +217,12 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
 
         const isPie = chartType === ChartType.PIE;
         const isLine = chartType === ChartType.LINE;
+        const isHBar = chartType === ChartType.BAR_HORIZONTAL;
 
         const series = Object.entries(seriesRecord).map(([name, data], idx) => {
             return {
                 name,
-                type: chartType,
+                type: chartType === ChartType.BAR_HORIZONTAL ? ChartType.BAR : chartType,
                 radius: isPie && [`${70 - idx * 20}%`, `${70 - idx * 20 + 10}%`],
                 tooltip: {
                     valueFormatter: data.column.formatter,
@@ -244,7 +247,7 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
             };
         });
 
-        const _lineBarOptions = {
+        const _lineBarOptions = !isHBar ? {
             xAxis: {
                 type: 'category',
                 ...(!isLine && {
@@ -256,11 +259,24 @@ function ChartWrapper<T>(props: WrapperProps<T>) {
             },
             yAxis: {
                 type: 'value',
+                data: undefined,
+                axisLabel: {
+                    formatter: (value: number) => (value >= 1000 ? numeral(value).format('0,0 a') : value),
+                },
+            },
+        } : {
+            yAxis: {
+                type: 'category',
+                data: categories,
+            },
+            xAxis: {
+                type: 'value',
                 axisLabel: {
                     formatter: (value: number) => (value >= 1000 ? numeral(value).format('0,0 a') : value),
                 },
             },
         };
+
 
         const _options: EChartsCoreOption = deepmerge(
             {

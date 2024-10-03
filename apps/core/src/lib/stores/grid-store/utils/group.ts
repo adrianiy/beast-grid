@@ -11,7 +11,7 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
             newColumn = {
                 headerName: tree.name || '',
                 tree: true,
-                field: tree.field,
+                field: tree.field as string,
                 id: uuidv4(),
                 pinned: PinType.NONE,
                 top: 0,
@@ -36,16 +36,14 @@ export const createGroupColumn = (column: Column, columns: ColumnStore, tree?: P
     return newColumn;
 };
 
-export const getValueHeaders = (values: Column[], parentField = ''): ColumnDef[] => {
+export const getValueHeaders = (values: Column[]): ColumnDef[] => {
     const columnDefs: ColumnDef[] = [];
     values.forEach((val) => {
-        const aggregation = val.aggregation;
-
         columnDefs.push({
             ...val,
             id: uuidv4(),
-            headerName: `${aggregation} of ${val.headerName}`,
-            pivotField: `${val.field}@${parentField}`,
+            headerName: val.headerName,
+            field: val.field,
             flex: 1,
         });
     });
@@ -75,7 +73,7 @@ export const getDynamicHeaders = (
                 field,
                 flex: 1,
                 minWidth: MIN_COL_WIDTH,
-                children: isFinal && values.length > 0 ? getValueHeaders(values, field) : !isFinal ? getDynamicHeaders(columns, currentColumn + 1, values, data) : []
+                children: isFinal && values.length > 0 ? getValueHeaders(values) : !isFinal ? getDynamicHeaders(columns, currentColumn + 1, values, data) : []
             });
         }
     });

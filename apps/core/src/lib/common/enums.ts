@@ -58,6 +58,7 @@ export enum FilterType {
     TEXT = 'text',
     NUMBER = 'number',
     BOOLEAN = 'boolean',
+    DATE = 'date',
 }
 
 export enum OperationType {
@@ -78,6 +79,7 @@ export enum BeastMode {
 
 export enum ChartType {
     BAR = 'bar',
+    BAR_HORIZONTAL = 'h_bar',
     LINE = 'line',
     PIE = 'pie',
 }

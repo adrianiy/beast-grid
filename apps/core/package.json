@@ -1,9 +1,10 @@
 {
     "name": "beast-grid",
-    "version": "0.7.7",
+    "version": "1.0.0-prerelease.24",
     "main": "./index.js",
     "types": "./index.d.ts",
     "style": "./style.css",
+    "module": "./index.mjs",
     "files": [
         "shepherd.css",
         "index.mjs",

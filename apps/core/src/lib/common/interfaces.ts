@@ -1,6 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 import { DragItem } from './../stores/dnd-store/store';
-import { AggregationType, ChangeType, FilterType, MathType, Operation, OperationType, PinType, SortType } from './enums';
+import { AggregationType, BeastMode, ChangeType, ChartType, FilterType, MathType, Operation, OperationType, PinType, SortType } from './enums';
 import { EChartsCoreOption } from 'echarts';
 
 export interface Row {
@@ -10,6 +10,8 @@ export interface Row {
     _hidden?: boolean;
     _level?: number;
     _singleChild?: boolean;
+    _pivotIndexes?: number[];
+    _childrenMap?: Record<string, number>;
     children?: Row[];
 }
 
@@ -47,18 +49,22 @@ export interface BaseColumnDef {
     headerName: string;
     pinned?: PinType;
     field?: string;
-    pivotField?: string;
     sortable?: boolean;
     children?: ColumnDef[];
     childrenMap?: Record<string, string>;
     formatter?: (value: string & number, row: Row) => string;
-    styleFormatter?: (value: string & number, row: Row) => CSSProperties;
+    styleFormatter?: (value: string & number, row: Row, idx: number) => CSSProperties;
+    headerStyleFormatter?: () => CSSProperties;
+    dateFormat?: string;
     menu?: Partial<MenuProps> | boolean;
     rowGroup?: boolean;
     aggregation?: AggregationType | AggregationFunction;
     sort?: SortState;
+    hideInDownload?: boolean;
     _firstLevel?: boolean;
+    _filters?: Record<string, string>;
     _total?: boolean;
+    _summary?: boolean;
 }
 
 export type ColumnDef = Partial<StyleProps> & Partial<FilterProps> & BaseColumnDef;
@@ -133,6 +139,7 @@ export interface ToolBar {
     filter: Partial<ToolBarButton> | boolean;
     mode: Partial<ToolBarButton> | boolean;
     restore: Partial<ToolBarButton> | boolean;
+    history: Partial<ToolBarButton> | boolean;
     custom: ReactNode;
 }
 
@@ -140,7 +147,7 @@ export interface Chart {
     defaultValues: Partial<{
         dataColumns: string[];
         categoryColumns: string[];
-        chartType: 'line' | 'bar';
+        chartType: ChartType;
     }>;
     groupData: boolean;
     config: Partial<EChartsCoreOption>;
@@ -194,6 +201,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     columnDefs: ColumnDef[];
     defaultColumnDef?: Partial<ColumnDef>;
     data: T;
+    mode?: BeastMode;
     topRows?: Data;
     bottomRows?: Data;
     pivot?: Partial<Pivot>;
@@ -204,7 +212,9 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     dragOptions?: Partial<DragOptions>;
     tree?: Partial<TreeConstructor>;
     topToolbar?: Partial<ToolBar>;
+    topLeftToolbar?: Partial<ToolBar>;
     bottomToolbar?: Partial<ToolBar>;
+    bottomLeftToolbar?: Partial<ToolBar>;
     chart?: Partial<Chart>;
     contextualMenu?: Partial<ContextualMenuProps>;
     appendModalToBoy?: boolean;
@@ -247,6 +257,9 @@ export interface Column extends ColumnDef, Position {
     logicDelete?: boolean;
     lastPinned?: boolean;
     tree?: boolean;
+    path?: string[];
+    _filters?: Record<string, string>;
+    _summary?: boolean;
 }
 
 export type ColumnStore = Record<ColumnId, Column>;
@@ -260,9 +273,11 @@ export interface HeaderDrag extends DragItem {
 export interface BeastGridApi {
     columns: ColumnStore;
     setColumns: (columns: ColumnStore) => void;
+    updateColumnDefs: (columnDefs: ColumnDef[], pivotConfig?: PivotConfig) => void;
     setLoading: (loading: boolean) => void;
-    setData: (data: Data) => void;
-    setEdited: (edited: boolean) => void;
+    setPivot: (pivot: PivotConfig) => void;
+    setData: (data: Data, pivot?: PivotConfig) => void;
+    clearHistory: () => void;
 }
 
 export interface Coords {

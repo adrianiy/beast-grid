@@ -21,6 +21,8 @@
     "toolbar.pivot": "Pivotado",
     "toolbar.filter": "Filtros",
     "toolbar.restore": "Restaurar",
+    "toolbar.undo": "Deshacer",
+    "toolbar.redo": "Rehacer",
     "filter.selectAll": "Seleccionar todo",
     "filter.placeholder": "Buscar...",
     "filter.operation": "Operación",

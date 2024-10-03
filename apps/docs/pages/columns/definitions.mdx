@@ -17,14 +17,16 @@ export interface MenuProps {
   grid: boolean;
 }
 interface ColumnDef extends Partial<StyleProps> {
-  headerName: string;
-  field: string;
-  pinned?: PinType;
-  children?: ColumnDef[];
-  formatter?: (value: unknown) => string;
-  menu?: Partial<MenuProps>;
-  aggregationLevel?: number;
-  aggregation?: AggregationType;
+    headerName: string;
+    field: string;
+    pinned?: PinType;
+    children?: ColumnDef[];
+    formatter?: (value: unknown) => string;
+    styleFormatter?: (value: string & number, row: Row) => CSSProperties;
+    dateFormat?: string;
+    menu?: Partial<MenuProps>;
+    aggregationLevel?: number;
+    aggregation?: AggregationType;
 }
 ```
 
@@ -76,7 +78,7 @@ Whether the column is pinned. The pin type is one of the following:
 </Callout>
 
 ### children
- 
+
 | Type | Required |
 | ---- | -------- |
 | `ColumnDef[]` | `false` |
@@ -90,6 +92,22 @@ The children columns of the column.
 | `(value: unknown) => string` | `false` |
 
 A function to format the value of the column.
+
+### styleFormatter
+
+| Type | Required |
+| ---- | -------- |
+| `(value: string & number, row: Row) => CSSProperties` | `false` |
+
+A function to format the style of the column.
+
+### dateFormat
+
+| Type | Required |
+| ---- | -------- |
+| `string` | `false` |
+
+The date format to be used in the column. It uses the dayjs format
 
 ### width
 

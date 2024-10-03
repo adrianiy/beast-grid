@@ -49,11 +49,13 @@
     cursor: pointer;
     user-select: none;
     position: absolute;
-    gap: var(--bg-size--3);
+    gap: var(--bg-size--2);
     transition: all linear var(--bg-transition--1);
     box-sizing: border-box;
     background-color: var(--bg-background-color--1);
     resize: horizontal;
+    overflow: hidden;
+    resize: inherit;
     z-index: 1;
 
     &:hover {
@@ -73,6 +75,8 @@
         width: 100%;
         overflow: hidden;
         margin: 0 var(--bg-size--4);
+        margin-right: 0;
+        transition: all ease-in var(--bg-transition--1);
         gap: var(--bg-size--3);
     }
 
@@ -83,10 +87,14 @@
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: var(--bg-font-weight--header);
+
+        &.summary {
+            font-size: var(--bg-size--2)
+        }
     }
 
     .bg-grid-header__cell__menu {
-        margin-right: var(--bg-size--2);
+        margin-right: var(--bg-size--1);
         position: relative;
         cursor: pointer;
 
@@ -118,7 +126,7 @@
         position: absolute;
         display: flex;
         right: 0px;
-        width: 16px;
+        width: 10px;
         height: 100%;
         cursor: ew-resize;
         z-index: 2;

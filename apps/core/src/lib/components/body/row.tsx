@@ -46,6 +46,7 @@ export default function RowContainer({
     loading,
     skeleton,
     isTopFixed,
+    isBottomFixed,
     isLastRow,
     onClick,
 }: Props) {
@@ -92,6 +93,29 @@ export default function RowContainer({
             });
     };
 
+    const getStyle = () => {
+        const commonProps = {
+            height,
+            width: totalWidth
+        }
+        if (isTopFixed) {
+            return {
+                ...commonProps,
+                top: `calc(var(--header-height) + ${height * idx}px)`
+            }
+        } else if (isBottomFixed) {
+            return {
+                ...commonProps,
+                top: `calc(100% - ${height * y}px)`
+            }
+        } else {
+            return {
+                ...commonProps,
+                top: height * idx + gap,
+            }
+        }
+    }
+
     return (
         <div
             key={idx}
@@ -100,9 +124,11 @@ export default function RowContainer({
                 expandable: row.children,
                 withHighlight: events?.onHover?.highlight,
                 topFixed: isTopFixed,
+                bottomFixed: isBottomFixed,
+                first: idx === 0,
                 last: isLastRow,
             })}
-            style={{ top: isTopFixed ? `calc(var(--header-height) + ${height * idx}px)` : height * idx + gap, height, width: totalWidth }}
+            style={getStyle()}
             onClick={handleRowClick}
         >
             {leftWidth > 0 && (

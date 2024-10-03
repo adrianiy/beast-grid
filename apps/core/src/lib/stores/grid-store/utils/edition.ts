@@ -1,4 +1,6 @@
 import { ColumnStore, Column, SortType, ColumnId, PinType, OnChanges, ChangeType } from '../../../common';
+import { clone } from '../../../utils/functions';
+import { DynamicState, GridStore } from '../store';
 
 export const toggleHide = (column: Column, columns: ColumnStore) => {
     column.hidden = !column.hidden;
@@ -119,8 +121,8 @@ export const moveColumns = (columns: ColumnStore, sortedColumns: Column[], pinTy
 export const resizeColumnChildren = (column: Column, diff: number, columns: ColumnStore) => {
     columns[column.id].width = (columns[column.id].width || 0) + diff
 
-    if (column.children) {
-        column.children?.forEach((child) => resizeColumnChildren(child as Column, diff, columns));
+    if (column.childrenId) {
+        column.childrenId?.forEach((child) => resizeColumnChildren(columns[child], diff, columns));
     }
 };
 
@@ -182,7 +184,7 @@ export const addSort = (
     multipleColumnSort: boolean,
     order: SortType = SortType.ASC,
     temporal?: boolean
-) => {
+): Column => {
     if (multipleColumnSort) {
         const lastPriority = columnsWithSort.reduce((acc, col) => Math.max(acc, col.sort?.priority as number || 0), 0);
 
@@ -202,6 +204,8 @@ export const addSort = (
             delete columnsWithSort[0].sort;
         }
     }
+
+    return column;
 };
 
 export const removeSort = (column: Column, columnsWithSort: Column[]) => {
@@ -236,8 +240,63 @@ export const updateColumnVisibility = (
             const allVisible = leftVisible && rightVisible;
             const onlyInsideVisible = left < leftEdge && right > rightEdge;
             column.inView = leftVisible || rightVisible || allVisible || onlyInsideVisible;
+        } else {
+            column.inView = true;
         }
     });
 
     return columns;
 };
+
+export const saveSnapshot = (state: GridStore): [DynamicState[], number] => {
+    const {
+        snapshots,
+        columns,
+        sort,
+        groupOrder,
+        sortedColumns,
+        hiddenColumns,
+        filters,
+        pivot,
+        historyPoint,
+        bottomRows,
+        topRows,
+        isPivoted,
+        isGrouped
+    } = state;
+
+    if (historyPoint < snapshots.length - 1) {
+        snapshots.splice(historyPoint + 1);
+    }
+
+    const newHistoryPoint = historyPoint + 1;
+
+    const newSnapshot: DynamicState = clone({
+        columns,
+        sort,
+        groupOrder,
+        sortedColumns,
+        hiddenColumns,
+        pivot,
+        filters,
+        historyPoint: newHistoryPoint,
+        bottomRows,
+        topRows,
+        isPivoted,
+        isGrouped
+    });
+
+    snapshots.push(newSnapshot);
+
+    return [snapshots, newHistoryPoint];
+}
+
+export const updateSnapshotAndSetState = (state: GridStore, newState: Partial<GridStore>): Partial<GridStore> => {
+    const [snapshots, historyPoint] = saveSnapshot({ ...state, ...newState });
+
+    newState.snapshots = snapshots;
+    newState.historyPoint = historyPoint;
+    newState.haveChanges = false;
+
+    return newState;
+}

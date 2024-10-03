@@ -1,8 +1,8 @@
-import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import useBus from 'use-bus';
 
 import { useBeastStore } from './../../stores/beast-store';
-import { filterRow, resetSortColumns, sortData } from '../../utils/functions';
+import { resetSortColumns, sortData } from '../../utils/functions';
 
 import RowContainer from './row';
 import ContextMenu from '../contextMenu/context-menu';
@@ -34,12 +34,12 @@ const getMaxMin = (
     dataLength: number,
     expandedRows: number
 ): [number, number] => {
-        const containerHeight = scrollElement?.getBoundingClientRect().height;
-        const visibleRows = Math.floor(containerHeight / rowHeight);
-        const topRow = Math.floor(scrollTop / rowHeight);
-        const bottomRow = topRow + visibleRows;
-        const maxValue = Math.min(dataLength + expandedRows, bottomRow + THRESHOLD);
-        const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
+    const containerHeight = scrollElement?.getBoundingClientRect().height;
+    const visibleRows = Math.floor(containerHeight / rowHeight);
+    const topRow = Math.floor(scrollTop / rowHeight);
+    const bottomRow = topRow + visibleRows;
+    const maxValue = Math.min(dataLength + expandedRows, bottomRow + THRESHOLD);
+    const minValue = Math.max(0, topRow - THRESHOLD - expandedRows);
 
     return [maxValue, minValue]
 }
@@ -57,6 +57,10 @@ export default function TBody<T>({
     const gaps = useRef<Record<string, number>>({});
     const [
         data,
+        pivotData,
+        groupData,
+        bottomRows,
+        topRows,
         columns,
         sortedColumns,
         theme,
@@ -69,6 +73,10 @@ export default function TBody<T>({
         updateSelected,
     ] = useBeastStore((state) => [
         state.data,
+        state.pivotData,
+        state.groupData,
+        state.bottomRows,
+        state.topRows,
         state.columns,
         state.sortedColumns,
         state.theme,
@@ -105,8 +113,19 @@ export default function TBody<T>({
         }
     }, [scrollTop, expandedRows, filters]);
 
+    const currentData = useMemo(() => {
+        if (groupData?.length) {
+            return groupData;
+        }
+        if (pivotData?.length) {
+            return pivotData;
+        }
+
+        return data;
+    }, [data, pivotData, groupData]);
+
     useEffect(() => {
-        if (!data.length) {
+        if (!currentData.length) {
             return;
         }
 
@@ -115,7 +134,7 @@ export default function TBody<T>({
         const someActive = Object.entries(filters).some(
             ([key, value]) => value.length && value.length !== columns[key].filterOptions?.length
         );
-        const newSortedData = someActive ? (data.filter(row => !row._hidden) as Row[]) : data;
+        const newSortedData = someActive ? (currentData.filter(row => !row._hidden) as Row[]) : currentData;
 
         const sortColumns = Object.values(columns)
             .filter((c) => c.sort)
@@ -135,13 +154,13 @@ export default function TBody<T>({
                     setSorting(true);
                 }
                 setTimeout(() => {
-                    newSortedData.sort(sortData(sortColumns));
+                    newSortedData.sort(sortData(sortColumns, data));
                     resetSortColumns(sortColumns);
                     updateGaps(0, newSortedData);
 
                     setSortedData([...newSortedData]);
 
-                    if (data.length > PERFORMANCE_LIMIT) {
+                    if (currentData.length > PERFORMANCE_LIMIT) {
                         setTimeout(() => setSorting(false), 100);
                     }
                 }, 0);
@@ -160,7 +179,7 @@ export default function TBody<T>({
         setExpandedRows(expanded);
 
         updateSelected(null);
-    }, [data, filters, sort]);
+    }, [currentData, filters, sort]);
 
     useBus(BusActions.EXPAND, () => sortedData.forEach((row) => forceRowExpand(row, true)), [sortedData]);
 
@@ -439,10 +458,10 @@ export default function TBody<T>({
     };
 
     const createTopRows = () => {
-        if (!beastConfig.topRows) {
+        if (!beastConfig.topRows && !topRows) {
             return null;
         }
-        const _data = beastConfig.topRows;
+        const _data = beastConfig.topRows || topRows || [];
         const renderArray: ReactNode[] = [];
         for (let i = 0; i < _data.length; i++) {
             const row = (
@@ -473,21 +492,59 @@ export default function TBody<T>({
         return renderArray.flat();
     };
 
+    const createBottomRows = () => {
+        if (!beastConfig.bottomRows && !bottomRows) {
+            return null;
+        }
+        const _data = beastConfig.bottomRows || bottomRows || [];
+
+        const renderArray: ReactNode[] = [];
+        for (let i = 0; i < _data.length; i++) {
+            const row = (
+                <RowContainer
+                    key={i}
+                    row={_data[i] as Row}
+                    columns={lastLevel}
+                    columnStore={columns}
+                    config={config}
+                    skeleton={beastConfig?.loadingState?.skeleton}
+                    groupOrder={groupOrder}
+                    selectable={false}
+                    idx={i}
+                    y={_data.length - i}
+                    border={border}
+                    height={rowHeight}
+                    level={0}
+                    events={events}
+                    gap={0}
+                    expandableSibling={false}
+                    isBottomFixed
+                    isLastRow={i === _data.length - 1}
+                />
+            );
+            renderArray.push(row);
+        }
+
+        return renderArray.flat();
+    };
+
     const getStyleProps = () => {
         return {
             height: sortedData.length
-                ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || 0)) * rowHeight
+                ? (sortedData.length + expandedRows + (beastConfig?.topRows?.length || topRows?.length || 0) + (beastConfig?.bottomRows?.length || bottomRows?.length || 0)) * rowHeight
                 : (beastConfig?.loadingState?.rows || 10) * rowHeight,
         };
     };
 
     const dataSlice = sortedData.length ? createDataSlice() : createLoadingSlice();
-    const topRows = createTopRows();
+    const topRowsSlice = createTopRows();
+    const bottomRowsSlice = createBottomRows();
 
     return (
         <div className="grid-body" style={getStyleProps()} onContextMenu={handleContextMenu}>
-            {topRows}
+            {topRowsSlice}
             {dataSlice}
+            {bottomRowsSlice}
             <ContextMenu
                 x={contextMenu?.x || 0}
                 y={contextMenu?.y || 0}

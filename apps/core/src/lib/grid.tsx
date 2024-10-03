@@ -23,10 +23,9 @@ type Props<T> = {
 
 export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwap, onSortChange }: Props<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [columns, pivot, edited, hiddenColumns, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
+    const [columns, pivot, hiddenColumns, setScrollElement, setTheme, autoSize, updateColumnVisibility] = useBeastStore((state) => [
         state.columns,
         state.pivot,
-        state.edited,
         state.hiddenColumns,
         state.setScrollElement,
         state.setTheme,
@@ -53,9 +52,10 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
 
             setScrollTop(scrollElement.scrollTop);
 
+            updateColumnVisibility(scrollLeft)
+
             if (scrollDiff > 100) {
                 lastScrollLeft.current = scrollLeft;
-                updateColumnVisibility(scrollLeft)
                 return;
             }
 
@@ -111,19 +111,12 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
     // Set loading on pivot change
     useEffect(() => {
         setLoading(true);
-        updateColumnVisibility(0);
 
         setTimeout(() => {
-            setLoading(false);
-        }, 0);
-    }, [pivot]);
-
-    // reload on edited restore
-    useEffect(() => {
-        if (!edited) {
             updateColumnVisibility(0);
-        }
-    }, [edited]);
+            setLoading(false);
+        }, 200);
+    }, [pivot]);
 
     useEffect(() => {
         updateColumnVisibility(0);

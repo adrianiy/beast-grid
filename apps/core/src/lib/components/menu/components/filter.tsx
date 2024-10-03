@@ -23,6 +23,8 @@ export default function FilterSection({
 }>) {
     const [filters] = useBeastStore((state) => [state.filters]);
 
+    console.log(column)
+
     if (!column.menu || !(column.menu as MenuProps)?.filter) {
         return null;
     }

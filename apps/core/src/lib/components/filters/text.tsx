@@ -30,13 +30,14 @@ export default function TextFilters(props: Props) {
 
     const [filters, data, addFilter, selectAll] = useBeastStore((state) => [
         state.filters,
-        state.unfilteredData,
+        state.data,
         state.addFilter,
         state.selectAllFilters,
     ]);
 
     useEffect(() => {
         const values = Array.from(new Set(data.map((row) => row[column.field as string]))).sort() as IFilter[];
+        console.log(values)
 
         setFilterOptions(values);
     }, [data, column.field, setFilterOptions]);

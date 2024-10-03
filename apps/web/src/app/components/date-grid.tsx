@@ -71,6 +71,7 @@ const columnDefs: ColumnDef[] = [
         width: 200,
         sortable: true,
         formatter: (value) => (field.startsWith('VB') ? numeral(value).format('0,0 $') : value),
+        dateFormat: 'D/M/YY',
         menu: {
             filter: field === 'VB_ORDERS',
             column: true,
@@ -113,9 +114,10 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
             setConfig({
                 data,
                 columnDefs,
-                pivot: {
-                    enabled: true,
-                },
+                // pivot: {
+                //     enabled: true,
+                //     totalizable: true
+                // },
                 style: {
                     maxHeight: 600,
                     border: true,

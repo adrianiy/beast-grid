@@ -18,6 +18,7 @@ import { groupBy } from '../../../utils/functions';
 import deepmerge from 'deepmerge';
 import { createGroupColumn } from './group';
 import { toggleHide } from './edition';
+import dayjs from 'dayjs';
 
 const loopColumns = (
     levelIndexes: Record<number, number>,
@@ -38,6 +39,7 @@ const loopColumns = (
         const id = columnDef.id ?? uuidv4();
         const column: Column = {
             ...deepmerge(defaultColumnDef || {}, columnDef),
+            children: [],
             width: columnDef.width || 0,
             position: levelIndexes[level],
             finalPosition: levelIndexes[level],
@@ -49,6 +51,7 @@ const loopColumns = (
             final: !columnDef.children || columnDef.children.length === 0,
             id,
             parent: parent?.id,
+            path: parent?.path ? [...parent.path, parent.id] : [],
             level,
         };
         columns[id] = column;
@@ -106,22 +109,22 @@ export const createVirtualIds = (data: Data): Data => {
 
 export const groupDataByColumnDefs = (
     columns: ColumnStore,
-    aggColumns: Column[],
     data: Data,
     groupOrder: ColumnId[],
     level = 0,
     pivoting = false
 ): Data => {
+    const aggColumns = Object.values(columns).filter((col) => col.aggregation);
     const aggregationLevel = columns[groupOrder[level]];
 
     if (!aggregationLevel) {
         return data;
     }
 
-    const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns);
+    const finalData: Row[] = groupBy(data, aggregationLevel, aggColumns, columns);
 
     finalData.forEach((row) => {
-        row.children = groupDataByColumnDefs(columns, aggColumns, row.children || [], groupOrder, level + 1, pivoting);
+        row.children = groupDataByColumnDefs(columns, row.children || [], groupOrder, level + 1, pivoting);
         row.children.forEach((child) => {
             child._level = level + 1;
         });
@@ -151,12 +154,20 @@ export const getColumnArrayFromDefs = (columnStore: ColumnStore): Column[][] => 
     return columns;
 };
 
+const _getColumnHeaderWidth = (column: Column): number | undefined => {
+    if (!column.headerName) {
+        return undefined;
+    }
+
+    return ((column.headerName.length * 10) + 100) || 0;
+}
+
 const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     if (column.hidden) {
         return;
     }
     if (!column.childrenId?.length) {
-        column.width = column.width || MIN_COL_WIDTH;
+        column.width = column.width || _getColumnHeaderWidth(column) || MIN_COL_WIDTH;
     }
 
     if (column.childrenId?.length) {
@@ -168,6 +179,7 @@ const _getChildrenWidth = (column: Column, columnStore: ColumnStore): void => {
     }
 };
 
+
 export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: number): ColumnStore => {
     const finalColumns = Object.values(columnStore).filter((column) => column.final && !column.hidden);
     const notFinalColumns = Object.values(columnStore).filter((column) => !column.final && !column.hidden);
@@ -176,7 +188,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
 
     // Calculate width for user defined columns
     const fixedWidth = finalColumns.reduce(
-        (acc, column) => acc + (!column.flex ? column.width || MIN_COL_WIDTH : 0),
+        (acc, column) => acc + (!column.flex ? column.width || _getColumnHeaderWidth(column) || MIN_COL_WIDTH : 0),
         0
     );
 
@@ -186,7 +198,7 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
     // Set width for flex columns
     dynamicColumns.forEach((column) => {
         const flexWidth = ((column.flex ?? 0) / totalFlex) * remainingWidth;
-        column.width = Math.max(flexWidth, column.minWidth || MIN_COL_WIDTH);
+        column.width = Math.max(flexWidth, column.minWidth || _getColumnHeaderWidth(column) || MIN_COL_WIDTH);
     });
 
     // Calculate parent widths based on children
@@ -199,23 +211,31 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
     return columnStore;
 };
 
+export const getColumnFilter = (column: Column, data: Data): void => {
+    if (typeof data[0][column.field as string] === 'number') {
+        column.filterType = FilterType.NUMBER;
+        return;
+    }
+    if (dayjs(data[0][column.field as string] as string).isValid()) {
+        column.filterType = FilterType.DATE;
+        return;
+    }
+    if (typeof data[0][column.field as string] === 'boolean') {
+        column.filterType = FilterType.BOOLEAN;
+        return;
+    }
+    if (typeof data[0][column.field as string] === 'string') {
+        column.filterType = FilterType.TEXT;
+        return;
+    }
+}
+
 export const setColumnFilters = (columns: ColumnStore, data: Data) => {
     if (!data.length) {
         return;
     }
     Object.values(columns).forEach((column) => {
-        if (typeof data[0][column.field as string] === 'boolean') {
-            column.filterType = FilterType.BOOLEAN;
-            return;
-        }
-        if (typeof data[0][column.field as string] === 'string') {
-            column.filterType = FilterType.TEXT;
-            return;
-        }
-        if (typeof data[0][column.field as string] === 'number') {
-            column.filterType = FilterType.NUMBER;
-            return;
-        }
+        getColumnFilter(column, data);
     });
 };
 
@@ -239,7 +259,7 @@ export const initialize = (
     data: Data,
     groupOrder: ColumnId[],
     tree?: Partial<TreeConstructor>
-): Data => {
+): [Data, ColumnStore] => {
     if (tree) {
         groupOrder.forEach((id) => {
             const column = columns[id];
@@ -252,10 +272,9 @@ export const initialize = (
         });
         setColumnsStyleProps(columns, container.offsetWidth);
     }
-    const aggColumns = Object.values(columns).filter((c) => c.aggregation);
-    const finalData = groupDataByColumnDefs(columns, aggColumns, data, groupOrder);
+    const finalData = groupDataByColumnDefs(columns, data, groupOrder);
     setColumnsStyleProps(columns, container.offsetWidth);
     setColumnFilters(columns, data);
 
-    return finalData;
+    return [finalData, columns];
 };

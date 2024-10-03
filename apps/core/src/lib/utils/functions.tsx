@@ -21,8 +21,12 @@ import {
     SortType,
 } from '../common';
 import { v4 as uuidv4 } from 'uuid';
-import dayjs from 'dayjs';
 import { parseFormula } from './math';
+
+import dayjs from 'dayjs';
+import CustomParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(CustomParseFormat);
 
 const _calculate = <TData,>(data: TData[], column: Column) => {
     switch (column.aggregation) {
@@ -47,7 +51,8 @@ const getGroupRows = (
     groups: Record<string, Row[]>,
     field: string,
     calculatedColumns: Column[],
-    aggregationColumns?: Column[]
+    columns: ColumnStore,
+    aggregationColumns?: Column[],
 ): Row[] => {
     const aggTypeColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'string');
     const aggFuncColumns = calculatedColumns.filter((column) => typeof column.aggregation === 'function');
@@ -57,7 +62,7 @@ const getGroupRows = (
             (acc, column) => {
                 if (aggregationColumns) {
                     const setChildrenFieldsByAggregation = (aggColumn: Column) => {
-                        const [, rest] = (aggColumn.pivotField || '').split('@');
+                        const [, rest] = (aggColumn.field || '').split('@');
                         children.forEach((child) => {
                             if (rest) {
                                 const match = rest?.split('&').map((filterField) => {
@@ -75,9 +80,9 @@ const getGroupRows = (
 
                         acc[aggColumn.field as string] = _calculate(children, aggColumn) || null;
 
-                        if (aggColumn.children) {
-                            aggColumn.children.forEach((aggChildColumn) => {
-                                setChildrenFieldsByAggregation(aggChildColumn as Column);
+                        if (aggColumn.childrenId) {
+                            aggColumn.childrenId.forEach((aggChildColumn) => {
+                                setChildrenFieldsByAggregation(columns[aggChildColumn]);
                             });
                         }
                     };
@@ -112,7 +117,7 @@ const getGroupRows = (
     });
 };
 
-export const groupBy = (data: Data, column: Column, calculatedColumns: Column[]): Row[] => {
+export const groupBy = (data: Data, column: Column, calculatedColumns: Column[], columns: ColumnStore): Row[] => {
     const groups = data.reduce((acc, row) => {
         const key = `${row[column.field as keyof Row]}`;
         if (!acc[key]) {
@@ -122,13 +127,14 @@ export const groupBy = (data: Data, column: Column, calculatedColumns: Column[])
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, column.field as string, calculatedColumns, undefined);
+    return getGroupRows(groups, column.field as string, calculatedColumns, columns, undefined);
 };
 
 export const groupByMultiple = (
     data: Data,
     columns: Column[],
     calculatedColumns: Column[],
+    columnStore: ColumnStore,
     aggregationColumns?: Column[]
 ): Row[] => {
     const groups = data.reduce((acc, row) => {
@@ -140,22 +146,133 @@ export const groupByMultiple = (
         return acc;
     }, {} as Record<string, Row[]>);
 
-    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns, aggregationColumns);
+    return getGroupRows(groups, columns.map((c) => c.headerName).join('_'), calculatedColumns, columnStore, aggregationColumns);
 };
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-export const sortData = (sortColumns: Column[]) => (a: Row, b: Row) => {
+export const aggregateData = (
+    data: Row,
+    row: Row,
+    calculatedColumn: Column,
+    valueField: string
+): Row => {
+    const value = getFieldValue(row, valueField) as number;
+    if (calculatedColumn.aggregation === AggregationType.SUM) {
+        data[valueField] = +(data[valueField] || 0) + value;
+    } else if (calculatedColumn.aggregation === AggregationType.AVG) {
+        data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
+        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + value;
+
+        data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
+    } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
+        data[valueField] = +(data[valueField] || 0) + 1;
+    } else if (calculatedColumn.aggregation === AggregationType.MIN) {
+        data[valueField] = Math.min(data[valueField] as number || Infinity, value);
+    } else if (calculatedColumn.aggregation === AggregationType.MAX) {
+        data[valueField] = Math.max(data[valueField] as number || -Infinity, value);
+    }
+
+    return data;
+}
+
+const doPivotOperation = (formula: Operand | null, column: Column, rows: Row[]): number => {
+    if (!formula) {
+        return 0;
+    }
+    if (formula.type === MathType.CELL) {
+        const cell = formula as MathCell;
+
+        if (!isNaN(+cell.cell)) {
+            return +cell.cell;
+        }
+
+        return rows.reduce((acc, curr) => aggregateData(acc, curr, column, cell.cell), {})[cell.cell] as number;
+    }
+
+    const operation = formula as Formula;
+
+    switch (operation.operation) {
+        case Operation.ADD:
+            return doPivotOperation(operation.left, column, rows) + doPivotOperation(operation.right, column, rows);
+        case Operation.SUBTRACT:
+            return doPivotOperation(operation.left, column, rows) - doPivotOperation(operation.right, column, rows);
+        case Operation.MULTIPLY:
+            return doPivotOperation(operation.left, column, rows) * doPivotOperation(operation.right, column, rows);
+        case Operation.DIVIDE:
+            return doPivotOperation(operation.left, column, rows) / doPivotOperation(operation.right, column, rows);
+        case Operation.POWER:
+            return doPivotOperation(operation.left, column, rows) ** doPivotOperation(operation.right, column, rows);
+        default:
+            return 0;
+    }
+}
+
+const getPivotFormula = (field: string | undefined, column: Column, rows: Row[]) => {
+    if (!field) {
+        return 0;
+    }
+    const jsonFormula = parseFormula(field);
+
+    return doPivotOperation(jsonFormula as Operand, column, rows);
+}
+
+export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
+    if (row._pivotIndexes && !row[column.field as string]) {
+        const field = column.field;
+        let rows = row._pivotIndexes.map((index) => data[index]);
+
+        if (column._filters) {
+            const filter = column._filters;
+
+            rows = rows.filter((row) => Object.keys(filter).every((key) => row[key] === filter[key]));
+
+            if (!rows.length) {
+                return 0;
+            }
+
+        }
+
+        const mathField = field?.startsWith('#{');
+
+        if (mathField) {
+            return getPivotFormula(field, column, rows);
+        }
+
+        const reduced = rows.reduce((acc, curr) => aggregateData(acc, curr, column, field!), {});
+
+        return reduced[field as string] as number;
+    }
+
+    const field = column.field;
+
+    return getFieldValue(row, field as string) as number | string;
+}
+
+export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
-        const field = column.pivotField || column.field;
-        const valueA = (a[field as keyof Row] as number) || 0;
-        const valueB = (b[field as keyof Row] as number) || 0;
+        const isAscending = column.sort?.order === SortType.ASC;
+        const valueA = getPivotedData(a, column, data)
+        const valueB = getPivotedData(b, column, data)
+
+        // order as date if both values are dates
+        if (column.filterType === FilterType.DATE) {
+            const dateA = dayjs(valueA as string, column.dateFormat);
+            const dateB = dayjs(valueB as string, column.dateFormat);
+
+            if (dateA.isBefore(dateB)) {
+                return isAscending ? -1 : 1;
+            }
+            if (dateA.isAfter(dateB)) {
+                return isAscending ? 1 : -1;
+            }
+        }
 
         if (valueA > valueB) {
-            return column.sort?.order === SortType.ASC ? 1 : -1;
+            return isAscending ? 1 : -1;
         }
         if (valueA < valueB) {
-            return column.sort?.order === SortType.ASC ? -1 : 1;
+            return isAscending ? -1 : 1;
         }
     }
     return (a._originalIdx as number) - (b._originalIdx as number);
@@ -179,12 +296,12 @@ export const filterRow =
                 if (
                     columns[filterKey].filterType === FilterType.TEXT &&
                     filters[filterKey].includes(
-                        `${row[columns[filterKey].pivotField || (columns[filterKey].field as string)]}`
+                        `${row[columns[filterKey].field as string]}`
                     )
                 ) {
                     show = show && true;
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {
-                    const rowValue = row[columns[filterKey].pivotField || (columns[filterKey].field as string)] as number;
+                    const rowValue = row[columns[filterKey].field as keyof Row] as number;
                     const numberFilter = filters[filterKey] as NumberFilter[];
                     for (const filter of numberFilter) {
                         const op = filter.op;
@@ -283,6 +400,19 @@ export function clone<T>(obj: T): T {
     return cloneDeep(obj);
 }
 
+export function cloneColumns(columnStore: ColumnStore): ColumnStore {
+    const newObject: ColumnStore = {};
+
+    Object.keys(columnStore).forEach((key) => {
+        newObject[key] = JSON.parse(JSON.stringify(columnStore[key]));
+        newObject[key].formatter = columnStore[key].formatter;
+        newObject[key].styleFormatter = columnStore[key].styleFormatter;
+        newObject[key].aggregation = columnStore[key].aggregation;
+    })
+
+    return newObject;
+}
+
 export function getAggregationType(column: Column | undefined, row: Row): AggregationType | AggregationFunction {
     if (column?.aggregation && typeof column.aggregation === 'string') {
         return column.aggregation;
@@ -295,16 +425,15 @@ export function getAggregationType(column: Column | undefined, row: Row): Aggreg
     return AggregationType.COUNT;
 }
 
-const convertToTotal = (column: Column, headerName: string, parentField: string, values: Column[]): ColumnDef[] => {
-    if (column.children && column.children?.length) {
+const convertToTotal = (column: ColumnDef, headerName: string, filters: Record<string, string>, values: Column[]): ColumnDef[] => {
+    if (column.children?.length) {
         column.id = uuidv4();
         column.headerName = headerName;
-        column.field = parentField;
         column.childrenMap = {};
         column.children = convertToTotal(
-            { ...column.children[0], parent: column.id } as Column,
+            { ...column.children[0] },
             '',
-            parentField,
+            filters,
             values
         );
 
@@ -313,13 +442,14 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
         return values.map((value) => ({
             id: uuidv4(),
             formatter: value.formatter,
+            aggregation: value.aggregation,
             headerName: `${value.aggregation} of ${value.headerName}`,
-            field: `${value.field}@${parentField}`,
-            filterType: FilterType.NUMBER,
+            field: value.field,
             flex: 1,
             parent: column.id,
             children: [],
             childrenMap: {},
+            _filters: filters,
             _total: true,
             _firstLevel: false,
         }));
@@ -327,20 +457,23 @@ const convertToTotal = (column: Column, headerName: string, parentField: string,
 };
 
 const loopColumn = (column: ColumnDef, values: Column[]) => {
-    const isLeaf = column.children?.some((child) => !child.children?.length);
-    if (column.children?.length && !isLeaf) {
+    if (!column.children) {
+        return;
+    }
+
+    const isAggregable = column.children?.length > 1; // has more than one child
+
+    if (isAggregable) {
+        column.children.forEach((child) => loopColumn(child, values));
+
         column.children?.push(
             ...convertToTotal(
-                { ...column.children[0], parent: column.id } as Column,
+                { ...column.children[0] },
                 'TOTAL',
-                column.field as string,
-                values
+                column._filters || {},
+                values,
             )
         );
-
-        column.children?.forEach((child) => {
-            loopColumn(child, values);
-        });
     }
 };
 
@@ -391,7 +524,7 @@ const getMathValue = (row: Row, field: string): number => {
 
 export const getFieldValue = (row: Row, field: string): string | number | React.ReactElement => {
     if (field.startsWith('#{')) {
-        return getMathValue(row, field);
+        return getMathValue(row, field) || 0;
     } else {
         return row[field as keyof Row] as string | number | React.ReactElement
     }

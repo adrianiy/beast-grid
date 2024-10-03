@@ -46,17 +46,19 @@ export default function HeaderCell<T>({
     const [dragging, setDragging] = useState(false);
     const [resizing, setResizing] = useState(false);
     const [translateX, setTranslateX] = useState(0);
-    const [columns, filters, theme, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort] =
+    const [columns, filters, theme, isPivoted, hideColumn, swapColumns, resizeColumn, container, scrollContainer, changeSort, saveState] =
         useBeastStore((state) => [
             state.columns,
             state.filters,
             state.theme,
+            state.isPivoted,
             state.hideColumn,
             state.swapColumns,
             state.resizeColumn,
             state.container,
             state.scrollElement,
             state.changeSort,
+            state.saveState
         ]);
     const [dropTargets] = useDndStore((state) => [state.dropTargets]);
     const [drag] = useDndHook(
@@ -79,6 +81,7 @@ export default function HeaderCell<T>({
         onDragEnd: () => {
             lastX.current = 0;
             setResizing(false);
+            saveState();
         },
     });
 
@@ -109,18 +112,63 @@ export default function HeaderCell<T>({
         const scrollLeft = scrollContainer.scrollLeft;
         for (const element of dropTargets) {
             const elementColumn = columns[element?.id];
-            if (
-                !elementColumn ||
-                elementColumn.logicDelete ||
-                elementColumn.pinned !== column.pinned ||
-                element.id === column.id ||
-                elementColumn.parent === column.id ||
-                elementColumn.level > column.level ||
-                (elementColumn.level < column.level && !elementColumn.final) ||
-                element.id === column.parent ||
-                element.id === lastHitElement.current?.id
-            )
+
+            const notValidElemnts = !elementColumn || !elementColumn.path || !column.path || elementColumn.pinned !== column.pinned || element.id === lastHitElement.current?.id;
+
+            if (notValidElemnts) {
                 continue;
+            }
+
+            const sameElement =
+                element.id === column.id ||
+                elementColumn.parent === column.id;
+
+            if (sameElement) {
+                continue;
+            }
+
+            if (isPivoted) {
+                // swap pivotado
+                //  - mismo nivel mismo padre: ok
+                //  - distinto nivel:
+                //      - si alguno de los padres es distinto y tiene mas de un hijo: no
+                //      - si todos los padres tienen un solo hijo: ok
+                //      - si todos los padres son iguales: ok
+                const isPivotValid =
+                    (elementColumn.level === column.level &&
+                        elementColumn.parent === column.parent) ||
+                    (elementColumn.level === column.level &&
+                        elementColumn.path?.every((id, idx) => {
+                            const columnParent = column.path?.[idx];
+                            const singleChildElement = columns[id].childrenId?.length === 1;
+                            const singleChildColumn = columns[columnParent as string].childrenId?.length === 1;
+                            const sameParent = id === columnParent;
+
+                            return sameParent || (singleChildElement && singleChildColumn);
+                        }))
+
+                if (!isPivotValid) {
+                    continue;
+                }
+            }
+
+            // swap comun
+            // - mismo nivel: ok
+            // - distinto nivel:
+            //  - si el elemento es final: no
+            //  - si el elemento es padre del elemento actual: no
+            //  - si el elemento es el mismo que el anterior: no
+
+            const isCommonSwapValid =
+                elementColumn.level === column.level ||
+                (elementColumn.level !== column.level &&
+                    elementColumn.final);
+
+
+
+            if (!isCommonSwapValid) {
+                continue;
+            }
 
             const left = columns[element.id].left + containerLeft - scrollLeft + (leftWidth || 0);
             const width = columns[element.id].width;
@@ -167,6 +215,7 @@ export default function HeaderCell<T>({
             }
         }
         setDragging(false);
+        saveState();
     }
 
     const handleChangeSort = () => {
@@ -214,10 +263,11 @@ export default function HeaderCell<T>({
             className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
             key={`${levelIdx}-${idx}-${column.id}`}
             style={{
-                marginTop: !column.children && levelIdx === 0 ? height * (headers.length - 1) : 0,
+                marginTop: !column.childrenId?.length && levelIdx === 0 ? height * (headers.length - 1) : 0,
                 height,
                 width: column.width,
                 left: column.left,
+                ...column.headerStyleFormatter?.()
             }}
             ref={drag}
             id={column.id}
@@ -225,10 +275,11 @@ export default function HeaderCell<T>({
             data-level={column.level}
             data-clone={column.original}
         >
-            <div className="bg-grid-header__cell__left row middle" onClick={handleChangeSort}>
-                <span className="bg-grid-header-drop bg-grid-header__cell__name"
+            <div className="bg-grid-header__cell__left row middle"
+                style={{ transform: `translateX(${translateX}px)` }}
+                onClick={handleChangeSort}>
+                <span className={cn('bg-grid-header-drop bg-grid-header__cell__name', { summary: column._summary })}
                     ref={translate}
-                    style={{ transform: `translateX(${translateX}px)` }}
                     title={column.headerName} >
                     {column.headerName}
                 </span>

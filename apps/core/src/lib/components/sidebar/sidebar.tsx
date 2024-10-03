@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BeastGridConfig, ChartType, Column, SideBarConfig } from '../../common';
 
 import GridConfig from './components/grid';
@@ -30,9 +30,15 @@ type ChartProps = {
 function SideBarSwitch<T>({
     sideBarConfig,
     config,
+    onClose,
     ...chartProps
-}: { sideBarConfig: SideBarConfig; config: BeastGridConfig<T> } & Partial<ChartProps>) {
-    const [columns] = useBeastStore((state) => [state.initialColumns]);
+}: { sideBarConfig: SideBarConfig; onClose: () => void, config: BeastGridConfig<T> } & Partial<ChartProps>) {
+    const [snapshots, columns] = useBeastStore((state) => [state.snapshots, state.columns]);
+
+    const originalColumns = useMemo(() => {
+        return snapshots[0]?.columns || [];
+    }, [snapshots[0]?.columns]);
+
 
     switch (sideBarConfig) {
         case SideBarConfig.GRID:
@@ -42,14 +48,14 @@ function SideBarSwitch<T>({
         case SideBarConfig.CHART:
             return chartProps?.values && <ChartConfig config={config} {...chartProps} />;
         case SideBarConfig.PIVOT:
-            return <PivotConfig config={config} columns={columns} />;
+            return <PivotConfig config={config} columns={originalColumns} onClose={onClose} />;
         default:
             return null;
     }
 }
 
 export default function SideBar<T>({ config, theme, ...chartProps }: { config: BeastGridConfig<T>, theme?: string } & Partial<ChartProps>) {
-    const [sideBarConfig, setSidebarConfig] = useBeastStore((state) => [state.sideBarConfig, state.setSideBarConfig]);
+    const [sideBarConfig, setSidebarConfig, saveState] = useBeastStore((state) => [state.sideBarConfig, state.setSideBarConfig, state.saveState]);
     const [useModal, setUseModal] = useState<boolean>(false);
 
     useEffect(() => {
@@ -64,6 +70,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
     const closeSidebar = () => {
         setSidebarConfig(null);
         setUseModal(false);
+        saveState();
     };
 
     const stopClick = (e: React.MouseEvent) => {
@@ -81,7 +88,7 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
                 onClick={closeSidebar}
             >
                 <div className="bg-sidebar__modal" onClick={stopClick}>
-                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
                 </div>
             </div>,
             document.body
@@ -93,14 +100,14 @@ export default function SideBar<T>({ config, theme, ...chartProps }: { config: B
                 onClick={closeSidebar}
             >
                 <div className="bg-sidebar__modal" onClick={stopClick}>
-                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                    <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
                 </div>
             </div>
         );
     } else {
         return (
             <div className="bg-sidebar__container">
-                <SideBarSwitch sideBarConfig={sideBarConfig} config={config} {...chartProps} />
+                <SideBarSwitch sideBarConfig={sideBarConfig} config={config} onClose={closeSidebar} {...chartProps} />
             </div>
         );
     }

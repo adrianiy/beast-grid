@@ -1,200 +1,163 @@
-import { AggregationType, Column, ColumnDef, Data, FilterType, Row } from '../common';
+import { AggregationType, Column, ColumnDef, Data, Row } from '../common';
 import { v4 as uuidv4 } from 'uuid';
 
-const aggregateData = (
-    data: Row,
-    row: Row,
-    calculatedColumn: Column,
-    valueField: string
-): void => {
-    if (calculatedColumn.aggregation === AggregationType.SUM) {
-        data[valueField] = +(data[valueField] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
-    } else if (calculatedColumn.aggregation === AggregationType.AVG) {
-        data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
-        data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + +(row[calculatedColumn.field as keyof Row] || 0);
-
-        data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
-    } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
-        data[valueField] = +(data[valueField] || 0) + 1;
-    } else if (calculatedColumn.aggregation === AggregationType.MIN) {
-        data[valueField] = Math.min(data[valueField] as number || Infinity, row[calculatedColumn.field as keyof Row] as number);
-    } else if (calculatedColumn.aggregation === AggregationType.MAX) {
-        data[valueField] = Math.max(data[valueField] as number || -Infinity, row[calculatedColumn.field as keyof Row] as number);
-    }
-
-}
-
-export const acumData = (
-    data: Row,
-    row: Row,
-    columns: Column[],
-    calculatedColumns: Column[],
-    columnDefs: Record<string, ColumnDef>
-): Row => {
-    let lastColumn: ColumnDef;
-
-    columns.forEach((column, index) => {
-        const key = row[column.field as keyof Row] as string;
-        const isLastColumn = index === columns.length - 1;
-        let field = `${column.field}:${key || ''}`;
-
-        if (lastColumn) {
-            field = `${field}@${lastColumn.field}`;
-        }
-
-        if (column.field !== 'total:') {
-            if (!columnDefs[field]) {
-                columnDefs[field] = {
-                    id: uuidv4(),
-                    headerName: key,
-                    field,
-                    flex: 1,
-                    children: [],
-                    childrenMap: {},
-                    menu: false,
-                    _firstLevel: !index,
-                };
-            }
-
-            if (lastColumn && !lastColumn.childrenMap?.[field]) {
-                if (lastColumn.childrenMap) {
-                    lastColumn.childrenMap[field] = columnDefs[field].id as string;
-                }
-                lastColumn.children?.push(columnDefs[field]);
-            }
-
-            lastColumn = columnDefs[field];
-        }
-
-        calculatedColumns.forEach((calculatedColumn) => {
-            const valueField = `${calculatedColumn.field}@${field}`;
-
-            aggregateData(data, row, calculatedColumn, valueField);
-
-            if (isLastColumn && lastColumn && !lastColumn.childrenMap?.[valueField]) {
-                const newValueColumn = {
-                    ...calculatedColumn,
-                    id: uuidv4(),
-                    parent: lastColumn.id,
-                    headerName: `${calculatedColumn.aggregation} of ${calculatedColumn.headerName}`,
-                    filterType: FilterType.NUMBER,
-                    pivotField: valueField,
-                    field,
-                    flex: 1,
-                    _firstLevel: false,
-                    children: [],
-                };
-
-                if (lastColumn.childrenMap) {
-                    lastColumn.childrenMap[valueField] = newValueColumn.id;
-                }
-
-                lastColumn.children?.push(newValueColumn);
-            }
-        });
-
-        data[column.field as string] = key;
-    });
-
-    return data;
-};
-
-const newRow = (showTotals: boolean, isTotal?: boolean): Row => ({
+const newRow = (row: Row, rows: Column[], showTotals: boolean, indexes: number[], isTotal?: boolean): Row => ({
     _id: uuidv4(),
     _expanded: true,
     _total: isTotal,
+    _pivotIndexes: indexes,
     _singleChild: !showTotals,
     children: [],
-    childrenMap: {},
+    _childrenMap: {} as Record<string, number>,
+    ...rows.reduce((acc, column) => ({ ...acc, [column.field as keyof Row]: row[column.field as keyof Row] }), {}),
 });
 
-const addData = (
-    row: Row & { childrenMap?: Record<string, number> },
-    data: Row,
-    aggregationColumns: Column[],
-    currentLevel: number,
-    columns: Column[],
-    values: Column[],
-    columnDefs: Record<string, ColumnDef>,
-    showRowTotals: boolean
-): Row => {
-    const aggregationColumn = aggregationColumns[currentLevel];
-    const isLastRowLevel = !aggregationColumns.length || currentLevel === aggregationColumns.length - 1;
-    const key = aggregationColumn ? data[aggregationColumn.field as keyof Row] as string : 'total';
+const newColumn = (baseColumn: Column, key: string, field: string, parent: Partial<Column> | undefined, firstLevel: boolean, filters: Record<string, string>) => {
+    const id = uuidv4();
 
-    if (!isLastRowLevel && showRowTotals) {
-        const nextLevel = currentLevel + 1;
-        const nextField = aggregationColumns[nextLevel]?.field as string;
-        const nextKey = data[nextField as keyof Row] as string;
-
-        if (!row.children) {
-            row.children = [];
-        }
-
-        if (!row.childrenMap) {
-            row.childrenMap = {};
-        }
-
-        let childIndex = row.childrenMap?.[nextKey] as number;
-
-        if (!childIndex) {
-            row.children?.push(newRow(showRowTotals));
-            childIndex = (row.children?.length as number) - 1;
-            row.childrenMap[nextKey] = childIndex;
-        }
-
-        row._total = true;
-
-        addData(
-            row.children[childIndex],
-            data,
-            aggregationColumns,
-            nextLevel,
-            columns,
-            values,
-            columnDefs,
-            showRowTotals
-        );
+    return {
+        ...baseColumn,
+        id,
+        field,
+        headerName: key,
+        flex: 1,
+        parent: parent?.id,
+        children: [],
+        childrenMap: {},
+        menu: false,
+        sort: undefined,
+        path: parent?.path ? [...parent.path, parent.id] : [],
+        _filters: filters,
+        _firstLevel: firstLevel,
+        _summary: firstLevel
     }
+}
 
-    if (!showRowTotals) {
-        aggregationColumns.forEach((column) => {
-            row[column.field as string] = data[column.field as keyof Row];
-        });
+const createSingleRows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
+    const key = rows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') || 'total';
+
+    if (rowMap[key] == null) {
+        // Si agrupo totales de fila, necesito crear un padre por cada nivel de filas y concatenar los hijos a cada
+        // padre
+        result.push(newRow(row, rows, false, [index]));
+
+        rowMap[key] = result.length - 1;
     } else {
-        row[aggregationColumn.field as string] = key;
+        result[rowMap[key]]._pivotIndexes?.push(index);
     }
+}
 
-    acumData(row, data, columns, values, columnDefs);
+const createNestedrows = (result: Row[], rows: Column[], row: Row, rowMap: Record<string, number>, index: number) => {
+    let parentRow: Row | undefined;
 
-    return row;
-};
+    rows.forEach((groupRow, i) => {
+        const key = row[groupRow.field as keyof Row] as string;
+        const isFirst = i === 0;
+        const isLast = i === rows.length - 1;
+
+        if (isFirst) {
+            // Parent Row
+            if (rowMap[key] == null) {
+                // Register parent row if not present in the map
+                result.push(newRow(row, rows, !isLast, [index], !isLast));
+                rowMap[key] = result.length - 1;
+            } else {
+                // Add pivot index to parent row
+                result[rowMap[key]]._pivotIndexes?.push(index);
+            }
+
+            // save parent row
+            parentRow = result[rowMap[key]];
+        } else if (parentRow) {
+            // Children row
+            if (!parentRow._childrenMap || !parentRow.children) {
+                throw new Error('Parent row is not properly initialized');
+            }
+
+            if (!parentRow._childrenMap[key]) {
+                // Register child row if not present in the map
+                parentRow.children.push(newRow(row, rows, !isLast, [index], !isLast));
+                parentRow._childrenMap[key] = parentRow.children.length - 1;
+            } else {
+                // Add pivot index to child row
+                parentRow.children[parentRow._childrenMap[key]]._pivotIndexes?.push(index);
+            }
+        } else {
+            throw new Error('Parent row is not defined');
+        }
+    });
+}
 
 export const groupByPivot = (
     data: Data,
-    groupRows: Column[],
+    rows: Column[],
     columns: Column[],
-    calculatedColumns: Column[],
-    showRowTotals: boolean
-): [Row[], ColumnDef[]] => {
-    const rows: Row[] = [];
-    const groups: Record<string, number> = {};
+    values: Column[],
+    showRowTotals: boolean,
+): [Row[], Row[], ColumnDef[]] => {
+    const rowMap: Record<string, number> = {};
     const columnDefs: Record<string, ColumnDef> = {};
+    const _rows: Row[] = [];
+    const _bottomRows: Row[] = [];
 
-    data.forEach((row) => {
-        const key = showRowTotals
-            ? (row[groupRows[0].field as keyof Row] as string)
-            : (groupRows.map((groupRow) => row[groupRow.field as keyof Row]).join('-') as string) || 'total';
+    // If not values, add a total column
+    if (!values.length) {
+        values.push({ field: 'total:', aggregation: AggregationType.SUM } as Column);
+    }
 
-        if (groups[key] == null) {
-            groups[key] = rows.length;
-            rows.push(newRow(showRowTotals));
+    const summaryId = 'summary';
+    const summaryColumn = newColumn({} as Column, columns.map((column) => column.headerName).join(' > '), 'summary', undefined, true, {});
+    columnDefs[summaryId] = summaryColumn;
+
+    data.forEach((row, index) => {
+        // for single rows
+        if (!showRowTotals) {
+            createSingleRows(_rows, rows, row, rowMap, index);
+        } else {
+            createNestedrows(_rows, rows, row, rowMap, index);
         }
 
-        addData(rows[groups[key]], row, groupRows, 0, columns, calculatedColumns, columnDefs, showRowTotals);
+        // for each value build column hierarchy
+        values.forEach((column) => {
+            let lastField = summaryId;
+            const filters: Record<string, string> = {};
+
+            columns.forEach((column) => {
+                const field = `${column.field}:${row[column.field as keyof Row] as string}@${lastField}`;
+                filters[column.field as string] = row[column.field as keyof Row] as string;
+
+                if (!columnDefs[field]) {
+                    columnDefs[field] = newColumn(column, column.formatter?.(row[column.field as keyof Row] as string & number, row) || row[column.field as keyof Row] as string, field, columnDefs[lastField], false, { ...filters });
+
+                    if (lastField) {
+                        columnDefs[lastField].children?.push(columnDefs[field]);
+                    }
+                }
+                lastField = field;
+            })
+            const valueField = `${column.field as string}@${lastField}`;
+
+            if (!columnDefs[valueField]) {
+                columnDefs[valueField] = newColumn(column, column.headerName as string, column.field as string, columnDefs[lastField], false, filters);
+
+                if (lastField) {
+                    columnDefs[lastField]?.children?.push(columnDefs[valueField]);
+                }
+            }
+        });
     });
 
-    return [rows, Object.values(columnDefs)];
+    if (showRowTotals) {
+        // Add bottom row totals
+        const totalRow = { [rows[0].field as string]: 'Total' } as Row;
+        const allIndexes = data.map((_, i) => i);
+
+        _bottomRows.push(newRow(totalRow, rows, false, allIndexes, true));
+    }
+
+    console.log(Object.keys(rowMap).length, Object.keys(columnDefs).length);
+
+    return [_rows, _bottomRows, Object.values(columnDefs)];
 };
 
 export const groupPivot = (
@@ -204,9 +167,10 @@ export const groupPivot = (
     data: Data,
     showRowTotals: boolean,
     level = 0
-): [Data, ColumnDef[]] => {
+): [Data, Data, ColumnDef[]] => {
     if (columns.length && level === columns.length) {
-        return [data, []];
+        return [data, [], []];
     }
     return groupByPivot(data, columns, aggColumns, valueColumns, showRowTotals);
 };
+
