@@ -73,7 +73,7 @@ export const getDynamicHeaders = (
                 field,
                 flex: 1,
                 minWidth: MIN_COL_WIDTH,
-                children: isFinal && values.length > 0 ? getValueHeaders(values, field) : !isFinal ? getDynamicHeaders(columns, currentColumn + 1, values, data) : []
+                children: isFinal && values.length > 0 ? getValueHeaders(values) : !isFinal ? getDynamicHeaders(columns, currentColumn + 1, values, data) : []
             });
         }
     });
