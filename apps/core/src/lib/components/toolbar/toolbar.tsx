@@ -8,10 +8,11 @@ import './toolbar.scss';
 type Props<T> = {
     config: BeastGridConfig<T>;
     position: ToolbarPosition;
+    title?: React.ReactNode;
     onRestore?: () => void;
 };
 
-export default function Toolbar<T>({ config, position, onRestore }: Props<T>) {
+export default function Toolbar<T>({ config, position, title, onRestore }: Props<T>) {
     const toolbarLeft = useMemo(
         () => (position === ToolbarPosition.TOP ? config.topLeftToolbar : config.bottomLeftToolbar),
         [config, position]
@@ -26,7 +27,8 @@ export default function Toolbar<T>({ config, position, onRestore }: Props<T>) {
     }
 
     return (
-        <div className="bg-toolbar row between">
+        <div className="bg-toolbar row middle between">
+            {title}
             {
                 [toolbarLeft, toolbarRight].map((toolbar, idx) => {
                     return toolbar ? (<div key={idx} className="bg-toolbar__element row">

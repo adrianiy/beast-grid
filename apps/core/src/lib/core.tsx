@@ -37,6 +37,7 @@ export function BeastGrid<T>({
     injectStyles = false,
     disableColumnSwap = false,
     api,
+    title,
     onSortChange,
     onChanges
 }: {
@@ -46,6 +47,7 @@ export function BeastGrid<T>({
     api?: MutableRefObject<BeastGridApi | undefined>;
     injectStyles?: boolean;
     disableColumnSwap?: boolean;
+    title?: React.ReactNode;
     onSortChange?: (data: Data, sortColumns: Column[]) => Promise<Data>;
     onChanges?: OnChanges
 }) {
@@ -106,7 +108,7 @@ export function BeastGrid<T>({
                         <IntlProvider messages={messages[locale]} locale={locale}>
                             <BeastApi store={api} />
                             <LoaderLayer config={config} />
-                            <Toolbar config={config} position={ToolbarPosition.TOP} />
+                            <Toolbar title={title} config={config} position={ToolbarPosition.TOP} />
                             <Beast
                                 config={config}
                                 defaultConfig={defaultConfig}

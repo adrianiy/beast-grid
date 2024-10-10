@@ -252,7 +252,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                     Error fetching data :(
                 </Alert>
             </Snackbar>
-            <BeastGrid config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
+            <BeastGrid title={<span>Title</span>} config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
         </>
     );
 }
