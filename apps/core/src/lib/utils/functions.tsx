@@ -300,6 +300,12 @@ export const filterRow =
                     )
                 ) {
                     show = show && true;
+                } else if (columns[filterKey].filterType === FilterType.BOOLEAN) {
+                    const rowValue = row[columns[filterKey].field as keyof Row] as boolean;
+                    const booleanFilter = filters[filterKey] as string[];
+                    console.log(rowValue, booleanFilter)
+
+                    show = show && booleanFilter.includes(`${rowValue}`)
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {
                     const rowValue = row[columns[filterKey].field as keyof Row] as number;
                     const numberFilter = filters[filterKey] as NumberFilter[];

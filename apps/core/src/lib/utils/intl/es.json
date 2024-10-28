@@ -44,5 +44,7 @@
     "chart.type": "Tipo de gráfico",
     "chart.line": "Línea",
     "chart.bar": "Barras",
-    "chart.pie": "Circular"
+    "chart.pie": "Circular",
+    "true": "Verdadero",
+    "false": "Falso"
 }

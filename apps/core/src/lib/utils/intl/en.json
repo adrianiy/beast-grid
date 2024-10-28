@@ -45,5 +45,7 @@
     "chart.groups": "Groups",
     "chart.line": "Line",
     "chart.bar": "Bar",
-    "chart.pie": "Pie"
+    "chart.pie": "Pie",
+    "true": "True",
+    "false": "False"
 }

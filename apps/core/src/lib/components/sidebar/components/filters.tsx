@@ -13,6 +13,7 @@ import SimpleBarCore from 'simplebar-core';
 
 import cn from 'classnames';
 import { getColumnFilter } from '../../../stores/grid-store/utils';
+import BooleanFilter from '../../filters/boolean';
 
 type Props<T> = {
     config: BeastGridConfig<T>;
@@ -60,6 +61,8 @@ export const Filter = ({ column, scrollContainer }: { column: Column; scrollCont
             return <TextFilters column={column} />;
         case FilterType.NUMBER:
             return <NumberFilter column={column} scrollContainer={scrollContainer} filters={filters} />;
+        case FilterType.BOOLEAN:
+            return <BooleanFilter column={column} filters={filters} scrollContainer={scrollContainer} />;
         default:
             return null;
     }

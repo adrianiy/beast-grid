@@ -33,6 +33,22 @@ const columnDefs: ColumnDef[] = [
         },
     },
     {
+        headerName: 'BOOLEAN',
+        field: 'es_activo',
+        width: 200,
+        sortable: true,
+        headerStyleFormatter: () => ({ backgroundColor: 'blue' }),
+        sort: {
+            order: SortType.DESC,
+            priority: 1
+        },
+        menu: {
+            pin: true,
+            filter: true,
+            column: true,
+        },
+    },
+    {
         headerName: 'USER',
         children: [
             {
@@ -121,7 +137,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             try {
                 const res = await getData(qty);
                 setTimeout(() => {
-                    beastApi?.current?.setData(res.map(r => ({ ...r, image_test: <img src="https://static.zara.net/photos/2024/I/0/1/p/4360/246/832/5/w/400/4360246832_1_1_1.jpg?ts=1727440558880" width="50" alt="test" /> })));
+                    beastApi?.current?.setData(res.map((r, i) => ({ ...r, es_activo: i % 2 === 0, image_test: <img src="https://static.zara.net/photos/2024/I/0/1/p/4360/246/832/5/w/400/4360246832_1_1_1.jpg?ts=1727440558880" width="50" alt="test" /> })));
                 }, 5000)
             } catch (_) {
                 setError(true);
@@ -136,29 +152,6 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     useEffect(() => {
         setConfig({
             data: [],
-            bottomRows: [
-                {
-                    _total: true,
-                    id: 9,
-                    name: 'Xzavier_Casper86',
-                    country: <Test />,
-                    language: 'paulatim',
-                    age: '--',
-                    orders: 69415,
-                    january: 79684,
-                    february: 96576,
-                    march: 96082,
-                    april: 13873,
-                    may: 39414,
-                    june: 70879,
-                    july: 64054,
-                    august: 33908,
-                    september: 44870,
-                    october: 47387,
-                    november: 17569,
-                    december: 41062,
-                },
-            ],
             columnDefs,
             style: {
                 maxHeight: 'calc(100vh - 100px)',

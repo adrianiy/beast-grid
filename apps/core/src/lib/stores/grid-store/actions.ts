@@ -206,6 +206,14 @@ export const addFilter =
                     filters[id][idx] = value;
                 }
             }
+            if (column.filterType === FilterType.BOOLEAN) {
+                if (filters[id]?.includes(value as string)) {
+                    filters[id] = filters[id]?.filter((val) => val !== value);
+                } else {
+                    filters[id] = filters[id] ? [...filters[id], value as string] : [value as string];
+                }
+            }
+
             if (!filters[id].length) {
                 delete filters[id];
             }
