@@ -216,12 +216,12 @@ export const getColumnFilter = (column: Column, data: Data): void => {
         column.filterType = FilterType.NUMBER;
         return;
     }
-    if (dayjs(data[0][column.field as string] as string).isValid()) {
-        column.filterType = FilterType.DATE;
-        return;
-    }
     if (typeof data[0][column.field as string] === 'boolean') {
         column.filterType = FilterType.BOOLEAN;
+        return;
+    }
+    if (dayjs(data[0][column.field as string] as string).isValid()) {
+        column.filterType = FilterType.DATE;
         return;
     }
     if (typeof data[0][column.field as string] === 'string') {

@@ -42,7 +42,7 @@ function getProperty<Key extends keyof Row>(
         return columnDef.formatter(value as number & string, row);
     }
 
-    return value as string;
+    return value?.toString();
 }
 
 type Props = {
