@@ -371,6 +371,7 @@ export default function TBody<T>({
                 groupOrder={groupOrder}
                 selectable={!!beastConfig.contextualMenu}
                 idx={idx + (beastConfig.topRows?.length || 0)}
+                fullWidth={beastConfig?.fullWidth}
                 y={y}
                 border={border}
                 height={rowHeight}
@@ -474,6 +475,7 @@ export default function TBody<T>({
                     skeleton={beastConfig?.loadingState?.skeleton}
                     groupOrder={groupOrder}
                     selectable={false}
+                    fullWidth={beastConfig?.fullWidth}
                     idx={i}
                     y={i}
                     border={border}
@@ -510,6 +512,7 @@ export default function TBody<T>({
                     skeleton={beastConfig?.loadingState?.skeleton}
                     groupOrder={groupOrder}
                     selectable={false}
+                    fullWidth={beastConfig?.fullWidth}
                     idx={i}
                     y={_data.length - i}
                     border={border}

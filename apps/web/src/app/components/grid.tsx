@@ -69,49 +69,49 @@ const columnDefs: ColumnDef[] = [
             { headerName: 'LANGUAGE', field: 'language', width: 200, menu: { grid: true, column: true } },
         ],
     },
-    {
-        headerName: 'USERS',
-        field: 'id',
-        aggregation: (row: Row) => row.children?.length || 0,
-        flex: 1,
-        formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}`,
-    },
-    {
-        headerName: '1ST_QUARTER',
-        field: '#{january + february + march + april}',
-        flex: 1,
-        formatter: (value) => numeral(value).format('0,0 $'),
-    },
-    {
-        headerName: 'Image test',
-        field: 'image_test',
-        pinned: PinType.LEFT,
-        hideInDownload: true,
-        flex: 1,
-    },
-    {
-        headerName: 'MONTHS',
-        children: [
-            ...months.map(
-                (month): ColumnDef => ({
-                    headerName: month.toUpperCase(),
-                    field: month,
-                    menu: {
-                        filter: true,
-                    },
-                    styleFormatter: (value) => {
-                        if (+value < 10000) {
-                            return { color: 'red' };
-                        }
-                        return {};
-                    },
-                    sortable: true,
-                    flex: 1,
-                    formatter: (value) => numeral(value).format('0,0 $'),
-                })
-            ),
-        ],
-    },
+    // {
+    //     headerName: 'USERS',
+    //     field: 'id',
+    //     aggregation: (row: Row) => row.children?.length || 0,
+    //     flex: 1,
+    //     formatter: (value: number, row: Row) => `${value}${row.children?.length ? ' users' : ''}`,
+    // },
+    // {
+    //     headerName: '1ST_QUARTER',
+    //     field: '#{january + february + march + april}',
+    //     flex: 1,
+    //     formatter: (value) => numeral(value).format('0,0 $'),
+    // },
+    // {
+    //     headerName: 'Image test',
+    //     field: 'image_test',
+    //     pinned: PinType.LEFT,
+    //     hideInDownload: true,
+    //     flex: 1,
+    // },
+    // {
+    //     headerName: 'MONTHS',
+    //     children: [
+    //         ...months.map(
+    //             (month): ColumnDef => ({
+    //                 headerName: month.toUpperCase(),
+    //                 field: month,
+    //                 menu: {
+    //                     filter: true,
+    //                 },
+    //                 styleFormatter: (value) => {
+    //                     if (+value < 10000) {
+    //                         return { color: 'red' };
+    //                     }
+    //                     return {};
+    //                 },
+    //                 sortable: true,
+    //                 flex: 1,
+    //                 formatter: (value) => numeral(value).format('0,0 $'),
+    //             })
+    //         ),
+    //     ],
+    // },
 ];
 
 function SlideTransition(props: SlideProps) {
@@ -153,6 +153,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         setConfig({
             data: [],
             columnDefs,
+            fullWidth: true,
             style: {
                 maxHeight: 'calc(100vh - 100px)',
                 border: true,

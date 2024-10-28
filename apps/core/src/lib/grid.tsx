@@ -167,13 +167,14 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                             levels={levels}
                             border={config.header?.border ?? true}
                             multiSort={config.sort?.multiple}
+                            fullWidth={config.fullWidth}
                             dragOptions={config.dragOptions}
                             disableSwapColumns={disableColumnSwap}
                         />
                         <TBody
                             rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
                             config={config.row}
-                            border={config.row?.border}
+                            border={config.row?.border && !config.fullWidth}
                             events={config.row?.events}
                             beastConfig={config}
                             scrollTop={scrollTop}
