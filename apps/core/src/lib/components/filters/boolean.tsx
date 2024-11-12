@@ -41,7 +41,7 @@ export default function BooleanFilter(props: Props) {
                         <CheckIcon />
                     </Checkbox.Indicator>
                 </Checkbox.Root>
-                <label>{value.toString()}</label>
+                <label>{column.formatter ? column.formatter(value.toString() as string & number, {}) : value.toString()}</label>
             </div>
 
         )

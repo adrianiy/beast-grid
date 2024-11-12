@@ -147,7 +147,7 @@ export default function RowContainer({
                     {renderRow(PinType.RIGHT)}
                 </div>
             )}
-            {fullWidth && <div className="grid-row-separator" />}
+            {fullWidth && <div className="grid-row-separator" style={{ width: totalWidth }} />}
         </div>
     );
 }

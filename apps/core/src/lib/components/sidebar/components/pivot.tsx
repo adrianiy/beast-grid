@@ -413,7 +413,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
         const [, drop] = useDrop(() => ({
             accept: ['COLUMN', 'BOX'],
             drop: (item: { id: string; onRemove: (column: Column) => () => void }) => {
-                if (columns.current.find((c) => c.id === item.id)) {
+                if (columns.current.find((c) => c?.id === item.id)) {
                     return;
                 }
                 const column = clone(columnStore[item.id]);
@@ -436,7 +436,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
 
 
         const removeColumn = (column: Column) => () => {
-            columns.current = columns.current.filter((c) => c.id !== column.id);
+            columns.current = columns.current.filter((c) => c?.id !== column.id);
 
             onChanges({ columns: columns.current });
         };
@@ -494,7 +494,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
                     ) : null}
                 </div>
                 <div className="bg-box column left" ref={drop}>
-                    {columns.current.map((column, idx) => (
+                    {columns.current.filter(Boolean).map((column, idx) => (
                         <Box
                             key={`${pivotType}-${column.id}`}
                             index={idx}

@@ -29,6 +29,7 @@ export default function Header<T>({ height, levels, border, multiSort, fullWidth
         <div className="grid-header row" style={{ height: height * levels.length, width: fullWidth ? '100%' : totalWidth }}>
             <HeaderSection
                 width={leftWidth}
+                totalWidth={totalWidth}
                 height={height}
                 headers={levels}
                 pinType={PinType.LEFT}
@@ -41,6 +42,7 @@ export default function Header<T>({ height, levels, border, multiSort, fullWidth
             />
             <HeaderSection
                 leftWidth={leftWidth}
+                totalWidth={totalWidth}
                 width={totalWidth - leftWidth - rightWidth}
                 height={height}
                 headers={levels}
@@ -54,6 +56,7 @@ export default function Header<T>({ height, levels, border, multiSort, fullWidth
             />
             <HeaderSection
                 width={rightWidth}
+                totalWidth={totalWidth}
                 height={height}
                 headers={levels}
                 pinType={PinType.RIGHT}
