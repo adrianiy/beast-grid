@@ -373,11 +373,18 @@ export const restore = (at = 0) => (state: GridStore) => {
         onChanges(ChangeType.RESTORE, {});
     }
 
+    if (!firstSnapshot.isPivoted) {
+        firstSnapshot.pivotData = undefined;
+    }
+    if (!firstSnapshot.isGrouped) {
+        firstSnapshot.groupData = undefined;
+    }
+
     updateColumnVisibility(scrollElement, 0, firstSnapshot.columns);
 
     const [newSnapshots, historyPoint] = saveSnapshot({ ...state, ...firstSnapshot, snapshots: [], historyPoint: -1 });
 
-    return { ...firstSnapshot, snapshots: newSnapshots, historyPoint, haveChanges: false };
+    return { ...state, ...firstSnapshot, snapshots: newSnapshots, historyPoint, haveChanges: false };
 };
 
 export const clearHistory = () => (state: GridStore) => {

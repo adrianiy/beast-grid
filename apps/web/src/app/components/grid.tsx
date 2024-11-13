@@ -62,7 +62,7 @@ const columnDefs: ColumnDef[] = [
     },
     {
         headerName: '1ST_QUARTER',
-        field: '#{january + february + march + april}',
+        field: '#{january + february + march + april + test.test}',
         flex: 1,
         formatter: (value) => numeral(value).format('0,0 $'),
     },
