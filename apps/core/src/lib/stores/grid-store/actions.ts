@@ -363,25 +363,40 @@ export const autoSizeColumns = () => (state: GridStore) => {
 export const restore = (at = 0) => (state: GridStore) => {
     const { snapshots, scrollElement, onChanges } = state;
 
+    if (!snapshots[at]) {
+        return state;
+    }
+
     const firstSnapshot = snapshots[at];
 
     if (onChanges) {
         onChanges(ChangeType.RESTORE, {});
     }
 
+    if (!firstSnapshot.isPivoted) {
+        firstSnapshot.pivotData = undefined;
+    }
+    if (!firstSnapshot.isGrouped) {
+        firstSnapshot.groupData = undefined;
+    }
+
     updateColumnVisibility(scrollElement, 0, firstSnapshot.columns);
 
     const [newSnapshots, historyPoint] = saveSnapshot({ ...state, ...firstSnapshot, snapshots: [], historyPoint: -1 });
 
-    return { ...firstSnapshot, snapshots: newSnapshots, historyPoint, haveChanges: false };
+    return { ...state, ...firstSnapshot, snapshots: newSnapshots, historyPoint, haveChanges: false };
 };
 
 export const clearHistory = () => (state: GridStore) => {
     const { snapshots } = state;
 
+    if (!snapshots?.length) {
+        return state;
+    }
+
     snapshots.splice(snapshots.length - 1, 1);
 
-    return { snapshots };
+    return { snapshots, historyPoint: -1 };
 }
 
 export const saveState = () => (state: GridStore) => {
@@ -494,6 +509,7 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 export const setPivot =
     (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
         const { pivot: currentPivot, data: currentData, defaultColumnDef, snapshots, container, onChanges } = state;
+        console.log(newPivot);
         const data = currentData.filter(row => !row._hidden) as Data;
 
         const nonEmptyPivot = Object.keys(newPivot || {}).length;

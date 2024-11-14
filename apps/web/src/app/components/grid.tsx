@@ -3,7 +3,7 @@
 import numeral from 'numeral';
 import { User, getData, months } from '../api/data';
 
-import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ChangeType, ColumnDef, Data, PinType, Row, SortType } from 'beast-grid';
+import { AggregationType, BeastGrid, BeastGridApi, BeastGridConfig, ChangeType, ColumnDef, PinType, Row, SortType } from 'beast-grid';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Slide, SlideProps, Snackbar } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
@@ -22,22 +22,6 @@ const columnDefs: ColumnDef[] = [
         width: 200,
         sortable: true,
         headerStyleFormatter: () => ({ backgroundColor: 'red' }),
-        sort: {
-            order: SortType.DESC,
-            priority: 1
-        },
-        menu: {
-            pin: true,
-            filter: true,
-            column: true,
-        },
-    },
-    {
-        headerName: 'BOOLEAN',
-        field: 'es_activo',
-        width: 200,
-        sortable: true,
-        headerStyleFormatter: () => ({ backgroundColor: 'blue' }),
         sort: {
             order: SortType.DESC,
             priority: 1
@@ -78,16 +62,9 @@ const columnDefs: ColumnDef[] = [
     },
     {
         headerName: '1ST_QUARTER',
-        field: '#{january + february + march + april}',
+        field: '#{january + february + march + april + test.test}',
         flex: 1,
         formatter: (value) => numeral(value).format('0,0 $'),
-    },
-    {
-        headerName: 'Image test',
-        field: 'image_test',
-        pinned: PinType.LEFT,
-        hideInDownload: true,
-        flex: 1,
     },
     {
         headerName: 'MONTHS',
@@ -130,14 +107,17 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     const loading = useRef(false);
     const beastApi = useRef<BeastGridApi | undefined>();
     const [config, setConfig] = useState<BeastGridConfig<User[]> | undefined>();
+    const [data, setData] = useState<User[]>([]);
     const [error, setError] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await getData(qty);
+                const _data = res.map((r, i) => ({ ...r, es_activo: i % 2 === 0, image_test: <img src="https://static.zara.net/photos/2024/I/0/1/p/4360/246/832/5/w/400/4360246832_1_1_1.jpg?ts=1727440558880" width="50" alt="test" /> }))
+                setData(_data);
                 setTimeout(() => {
-                    beastApi?.current?.setData(res.map((r, i) => ({ ...r, es_activo: i % 2 === 0, image_test: <img src="https://static.zara.net/photos/2024/I/0/1/p/4360/246/832/5/w/400/4360246832_1_1_1.jpg?ts=1727440558880" width="50" alt="test" /> })));
+                    beastApi?.current?.setData(_data);
                 }, 5000)
             } catch (_) {
                 setError(true);
@@ -153,6 +133,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         setConfig({
             data: [],
             columnDefs,
+            fullWidth: true,
             style: {
                 maxHeight: 'calc(100vh - 100px)',
                 border: true,
@@ -231,6 +212,10 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         }
     }
 
+    const clear = () => {
+        beastApi.current?.clearHistory();
+    }
+
     return (
         <>
             <Snackbar
@@ -246,6 +231,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 </Alert>
             </Snackbar>
             <BeastGrid title={<span>Title</span>} config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
+            <button onClick={clear}>Reset</button>
         </>
     );
 }

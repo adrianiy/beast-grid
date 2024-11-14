@@ -12,14 +12,16 @@ type Props<T> = {
     pinType?: PinType;
     border?: boolean;
     multiSort?: boolean;
+    fullWidth?: boolean;
     dragOptions?: BeastGridConfig<T>['dragOptions'];
     events?: Partial<HeaderEvents>;
     disableSwapColumns?: boolean;
+    totalWidth?: number;
 };
 
-function HeaderRow<T>({ level, levelIdx, border, height, width, pinType, multiSort, headers, dragOptions, events, disableSwapColumns, leftWidth }: { level: Column[]; levelIdx: number } & Props<T>) {
+function HeaderRow<T>({ level, levelIdx, fullWidth, border, height, width, pinType, multiSort, headers, dragOptions, events, disableSwapColumns, leftWidth, totalWidth }: { level: Column[]; levelIdx: number } & Props<T>) {
     return (
-        <div className={cn('grid-header-row row', { border })} style={{ height, width }} key={levelIdx}>
+        <div className={cn('grid-header-row row', { border: border && !fullWidth })} style={{ height, width: fullWidth ? '100%' : width }} key={levelIdx}>
             {level.map((column, idx) => {
                 const inView = column.pinned !== PinType.NONE || column.inView;
 
@@ -43,6 +45,7 @@ function HeaderRow<T>({ level, levelIdx, border, height, width, pinType, multiSo
                     />
                 );
             })}
+            {fullWidth && <div className="grid-header-separator" style={{ width: totalWidth }} />}
         </div>
     );
 }
@@ -53,7 +56,7 @@ export default function HeaderSection<T>(props: Props<T>) {
     }
 
     return (
-        <div className={cn('grid-header-content', `grid-${props.pinType}-pin`)}>
+        <div className={cn('grid-header-content', `grid-${props.pinType}-pin`)} style={{ width: props.fullWidth ? '100%' : 'auto' }}>
             {props.headers.map((level, idx) => HeaderRow({ ...props, level, levelIdx: idx }))}
         </div>
     );

@@ -212,6 +212,9 @@ export const setColumnsStyleProps = (columnStore: ColumnStore, containerWidth: n
 };
 
 export const getColumnFilter = (column: Column, data: Data): void => {
+    if (!data.length) {
+        return;
+    }
     if (typeof data[0][column.field as string] === 'number') {
         column.filterType = FilterType.NUMBER;
         return;

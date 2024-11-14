@@ -204,6 +204,7 @@ export interface BeastGridConfig<T> extends Partial<TableStyles> {
     mode?: BeastMode;
     topRows?: Data;
     bottomRows?: Data;
+    fullWidth?: boolean;
     pivot?: Partial<Pivot>;
     sort?: Partial<SortConfig>;
     row?: Partial<RowConfig>;

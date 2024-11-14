@@ -12,6 +12,7 @@ const OPERATION_PRIORITY = {
 
 export const parseFormula = (formula: string) => {
     const formulaParts = formula.match(/#{(.*)}/);
+
     if (!formulaParts) {
         return null;
     }
@@ -22,6 +23,7 @@ export const parseFormula = (formula: string) => {
 
 const getOperation = (formula: string): Operation => {
     const operation = formula.match(/(\+|-|\*|\^|\/)/);
+    console.log(operation)
 
     if (!operation) {
         throw new Error(MathErrors.INVALID_FORMULA);
@@ -44,7 +46,7 @@ const getOperation = (formula: string): Operation => {
 }
 
 const getOperand = (formula: string): MathCell => {
-    const operand = formula.match(/(\w+)/);
+    const operand = formula.match(/(\S+)/);
 
     if (operand) {
         formula = formula.replace(operand[1], '');
