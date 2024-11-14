@@ -212,27 +212,8 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
         }
     }
 
-    const addColumn = () => {
-        columnDefs.push(
-            {
-                headerName: 'BOOLEAN',
-                field: 'es_activo',
-                width: 200,
-                sortable: true,
-                headerStyleFormatter: () => ({ backgroundColor: 'blue' }),
-                sort: {
-                    order: SortType.DESC,
-                    priority: 1
-                },
-                menu: {
-                    pin: true,
-                    filter: true,
-                    column: true,
-                },
-            },
-        )
-
-        setConfig({ ...config, data, columnDefs } as any);
+    const clear = () => {
+        beastApi.current?.clearHistory();
     }
 
     return (
@@ -250,7 +231,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 </Alert>
             </Snackbar>
             <BeastGrid title={<span>Title</span>} config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
-            <button onClick={addColumn}>Reset</button>
+            <button onClick={clear}>Reset</button>
         </>
     );
 }

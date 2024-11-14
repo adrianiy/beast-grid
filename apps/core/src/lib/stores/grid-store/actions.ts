@@ -396,7 +396,7 @@ export const clearHistory = () => (state: GridStore) => {
 
     snapshots.splice(snapshots.length - 1, 1);
 
-    return { snapshots };
+    return { snapshots, historyPoint: -1 };
 }
 
 export const saveState = () => (state: GridStore) => {
