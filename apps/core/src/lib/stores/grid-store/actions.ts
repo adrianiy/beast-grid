@@ -122,7 +122,7 @@ export const deleteEmptyParents = () => (state: GridStore) => {
 };
 
 export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) => {
-    const { columns, sortedColumns } = state;
+    const { columns, sortedColumns, onChanges } = state;
     const column = columns[id];
 
     const prevWidth = column.width;
@@ -143,6 +143,10 @@ export const resizeColumn = (id: ColumnId, width: number) => (state: GridStore) 
 
     moveColumns(columns, sortedColumns, PinType.LEFT);
     moveColumns(columns, sortedColumns, PinType.NONE);
+
+    if (onChanges) {
+        onChanges(ChangeType.RESIZE, { columns, id, width });
+    }
 
     return { columns, edited: true };
 };
@@ -394,9 +398,7 @@ export const clearHistory = () => (state: GridStore) => {
         return state;
     }
 
-    snapshots.splice(snapshots.length - 1, 1);
-
-    return { snapshots, historyPoint: -1 };
+    return { snapshots: [snapshots[snapshots.length - 1]], historyPoint: 0 };
 }
 
 export const saveState = () => (state: GridStore) => {
@@ -509,7 +511,6 @@ export const setInitialPivot = (pivotConfig: PivotConfig) => (state: GridStore) 
 export const setPivot =
     (newPivot: Partial<GridState['pivot']> | null) => (state: GridStore) => {
         const { pivot: currentPivot, data: currentData, defaultColumnDef, snapshots, container, onChanges } = state;
-        console.log(newPivot);
         const data = currentData.filter(row => !row._hidden) as Data;
 
         const nonEmptyPivot = Object.keys(newPivot || {}).length;
@@ -522,6 +523,14 @@ export const setPivot =
             const rowColumnDefs: ColumnDef[] = [];
             const columnDefs: ColumnDef[] = [];
             const groupOrder: ColumnId[] = [];
+
+            // const haveValues = pivot.values?.length;
+            //
+            // const valuesColumn = haveValues && pivot.columns?.find((col) => col.field === 'pivot_values');
+            //
+            // if (haveValues && !valuesColumn) {
+            //     pivot.columns?.push({ field: 'pivot_values', headerName: 'values' } as Column);
+            // }
 
             if (pivot.rows?.length) {
                 pivot.rows.forEach((row, index) => {
@@ -555,7 +564,7 @@ export const setPivot =
 
             const [groupedByRows, bottomRows, valueColumns] = groupPivot(
                 pivot.rows || [],
-                pivot.columns || [{ field: 'total' } as Column],
+                pivot.columns?.filter(c => c.field !== 'pivot_values') || [{ field: 'total' } as Column],
                 pivot.values || [],
                 data,
                 !!pivot?.rowTotals

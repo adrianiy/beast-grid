@@ -23,7 +23,6 @@ export const parseFormula = (formula: string) => {
 
 const getOperation = (formula: string): Operation => {
     const operation = formula.match(/(\+|-|\*|\^|\/)/);
-    console.log(operation)
 
     if (!operation) {
         throw new Error(MathErrors.INVALID_FORMULA);

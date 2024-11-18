@@ -33,11 +33,7 @@ function SideBarSwitch<T>({
     onClose,
     ...chartProps
 }: { sideBarConfig: SideBarConfig; onClose: () => void, config: BeastGridConfig<T> } & Partial<ChartProps>) {
-    const [snapshots, columns] = useBeastStore((state) => [state.snapshots, state.columns]);
-
-    const originalColumns = useMemo(() => {
-        return snapshots[0]?.columns || [];
-    }, [snapshots[0]?.columns]);
+    const [columns, originalColumns] = useBeastStore((state) => [state.columns, state.initialColumns]);
 
 
     switch (sideBarConfig) {

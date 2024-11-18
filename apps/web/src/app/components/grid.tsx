@@ -20,7 +20,9 @@ const columnDefs: ColumnDef[] = [
         headerName: 'COUNTRY',
         field: 'country',
         width: 200,
+        pinned: PinType.LEFT,
         sortable: true,
+        alignment: 'center',
         headerStyleFormatter: () => ({ backgroundColor: 'red' }),
         sort: {
             order: SortType.DESC,
@@ -38,6 +40,7 @@ const columnDefs: ColumnDef[] = [
             {
                 headerName: 'NAME AND SURNAME',
                 field: 'name',
+                alignment: 'right',
                 width: 200,
                 sortable: true,
                 menu: { grid: true, column: true },
@@ -45,6 +48,7 @@ const columnDefs: ColumnDef[] = [
             {
                 headerName: 'AGE',
                 field: 'age',
+                alignment: 'center',
                 width: 200,
                 sortable: true,
                 aggregation: AggregationType.AVG,
@@ -207,6 +211,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
     };
 
     const handleChanges = (changeType: ChangeType, config: Changes) => {
+        console.log(changeType, config);
         if (changeType === ChangeType.VISIBILITY) {
             console.log(config)
         }
@@ -214,6 +219,32 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
 
     const clear = () => {
         beastApi.current?.clearHistory();
+    }
+
+    const addColumn = () => {
+        columnDefs.push(
+            {
+                headerName: 'BOOLEAN',
+                field: 'es_activo',
+                width: 200,
+                sortable: true,
+                headerStyleFormatter: () => ({ backgroundColor: 'blue' }),
+                sort: {
+                    order: SortType.DESC,
+                    priority: 1
+                },
+                menu: {
+                    pin: true,
+                    filter: true,
+                    column: true,
+                },
+            },
+        )
+
+        setConfig({ ...config, columnDefs } as any);
+        setTimeout(() => {
+            beastApi?.current?.setData(data as any);
+        }, 1000)
     }
 
     return (
@@ -232,6 +263,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
             </Snackbar>
             <BeastGrid title={<span>Title</span>} config={config} api={beastApi} theme={theme} locale="es" onChanges={handleChanges} />
             <button onClick={clear}>Reset</button>
+            <button onClick={addColumn}>Add column</button>
         </>
     );
 }

@@ -401,19 +401,20 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
         },
         ref
     ) => {
-        const [snapshots, pivot, theme, scrollContainer] = useBeastStore((state) => [
-            state.snapshots,
+        const [initialColumns, pivot, theme, scrollContainer] = useBeastStore((state) => [
+            state.initialColumns,
             state.pivot,
             state.theme,
             state.scrollElement,
         ]);
+        console.log(initialColumns)
         const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
-        const columnStore = snapshots[0].columns;
+        const columnStore = initialColumns;
 
         const [, drop] = useDrop(() => ({
             accept: ['COLUMN', 'BOX'],
             drop: (item: { id: string; onRemove: (column: Column) => () => void }) => {
-                if (columns.current.find((c) => c?.id === item.id)) {
+                if (columns.current.find((c) => c?.id === item?.id)) {
                     return;
                 }
                 const column = clone(columnStore[item.id]);
@@ -436,7 +437,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
 
 
         const removeColumn = (column: Column) => () => {
-            columns.current = columns.current.filter((c) => c?.id !== column.id);
+            columns.current = columns.current.filter((c) => c?.id !== column?.id);
 
             onChanges({ columns: columns.current });
         };

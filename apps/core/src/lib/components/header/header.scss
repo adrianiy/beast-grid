@@ -19,7 +19,7 @@
     bottom: 0;
     position: absolute;
     border-bottom: var(--bg-border--1);
-    z-index: 9;
+    z-index: 0;
 }
 
 .grid-header-content {
@@ -66,6 +66,16 @@
     resize: inherit;
     z-index: 1;
 
+    &.right {
+        flex-direction: row-reverse;
+    }
+    &.center {
+        .bg-grid-header__cell__menu {
+            position: absolute;
+            right: 0;
+        }
+    }
+
     &:hover {
         background-color: var(--bg-hover-color--cell);
 
@@ -85,6 +95,23 @@
         margin: 0 var(--bg-size--4);
         margin-right: 0;
         transition: all ease-in var(--bg-transition--1);
+        gap: var(--bg-size--3);
+    }
+    &__right {
+        width: 100%;
+        overflow: hidden;
+        margin: 0 var(--bg-size--3);
+        margin-left: 0;
+        justify-content: flex-end;
+        transition: all ease-in var(--bg-transition--1);
+        gap: var(--bg-size--3);
+    }
+    &__center {
+        width: 100%;
+        overflow: hidden;
+        margin: 0;
+        transition: all ease-in var(--bg-transition--1);
+        justify-content: center;
         gap: var(--bg-size--3);
     }
 

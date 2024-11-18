@@ -124,7 +124,16 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        text-align: left;
+
+        &.center {
+            text-align: center;
+        }
+        &.right {
+            text-align: right;
+        }
+        &.left {
+            text-align: left;
+        }
     }
 
     svg {

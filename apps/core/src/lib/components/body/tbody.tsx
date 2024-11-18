@@ -66,6 +66,7 @@ export default function TBody<T>({
         theme,
         sort,
         filters,
+        container,
         setSorting,
         groupOrder,
         setSelecting,
@@ -82,6 +83,7 @@ export default function TBody<T>({
         state.theme,
         state.sort,
         state.filters,
+        state.container,
         state.setSorting,
         state.groupOrder,
         state.setSelecting,
@@ -372,6 +374,7 @@ export default function TBody<T>({
                 selectable={!!beastConfig.contextualMenu}
                 idx={idx + (beastConfig.topRows?.length || 0)}
                 fullWidth={beastConfig?.fullWidth}
+                containerWidth={container?.clientWidth}
                 y={y}
                 border={border}
                 height={rowHeight}
@@ -476,6 +479,7 @@ export default function TBody<T>({
                     groupOrder={groupOrder}
                     selectable={false}
                     fullWidth={beastConfig?.fullWidth}
+                    containerWidth={container?.clientWidth}
                     idx={i}
                     y={i}
                     border={border}
@@ -513,6 +517,7 @@ export default function TBody<T>({
                     groupOrder={groupOrder}
                     selectable={false}
                     fullWidth={beastConfig?.fullWidth}
+                    containerWidth={container?.clientWidth}
                     idx={i}
                     y={_data.length - i}
                     border={border}

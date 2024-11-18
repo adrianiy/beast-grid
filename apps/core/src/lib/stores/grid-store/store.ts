@@ -29,6 +29,7 @@ import {
     updateSelectedCells,
 } from './actions';
 import { Column, ColumnId, ColumnStore, Data, IFilter } from './../../common/interfaces';
+import { clone } from '../../utils/functions';
 import {
     BeastGridConfig,
     BeastMode,
@@ -43,7 +44,6 @@ import {
     TreeConstructor,
 } from '../../common';
 import { createVirtualIds, getColumnsFromDefs, initialize, moveColumns, saveSnapshot, sortColumns } from './utils';
-import { config } from 'process';
 
 export interface PivotState {
     columns: Column[];
@@ -69,6 +69,7 @@ export interface DynamicState {
     isPivoted?: boolean;
     sortedColumns: Column[];
     hiddenColumns: ColumnId[];
+    initialColumns: ColumnStore;
     filters: Record<ColumnId, IFilter[]>;
     pivot?: Partial<PivotState>;
     historyPoint: number;
@@ -159,6 +160,7 @@ export const createGridStore = <T>(
         hiddenColumns: sortedColumns.filter((col) => col.hidden).map((col) => col.id),
         tree,
         groupOrder,
+        initialColumns: clone(columns),
         columns,
         sortedColumns,
         allowMultipleColumnSort: !!sort?.multiple,

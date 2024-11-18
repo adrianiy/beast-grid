@@ -18,6 +18,7 @@ type Props = {
     gap: number;
     level: number;
     fullWidth?: boolean;
+    containerWidth?: number;
     events?: Partial<RowEvents>;
     expandableSibling?: boolean;
     loading?: boolean;
@@ -44,6 +45,7 @@ export default function RowContainer({
     level,
     events,
     fullWidth,
+    containerWidth,
     expandableSibling,
     loading,
     skeleton,
@@ -56,6 +58,7 @@ export default function RowContainer({
     const leftWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.LEFT ? curr.width : 0), 0);
     const totalWidth = visibleColumns.reduce((acc, curr) => acc + curr.width, 0);
     const rightWidth = visibleColumns.reduce((acc, curr) => acc + (curr.pinned === PinType.RIGHT ? curr.width : 0), 0);
+    const borderWidth = containerWidth;
 
     const handleRowClick = () => {
         if (events?.onClick?.callback) {
@@ -98,7 +101,7 @@ export default function RowContainer({
     const getStyle = () => {
         const commonProps = {
             height,
-            width: fullWidth ? '100%' : totalWidth
+            width: totalWidth
         }
         if (isTopFixed) {
             return {
@@ -129,7 +132,6 @@ export default function RowContainer({
                 bottomFixed: isBottomFixed,
                 first: idx === 0,
                 last: isLastRow,
-                fullWidth
             })}
             style={getStyle()}
             onClick={handleRowClick}
@@ -147,7 +149,7 @@ export default function RowContainer({
                     {renderRow(PinType.RIGHT)}
                 </div>
             )}
-            {fullWidth && <div className="grid-row-separator" style={{ width: totalWidth, minWidth: '100%' }} />}
+            {fullWidth && <div className="grid-row-separator" style={{ width: borderWidth }} />}
         </div>
     );
 }

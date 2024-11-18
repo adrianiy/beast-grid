@@ -260,11 +260,11 @@ export default function HeaderCell<T>({
 
     return (
         <div
-            className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned })}
+            className={cn('bg-grid-header__cell row middle between', { lastPinned: column.lastPinned }, column.alignment || 'left')}
             key={`${levelIdx}-${idx}-${column.id}`}
             style={{
-                marginTop: !column.childrenId?.length && levelIdx === 0 ? height * (headers.length - 1) : 0,
-                height,
+                paddingTop: !column.childrenId?.length && levelIdx === 0 ? height * (headers.length - 1) : 0,
+                height: !column.childrenId?.length && levelIdx === 0 ? height * headers.length : height,
                 width: column.width,
                 left: column.left,
                 ...column.headerStyleFormatter?.()
@@ -275,7 +275,7 @@ export default function HeaderCell<T>({
             data-level={column.level}
             data-clone={column.original}
         >
-            <div className="bg-grid-header__cell__left row middle"
+            <div className={`bg-grid-header__cell__${column.alignment || 'left'} row middle`}
                 style={{ transform: `translateX(${translateX}px)` }}
                 onClick={handleChangeSort}>
                 <span className={cn('bg-grid-header-drop bg-grid-header__cell__name', { summary: column._summary })}

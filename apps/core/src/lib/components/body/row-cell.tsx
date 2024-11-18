@@ -221,7 +221,7 @@ export function RowCell({
                         level={level}
                         pivot={pivot}
                     />
-                    <div className="grid-row-value">{loading ? skeleton : value}</div>
+                    <div className={cn("grid-row-value", columnDef.alignment || 'left')}>{loading ? skeleton : value}</div>
                 </>
             )}
         </div>

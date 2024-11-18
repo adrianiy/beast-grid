@@ -52,6 +52,7 @@ export interface BaseColumnDef {
     sortable?: boolean;
     children?: ColumnDef[];
     childrenMap?: Record<string, string>;
+    alignment?: 'left' | 'right' | 'center';
     formatter?: (value: string & number, row: Row) => string;
     styleFormatter?: (value: string & number, row: Row, idx: number) => CSSProperties;
     headerStyleFormatter?: () => CSSProperties;
@@ -309,7 +310,12 @@ export interface VisibilityChanges {
     hiddenColumns: Column[]
 }
 
-export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges>, Partial<VisibilityChanges> { }
+export interface ResizeChanges {
+    id: ColumnId;
+    width: number;
+}
+
+export interface Changes extends Partial<SortChanges>, Partial<SwapChanges>, Partial<PivotChanges>, Partial<VisibilityChanges>, Partial<ResizeChanges> { }
 
 export type OnChanges = (changeType: ChangeType, changes: Changes) => void;
 
