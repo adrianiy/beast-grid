@@ -19,27 +19,33 @@ function getProperty<Key extends keyof Row>(
     data: Data
 ): string | ReactNode | null {
     let field = columnDef.field;
+    let value = null;
 
     if (columnDef.tree) {
         field = columns[groupOrder[level]]?.field || field;
-    }
-
-    let value = getPivotedData(row, columnDef, data);
-
-    if (React.isValidElement(value)) {
-        return value;
-    }
-
-    const columnIdx = groupOrder.indexOf(columnDef.id);
-
-    if (columnIdx >= level) {
         value = row[field as Key] as string;
-    } else if (columnIdx > -1) {
-        return null;
+    } else {
+        value = getPivotedData(row, columnDef, data);
+
+        if (React.isValidElement(value)) {
+            return value;
+        }
+
+        const columnIdx = groupOrder.indexOf(columnDef.id);
+
+        if (columnIdx >= level) {
+            value = row[field as Key] as string;
+        } else if (columnIdx > -1) {
+            return null;
+        }
     }
 
-    if (columnDef.formatter) {
+
+    if (columnDef.formatter && columnDef.field !== 'non_value') {
         return columnDef.formatter(value as number & string, row);
+    }
+    if (row.formatter && columnDef.field === 'non_value') {
+        return row.formatter(value as number & string, row);
     }
 
     return value?.toString();

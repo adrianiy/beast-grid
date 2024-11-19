@@ -524,28 +524,29 @@ export const setPivot =
             const columnDefs: ColumnDef[] = [];
             const groupOrder: ColumnId[] = [];
 
-            // const haveValues = pivot.values?.length;
-            //
-            // const valuesColumn = haveValues && pivot.columns?.find((col) => col.field === 'pivot_values');
-            //
-            // if (haveValues && !valuesColumn) {
-            //     pivot.columns?.push({ field: 'pivot_values', headerName: 'values' } as Column);
-            // }
+            const haveValues = pivot.values?.length;
+
+            const valuesColumn = haveValues && (pivot.columns?.find((col) => col?.field === 'pivot_values') || pivot.rows?.find((col) => col?.field === 'pivot_values'));
+
+            if (haveValues && !valuesColumn) {
+                pivot.columns?.push({ field: 'pivot_values', headerName: 'values', id: uuidv4() } as Column);
+            }
 
             if (pivot.rows?.length) {
                 pivot.rows.forEach((row, index) => {
                     const column = {
                         id: uuidv4(),
-                        headerName: row.headerName,
+                        tree: pivot.tree?.enabled && !index,
+                        headerName: pivot.tree?.enabled ? pivot.tree?.name : row.headerName,
                         field: row.field,
                         width: MIN_COL_WIDTH,
                         rowGroup: index < (pivot.rows?.length || 0) - 1,
                         styleFormatter: row.styleFormatter,
                         headerStyleFormatter: row.headerStyleFormatter,
                         dateFormat: row.dateFormat,
-                        tree: false,
+                        hidden: pivot.tree?.enabled ? index : false,
                         final: true,
-                        level: 0
+                        level: index
                     } as Column;
 
                     rowColumnDefs.push(column);
@@ -564,7 +565,7 @@ export const setPivot =
 
             const [groupedByRows, bottomRows, valueColumns] = groupPivot(
                 pivot.rows || [],
-                pivot.columns?.filter(c => c.field !== 'pivot_values') || [{ field: 'total' } as Column],
+                pivot.columns || [{ field: 'total' } as Column],
                 pivot.values || [],
                 data,
                 !!pivot?.rowTotals

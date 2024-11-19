@@ -13,6 +13,7 @@ export interface Row {
     _pivotIndexes?: number[];
     _childrenMap?: Record<string, number>;
     children?: Row[];
+    formatter?: ColumnDef['formatter'];
 }
 
 export type Data = Row[];
@@ -173,6 +174,7 @@ export interface PivotState {
     columnTotals: boolean;
     rowTotals: boolean;
     rowGroups: boolean;
+    tree: { enabled: boolean, name: string };
 }
 
 export interface PivotConfig {
@@ -182,7 +184,6 @@ export interface PivotConfig {
     rowTotals: boolean;
     columnTotals: boolean;
     rowGroups: boolean;
-
 }
 
 export interface Pivot {
@@ -191,6 +192,7 @@ export interface Pivot {
     applyButton: boolean;
     totalizable: boolean;
     pivotConfig?: PivotConfig;
+    treeConfig: { enabled: boolean, name: string };
 }
 
 export interface Loading {

@@ -5,10 +5,10 @@
 
 .grid-row-separator {
     width: 100%;
-    bottom: 0;
+    bottom: -1px;
     position: absolute;
     border-bottom: var(--bg-border--1);
-    z-index: 9;
+    z-index: 0;
 }
 .grid-row {
     position: absolute;

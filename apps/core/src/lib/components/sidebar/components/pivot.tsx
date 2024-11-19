@@ -9,7 +9,7 @@ import SimpleBar from 'simplebar-react';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CheckIcon, Cross2Icon, DotsVerticalIcon, DragHandleDots2Icon } from '@radix-ui/react-icons';
 
-import { AggregationType, BeastGridConfig, Column, ColumnStore, HEADER_HEIGHT, PivotState } from '../../../common';
+import { AggregationType, BeastGridConfig, Column, ColumnStore, HEADER_HEIGHT, Pivot, PivotConfig, PivotState } from '../../../common';
 
 import { useBeastStore } from '../../../stores/beast-store';
 import { clone } from '../../../utils/functions';
@@ -73,6 +73,7 @@ export default function PivotConfig<T>({ columns, config, onClose }: Props<T>) {
                     enabled={config.pivot?.enabled}
                     applyButton={config.pivot?.applyButton}
                     totalizable={config.pivot?.totalizable}
+                    tree={config.pivot?.treeConfig}
                     onClose={onClose}
                 />
             </div>
@@ -181,11 +182,13 @@ const PivotOptions = ({
     enabled,
     applyButton,
     totalizable,
+    tree,
     onClose
 }: {
     enabled?: boolean;
     applyButton?: boolean;
     totalizable?: boolean;
+    tree?: Pivot['treeConfig'];
     onClose: () => void;
 }) => {
     const rowBox = useRef<PivotBoxHandle>(null);
@@ -240,6 +243,15 @@ const PivotOptions = ({
         }
     };
 
+    const handleTreeChanges = () => {
+        if (!applyButton) {
+            setPivot({ tree: { enabled: !pivot?.tree?.enabled, name: tree?.name || '' } });
+            setPivotState((state) => ({ ...state, tree: { enabled: !state?.tree?.enabled, name: tree?.name || '' } } as PivotState));
+        } else {
+            setPivotState((state) => ({ ...state, tree: { enabled: !state?.tree?.enabled, name: tree?.name || '' } } as PivotState));
+        }
+    }
+
     const onApply = () => {
         setPivot(pivotState as PivotState);
         onClose();
@@ -257,10 +269,13 @@ const PivotOptions = ({
             <PivotBox
                 ref={rowBox}
                 rowTotals={!!pivotState?.rowTotals}
+                rowTree={!!pivotState?.tree?.enabled}
                 pivotType="rows"
                 totalizable={totalizable}
+                treeable={tree?.enabled}
                 onChanges={handleRowChange}
                 onTotalChanges={handleRowTotalChanges}
+                onTreeChanges={handleTreeChanges}
             />
             <PivotBox
                 ref={columnBox}
@@ -282,6 +297,7 @@ const Box = ({
     isValue,
     theme,
     scrollContainer,
+    pivotType,
     onRemove,
     onHover,
     onChanges,
@@ -291,6 +307,7 @@ const Box = ({
     isValue?: boolean;
     theme: string;
     scrollContainer: HTMLDivElement | null;
+    pivotType: string;
     onRemove: (column: Column) => () => void;
     onHover: (index: number, hoverIndex: number) => void;
     onChanges: () => void;
@@ -299,7 +316,7 @@ const Box = ({
     const [showSubmenu, setShowSubmenu] = useState(false);
     const [, drag] = useDrag(() => ({
         type: 'BOX',
-        item: { id: column.id, index, onRemove },
+        item: { id: column.id, pivotType, index, onRemove },
         end: (_, monitor) => {
             if (!monitor.didDrop()) {
                 onRemove(column)();
@@ -310,7 +327,10 @@ const Box = ({
 
     const [, drop] = useDrop(() => ({
         accept: 'BOX',
-        hover: (item: { index: number }) => {
+        hover: (item: { index: number; pivotType: string }) => {
+            if (pivotType !== item.pivotType) {
+                return;
+            }
             if (!ref.current) {
                 return;
             }
@@ -319,7 +339,7 @@ const Box = ({
             }
             onHover(item.index, index);
         },
-    }));
+    }), [column, index, pivotType]);
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -383,10 +403,13 @@ interface PivotBoxHandle {
 interface PivotProps {
     pivotType: string;
     rowTotals?: boolean;
+    rowTree?: boolean;
     columnTotals?: boolean;
     totalizable?: boolean;
+    treeable?: boolean;
     onChanges: (state: Partial<PivotState>) => void;
     onTotalChanges?: (state: Partial<PivotState>) => void;
+    onTreeChanges?: () => void;
 }
 
 const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
@@ -394,10 +417,13 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
         {
             pivotType,
             rowTotals,
+            rowTree,
             columnTotals,
             totalizable,
+            treeable,
             onChanges,
             onTotalChanges,
+            onTreeChanges
         },
         ref
     ) => {
@@ -407,17 +433,18 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
             state.theme,
             state.scrollElement,
         ]);
-        console.log(initialColumns)
         const columns = useRef<Column[]>((pivot?.[pivotType.toLowerCase() as keyof PivotState] as Column[]) || []);
         const columnStore = initialColumns;
 
         const [, drop] = useDrop(() => ({
             accept: ['COLUMN', 'BOX'],
-            drop: (item: { id: string; onRemove: (column: Column) => () => void }) => {
+            drop: (item: { id: string; pivotType: string, onRemove: (column: Column) => () => void }) => {
                 if (columns.current.find((c) => c?.id === item?.id)) {
                     return;
                 }
-                const column = clone(columnStore[item.id]);
+                const pivotColumn = (pivot?.[item.pivotType?.toLowerCase() as keyof PivotState] as Column[])?.find((c) => c?.id === item?.id);
+
+                const column = clone(pivotColumn || columnStore[item.id]);
 
                 if (pivotType === 'values' && !column.aggregation) {
                     column.aggregation = AggregationType.SUM;
@@ -433,7 +460,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
                     item.onRemove(column)();
                 }
             },
-        }));
+        }), [pivot, columns]);
 
 
         const removeColumn = (column: Column) => () => {
@@ -446,10 +473,12 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
             const dragColumn = columns.current[index];
             const hoverColumn = columns.current[hoverIndex];
 
-            columns.current[index] = hoverColumn;
-            columns.current[hoverIndex] = dragColumn;
+            if (dragColumn && hoverColumn) {
+                columns.current[index] = hoverColumn;
+                columns.current[hoverIndex] = dragColumn;
 
-            onChanges({ columns: columns.current });
+                onChanges({ columns: columns.current });
+            }
         };
 
         const onColumnTotalsChange = () => {
@@ -459,6 +488,10 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
         const onRowTotalsChange = () => {
             onTotalChanges?.({ rowTotals: !pivot?.rowTotals });
         };
+
+        const onRowTreeChange = () => {
+            onTreeChanges?.()
+        }
 
         const onChangeColumn = () => {
             onChanges({ columns: columns.current });
@@ -475,13 +508,25 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
                 <div className="bg-box__title row middle">
                     <label>{pivotType}</label>
                     {totalizable && pivotType === 'rows' ? (
-                        <div className="row middle" onClick={onRowTotalsChange}>
-                            <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
-                                <Checkbox.Indicator className="bg-checbox__indicator row center middle">
-                                    <CheckIcon />
-                                </Checkbox.Indicator>
-                            </Checkbox.Root>
-                            <label>Totals</label>
+                        <div className="row middle bg-row-checks">
+                            {treeable ? (
+                                <div className="row middle" onClick={onRowTreeChange}>
+                                    <Checkbox.Root className="bg-checkbox__root" checked={rowTree} id="rowTotals">
+                                        <Checkbox.Indicator className="bg-checbox__indicator row center middle">
+                                            <CheckIcon />
+                                        </Checkbox.Indicator>
+                                    </Checkbox.Root>
+                                    <label>Tree</label>
+                                </div>
+                            ) : null}
+                            <div className="row middle" onClick={onRowTotalsChange}>
+                                <Checkbox.Root className="bg-checkbox__root" checked={rowTotals} id="rowTotals">
+                                    <Checkbox.Indicator className="bg-checbox__indicator row center middle">
+                                        <CheckIcon />
+                                    </Checkbox.Indicator>
+                                </Checkbox.Root>
+                                <label>Totals</label>
+                            </div>
                         </div>
                     ) : totalizable && pivotType === 'columns' ? (
                         <div className="row middle center" onClick={onColumnTotalsChange}>
@@ -502,6 +547,7 @@ const PivotBox = forwardRef<PivotBoxHandle, PivotProps>(
                             column={column}
                             isValue={pivotType === 'values'}
                             theme={theme}
+                            pivotType={pivotType}
                             scrollContainer={scrollContainer}
                             onChanges={onChangeColumn}
                             onRemove={removeColumn}

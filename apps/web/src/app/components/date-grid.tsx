@@ -114,10 +114,14 @@ export default function DateGrid({ qty, theme, config: _customConfig }: Props) {
             setConfig({
                 data,
                 columnDefs,
-                // pivot: {
-                //     enabled: true,
-                //     totalizable: true
-                // },
+                pivot: {
+                    enabled: true,
+                    totalizable: true,
+                    treeConfig: {
+                        enabled: true,
+                        name: ''
+                    }
+                },
                 style: {
                     maxHeight: 600,
                     border: true,

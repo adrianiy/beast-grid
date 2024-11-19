@@ -210,6 +210,10 @@
             text-transform: uppercase;
         }
 
+        .bg-row-checks {
+            gap: var(--bg-size--3);
+        }
+
         .bg-checkbox__root {
             margin-right: var(--bg-size--2);
             cursor: pointer;

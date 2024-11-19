@@ -122,7 +122,7 @@ export default function Grid({ qty, theme, config: _customConfig }: Props) {
                 setData(_data);
                 setTimeout(() => {
                     beastApi?.current?.setData(_data);
-                }, 5000)
+                }, 1000)
             } catch (_) {
                 setError(true);
             }

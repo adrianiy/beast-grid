@@ -174,7 +174,7 @@ export default function Grid<T>({ config, defaultConfig, theme, disableColumnSwa
                         <TBody
                             rowHeight={config.row?.height || (defaultConfig.rowHeight as number)}
                             config={config.row}
-                            border={config.row?.border && !config.fullWidth}
+                            border={config.row?.border}
                             events={config.row?.events}
                             beastConfig={config}
                             scrollTop={scrollTop}

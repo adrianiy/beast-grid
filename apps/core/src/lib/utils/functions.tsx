@@ -154,22 +154,22 @@ export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.sli
 export const aggregateData = (
     data: Row,
     row: Row,
-    calculatedColumn: Column,
+    aggregation: AggregationType | AggregationFunction | undefined,
     valueField: string
 ): Row => {
     const value = getFieldValue(row, valueField) as number;
-    if (calculatedColumn.aggregation === AggregationType.SUM) {
+    if (aggregation === AggregationType.SUM) {
         data[valueField] = +(data[valueField] || 0) + value;
-    } else if (calculatedColumn.aggregation === AggregationType.AVG) {
+    } else if (aggregation === AggregationType.AVG) {
         data[`count:${valueField}`] = +(data[`count:${valueField}`] || 0) + 1;
         data[`abs:${valueField}`] = +(data[`abs:${valueField}`] || 0) + value;
 
         data[valueField] = data[`abs:${valueField}`] as number / (data[`count:${valueField}`] as number);
-    } else if (calculatedColumn.aggregation === AggregationType.COUNT) {
+    } else if (aggregation === AggregationType.COUNT) {
         data[valueField] = +(data[valueField] || 0) + 1;
-    } else if (calculatedColumn.aggregation === AggregationType.MIN) {
+    } else if (aggregation === AggregationType.MIN) {
         data[valueField] = Math.min(data[valueField] as number || Infinity, value);
-    } else if (calculatedColumn.aggregation === AggregationType.MAX) {
+    } else if (aggregation === AggregationType.MAX) {
         data[valueField] = Math.max(data[valueField] as number || -Infinity, value);
     }
 
@@ -187,7 +187,7 @@ const doPivotOperation = (formula: Operand | null, column: Column, rows: Row[]):
             return +cell.cell;
         }
 
-        return rows.reduce((acc, curr) => aggregateData(acc, curr, column, cell.cell), {})[cell.cell] as number;
+        return rows.reduce((acc, curr) => aggregateData(acc, curr, column.aggregation, cell.cell), {})[cell.cell] as number;
     }
 
     const operation = formula as Formula;
@@ -217,9 +217,9 @@ const getPivotFormula = (field: string | undefined, column: Column, rows: Row[])
     return doPivotOperation(jsonFormula as Operand, column, rows);
 }
 
-export const getPivotedData = (row: Row, column: Column, data: Data): number | string => {
+export const getPivotedData = (row: Row, column: Column, data: Data): number | string | null => {
     if (row._pivotIndexes && !row[column.field as string]) {
-        const field = column.field;
+        const field = column.field === 'non_value' ? (row['pivot_values'] || '') as string : column.field;
         let rows = row._pivotIndexes.map((index) => data[index]);
 
         if (column._filters) {
@@ -239,21 +239,21 @@ export const getPivotedData = (row: Row, column: Column, data: Data): number | s
             return getPivotFormula(field, column, rows);
         }
 
-        const reduced = rows.reduce((acc, curr) => aggregateData(acc, curr, column, field!), {});
+        const reduced = rows.reduce((acc, curr) => aggregateData(acc, curr, column.aggregation || row.aggregation_type as AggregationType | AggregationFunction, field!), {});
 
         return reduced[field as string] as number;
     }
 
     const field = column.field;
 
-    return getFieldValue(row, field as string) as number | string;
+    return getFieldValue(row, field as string) as number | string | null;
 }
 
 export const sortData = (sortColumns: Column[], data: Data = []) => (a: Row, b: Row) => {
     for (const column of sortColumns) {
         const isAscending = column.sort?.order === SortType.ASC;
-        const valueA = getPivotedData(a, column, data)
-        const valueB = getPivotedData(b, column, data)
+        const valueA = getPivotedData(a, column, data) || 0;
+        const valueB = getPivotedData(b, column, data) || 0;
 
         // order as date if both values are dates
         if (column.filterType === FilterType.DATE) {
@@ -303,7 +303,6 @@ export const filterRow =
                 } else if (columns[filterKey].filterType === FilterType.BOOLEAN) {
                     const rowValue = row[columns[filterKey].field as keyof Row] as boolean;
                     const booleanFilter = filters[filterKey] as string[];
-                    console.log(rowValue, booleanFilter)
 
                     show = show && booleanFilter.includes(`${rowValue}`)
                 } else if (columns[filterKey].filterType === FilterType.NUMBER) {

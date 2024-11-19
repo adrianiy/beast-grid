@@ -54,6 +54,7 @@ export interface PivotState {
     columnTotals: boolean;
     rowTotals: boolean;
     rowGroups: boolean;
+    tree: { enabled: boolean, name: string };
     snapshotBeforePivot: number;
 }
 
