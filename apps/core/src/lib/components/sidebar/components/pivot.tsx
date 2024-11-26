@@ -339,7 +339,7 @@ const Box = ({
             }
             onHover(item.index, index);
         },
-    }), [column, index, pivotType]);
+    }));
 
     const ref = useRef<HTMLDivElement>(null);
 

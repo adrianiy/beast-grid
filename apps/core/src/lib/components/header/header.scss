@@ -61,9 +61,8 @@
     transition: all linear var(--bg-transition--1);
     box-sizing: border-box;
     background-color: var(--bg-background-color--1);
-    resize: horizontal;
+    resize: none;
     overflow: hidden;
-    resize: inherit;
     z-index: 1;
 
     &.right {
